@@ -411,7 +411,7 @@ html[dir="rtl"] .filters .select{padding-left:34px}
 .rp-path-lbl{font-size:10.5px;font-weight:800;margin-top:3px;color:var(--slate);white-space:nowrap}
 .rp-batt{display:inline-flex;align-items:center;gap:5px}
 .rp-batt b{font-weight:900;line-height:1}
-/* ===== v11-120 · SQUAD-BTN — مسار اللاعب وشريط الإنجاز ===== */
+/* ===== v11-121 · SQUAD-BTN-2 — مسار اللاعب وشريط الإنجاز ===== */
 .rp-path2{display:flex;align-items:center;margin:5px 0 6px;min-width:150px}
 .rp-node{width:13px;height:13px;border-radius:50%;flex:0 0 auto;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;background:#fff;border:2px solid #D3D9E1;transition:background .25s,border-color .25s,box-shadow .25s}
 .rp-node.done{background:#15803D;border-color:#15803D}
@@ -3108,7 +3108,7 @@ function qdajTmrwK(){
   var d=new Date(); d.setDate(d.getDate()+1); function p(n){ return (n<10?"0":"")+n; }
   return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate());
 }
-/* ---- v11-120 · جسر فتح نموذج الجلسة (يحلّ مشكلة عدم فتح النموذج عند اختيار اليوم/غدًا) ---- */
+/* ---- v11-121 · جسر فتح نموذج الجلسة (يحلّ مشكلة عدم فتح النموذج عند اختيار اليوم/غدًا) ---- */
 function qdSessOpener(){
   try{ if(typeof window.qdOpenSessionForm==="function") return window.qdOpenSessionForm; }catch(e){}
   try{ if(typeof sessionForm==="function") return sessionForm; }catch(e){}
@@ -6955,7 +6955,7 @@ function qdlaStalled(ms){
 /* ---- الفتح المضمون: الوضع المحلي ثم إعادة التحميل (مرة واحدة في الجلسة) ---- */
 function qdlaAutoLocal(){
   try{
-    try{ if(localStorage.getItem("qd_ok_cloud")==="1") return false; }catch(e){}   /* v11-120 */
+    try{ if(localStorage.getItem("qd_ok_cloud")==="1") return false; }catch(e){}   /* v11-121 */
     try{ if(String(location.search||"").indexOf("qdcloud=1")>-1) return false; }catch(e){}
     if(qdlaFlagOn()) return false;
     if(document.getElementById("qdl2Box")) {} /* اللوحة تعمل — لا حاجة للإجبار */
@@ -14315,7 +14315,7 @@ function doLogin(){
   var em=(document.getElementById("qcEmail").value||"").trim();
   var pw=document.getElementById("qcPass").value||"";
   if(!em||!pw){ view("login",T10("msg_fill_login")); return; }
-  if(window.__qdLoggingIn){ return; }              /* v11-120: منع الضغط المزدوج */
+  if(window.__qdLoggingIn){ return; }              /* v11-121: منع الضغط المزدوج */
   window.__qdLoggingIn=true;
   var btn=document.querySelector("#qcGo,#loginBtn,.qc-go,button[onclick*='doLogin']");
   var oldTxt=btn?btn.textContent:"";
@@ -15405,7 +15405,7 @@ try{
 }catch(e){}
 
 /* QDBK-END */
-(function(){function mk(){try{var b=document.createElement("div");b.id="qdrBadge";b.textContent="v11-120 · SQUAD-BTN";b.style.cssText="position:fixed;left:8px;bottom:8px;z-index:2147483647;background:#fff;color:#7E0E14;border:1px solid #7E0E14;font:800 11px/1.5 system-ui;padding:3px 9px;border-radius:20px;pointer-events:none;opacity:.97;box-shadow:0 2px 8px rgba(0,0,0,.35)";document.body.appendChild(b);}catch(e){}}if(document.body)mk();else setTimeout(mk,600);})();
+(function(){function mk(){try{var b=document.createElement("div");b.id="qdrBadge";b.textContent="v11-121 · SQUAD-BTN-2";b.style.cssText="position:fixed;left:8px;bottom:8px;z-index:2147483647;background:#fff;color:#7E0E14;border:1px solid #7E0E14;font:800 11px/1.5 system-ui;padding:3px 9px;border-radius:20px;pointer-events:none;opacity:.97;box-shadow:0 2px 8px rgba(0,0,0,.35)";document.body.appendChild(b);}catch(e){}}if(document.body)mk();else setTimeout(mk,600);})();
 /* ---- PWA: install as an app on Android and iPhone / iPad ---- */
 (function(){
   Object.assign(STR.en,{
@@ -23987,7 +23987,7 @@ try{
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous">
 /* =====================================================================
-   v11-120 · SQUAD-BTN — توحيد حالة اليوم (مباراة · تدريب · راحة · إجازة)
+   v11-121 · SQUAD-BTN-2 — توحيد حالة اليوم (مباراة · تدريب · راحة · إجازة)
    بين: لوحة التحكم · البرنامج الأسبوعي · التقويم · جدول المباريات
    ===================================================================== */
 (function(){
@@ -24089,7 +24089,7 @@ try{
 /* ================= نهاية وحدة حالة اليوم ================= */
 
 /* =====================================================================
-   v11-120 · SQUAD-BTN — المشاركون في المباراة + التقرير الشامل
+   v11-121 · SQUAD-BTN-2 — المشاركون في المباراة + التقرير الشامل
    زر «اللاعبون المشاركون» داخل بطاقة المباراة · اختيار الأساسيين والاحتياط
    أو رفع صورة التشكيلة · ثم تقرير واحد يجمع: معلومات المباراة + الملعب
    والتوقيت والنتيجة + الأساسيون والاحتياط + الإصابات + الملاحظات الطبية
@@ -24362,32 +24362,43 @@ try{
       w.document.open(); w.document.write(html); w.document.close();
     }catch(e){ try{ toast(T("تعذّر إنشاء التقرير","Could not build the report"),"bad"); }catch(x){} }
   }
-  on("mxFull",function(d){ openReport(d&&d.id); });
+  on("mxFull",function(d){ var m=null; try{ if(d&&d.r!=null) m=fxMatchOf(d.r); }catch(e){} if(!m&&d&&d.id) m=(S.matches||[]).filter(function(x){ return String(x.id)===String(d.id); })[0]; if(!m){ toast(T("لا يوجد سجل مباراة بعد","No match record yet"),"warn"); return; } openReport(m.id); });
 
-  /* ---------- buttons inside the match cards (always visible, never toggles) ---------- */
+  /* ---------- buttons inside the LIVE fixtures rows (:target .qd-fxrow) ---------- */
+  function fxMatchOf(round){
+    try{ if(typeof fxMatch==="function") return fxMatch(Number(round)); }catch(e){}
+    try{ return (S.matches||[]).filter(function(x){ return String(x.round||"")===String(round); })[0]||null; }catch(e){ return null; }
+  }
   function decorate(){
     try{
-      var cards=document.querySelectorAll("#v-matches .qd-match");
-      for(var i=0;i<cards.length;i++){
-        var card=cards[i];
-        if(card.querySelector(".mx-actions")) continue;
-        var tog=card.querySelector('[data-act="toggleMatch"]'); if(!tog) continue;
-        var id=tog.getAttribute("data-id");
-        var m=(S.matches||[]).filter(function(x){ return String(x.id)===String(id); })[0]||{};
+      var rows=document.querySelectorAll("#v-fixtures .qd-fxrow, .qd-fxrow");
+      for(var i=0;i<rows.length;i++){
+        var row=rows[i];
+        if(row.querySelector(".mx-actions")) continue;
+        var act=row.querySelector(".fx-act"); if(!act) continue;
+        var rep=act.querySelector('[data-act="fxReport"]'); if(!rep) continue;
+        var r=rep.getAttribute("data-r");
+        var m=fxMatchOf(r)||{};
         var ns=(m.starters||[]).length, nb=(m.subs||[]).length;
-        var row=document.createElement("div");
-        row.className="mx-actions";
-        row.innerHTML=
-          '<button type="button" class="btn sm" data-act="mxSquad" data-id="'+escx(id)+'">'+svg(I.players,2)+' '+T("اللاعبون المشاركون","Squad")+' ('+(ns+nb)+')</button>'+
-          '<button type="button" class="btn gold sm" data-act="mxFull" data-id="'+escx(id)+'">'+svg((I.reports||I.docs||I.ball),2)+' '+T("التقرير الشامل","Full report")+'</button>';
-        row.addEventListener("click",function(e){ e.stopPropagation(); },false);
-        var head=card.querySelector(".qd-mhead");
-        if(head&&head.nextSibling) card.insertBefore(row,head.nextSibling);
-        else card.insertBefore(row,card.firstChild);
+        var box=document.createElement("div");
+        box.className="mx-actions";
+        box.style.cssText="display:flex;gap:6px;flex-wrap:wrap;margin-top:2px";
+        box.innerHTML=
+          '<button type="button" class="btn sm" data-act="mxSquad" data-r="'+escx(r)+'" title="'+T("اختر الأساسيين والاحتياط أو ارفع صورة التشكيلة","Pick starters and substitutes, or upload the lineup")+'">'+svg(I.players,2)+' '+T("المشاركون","Squad")+' ('+(ns+nb)+')</button>'+
+          '<button type="button" class="btn gold sm" data-act="mxFull" data-r="'+escx(r)+'">'+svg((I.reports||I.docs||I.ball),2)+' '+T("التقرير الشامل","Full report")+'</button>';
+        act.appendChild(box);
       }
     }catch(e){ try{ window.QDMX_DEC_ERR=String((e&&e.stack)||e); }catch(x){} }
   }
-  on("mxSquad",function(d){ try{ var m=(S.matches||[]).filter(function(x){ return String(x.id)===String(d.id); })[0]; if(m) window.matchForm(m); }catch(e){} });
+  on("mxSquad",function(d){
+    try{
+      var m=(d&&d.r!=null)?fxMatchOf(d.r):null;
+      if(!m&&d&&d.id) m=(S.matches||[]).filter(function(x){ return String(x.id)===String(d.id); })[0];
+      if(!m){ toast(T("افتح تقرير الإصابات مرة واحدة لإنشاء سجل المباراة","Open the injury report once to create the match record"),"warn"); return; }
+      var f=window.matchForm||window.qdOpenMatchForm;
+      if(typeof f==="function") f(m);
+    }catch(e){}
+  });
 
   function wrapRender(){
     try{
