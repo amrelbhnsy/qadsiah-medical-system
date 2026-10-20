@@ -411,7 +411,7 @@ html[dir="rtl"] .filters .select{padding-left:34px}
 .rp-path-lbl{font-size:10.5px;font-weight:800;margin-top:3px;color:var(--slate);white-space:nowrap}
 .rp-batt{display:inline-flex;align-items:center;gap:5px}
 .rp-batt b{font-weight:900;line-height:1}
-/* ===== v11-130 · REPORT-FIX — مسار اللاعب وشريط الإنجاز ===== */
+/* ===== v11-131 · HAS-FIX — مسار اللاعب وشريط الإنجاز ===== */
 .rp-path2{display:flex;align-items:center;margin:5px 0 6px;min-width:150px}
 .rp-node{width:13px;height:13px;border-radius:50%;flex:0 0 auto;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;background:#fff;border:2px solid #D3D9E1;transition:background .25s,border-color .25s,box-shadow .25s}
 .rp-node.done{background:#15803D;border-color:#15803D}
@@ -3108,7 +3108,7 @@ function qdajTmrwK(){
   var d=new Date(); d.setDate(d.getDate()+1); function p(n){ return (n<10?"0":"")+n; }
   return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate());
 }
-/* ---- v11-130 · جسر فتح نموذج الجلسة (يحلّ مشكلة عدم فتح النموذج عند اختيار اليوم/غدًا) ---- */
+/* ---- v11-131 · جسر فتح نموذج الجلسة (يحلّ مشكلة عدم فتح النموذج عند اختيار اليوم/غدًا) ---- */
 function qdSessOpener(){
   try{ if(typeof window.qdOpenSessionForm==="function") return window.qdOpenSessionForm; }catch(e){}
   try{ if(typeof sessionForm==="function") return sessionForm; }catch(e){}
@@ -6955,7 +6955,7 @@ function qdlaStalled(ms){
 /* ---- الفتح المضمون: الوضع المحلي ثم إعادة التحميل (مرة واحدة في الجلسة) ---- */
 function qdlaAutoLocal(){
   try{
-    try{ if(localStorage.getItem("qd_ok_cloud")==="1") return false; }catch(e){}   /* v11-130 */
+    try{ if(localStorage.getItem("qd_ok_cloud")==="1") return false; }catch(e){}   /* v11-131 */
     try{ if(String(location.search||"").indexOf("qdcloud=1")>-1) return false; }catch(e){}
     if(qdlaFlagOn()) return false;
     if(document.getElementById("qdl2Box")) {} /* اللوحة تعمل — لا حاجة للإجبار */
@@ -14315,7 +14315,7 @@ function doLogin(){
   var em=(document.getElementById("qcEmail").value||"").trim();
   var pw=document.getElementById("qcPass").value||"";
   if(!em||!pw){ view("login",T10("msg_fill_login")); return; }
-  if(window.__qdLoggingIn){ return; }              /* v11-130: منع الضغط المزدوج */
+  if(window.__qdLoggingIn){ return; }              /* v11-131: منع الضغط المزدوج */
   window.__qdLoggingIn=true;
   var btn=document.querySelector("#qcGo,#loginBtn,.qc-go,button[onclick*='doLogin']");
   var oldTxt=btn?btn.textContent:"";
@@ -15405,7 +15405,7 @@ try{
 }catch(e){}
 
 /* QDBK-END */
-(function(){function mk(){try{var b=document.createElement("div");b.id="qdrBadge";b.textContent="v11-130 · REPORT-FIX";b.style.cssText="position:fixed;left:8px;bottom:8px;z-index:2147483647;background:#fff;color:#7E0E14;border:1px solid #7E0E14;font:800 11px/1.5 system-ui;padding:3px 9px;border-radius:20px;pointer-events:none;opacity:.97;box-shadow:0 2px 8px rgba(0,0,0,.35)";document.body.appendChild(b);}catch(e){}}if(document.body)mk();else setTimeout(mk,600);})();
+(function(){function mk(){try{var b=document.createElement("div");b.id="qdrBadge";b.textContent="v11-131 · HAS-FIX";b.style.cssText="position:fixed;left:8px;bottom:8px;z-index:2147483647;background:#fff;color:#7E0E14;border:1px solid #7E0E14;font:800 11px/1.5 system-ui;padding:3px 9px;border-radius:20px;pointer-events:none;opacity:.97;box-shadow:0 2px 8px rgba(0,0,0,.35)";document.body.appendChild(b);}catch(e){}}if(document.body)mk();else setTimeout(mk,600);})();
 /* ---- PWA: install as an app on Android and iPhone / iPad ---- */
 (function(){
   Object.assign(STR.en,{
@@ -23987,7 +23987,7 @@ try{
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous">
 /* =====================================================================
-   v11-130 · REPORT-FIX — توحيد حالة اليوم (مباراة · تدريب · راحة · إجازة)
+   v11-131 · HAS-FIX — توحيد حالة اليوم (مباراة · تدريب · راحة · إجازة)
    بين: لوحة التحكم · البرنامج الأسبوعي · التقويم · جدول المباريات
    ===================================================================== */
 (function(){
@@ -24091,7 +24091,7 @@ try{
 
 <script>
 /* =====================================================================
-   v11-130 · REPORT-FIX
+   v11-131 · HAS-FIX
    إصلاح التجمد: يُبنى الهيكل مرة واحدة فقط، ويُحدَّث محتواه الداخلي
    (لا إعادة بناء للجذر ⇒ لا يفقد الهوية ولا يعلق)
    ===================================================================== */
@@ -24208,6 +24208,34 @@ try{
   /* ============ سجل المباراة ============ */
   function fxOf(r){ try{ if(typeof fxOf==="function") return fxOf(r); }catch(e){} try{ if(window.fxOf) return window.fxOf(r); }catch(e){} return null; }
   function matchOfRound(r){ var a=MTS(); for(var i=0;i<a.length;i++){ if(Number(a[i].fx)===Number(r)) return a[i]; } return null; }
+  /* إجابة «هل يوجد إصابات» محفوظة لكل جولة — مستقلة عن هوية السجل (تحلّ اختلاف التقرير عن الاختيار) */
+  function HAS(){
+    var st=ST(); if(!st) return {};
+    if(!st.qdHas||typeof st.qdHas!=="object") st.qdHas={};
+    return st.qdHas;
+  }
+  function hasKey(m,r){
+    try{
+      var f=(m&&m.fx!=null)?m.fx:(r!=null?r:null);
+      if(f!=null&&f!=="") return "r"+f;
+      if(m&&m.id) return "id"+m.id;
+    }catch(e){}
+    return null;
+  }
+  function setHas(m,r,v){
+    try{
+      var k=hasKey(m,r); if(!k) return;
+      var h=HAS(); h[k]=(v!==false); SAVE();
+    }catch(e){}
+  }
+  function getHas(m,r){
+    try{
+      var k=hasKey(m,r); var h=HAS();
+      if(k&&Object.prototype.hasOwnProperty.call(h,k)) return h[k]!==false;
+    }catch(e){}
+    if(m) return (m.hasInjuries!==false);
+    return true;
+  }
   function score(m){ if(!m) return -1;
     return ((m.starters||[]).length)*3+((m.subs||[]).length)*2+((m.extraSquad||[]).length)*3
          + ((m.injuries||[]).length)*2 + Object.keys(m.minutes||{}).length + (m.opponent?2:0) + (m.lineup?4:0); }
@@ -24233,6 +24261,7 @@ try{
           keep.medStatus=Object.assign({},x.medStatus||{},keep.medStatus||{});
           keep.injuries=(keep.injuries||[]).concat(x.injuries||[]);
           if(x.hasInjuries===false) keep.hasInjuries=false;
+          if(x.fx!=null&&HAS()["r"+x.fx]!==undefined) keep.hasInjuries=HAS()["r"+x.fx];
           if(x.lineup&&!keep.lineup) keep.lineup=x.lineup;
           if(x.medicalNotes&&!keep.medicalNotes) keep.medicalNotes=x.medicalNotes;
         }
@@ -24303,7 +24332,7 @@ try{
     V.mid=m.id; V.st=(m.starters||[]).slice(); V.sb=(m.subs||[]).slice();
     V.ex=((m.extraSquad)||[]).map(function(x){ return {n:String(x.n||""), r:String(x.r||"st")}; });
     V.min=Object.assign({},m.minutes||{}); V.med=Object.assign({},m.medStatus||{});
-    V.lineup=m.lineup||""; V.has=(m.hasInjuries!==false);
+    V.lineup=m.lineup||""; V.has=getHas(m,m.fx);
   }
   function saveTo(){
     var a=MTS(), m=null;
@@ -24313,7 +24342,7 @@ try{
     m.minutes=Object.assign({},V.min); m.medStatus=Object.assign({},V.med);
     m.lineup=V.lineup||""; m.hasInjuries=(V.has!==false);
     if(!V.has) m.injuries=[];
-    SAVE(); return true;
+    SAVE(); setHas(m,m.fx,V.has); return true;
   }
 
   /* ============ الشاشة (هيكل ثابت + تحديث داخلي) ============ */
@@ -24479,6 +24508,7 @@ try{
       m.lineup=Pd.lineup||""; m.hasInjuries=(Pd.has!==false);
       if(!Pd.has) m.injuries=[];
       SAVE();
+      setHas(m,Pd.round,Pd.has);
     }catch(e){}
   }
   function hideInj(h){
@@ -24495,7 +24525,8 @@ try{
       if(!mc||!mc.querySelector('[data-act="saveMatch"]')){ pbusy=false; return; }
       if(!document.getElementById("p9Panel")){
         var m=modalMatch();
-        Pd.has=(m&&m.hasInjuries===false)?false:true;
+        Pd.round=(m&&m.fx!=null)?m.fx:(function(){ try{ return (typeof mOpen!=="undefined"&&S&&S.matches)?(S.matches.filter(function(x){return String(x.id)===String(mOpen);})[0]||{}).fx:null; }catch(e){ return null; } })();
+        Pd.has=getHas(m,Pd.round);
         Pd.st=((m&&m.starters)||[]).slice(); Pd.sb=((m&&m.subs)||[]).slice();
         Pd.ex=(((m&&m.extraSquad)||[])).map(function(x){ return {n:String(x.n||""),r:String(x.r||"st")}; });
         Pd.min=Object.assign({},(m&&m.minutes)||{}); Pd.med=Object.assign({},(m&&m.medStatus)||{});
@@ -24505,8 +24536,8 @@ try{
         body.insertBefore(d,body.firstChild);
         d.addEventListener("click",function(e){
           var t=e.target;
-          if(t.getAttribute&&t.getAttribute("data-p9")==="y"){ Pd.has=true; persist(); paintPanel(); return; }
-          if(t.getAttribute&&t.getAttribute("data-p9")==="n"){ Pd.has=false; persist(); paintPanel(); return; }
+          if(t.getAttribute&&t.getAttribute("data-p9")==="y"){ Pd.has=true; persist(); setHas(modalMatch(),Pd.round,true); paintPanel(); return; }
+          if(t.getAttribute&&t.getAttribute("data-p9")==="n"){ Pd.has=false; persist(); setHas(modalMatch(),Pd.round,false); paintPanel(); return; }
           if(t.getAttribute&&t.getAttribute("data-p9")==="open"){
             if(modalMatch()) loadFrom(modalMatch()); else { V.st=Pd.st.slice(); V.sb=Pd.sb.slice(); V.ex=Pd.ex.slice(); V.lineup=Pd.lineup; V.mid=null; }
             var b2=document.createElement("div"); b2.innerHTML=shell(); document.body.appendChild(b2.firstChild);
@@ -24572,7 +24603,7 @@ try{
     mergeDupes();
     var m=bestRound(r)||ensureMatch(r); fillMeta(m,r); if(!m) return;
     var st=m.starters||[], sb=m.subs||[], ex=m.extraSquad||[];
-    var has=(m.hasInjuries!==false), inj=has?(m.injuries||[]):[];
+    var has=getHas(m,r), inj=has?(m.injuries||[]):[];
     var mins=m.minutes||{}, meds=m.medStatus||{};
     var rws=PLS().map(function(p){ return {id:String(p.id), nm:NM(p.id)}; });
     ex.forEach(function(x,i){ rws.push({id:"X"+i, nm:String(x.n||"")}); });
