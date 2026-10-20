@@ -411,7 +411,7 @@ html[dir="rtl"] .filters .select{padding-left:34px}
 .rp-path-lbl{font-size:10.5px;font-weight:800;margin-top:3px;color:var(--slate);white-space:nowrap}
 .rp-batt{display:inline-flex;align-items:center;gap:5px}
 .rp-batt b{font-weight:900;line-height:1}
-/* ===== v11-124 · NO-FREEZE — مسار اللاعب وشريط الإنجاز ===== */
+/* ===== v11-125 · SQUAD-SCREEN — مسار اللاعب وشريط الإنجاز ===== */
 .rp-path2{display:flex;align-items:center;margin:5px 0 6px;min-width:150px}
 .rp-node{width:13px;height:13px;border-radius:50%;flex:0 0 auto;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;background:#fff;border:2px solid #D3D9E1;transition:background .25s,border-color .25s,box-shadow .25s}
 .rp-node.done{background:#15803D;border-color:#15803D}
@@ -3108,7 +3108,7 @@ function qdajTmrwK(){
   var d=new Date(); d.setDate(d.getDate()+1); function p(n){ return (n<10?"0":"")+n; }
   return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate());
 }
-/* ---- v11-124 · جسر فتح نموذج الجلسة (يحلّ مشكلة عدم فتح النموذج عند اختيار اليوم/غدًا) ---- */
+/* ---- v11-125 · جسر فتح نموذج الجلسة (يحلّ مشكلة عدم فتح النموذج عند اختيار اليوم/غدًا) ---- */
 function qdSessOpener(){
   try{ if(typeof window.qdOpenSessionForm==="function") return window.qdOpenSessionForm; }catch(e){}
   try{ if(typeof sessionForm==="function") return sessionForm; }catch(e){}
@@ -6955,7 +6955,7 @@ function qdlaStalled(ms){
 /* ---- الفتح المضمون: الوضع المحلي ثم إعادة التحميل (مرة واحدة في الجلسة) ---- */
 function qdlaAutoLocal(){
   try{
-    try{ if(localStorage.getItem("qd_ok_cloud")==="1") return false; }catch(e){}   /* v11-124 */
+    try{ if(localStorage.getItem("qd_ok_cloud")==="1") return false; }catch(e){}   /* v11-125 */
     try{ if(String(location.search||"").indexOf("qdcloud=1")>-1) return false; }catch(e){}
     if(qdlaFlagOn()) return false;
     if(document.getElementById("qdl2Box")) {} /* اللوحة تعمل — لا حاجة للإجبار */
@@ -14315,7 +14315,7 @@ function doLogin(){
   var em=(document.getElementById("qcEmail").value||"").trim();
   var pw=document.getElementById("qcPass").value||"";
   if(!em||!pw){ view("login",T10("msg_fill_login")); return; }
-  if(window.__qdLoggingIn){ return; }              /* v11-124: منع الضغط المزدوج */
+  if(window.__qdLoggingIn){ return; }              /* v11-125: منع الضغط المزدوج */
   window.__qdLoggingIn=true;
   var btn=document.querySelector("#qcGo,#loginBtn,.qc-go,button[onclick*='doLogin']");
   var oldTxt=btn?btn.textContent:"";
@@ -15405,7 +15405,7 @@ try{
 }catch(e){}
 
 /* QDBK-END */
-(function(){function mk(){try{var b=document.createElement("div");b.id="qdrBadge";b.textContent="v11-124 · NO-FREEZE";b.style.cssText="position:fixed;left:8px;bottom:8px;z-index:2147483647;background:#fff;color:#7E0E14;border:1px solid #7E0E14;font:800 11px/1.5 system-ui;padding:3px 9px;border-radius:20px;pointer-events:none;opacity:.97;box-shadow:0 2px 8px rgba(0,0,0,.35)";document.body.appendChild(b);}catch(e){}}if(document.body)mk();else setTimeout(mk,600);})();
+(function(){function mk(){try{var b=document.createElement("div");b.id="qdrBadge";b.textContent="v11-125 · SQUAD-SCREEN";b.style.cssText="position:fixed;left:8px;bottom:8px;z-index:2147483647;background:#fff;color:#7E0E14;border:1px solid #7E0E14;font:800 11px/1.5 system-ui;padding:3px 9px;border-radius:20px;pointer-events:none;opacity:.97;box-shadow:0 2px 8px rgba(0,0,0,.35)";document.body.appendChild(b);}catch(e){}}if(document.body)mk();else setTimeout(mk,600);})();
 /* ---- PWA: install as an app on Android and iPhone / iPad ---- */
 (function(){
   Object.assign(STR.en,{
@@ -23987,7 +23987,7 @@ try{
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous">
 /* =====================================================================
-   v11-124 · NO-FREEZE — توحيد حالة اليوم (مباراة · تدريب · راحة · إجازة)
+   v11-125 · SQUAD-SCREEN — توحيد حالة اليوم (مباراة · تدريب · راحة · إجازة)
    بين: لوحة التحكم · البرنامج الأسبوعي · التقويم · جدول المباريات
    ===================================================================== */
 (function(){
@@ -24091,350 +24091,412 @@ try{
 
 <script>
 /* =====================================================================
-   v11-124 · NO-FREEZE  (script مستقل — لا يعتمد على أي بلوك آخر)
-   • زر «المشاركون» + «التقرير الشامل» في كل صف مباراة
-   • داخل نموذج تقرير الإصابات: هل يوجد إصابات؟ نعم/لا
-   • لا → تُخفى حقول الإصابة · يبقى: التشكيلة + دقائق اللعب + الحالة الطبية
-   • التقرير الشامل يجمع: معلومات المباراة + الأساسيون والاحتياط + الإصابات + الدقائق + الحالة الطبية
+   v11-125 · SQUAD-SCREEN
+   • سؤال «هل يوجد إصابات؟» في أعلى النموذج وأعلى التقرير
+   • خانة «المشاركون» تفتح شاشة كاملة لإضافة اللاعبين (أساسي/احتياطي)
+   • إضافة لاعبين يدويًا (اسم حر) بالإضافة إلى قائمة الفريق
+   • ورقة التشكيلة: رفع + تفريغ
    ===================================================================== */
 (function(){
   "use strict";
-  if(window.__QDMR123) return; window.__QDMR123=1;
+  if(window.__QD125) return; window.__QD125=1;
 
   function Q(a,b){ try{ return QDT(a,b); }catch(e){ return a; } }
   function E(v){ return String(v==null?"":v).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];}); }
-  function AR(){ try{ return LANG==="ar"; }catch(e){ return true; } }
-  function PL(id){ try{ return (S.players||[]).filter(function(p){return String(p.id)===String(id);})[0]||null; }catch(e){ return null; } }
-  function NM(id){ try{ return pname(id); }catch(e){ var p=PL(id); return p?((p.first||"")+" "+(p.last||"")):"—"; } }
-  function POS(id){ var p=PL(id); try{ return p?tr(p.pos||""):""; }catch(e){ return p?(p.pos||""):""; } }
+  function PLS(){ try{ return (S&&S.players)||[]; }catch(e){ return []; } }
+  function MTS(){ try{ return (S&&S.matches)||[]; }catch(e){ return []; } }
+  function PL(id){ for(var i=0;i<PLS().length;i++){ if(String(PLS()[i].id)===String(id)) return PLS()[i]; } return null; }
+  function NM(id){ try{ return pname(id); }catch(e){ var p=PL(id); return p?((p.first||"")+" "+(p.last||"")):String(id); } }
+  function POS(id){ var p=PL(id); try{ return p?tr(p.pos||""):""; }catch(e){ return p?String(p.pos||""):""; } }
   function TR(v){ try{ return tr(v); }catch(e){ return String(v||""); } }
   function SITE(v){ try{ return String(v||"").split(",").filter(Boolean).map(site).join(", "); }catch(e){ return String(v||""); } }
-  function SV(){ try{ return (typeof S!=="undefined")?S:window.S; }catch(e){ return window.S; } }
-  function MATCHES(){ try{ var s=SV(); return (s&&s.matches)||[]; }catch(e){ return []; } }
-  function PLAYERS(){ try{ var s=SV(); return (s&&s.players)||[]; }catch(e){ return []; } }
-  function SAVE(){ try{ if(typeof save==="function") return save(); if(window.save) return window.save(); }catch(e){} }
+  function SAVE(){ try{ if(typeof save==="function") save(); else if(window.save) window.save(); }catch(e){} }
+  function TODAY(){ try{ return todayKey(); }catch(e){ return new Date().toISOString().slice(0,10); } }
 
-  var MS={has:true, min:{}, st:{}, st_arr:[], sb_arr:[], lineup:"", med:""};
-  var STL=[
-    {k:"ok",    ar:"سليم — جاهز",       en:"Fit — available",      c:"#15803D"},
-    {k:"follow",ar:"متابعة طبية",       en:"Medical follow-up",    c:"#B45309"},
-    {k:"rest",  ar:"إجازة / راحة طبية", en:"Medically rested",     c:"#1D4ED8"},
-    {k:"newinj",ar:"إصابة جديدة",       en:"New injury",           c:"#B5122B"}
-  ];
+  var STL=[{k:"ok",ar:"سليم — جاهز",en:"Fit",c:"#15803D"},
+           {k:"follow",ar:"متابعة طبية",en:"Follow-up",c:"#B45309"},
+           {k:"rest",ar:"إجازة / راحة طبية",en:"Rested",c:"#1D4ED8"},
+           {k:"newinj",ar:"إصابة جديدة",en:"New injury",c:"#B5122B"}];
   function stOf(k){ for(var i=0;i<STL.length;i++) if(STL[i].k===k) return STL[i]; return STL[0]; }
 
-  /* ---------- CSS ---------- */
+  /* الحالة الحيّة للنموذج المفتوح */
+  var M={has:true, st:[], sb:[], extra:[], min:{}, med:{}, lineup:"", notes:""};
+  function resetFrom(m){
+    m=m||{};
+    M.has=(m.hasInjuries!==false);
+    M.st=((m.starters)||[]).slice();
+    M.sb=((m.subs)||[]).slice();
+    M.extra=((m.extraSquad)||[]).map(function(x){ return {n:String(x.n||x.name||""), r:String(x.r||x.role||"st")}; });
+    M.min=Object.assign({},(m.minutes)||{});
+    M.med=Object.assign({},(m.medStatus)||{});
+    M.lineup=(m.lineup)||"";
+    M.notes=(m.medicalNotes)||"";
+  }
+  function allRows(){
+    var out=PLS().map(function(p){ return {id:String(p.id), nm:NM(p.id), pos:POS(p.id), extra:false}; });
+    M.extra.forEach(function(x,i){ out.push({id:"X"+i, nm:x.n, pos:Q("إضافة يدوية","Manual"), extra:true}); });
+    return out;
+  }
+  function rankOf(id){
+    if(M.st.indexOf(id)>-1) return "st";
+    if(M.sb.indexOf(id)>-1) return "sb";
+    for(var i=0;i<M.extra.length;i++){ if(String("X"+i)===String(id)) return (M.extra[i].r==="sb"?"sb":"st"); }
+    return "np";
+  }
+  function setRank(id,r){
+    var i;
+    if((i=M.st.indexOf(id))>-1) M.st.splice(i,1);
+    if((i=M.sb.indexOf(id))>-1) M.sb.splice(i,1);
+    if(String(id).charAt(0)==="X"){
+      var k=Number(String(id).slice(1)); if(M.extra[k]) M.extra[k].r=r; return;
+    }
+    if(r==="st") M.st.push(id); else if(r==="sb") M.sb.push(id);
+  }
+  function unset(id){
+    var i;
+    if((i=M.st.indexOf(id))>-1) M.st.splice(i,1);
+    if((i=M.sb.indexOf(id))>-1) M.sb.splice(i,1);
+    if(String(id).charAt(0)==="X"){ var k=Number(String(id).slice(1)); if(M.extra[k]) M.extra.splice(k,1); }
+  }
+
+  /* ---------------- CSS ---------------- */
   var css=document.createElement("style");
   css.textContent=[
-   ".mr123{margin-top:14px;border:1px solid #E3E8EC;border-radius:14px;overflow:hidden;background:#fff}",
-   ".mr123-h{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:10px 14px;background:#F7F9FC;border-bottom:1px solid #E3E8EC;font-weight:900;font-size:13px;color:#14181F}",
-   ".mr123-h .sp{flex:1}",
-   ".mr123-q{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 14px}",
-   ".mr123-q b{font-size:13px}",
-   ".mr123-b{font-family:inherit;cursor:pointer;border-radius:10px;padding:6px 20px;font-size:13px;font-weight:900;border:1.6px solid #D9DEE6;background:#fff;color:#48505E}",
-   ".mr123-b.on-y{background:#B5121B;border-color:#B5121B;color:#fff}",
-   ".mr123-b.on-n{background:#15803D;border-color:#15803D;color:#fff}",
-   ".mr123-note{padding:0 14px 12px;font-size:11.5px;color:#64748B}",
-   ".mr123-tbl{width:100%;border-collapse:collapse;font-size:12.5px}",
-   ".mr123-tbl th{background:#F7F9FC;text-align:start;padding:7px 9px;border-bottom:2px solid #E3E8EC;font-size:11px;color:#475569}",
-   ".mr123-tbl td{padding:5px 9px;border-bottom:1px solid #F1F4F7;vertical-align:middle}",
-   ".mr123-scr{max-height:320px;overflow:auto;border:1px solid #EDF0F4;border-radius:10px;margin:0 14px 14px}",
-   ".mr123-in{width:62px;padding:4px 6px;border:1px solid #D9DEE6;border-radius:7px;font-family:inherit;font-size:12.5px;text-align:center;color:#14181F;background:#fff}",
-   ".mr123-sel{padding:4px 6px;border:1px solid #D9DEE6;border-radius:7px;font-family:inherit;font-size:12px;background:#fff;color:#14181F}",
-   ".mr123-tag{font-size:10px;font-weight:900;border-radius:999px;padding:1px 7px;border:1px solid;white-space:nowrap}",
-   ".mr123-tag.st{background:rgba(21,128,61,.1);border-color:rgba(21,128,61,.3);color:#0F6B4F}",
-   ".mr123-tag.sb{background:rgba(200,162,74,.16);border-color:rgba(200,162,74,.45);color:#7A5F00}",
-   ".mr123-tag.np{background:#F1F5F9;border-color:#DCE3EA;color:#64748B}",
-   ".mr123-act{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}",
-   ".mr123-x{font-size:10px;font-weight:900;background:#14181F;color:#7CFFB2;border-radius:6px;padding:1px 6px;margin-inline-start:6px}"
+   ".s125{border:1px solid #E3E8EC;border-radius:14px;overflow:hidden;background:#fff;margin-top:14px;font-family:inherit}",
+   ".s125-q{padding:14px;background:linear-gradient(180deg,#FDF6F3,#FFF);border-bottom:2px solid #B5121B}",
+   ".s125-q b{display:block;font-size:15px;font-weight:900;color:#7E0E14;margin-bottom:10px}",
+   ".s125-q .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}",
+   ".s125-y{font-family:inherit;cursor:pointer;border-radius:10px;padding:8px 26px;font-size:14px;font-weight:900;border:1.8px solid #D9DEE6;background:#fff;color:#48505E}",
+   ".s125-y.y{background:#B5121B;border-color:#B5121B;color:#fff}",
+   ".s125-y.n{background:#15803D;border-color:#15803D;color:#fff}",
+   ".s125-row{display:flex;align-items:center;gap:10px;padding:11px 14px;border-bottom:1px solid #EEF1F4;flex-wrap:wrap}",
+   ".s125-row .t{font-weight:900;font-size:13.5px}",
+   ".s125-open{font-family:inherit;cursor:pointer;border:1.5px solid #7E0E14;background:#7E0E14;color:#fff;border-radius:10px;padding:7px 16px;font-size:13px;font-weight:900}",
+   ".s125-cnt{font-size:11.5px;font-weight:900;border-radius:999px;padding:2px 10px;border:1px solid}",
+   ".s125-cnt.st{background:rgba(21,128,61,.1);border-color:rgba(21,128,61,.32);color:#0F6B4F}",
+   ".s125-cnt.sb{background:rgba(200,162,74,.16);border-color:rgba(200,162,74,.45);color:#7A5F00}",
+   ".s125-tbl{width:100%;border-collapse:collapse;font-size:12.5px}",
+   ".s125-tbl th{background:#F7F9FC;text-align:start;padding:7px 9px;border-bottom:2px solid #E3E8EC;font-size:11px;color:#475569;position:sticky;top:0;z-index:1}",
+   ".s125-tbl td{padding:5px 9px;border-bottom:1px solid #F1F4F7;vertical-align:middle}",
+   ".s125-scr{max-height:300px;overflow:auto;border:1px solid #EDF0F4;border-radius:10px;margin:10px 14px 14px}",
+   ".s125-in{width:60px;padding:4px 6px;border:1px solid #D9DEE6;border-radius:7px;font-family:inherit;font-size:12.5px;text-align:center}",
+   ".s125-sel{padding:4px 6px;border:1px solid #D9DEE6;border-radius:7px;font-family:inherit;font-size:12px;background:#fff}",
+   ".s125-tag{font-size:10px;font-weight:900;border-radius:999px;padding:1px 7px;border:1px solid;white-space:nowrap}",
+   ".s125-tag.st{background:rgba(21,128,61,.1);border-color:rgba(21,128,61,.3);color:#0F6B4F}",
+   ".s125-tag.sb{background:rgba(200,162,74,.16);border-color:rgba(200,162,74,.45);color:#7A5F00}",
+   ".s125-tag.np{background:#F1F5F9;border-color:#DCE3EA;color:#64748B}",
+   ".s125-lu{margin:0 14px 14px;text-align:center}",
+   ".s125-lu img{max-width:100%;max-height:230px;border:1px solid #E3E8EC;border-radius:10px;display:block;margin:0 auto 8px}",
+   /* شاشة المشاركين */
+   ".sq125{position:fixed;inset:0;z-index:99999;background:rgba(15,23,42,.55);display:flex;align-items:flex-start;justify-content:center;padding:20px;overflow:auto}",
+   ".sq125-w{background:#fff;border-radius:16px;max-width:760px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,.35);overflow:hidden}",
+   ".sq125-h{display:flex;align-items:center;gap:10px;padding:14px 18px;background:#7E0E14;color:#fff}",
+   ".sq125-h b{font-size:15px;flex:1}",
+   ".sq125-x{cursor:pointer;border:none;background:rgba(255,255,255,.16);color:#fff;border-radius:9px;width:32px;height:32px;font-size:18px;line-height:1;font-weight:900}",
+   ".sq125-b{padding:14px 18px;max-height:70vh;overflow:auto}",
+   ".sq125-s{width:100%;padding:9px 12px;border:1px solid #D9DEE6;border-radius:10px;font-family:inherit;font-size:13px;margin-bottom:10px}",
+   ".sq125-add{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap}",
+   ".sq125-add input{flex:1;min-width:150px;padding:9px 12px;border:1px solid #D9DEE6;border-radius:10px;font-family:inherit;font-size:13px}",
+   ".sq125-add button{font-family:inherit;cursor:pointer;border:none;border-radius:10px;padding:9px 16px;font-size:13px;font-weight:900;background:#14181F;color:#fff}",
+   ".sq125 li{display:flex;align-items:center;gap:8px;padding:7px 2px;border-bottom:1px solid #F1F4F7;list-style:none;font-size:13px}",
+   ".sq125 li .n{flex:1;font-weight:700}",
+   ".sq125 li .n i{font-style:normal;font-weight:600;font-size:11px;color:#64748B;display:block}",
+   ".sq125 ul{margin:0;padding:0}",
+   ".sq125-t{font-family:inherit;cursor:pointer;border-radius:8px;padding:4px 11px;font-size:11.5px;font-weight:900;border:1.5px solid #D9DEE6;background:#fff;color:#48505E}",
+   ".sq125-t.on{background:#15803D;border-color:#15803D;color:#fff}",
+   ".sq125-t.onb{background:#C8A24A;border-color:#C8A24A;color:#3A2B00}",
+   ".sq125-t.rm{background:#fff;border-color:#B5121B;color:#B5121B;padding:4px 9px}",
+   ".sq125-f{padding:12px 18px;border-top:1px solid #E3E8EC;display:flex;gap:8px;align-items:center;background:#F7F9FC}",
+   ".sq125-f .k{font-size:12px;font-weight:900;color:#48505E}",
+   ".sq125-f button{margin-inline-start:auto;font-family:inherit;cursor:pointer;border:none;border-radius:10px;padding:9px 22px;font-size:13px;font-weight:900;background:#15803D;color:#fff}"
   ].join("");
   try{ (document.head||document.documentElement).appendChild(css); }catch(e){}
 
-  /* ---------- rail inside the modal ---------- */
-  function hiddenVals(){
-    var mc=document.getElementById("modalCard"); if(!mc) return {st:[],sb:[]};
-    function g(k){ var el=mc.querySelector('[data-f="'+k+'"]'); return el?String(el.value||""):""; }
-    var st=g("msSt").split("|").filter(Boolean), sb=g("msSb").split("|").filter(Boolean);
-    if(!st.length&&!sb.length){ st=MS.st_arr; sb=MS.sb_arr; }
-    return {st:st, sb:sb};
+  /* ---------------- لوحة داخل النموذج ---------------- */
+  function countsLabel(){
+    return '<span class="s125-cnt st">'+Q("أساسي","Starters")+': '+M.st.length+'</span> '+
+           '<span class="s125-cnt sb">'+Q("احتياطي","Subs")+': '+M.sb.length+'</span>';
   }
-  function rankOf(id,q){ return q.st.indexOf(id)>-1?"st":(q.sb.indexOf(id)>-1?"sb":"np"); }
-  function tagOf(r){ return '<span class="mr123-tag '+r+'">'+(r==="st"?Q("أساسي","Starter"):(r==="sb"?Q("احتياطي","Sub"):Q("خارج القائمة","Not in squad")))+'</span>'; }
-
-  function squadTable(){
-    var q=hiddenVals();
-    var ids=PLAYERS().map(function(p){return p.id;});
-    var w=function(id){ var r=rankOf(id,q); return r==="st"?0:(r==="sb"?1:2); };
-    ids.sort(function(a,b){ return w(a)-w(b); });
-    var rows=ids.map(function(id){
-      var r=rankOf(id);
-      var mv=(MS.min[id]===undefined||MS.min[id]===null)?"":MS.min[id];
-      var sv=MS.st[id]||"ok";
+  function attTable(){
+    var rows=allRows().sort(function(a,b){
+      var w=function(r){ return r==="st"?0:(r==="sb"?1:2); };
+      return w(rankOf(a.id))-w(rankOf(b.id));
+    }).map(function(o){
+      var r=rankOf(o.id);
+      var mv=(M.min[o.id]===undefined||M.min[o.id]===null)?"":M.min[o.id];
+      var sv=M.med[o.id]||"ok";
       var opt=STL.map(function(x){ return '<option value="'+x.k+'"'+(sv===x.k?" selected":"")+'>'+E(Q(x.ar,x.en))+'</option>'; }).join("");
-      return '<tr><td><b>'+E(NM(id))+'</b><div style="font-size:10.5px;color:#64748B">'+E(POS(id))+'</div></td>'+
-        '<td>'+tagOf(r)+'</td>'+
-        '<td><input class="mr123-in" type="number" min="0" max="130" data-mr="min" data-id="'+E(id)+'" value="'+E(mv)+'"></td>'+
-        '<td><select class="mr123-sel" data-mr="st" data-id="'+E(id)+'">'+opt+'</select></td></tr>';
+      return '<tr><td><b>'+E(o.nm)+'</b><div style="font-size:10.5px;color:#64748B">'+E(o.pos)+'</div></td>'+
+        '<td><span class="s125-tag '+r+'">'+(r==="st"?Q("أساسي","Starter"):(r==="sb"?Q("احتياطي","Sub"):Q("خارج القائمة","Not in squad")))+'</span></td>'+
+        '<td><input class="s125-in" type="number" min="0" max="130" data-q125="min" data-id="'+E(o.id)+'" value="'+E(mv)+'"></td>'+
+        '<td><select class="s125-sel" data-q125="med" data-id="'+E(o.id)+'">'+opt+'</select></td></tr>';
     }).join("");
-    return '<div class="mr123-scr"><table class="mr123-tbl"><thead><tr><th>'+Q("اللاعب","Player")+'</th><th>'+Q("الصفة","Role")+'</th><th>'+Q("دقائق اللعب","Minutes")+'</th><th>'+Q("الحالة الطبية بعد المباراة","Medical status after match")+'</th></tr></thead><tbody>'+rows+'</tbody></table></div>';
+    return '<div class="s125-scr"><table class="s125-tbl"><thead><tr><th>'+Q("اللاعب","Player")+'</th><th>'+Q("الصفة","Role")+'</th><th>'+Q("دقائق اللعب","Minutes")+'</th><th>'+Q("الحالة الطبية بعد المباراة","Medical status")+'</th></tr></thead><tbody>'+
+      (rows||'<tr><td colspan="4" style="text-align:center;color:#94A3B8;padding:18px">'+Q("أضف اللاعبين من زر «المشاركون»","Add players from the “Squad” button")+'</td></tr>')+'</tbody></table></div>';
   }
-  function squadPicker(){
-    var q=hiddenVals();
-    var rows=PLAYERS().map(function(p){
-      var id=p.id, a=q.st.indexOf(id)>-1, b=q.sb.indexOf(id)>-1;
-      return '<tr><td><b>'+E(NM(id))+'</b><div style="font-size:10.5px;color:#64748B">'+E(POS(id))+'</div></td>'+
-        '<td style="text-align:end;white-space:nowrap">'+
-        '<button type="button" class="mr123-b'+(a?" on-y":"")+'" style="padding:3px 12px;font-size:11.5px" data-mr="A" data-id="'+E(id)+'">'+Q("أساسي","Starter")+'</button> '+
-        '<button type="button" class="mr123-b'+(b?" on-y":"")+'" style="padding:3px 12px;font-size:11.5px;'+(b?"background:#C8A24A;border-color:#C8A24A;color:#3A2B00":"")+'" data-mr="B" data-id="'+E(id)+'">'+Q("احتياطي","Sub")+'</button></td></tr>';
-    }).join("");
-    return '<div class="mr123-scr"><table class="mr123-tbl"><tbody>'+rows+'</tbody></table></div>'+
-      '<div style="padding:0 14px 12px"><input type="file" id="mrLineup" accept="image/*" style="font-family:inherit;font-size:12px">'+
-      (MS.lineup?'<div style="margin-top:8px"><img src="'+MS.lineup+'" style="max-width:100%;max-height:190px;border:1px solid #E3E8EC;border-radius:8px"> <button type="button" class="mr123-b" style="padding:2px 10px;font-size:11px" data-mr="delimg">'+Q("حذف الصورة","Remove image")+'</button></div>':"")+'</div>';
+  function panelHTML(){
+    return '<div class="s125-q"><b>'+Q("هل يوجد إصابات في هذه المباراة؟","Were there injuries in this match?")+'</b>'+
+      '<div class="row"><button type="button" class="s125-y '+(M.has?"y":"")+'" data-q125="Y">'+Q("نعم","Yes")+'</button>'+
+      '<button type="button" class="s125-y '+(M.has?"":"n")+'" data-q125="N">'+Q("لا","No")+'</button>'+
+      '<span style="font-size:11.5px;color:#64748B;margin-inline-start:auto">'+(M.has?Q("املأ حقول الإصابة أدناه","Fill the injury fields below"):Q("حقول الإصابة مخفية — يبقى المشاركون والدقائق والحالة الطبية","Injury fields hidden — squad, minutes and medical status remain"))+'</span></div></div>'+
+      '<div class="s125-row"><span class="t">'+Q("المشاركون في المباراة","Players in the match")+'</span>'+
+        countsLabel()+
+        '<button type="button" class="s125-open" data-q125="open" style="margin-inline-start:auto">'+Q("المشاركون — إضافة اللاعبين","Squad — add players")+'</button></div>'+
+      attTable()+
+      '<div class="s125-lu">'+
+        '<input type="file" id="q125File" accept="image/*" style="font-family:inherit;font-size:12px">'+
+        (M.lineup?'<div style="margin-top:10px"><img src="'+M.lineup+'"><button type="button" class="sq125-t rm" data-q125="delimg">'+Q("تفريغ الورقة","Clear the sheet")+'</button></div>':'')+
+      '</div>';
+  }
+  function paint(){
+    try{
+      var p=document.getElementById("q125Panel"); if(!p) return;
+      p.innerHTML=panelHTML();
+      var f=document.getElementById("q125File");
+      if(f) f.addEventListener("change",function(){
+        var file=this.files&&this.files[0]; if(!file) return;
+        shrink(file,function(d){ if(d){ M.lineup=d; paint(); } });
+      });
+      hideInj(!M.has);
+      syncHidden();
+    }catch(e){ try{ window.Q125_ERR=String((e&&e.stack)||e); }catch(x){} }
+  }
+  function syncHidden(){
+    var mc=document.getElementById("modalCard"); if(!mc) return;
+    function s(k,v){ var el=mc.querySelector('[data-f="'+k+'"]'); if(el) el.value=v; }
+    s("q125St",M.st.join("|")); s("q125Sb",M.sb.join("|"));
+    s("q125Ex",JSON.stringify(M.extra)); s("q125Has",M.has?"YES":"NO"); s("q125Med",M.notes||"");
+  }
+  function injHost(){
+    try{
+      var box=document.getElementById("miBox"); if(!box) return null;
+      var w=box;
+      for(var i=0;i<5;i++){ if(w.parentNode&&w.parentNode.classList&&w.parentNode.classList.contains("frm-grid")) return w.parentNode; w=w.parentNode; }
+      return box.parentNode;
+    }catch(e){ return null; }
+  }
+  function hideInj(h){
+    try{ var w=injHost(); if(w&&w.style) w.style.display=h?"none":""; }catch(e){}
   }
 
-  function panelHTML(){
-    var y=MS.has, q=hiddenVals();
-    return '<div class="mr123-h">'+Q("المشاركون في المباراة","Match squad")+
-      '<span class="mr123-x">v124</span><div class="sp"></div>'+
-      '<span style="font-size:11.5px;font-weight:800;color:#0F6B4F">'+Q("أساسي","Starters")+': '+q.st.length+'</span> '+
-      '<span style="font-size:11.5px;font-weight:800;color:#7A5F00">'+Q("احتياطي","Subs")+': '+q.sb.length+'</span></div>'+
-      '<div id="mrPick"></div>'+
-      '<div class="mr123-h" style="border-top:1px solid #E3E8EC">'+Q("هل يوجد إصابات في هذه المباراة؟","Were there injuries in this match?")+'</div>'+
-      '<div class="mr123-q">'+
-        '<button type="button" class="mr123-b '+(y?"on-y":"")+'" data-mr="Y">'+Q("نعم","Yes")+'</button>'+
-        '<button type="button" class="mr123-b '+(y?"":"on-n")+'" data-mr="N">'+Q("لا","No")+'</button>'+
-        '<span style="font-size:11.5px;color:#64748B;margin-inline-start:auto">'+(y?Q("املأ حقول الإصابة أدناه","Fill the injury fields below"):Q("حقول الإصابة مخفية","Injury fields hidden"))+'</span></div>'+
-      '<div class="mr123-note">'+Q("دقائق اللعب والحالة الطبية تُسجَّل لكل اللاعبين — الأساسيون والاحتياط ومن لم يُشارك.","Minutes and medical status are recorded for all players — starters, substitutes and unused.")+'</div>'+
-      '<div id="mrAtt">'+squadTable()+'</div>';
+  /* ---------------- شاشة المشاركين الكاملة ---------------- */
+  var SEARCH="";
+  function screenHTML(){
+    var rows=allRows().filter(function(o){ return !SEARCH||o.nm.toLowerCase().indexOf(SEARCH.toLowerCase())>-1; });
+    var lis=rows.map(function(o){
+      var r=rankOf(o.id);
+      return '<li><span class="n">'+E(o.nm)+'<i>'+E(o.pos)+'</i></span>'+
+        '<button type="button" class="sq125-t '+(r==="st"?"on":"")+'" data-sq="st" data-id="'+E(o.id)+'">'+Q("أساسي","Starter")+'</button>'+
+        '<button type="button" class="sq125-t '+(r==="sb"?"onb":"")+'" data-sq="sb" data-id="'+E(o.id)+'">'+Q("احتياطي","Sub")+'</button>'+
+        (r!=="np"?'<button type="button" class="sq125-t rm" data-sq="rm" data-id="'+E(o.id)+'">✕</button>':'')+'</li>';
+    }).join("");
+    return '<div class="sq125" id="sq125"><div class="sq125-w">'+
+      '<div class="sq125-h"><b>'+Q("المشاركون في المباراة","Players in the match")+'</b><button type="button" class="sq125-x" data-sq="close">✕</button></div>'+
+      '<div class="sq125-b">'+
+        '<div class="sq125-add"><input id="sqAddName" placeholder="'+Q("أضف لاعبًا يدويًا — اكتب الاسم","Add a player manually — type the name")+'">'+
+        '<button type="button" data-sq="add">+ '+Q("إضافة","Add")+'</button></div>'+
+        '<input class="sq125-s" id="sqSearch" placeholder="'+Q("ابحث باسم اللاعب…","Search player name…")+'" value="'+E(SEARCH)+'">'+
+        '<ul>'+lis+'</ul>'+
+        '<div style="margin-top:14px"><input type="file" id="sqFile" accept="image/*" style="font-family:inherit;font-size:12px"></div>'+
+        (M.lineup?'<div style="margin-top:10px;text-align:center"><img src="'+M.lineup+'" style="max-width:100%;max-height:180px;border-radius:10px;border:1px solid #E3E8EC"><br><button type="button" class="sq125-t rm" data-sq="delimg" style="margin-top:8px">'+Q("تفريغ الورقة","Clear the sheet")+'</button></div>':"")+
+      '</div>'+
+      '<div class="sq125-f"><span class="k">'+Q("أساسي","Starters")+': '+M.st.length+' · '+Q("احتياطي","Subs")+': '+M.sb.length+'</span>'+
+      '<button type="button" data-sq="ok">'+Q("تم","Done")+'</button></div>'+
+      '</div></div>';
   }
-  function paintPanel(){
-    var p=document.getElementById("mrPanel"); if(!p) return;
-    var y=MS.has;
-    var yes=p.querySelector('[data-mr="Y"]'), no=p.querySelector('[data-mr="N"]');
-    if(yes){ yes.className="mr123-b "+(y?"on-y":""); }
-    if(no){ no.className="mr123-b "+(y?"":"on-n"); }
-    var pk=document.getElementById("mrPick"); if(pk) pk.innerHTML=squadPicker();
-    var at=document.getElementById("mrAtt"); if(at) at.innerHTML=squadTable();
-    var q=hiddenVals();
-    var hd=p.querySelector(".mr123-h");
-    if(hd){ var sp=hd.querySelectorAll("span"); if(sp.length>=2){ sp[0].textContent=Q("أساسي","Starters")+": "+q.st.length; sp[1].textContent=Q("احتياطي","Subs")+": "+q.sb.length; } }
-    hideInjFields(!y);
-  }
-  function injWrap(){
-    var box=document.getElementById("miBox"); if(!box) return null;
-    var w=box; for(var i=0;i<4;i++){ if(w.parentNode&&w.parentNode.classList&&w.parentNode.classList.contains("frm-grid")) return w.parentNode; w=w.parentNode; }
-    return box.parentNode;
-  }
-  function hideInjFields(hide){
+  function openScreen(){
     try{
-      var w=injWrap(); if(!w||!w.style) return;
-      w.style.display=hide?"none":"";
-      var mi=document.getElementById("miBox");
-      if(mi){ var b=mi.previousElementSibling||mi.parentNode.querySelector(".label"); if(b&&b.style) b.style.display=hide?"none":""; }
+      closeScreen();
+      var d=document.createElement("div"); d.innerHTML=screenHTML();
+      document.body.appendChild(d.firstChild);
+      var s=document.getElementById("sqSearch");
+      if(s) s.addEventListener("input",function(){ SEARCH=this.value; refreshScreen(); });
+      var a=document.getElementById("sqAddName");
+      if(a) a.addEventListener("keydown",function(e){ if(e.key==="Enter"){ e.preventDefault(); addManual(); } });
+      var f=document.getElementById("sqFile");
+      if(f) f.addEventListener("change",function(){
+        var file=this.files&&this.files[0]; if(!file) return;
+        shrink(file,function(x){ if(x){ M.lineup=x; refreshScreen(); paint(); } });
+      });
     }catch(e){}
   }
-  function ensureInModal(){
-    try{
-      var mc=document.getElementById("modalCard"); if(!mc) return;
-      var save=mc.querySelector('[data-act="saveMatch"]'); if(!save) return;   /* only the match form */
-      var body=mc.querySelector(".modal-body"); if(!body) return;
-      if(!document.getElementById("mrPanel")){
-        var p=document.createElement("div"); p.id="mrPanel"; p.className="mr123"; p.innerHTML=panelHTML();
-        body.appendChild(p);
-        var f=document.getElementById("mrLineup");
-        if(f) f.addEventListener("change",function(){
-          var file=this.files&&this.files[0]; if(!file) return;
-          shrink(file,function(d){ if(d){ MS.lineup=d; paintPanel(); } });
-        });
-        var h1=document.createElement("input"); h1.type="hidden"; h1.setAttribute("data-f","msSt"); body.appendChild(h1);
-        var h2=document.createElement("input"); h2.type="hidden"; h2.setAttribute("data-f","msSb"); body.appendChild(h2);
-        var h3=document.createElement("input"); h3.type="hidden"; h3.setAttribute("data-f","msHas"); body.appendChild(h3);
-        var h4=document.createElement("input"); h4.type="hidden"; h4.setAttribute("data-f","msMed"); body.appendChild(h4);
-      }
-      var q=hiddenVals();
-      var h1b=mc.querySelector('[data-f="msSt"]'); if(h1b) h1b.value=q.st.join("|");
-      var h2b=mc.querySelector('[data-f="msSb"]'); if(h2b) h2b.value=q.sb.join("|");
-      var h3b=mc.querySelector('[data-f="msHas"]'); if(h3b) h3b.value=MS.has?"YES":"NO";
-      var h4b=mc.querySelector('[data-f="msMed"]'); if(h4b) h4b.value=MS.med||"";
-      if(!window.__mrPainted){ window.__mrPainted=1; paintPanel(); }
-    }catch(e){ try{ window.MR123_ERR=String((e&&e.stack)||e); }catch(x){} }
+  function refreshScreen(){
+    var cur=document.getElementById("sq125"); if(!cur) return;
+    var box=document.createElement("div"); box.innerHTML=screenHTML();
+    cur.parentNode.replaceChild(box.firstChild,cur);
+    var s=document.getElementById("sqSearch"); if(s){ s.value=SEARCH; s.addEventListener("input",function(){ SEARCH=this.value; refreshScreen(); }); }
+    var a=document.getElementById("sqAddName"); if(a) a.addEventListener("keydown",function(e){ if(e.key==="Enter"){ e.preventDefault(); addManual(); } });
+    var f=document.getElementById("sqFile");
+    if(f) f.addEventListener("change",function(){ var file=this.files&&this.files[0]; if(!file) return; shrink(file,function(x){ if(x){ M.lineup=x; refreshScreen(); paint(); } }); });
   }
+  function closeScreen(){ var e=document.getElementById("sq125"); if(e&&e.parentNode) e.parentNode.removeChild(e); }
+  function addManual(){
+    var a=document.getElementById("sqAddName"); if(!a) return;
+    var v=String(a.value||"").trim(); if(!v) return;
+    M.extra.push({n:v,r:"st"}); SEARCH=""; refreshScreen(); paint();
+  }
+
+  document.addEventListener("click",function(e){
+    var t=e.target; if(!t||!t.closest) return;
+    var sb=t.closest("[data-sq]");
+    if(sb){
+      e.preventDefault();
+      var k=sb.getAttribute("data-sq"), id=sb.getAttribute("data-id");
+      if(k==="close"||k==="ok"){ closeScreen(); paint(); return; }
+      if(k==="add"){ addManual(); return; }
+      if(k==="delimg"){ M.lineup=""; refreshScreen(); paint(); return; }
+      if(k==="st"){ if(rankOf(id)==="st") unset(id); else setRank(id,"st"); refreshScreen(); paint(); return; }
+      if(k==="sb"){ if(rankOf(id)==="sb") unset(id); else setRank(id,"sb"); refreshScreen(); paint(); return; }
+      if(k==="rm"){ unset(id); refreshScreen(); paint(); return; }
+      return;
+    }
+    var qb=t.closest("[data-q125]");
+    if(qb){
+      var kk=qb.getAttribute("data-q125");
+      if(kk==="Y"||kk==="N"){ e.preventDefault(); M.has=(kk==="Y"); paint(); return; }
+      if(kk==="open"){ e.preventDefault(); openScreen(); return; }
+      if(kk==="delimg"){ e.preventDefault(); M.lineup=""; paint(); return; }
+    }
+  },true);
+
+  document.addEventListener("input",function(e){
+    var t=e.target; if(!t||!t.getAttribute) return;
+    if(t.getAttribute("data-q125")==="min") M.min[t.getAttribute("data-id")]=t.value;
+  },true);
+  document.addEventListener("change",function(e){
+    var t=e.target; if(!t||!t.getAttribute) return;
+    var k=t.getAttribute("data-q125"); if(!k) return;
+    if(k==="min") M.min[t.getAttribute("data-id")]=t.value;
+    if(k==="med") M.med[t.getAttribute("data-id")]=t.value;
+  },true);
+
   function shrink(file,cb){
     try{
       if(!file||!/^image\//.test(file.type)) return cb("");
       var fr=new FileReader();
       fr.onload=function(){ var im=new Image();
-        im.onload=function(){ try{ var M=1100,w=im.width,h=im.height; if(w>M||h>M){var r=Math.min(M/w,M/h); w=Math.round(w*r); h=Math.round(h*r);} var c=document.createElement("canvas"); c.width=w; c.height=h; c.getContext("2d").drawImage(im,0,0,w,h); cb(c.toDataURL("image/jpeg",0.7)); }catch(e){ cb(fr.result||""); } };
+        im.onload=function(){ try{ var MX=1000,w=im.width,h=im.height; if(w>MX||h>MX){var r=Math.min(MX/w,MX/h);w=Math.round(w*r);h=Math.round(h*r);} var c=document.createElement("canvas"); c.width=w;c.height=h; c.getContext("2d").drawImage(im,0,0,w,h); cb(c.toDataURL("image/jpeg",0.68)); }catch(e){ cb(fr.result||""); } };
         im.onerror=function(){ cb(fr.result||""); }; im.src=fr.result; };
       fr.onerror=function(){ cb(""); }; fr.readAsDataURL(file);
     }catch(e){ cb(""); }
   }
 
-  /* ---------- delegation ---------- */
-  document.addEventListener("click",function(e){
-    var t=e.target; if(!t||!t.closest) return;
-    var b=t.closest("[data-mr]"); if(!b) return;
-    var k=b.getAttribute("data-mr"), id=b.getAttribute("data-id");
-    var mc=document.getElementById("modalCard"); if(!mc) return;
-    var q=hiddenVals();
-    function W(){
-      var s1=mc.querySelector('[data-f="msSt"]'), s2=mc.querySelector('[data-f="msSb"]');
-      if(s1) s1.value=q.st.join("|"); if(s2) s2.value=q.sb.join("|");
-    }
-    if(k==="Y"||k==="N"){ e.preventDefault(); MS.has=(k==="Y"); var h=mc.querySelector('[data-f="msHas"]'); if(h) h.value=MS.has?"YES":"NO"; paintPanel(); return; }
-    if(k==="delimg"){ e.preventDefault(); MS.lineup=""; paintPanel(); return; }
-    if(k==="A"){ e.preventDefault(); var i=q.st.indexOf(id); if(i>-1) q.st.splice(i,1); else { q.st.push(id); var j=q.sb.indexOf(id); if(j>-1) q.sb.splice(j,1); } W(); paintPanel(); return; }
-    if(k==="B"){ e.preventDefault(); var i2=q.sb.indexOf(id); if(i2>-1) q.sb.splice(i2,1); else { q.sb.push(id); var j2=q.st.indexOf(id); if(j2>-1) q.st.splice(j2,1); } W(); paintPanel(); return; }
-  },true);
-  document.addEventListener("input",function(e){
-    var t=e.target; if(!t||!t.getAttribute) return;
-    if(t.getAttribute("data-mr")==="min"){ MS.min[t.getAttribute("data-id")]=t.value; }
-  },true);
-  document.addEventListener("change",function(e){
-    var t=e.target; if(!t||!t.getAttribute) return;
-    var k=t.getAttribute("data-mr"); if(!k) return;
-    if(k==="min") MS.min[t.getAttribute("data-id")]=t.value;
-    if(k==="st") MS.st[t.getAttribute("data-id")]=t.value;
-  },true);
-
-  /* ---------- polling (لا MutationObserver على كل الصفحة — كان يسبب تعليق المتصفح) ---------- */
-  var _busy=false;
-  function _modalOpen(){
-    try{ var mc=document.getElementById("modalCard"); return !!(mc&&mc.querySelector('[data-act="saveMatch"]')); }catch(e){ return false; }
-  }
-  function _tickModal(){
-    if(_busy) return; _busy=true;
+  /* ---------------- ربط بالنموذج (مؤقّت خفيف، لا مراقبات) ---------------- */
+  function modalMatch(){ try{ return (typeof mOpen!=="undefined")?mOpen:""; }catch(e){ return ""; } }
+  var lastId=null, busy=false;
+  function tick(){
+    if(busy) return; busy=true;
     try{
-      if(_modalOpen()){
-        if(!document.getElementById("mrPanel")){ window.__mrPainted=0; hydrate(); }
-        ensureInModal();
-      } else { window.__mrPainted=0; }
-    }catch(e){ try{ window.MR124_ERR=String((e&&e.stack)||e); }catch(x){} }
-    _busy=false;
+      var mc=document.getElementById("modalCard");
+      var isForm=!!(mc&&mc.querySelector('[data-act="saveMatch"]'));
+      if(!isForm){ lastId=null; busy=false; return; }
+      if(!document.getElementById("q125Panel")){
+        var m=MTS().filter(function(x){ return String(x.id)===String(modalMatch()); })[0];
+        resetFrom(m); lastId=modalMatch();
+        var body=mc.querySelector(".modal-body");
+        if(!body){ busy=false; return; }
+        var p=document.createElement("div"); p.id="q125Panel"; p.className="s125";
+        body.insertBefore(p,body.firstChild);
+        ["q125St","q125Sb","q125Ex","q125Has","q125Med"].forEach(function(k){
+          var h=document.createElement("input"); h.type="hidden"; h.setAttribute("data-f",k); body.appendChild(h);
+        });
+        paint();
+      }
+    }catch(e){ try{ window.Q125_TICK_ERR=String((e&&e.stack)||e); }catch(x){} }
+    busy=false;
   }
-  setInterval(_tickModal,450); setTimeout(_tickModal,350);
+  setInterval(tick,500); setTimeout(tick,300);
 
-  /* ---------- persist ---------- */
-  var t0=0;
-  (function hookSave(){
+  /* حفظ */
+  var tries=0;
+  (function hook(){
     try{
       var f=window.ACT&&ACT.saveMatch;
-      if(typeof f!=="function"||f.__mr){ if(t0++<300) return setTimeout(hookSave,120); return; }
+      if(typeof f!=="function"||f.__q125){ if(tries++<200) return setTimeout(hook,150); return; }
       var w=function(){
-        var mc=document.getElementById("modalCard");
-        if(mc){
-          var g=function(k){ var el=mc.querySelector('[data-f="'+k+'"]'); return el?String(el.value||""):""; };
-          MS.has=(g("msHas").toUpperCase()!=="NO");
-          var st=g("msSt").split("|").filter(Boolean), sb=g("msSb").split("|").filter(Boolean);
-          if(st.length||sb.length){ MS.st_arr=st; MS.sb_arr=sb; }
-          MS.med=g("msMed")||MS.med;
-        }
         var r=f.apply(this,arguments);
         try{
-          var id=(typeof mOpen!=="undefined")?mOpen:"";
-          var m=MATCHES().filter(function(x){ return String(x.id)===String(id); })[0];
+          var m=MTS().filter(function(x){ return String(x.id)===String(modalMatch()); })[0];
           if(m){
-            m.starters=MS.st_arr.slice(); m.subs=MS.sb_arr.slice();
-            m.hasInjuries=MS.has; m.minutes=Object.assign({},MS.min);
-            m.medStatus=Object.assign({},MS.st); m.lineup=MS.lineup||""; m.medicalNotes=MS.med||"";
-            if(!MS.has) m.injuries=[];
+            m.starters=M.st.slice(); m.subs=M.sb.slice(); m.extraSquad=M.extra.slice();
+            m.hasInjuries=M.has; m.minutes=Object.assign({},M.min);
+            m.medStatus=Object.assign({},M.med); m.lineup=M.lineup||"";
+            m.medicalNotes=M.notes||"";
+            if(!M.has) m.injuries=[];
             SAVE();
           }
-        }catch(e){ try{ window.MR123_SAVE_ERR=String((e&&e.stack)||e); }catch(x){} }
+        }catch(e){ try{ window.Q125_SAVE_ERR=String((e&&e.stack)||e); }catch(x){} }
         return r;
       };
-      w.__mr=1; ACT.saveMatch=w;
+      w.__q125=1; ACT.saveMatch=w;
     }catch(e){}
   })();
 
-  /* ---------- hydrate when a form opens ---------- */
-  var lastKey="";
-  function hydrate(){
-    try{
-      var mc=document.getElementById("modalCard"); if(!mc) return;
-      if(!mc.querySelector('[data-act="saveMatch"]')) return;
-      var id=(typeof mOpen!=="undefined")?mOpen:"";
-      var m=MATCHES().filter(function(x){ return String(x.id)===String(id); })[0];
-      var key=String(id)+"|"+(m?String(m.date||""):"");
-      if(key===lastKey) return; lastKey=key;
-      MS.has=(m&&m.hasInjuries===false)?false:true;
-      MS.st_arr=((m&&m.starters)||[]).slice(); MS.sb_arr=((m&&m.subs)||[]).slice();
-      MS.min=Object.assign({},(m&&m.minutes)||{}); MS.st=Object.assign({},(m&&m.medStatus)||{});
-      MS.lineup=(m&&m.lineup)||""; MS.med=(m&&m.medicalNotes)||"";
-      var s1=mc.querySelector('[data-f="msSt"]'); if(s1) s1.value=MS.st_arr.join("|");
-      var s2=mc.querySelector('[data-f="msSb"]'); if(s2) s2.value=MS.sb_arr.join("|");
-      MS.floor=1; window.__mrPainted=0;
-    }catch(e){}
-  }
-  /* hydrate يُنادى من المؤقّت أعلاه فقط عند تغيّر المباراة */
-  document.addEventListener("click",function(e){
-    var t=e.target; if(!t||!t.closest) return;
-    if(t.closest('[data-act="fxReport"],[data-act="newMatch"],[data-act="addMatchInj"]')){ lastKey=""; setTimeout(function(){ hydrate(); ensureInModal(); },120); }
-  },true);
-
-  /* ---------- buttons in fixture rows ---------- */
-  function fxOf(r){
+  /* ---------------- أزرار صفوف المباريات ---------------- */
+  function fxMatchOf(r){
     try{ if(typeof fxMatch==="function"){ var m=fxMatch(Number(r)); if(m) return m; } }catch(e){}
-    try{ return MATCHES().filter(function(x){ return String(x.fx||"")===String(r); })[0]||null; }catch(e){ return null; }
+    try{ return MTS().filter(function(x){ return String(x.fx||"")===String(r); })[0]||null; }catch(e){ return null; }
   }
   function decorate(){
     try{
-      var acts=document.querySelectorAll("#v-fixtures .fx-act, .fx-act");
+      var acts=document.querySelectorAll(".fx-act");
       for(var i=0;i<acts.length;i++){
-        var act=acts[i];
-        if(act.querySelector('[data-mrbtn="1"]')) continue;
-        var rep=act.querySelector('[data-act="fxReport"]'); if(!rep) continue;
+        var a=acts[i]; if(a.querySelector('[data-q125b]')) continue;
+        var rep=a.querySelector('[data-act="fxReport"]'); if(!rep) continue;
         var r=rep.getAttribute("data-r"); if(r==null) continue;
-        var m=fxOf(r)||{};
-        var n=((m.starters||[]).length)+((m.subs||[]).length);
-        var box=document.createElement("div"); box.className="mr123-act";
-        box.innerHTML=
-          '<button type="button" class="btn sm" data-mrbtn="1" data-act="mrSquad" data-r="'+E(r)+'">'+Q("المشاركون","Squad")+' ('+n+')</button>'+
-          '<button type="button" class="btn gold sm" data-mrbtn="1" data-act="mrFull" data-r="'+E(r)+'">'+Q("التقرير الشامل","Full report")+'</button>';
-        act.appendChild(box);
+        var m=fxMatchOf(r)||{};
+        var n=((m.starters||[]).length)+((m.subs||[]).length)+(((m.extraSquad)||[]).length);
+        var box=document.createElement("div"); box.style.cssText="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px";
+        box.innerHTML='<button type="button" class="btn sm" data-q125b="1" data-qact="squad" data-r="'+E(r)+'">'+Q("المشاركون","Squad")+' ('+n+')</button>'+
+          '<button type="button" class="btn gold sm" data-q125b="1" data-qact="full" data-r="'+E(r)+'">'+Q("التقرير الشامل","Full report")+'</button>';
+        a.appendChild(box);
       }
     }catch(e){}
   }
-  var _dbusy=false;
-  function _tickFx(){ if(_dbusy) return; _dbusy=true; try{ decorate(); }catch(e){} _dbusy=false; }
-  setInterval(_tickFx,1400); setTimeout(_tickFx,400); setTimeout(_tickFx,1200);
+  setInterval(decorate,1500); setTimeout(decorate,500);
 
   document.addEventListener("click",function(e){
     var t=e.target; if(!t||!t.closest) return;
-    var sq=t.closest('[data-act="mrSquad"]'), fu=t.closest('[data-act="mrFull"]');
-    if(!sq&&!fu) return;
+    var b=t.closest("[data-qact]"); if(!b) return;
     e.preventDefault(); if(e.stopPropagation) e.stopPropagation();
-    var r=(sq||fu).getAttribute("data-r");
-    var m=fxOf(r);
-    if(!m){ try{ toast(Q("لا يوجد سجل مباراة — افتح «إضافة تقرير إصابات» مرة واحدة","No match record — open “Add injury report” once"),"warn"); }catch(x){} return; }
-    if(sq){ try{ var f=window.matchForm||window.qdOpenMatchForm; if(typeof f==="function") f(m); }catch(x){} return; }
-    openReport(m);
+    var r=b.getAttribute("data-r"), act=b.getAttribute("data-qact");
+    var m=fxMatchOf(r);
+    if(!m){ try{ toast(Q("افتح «إضافة تقرير إصابات» مرة واحدة لإنشاء سجل المباراة","Open “Add injury report” once to create the record"),"warn"); }catch(x){} return; }
+    if(act==="squad"){ try{ var f=window.matchForm||window.qdOpenMatchForm; if(typeof f==="function") f(m); setTimeout(openScreen,700); }catch(x){} return; }
+    report(m);
   },true);
 
-  /* ---------- report ---------- */
+  /* ---------------- التقرير ---------------- */
   function crest(){ try{ return window.QDCREST?window.QDCREST():""; }catch(e){ return ""; } }
   function report(m){
-    var st=m.starters||[], sb=m.subs||[], has=(m.hasInjuries!==false);
-    var inj=has?(m.injuries||[]):[];
-    var mins=m.minutes||{}, sts=m.medStatus||{};
-    var rk=function(id){ return st.indexOf(id)>-1?"st":(sb.indexOf(id)>-1?"sb":"np"); };
+    var st=m.starters||[], sb=m.subs||[], ex=m.extraSquad||[];
+    var has=(m.hasInjuries!==false), inj=has?(m.injuries||[]):[];
+    var mins=m.minutes||{}, meds=m.medStatus||{};
+    var rows=PLS().map(function(p){ return {id:String(p.id), nm:NM(p.id), pos:POS(p.id), extra:false}; });
+    ex.forEach(function(x,i){ rows.push({id:"X"+i, nm:String(x.n||""), pos:Q("إضافة يدوية","Manual"), extra:true}); });
+    var rk=function(id){
+      if(st.indexOf(id)>-1) return "st"; if(sb.indexOf(id)>-1) return "sb";
+      for(var i=0;i<ex.length;i++){ if(String("X"+i)===String(id)) return (ex[i].r==="sb"?"sb":"st"); }
+      return "np";
+    };
     var tg=function(r){ return '<span class="tg '+r+'">'+(r==="st"?Q("أساسي","Starter"):(r==="sb"?Q("احتياطي","Sub"):Q("خارج القائمة","Not in squad")))+'</span>'; };
-    var squadIds=PLAYERS().map(function(p){return p.id;}).filter(function(id){ return rk(id)!=="np"; });
-    var others=PLAYERS().map(function(p){return p.id;}).filter(function(id){ return rk(id)==="np"; });
-    var attRows=squadIds.map(function(id,i){
-      var s=stOf(sts[id]||"ok");
-      return '<tr><td>'+(i+1)+'</td><td><b>'+E(NM(id))+'</b></td><td>'+tg(rk(id))+'</td>'+
-        '<td style="text-align:center">'+E((mins[id]==null||mins[id]==="")?"—":mins[id])+'</td>'+
-        '<td><span class="pill" style="background:'+s.c+'1f;color:'+s.c+';border:1px solid '+s.c+'55">'+E(Q(s.ar,s.en))+'</span></td></tr>';
+    var ordered=rows.slice().sort(function(a,b){ var w=function(x){ var r=rk(x.id); return r==="st"?0:(r==="sb"?1:2); }; return w(a)-w(b); });
+    var attRows=ordered.map(function(o,i){
+      var r=rk(o.id); if(r==="np") return "";
+      var s=stOf(meds[o.id]||"ok");
+      return '<tr><td>'+(i+1)+'</td><td><b>'+E(o.nm)+'</b></td><td>'+tg(r)+'</td>'+
+        '<td style="text-align:center">'+E((mins[o.id]==null||mins[o.id]==="")?"—":mins[o.id])+'</td>'+
+        '<td><span class="pl" style="background:'+s.c+'1f;color:'+s.c+';border:1px solid '+s.c+'55">'+E(Q(s.ar,s.en))+'</span></td></tr>';
     }).join("");
-    var othRows=others.map(function(id,i){
-      var s=stOf(sts[id]||"ok");
-      return '<tr style="color:#64748B"><td>'+(squadIds.length+i+1)+'</td><td>'+E(NM(id))+'</td><td>'+tg("np")+'</td>'+
+    var othRows=ordered.map(function(o,i){
+      var r=rk(o.id); if(r!=="np") return "";
+      var s=stOf(meds[o.id]||"ok");
+      return '<tr style="color:#64748B"><td>'+(i+1)+'</td><td>'+E(o.nm)+'</td><td>'+tg("np")+'</td>'+
         '<td style="text-align:center">—</td>'+
-        '<td><span class="pill" style="background:'+s.c+'1f;color:'+s.c+';border:1px solid '+s.c+'55">'+E(Q(s.ar,s.en))+'</span></td></tr>';
+        '<td><span class="pl" style="background:'+s.c+'1f;color:'+s.c+';border:1px solid '+s.c+'55">'+E(Q(s.ar,s.en))+'</span></td></tr>';
     }).join("");
     var injRows=inj.map(function(x,i){
-      return '<tr><td>'+(i+1)+'</td><td><b>'+E(NM(x.playerId))+'</b> '+tg(rk(x.playerId))+'</td>'+
+      return '<tr><td>'+(i+1)+'</td><td><b>'+E(NM(x.playerId))+'</b> '+tg(rk(String(x.playerId)))+'</td>'+
         '<td>'+E(x.minute)+"'"+'</td><td>'+E(TR(x.type))+'</td><td>'+E(SITE(x.bodySites))+'</td>'+
         '<td>'+E(TR(x.mech))+'</td><td>'+E(TR(x.sev))+'</td><td>'+E(TR(x.action))+'</td><td>'+E(x.days)+'</td></tr>';
     }).join("");
@@ -24449,6 +24511,9 @@ try{
      '.hd .qd-crest img{width:100%;height:100%;object-fit:contain}.hd .qd-crest b{font-size:19px;color:#7E0E14}',
      '.hd h1{margin:0;font-size:19px}.hd h2{margin:6px 0 0;font-size:14.5px}.hd p{margin:5px 0 0;font-size:11.5px;opacity:.85}',
      '.bd{padding:18px 22px 24px}',
+     '.ask{display:flex;align-items:center;gap:12px;flex-wrap:wrap;border:2px solid #B5121B;border-radius:12px;padding:12px 15px;margin:0 0 6px;background:#FDF6F3}',
+     '.ask b{font-size:14.5px;color:#7E0E14}.ask .ans{font-size:13px;font-weight:900;border-radius:999px;padding:4px 16px;color:#fff}',
+     '.ask .y{background:#B5121B}.ask .n{background:#15803D}',
      '.sh{display:flex;align-items:center;gap:9px;margin:18px 0 9px}.sh i{width:5px;height:18px;border-radius:3px;background:#B5121B}.sh h3{margin:0;font-size:14.5px}',
      '.sec{border:1px solid #E3E8EC;border-radius:12px;overflow:hidden}',
      '.g{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;background:#EDF0F4}',
@@ -24462,56 +24527,61 @@ try{
      '.tg.st{background:rgba(21,128,61,.1);border-color:rgba(21,128,61,.3);color:#0F6B4F}',
      '.tg.sb{background:rgba(200,162,74,.16);border-color:rgba(200,162,74,.45);color:#7A5F00}',
      '.tg.np{background:#F1F5F9;border-color:#DCE3EA;color:#64748B}',
-     '.pill{font-size:10.5px;font-weight:900;border-radius:999px;padding:1px 8px;white-space:nowrap}',
+     '.pl{font-size:10.5px;font-weight:900;border-radius:999px;padding:1px 8px;white-space:nowrap}',
      '.note{padding:11px 13px;font-size:12.5px;border-bottom:1px dashed #EEF1F4}.note i{display:block;font-style:normal;font-size:10.5px;font-weight:800;color:#64748B;margin-bottom:3px}',
-     '.empty{padding:20px;text-align:center;color:#15803D;font-weight:800;font-size:13px;background:#F4FBF7}',
-     '.empty span{display:block;font-weight:600;font-size:11.5px;color:#64748B;margin-top:4px}',
      '.bar{display:flex;gap:8px;margin:0 0 14px}button{font-family:inherit;cursor:pointer;border:none;border-radius:10px;padding:9px 15px;font-size:13px;font-weight:800;background:#B5121B;color:#fff}button.alt{background:#fff;color:#7E0E14;border:1.5px solid rgba(126,14,20,.3)}',
      '.ft{border-top:1px solid #EEF1F4;padding:11px 22px;font-size:11px;color:#7B8494;text-align:center}',
-     '@media print{body{background:#fff;padding:0}.wrap{box-shadow:none}.bar{display:none}.hd{-webkit-print-color-adjust:exact;print-color-adjust:exact}}'
+     '@media print{body{background:#fff;padding:0}.wrap{box-shadow:none}.bar{display:none}.hd,.ask{-webkit-print-color-adjust:exact;print-color-adjust:exact}}'
     ].join("");
-    return '<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'+
+    var h='<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">'+
       '<title>'+Q("تقرير المباراة الشامل","Full match report")+'</title><style>'+C+'</style></head><body><div class="wrap">'+
       '<div class="hd">'+crest()+'<h1>'+Q("تقرير المباراة الشامل","Full match report")+'</h1>'+
       '<h2>'+Q("القادسية × ","Al Qadsiah vs ")+E(m.opponent||"—")+'</h2>'+
       '<p>'+E(dt)+(tm?" · "+E(tm):"")+' · '+E(TR(m.comp||""))+' · '+E(TR(m.venue||""))+'</p>'+
       '<p>'+Q("نادي القادسية · إدارة الإصابات الرياضية · تحت ١٨ سنة","Al Qadsiah · Sports Injury Management · U18")+'</p></div>'+
-      '<div class="bd"><div class="bar"><button onclick="window.print()">'+Q("طباعة / حفظ PDF","Print / Save PDF")+'</button><button class="alt" onclick="window.close()">'+Q("إغلاق","Close")+'</button></div>'+
+      '<div class="bd">'+
+      '<div class="ask"><b>'+Q("هل يوجد إصابات في هذه المباراة؟","Were there injuries in this match?")+'</b>'+
+        '<span class="ans '+(has?"y":"n")+'">'+(has?Q("نعم","Yes"):Q("لا","No"))+'</span>'+
+        '<span style="font-size:11.5px;color:#64748B;margin-inline-start:auto">'+Q("النتيجة","Result")+': '+E(m.result||"—")+'</span></div>'+
+      '<div class="bar" style="margin-top:12px"><button onclick="window.print()">'+Q("طباعة / حفظ PDF","Print / Save PDF")+'</button><button class="alt" onclick="window.close()">'+Q("إغلاق","Close")+'</button></div>'+
       '<div class="sh"><i></i><h3>'+Q("معلومات المباراة","Match information")+'</h3></div><div class="sec"><div class="g">'+
-        '<div class="c"><i>'+Q("النتيجة","Result")+'</i><b>'+E(m.result||"—")+'</b></div>'+
         '<div class="c"><i>'+Q("البطولة","Competition")+'</i><b>'+E(TR(m.comp||"—"))+'</b></div>'+
         '<div class="c"><i>'+Q("الملعب","Venue")+'</i><b>'+E(TR(m.venue||"—"))+'</b></div>'+
         '<div class="c"><i>'+Q("الأرضية","Surface")+'</i><b>'+E(TR(m.surface||"—"))+'</b></div>'+
         '<div class="c"><i>'+Q("التاريخ","Date")+'</i><b>'+E(dt)+'</b></div>'+
         '<div class="c"><i>'+Q("التوقيت","Kick-off")+'</i><b>'+E(tm||"—")+'</b></div>'+
-        '<div class="c"><i>'+Q("الأساسيون","Starters")+'</i><b>'+E(String(st.length))+'</b></div>'+
+        '<div class="c"><i>'+Q("الأساسيون","Starters")+'</i><b>'+E(String(st.filter(function(id){return true;}).length))+'</b></div>'+
         '<div class="c"><i>'+Q("الاحتياط","Substitutes")+'</i><b>'+E(String(sb.length))+'</b></div>'+
+        '<div class="c"><i>'+Q("الإصابات","Injuries")+'</i><b>'+E(String(inj.length))+'</b></div>'+
       '</div></div>'+
       '<div class="sh"><i></i><h3>'+Q("التشكيلة","Line-up")+'</h3></div><div class="sec">'+
         '<div class="ln" style="background:#F7F9FC;font-weight:900;font-size:12px"><b style="background:#15803D;color:#fff">'+E(String(st.length))+'</b><span>'+Q("الأساسيون","Starters")+'</span></div>'+
         (st.length?st.map(function(id,i){ return '<div class="ln"><b>'+(i+1)+'</b><span>'+E(NM(id))+'</span><i>'+E(POS(id))+'</i></div>'; }).join(""):'<div class="ln"><span style="color:#94A3B8">'+Q("لم تُحدَّد","Not set")+'</span></div>')+
         '<div class="ln" style="background:#F7F9FC;font-weight:900;font-size:12px"><b style="background:#C8A24A;color:#3A2B00">'+E(String(sb.length))+'</b><span>'+Q("الاحتياط","Substitutes")+'</span></div>'+
         (sb.length?sb.map(function(id,i){ return '<div class="ln"><b>'+(i+1)+'</b><span>'+E(NM(id))+'</span><i>'+E(POS(id))+'</i></div>'; }).join(""):'<div class="ln"><span style="color:#94A3B8">'+Q("لم تُحدَّد","Not set")+'</span></div>')+
+        (ex.length?ex.map(function(x,i){ return '<div class="ln"><b>'+(x.r==="sb"?"B":"S")+'</b><span>'+E(x.n)+'</span><i>'+Q("إضافة يدوية","Manual")+'</i></div>'; }).join(""):"")+
       '</div>'+
       (m.lineup?'<div class="sh"><i></i><h3>'+Q("ورقة التشكيلة","Lineup sheet")+'</h3></div><div class="sec" style="padding:12px;text-align:center"><img src="'+m.lineup+'" style="max-width:100%;border-radius:10px"></div>':"")+
       '<div class="sh"><i></i><h3>'+Q("تقرير الإصابات","Injury report")+'</h3></div>'+
       (inj.length?'<div class="sec"><table><thead><tr><th>#</th><th>'+Q("اللاعب","Player")+'</th><th>'+Q("الدقيقة","Min")+'</th><th>'+Q("النوع","Type")+'</th><th>'+Q("الموضع","Site")+'</th><th>'+Q("الميكانيكية","Mechanism")+'</th><th>'+Q("الشدة","Severity")+'</th><th>'+Q("الإجراء","Action")+'</th><th>'+Q("الأيام","Days")+'</th></tr></thead><tbody>'+injRows+'</tbody></table></div>'
-        :'<div class="sec"><div class="empty">'+Q("لا توجد إصابات في هذه المباراة","No injuries in this match")+'<span>'+Q("القائمة أدناه توضح دقائق اللعب والحالة الطبية بعد المباراة.","The list below shows minutes played and medical status after the match.")+'</span></div></div>')+
-      '<div class="sh"><i></i><h3>'+Q("المشاركون · دقائق اللعب · الحالة الطبية","Squad · minutes · medical status")+'</h3></div><div class="sec"><table><thead><tr><th>#</th><th>'+Q("اللاعب","Player")+'</th><th>'+Q("الصفة","Role")+'</th><th>'+Q("دقائق اللعب","Minutes")+'</th><th>'+Q("الحالة الطبية بعد المباراة","Medical status")+'</th></tr></thead><tbody>'+
+        :'<div class="sec"><div style="padding:18px;text-align:center;color:#15803D;font-weight:900;background:#F4FBF7;font-size:13px">'+Q("لا توجد إصابات في هذه المباراة","No injuries in this match")+'</div></div>')+
+      '<div class="sh"><i></i><h3>'+Q("المشاركون · دقائق اللعب · الحالة الطبية","Squad · minutes · medical status")+'</h3></div>'+
+      '<div class="sec"><table><thead><tr><th>#</th><th>'+Q("اللاعب","Player")+'</th><th>'+Q("الصفة","Role")+'</th><th>'+Q("دقائق اللعب","Minutes")+'</th><th>'+Q("الحالة الطبية","Medical status")+'</th></tr></thead><tbody>'+
       (attRows||'<tr><td colspan="5" style="text-align:center;color:#94A3B8">'+Q("لم تُحدَّد التشكيلة","No squad")+'</td></tr>')+othRows+'</tbody></table></div>'+
       '<div class="sh"><i></i><h3>'+Q("الملاحظات الطبية","Medical notes")+'</h3></div><div class="sec">'+
         '<div class="note"><i>'+Q("ملاحظات طبية","Medical notes")+'</i>'+E(m.medicalNotes||"—")+'</div>'+
         '<div class="note"><i>'+Q("ملاحظات المباراة","Match notes")+'</i>'+E(m.notes||"—")+'</div>'+
       '</div></div><div class="ft">'+E(Q("نادي القادسية","Al Qadsiah"))+' · '+E(m.opponent||"")+' · '+E(dt)+'</div></div></body></html>';
+    return h;
   }
   function openReport(m){
     try{
       var w=window.open("","_blank");
-      if(!w){ toast(Q("اسمح بالنوافذ المنبثقة","Allow pop-ups"),"bad"); return; }
+      if(!w){ try{ toast(Q("اسمح بالنوافذ المنبثقة","Allow pop-ups"),"bad"); }catch(e){} return; }
       w.document.open(); w.document.write(report(m)); w.document.close();
-    }catch(e){ try{ toast(Q("تعذّر إنشاء التقرير","Could not build the report"),"bad"); }catch(x){} }
+    }catch(e){}
   }
-  window.QDMR={report:report,open:openReport,ensure:ensureInModal,state:MS};
+  window.QD125={open:openReport,screen:openScreen,state:M};
 })();
 </script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
