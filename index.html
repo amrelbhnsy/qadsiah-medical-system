@@ -411,7 +411,7 @@ html[dir="rtl"] .filters .select{padding-left:34px}
 .rp-path-lbl{font-size:10.5px;font-weight:800;margin-top:3px;color:var(--slate);white-space:nowrap}
 .rp-batt{display:inline-flex;align-items:center;gap:5px}
 .rp-batt b{font-weight:900;line-height:1}
-/* ===== v11-132 · META-SYNC — مسار اللاعب وشريط الإنجاز ===== */
+/* ===== v11-133 · REPORT-CTL — مسار اللاعب وشريط الإنجاز ===== */
 .rp-path2{display:flex;align-items:center;margin:5px 0 6px;min-width:150px}
 .rp-node{width:13px;height:13px;border-radius:50%;flex:0 0 auto;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;background:#fff;border:2px solid #D3D9E1;transition:background .25s,border-color .25s,box-shadow .25s}
 .rp-node.done{background:#15803D;border-color:#15803D}
@@ -3108,7 +3108,7 @@ function qdajTmrwK(){
   var d=new Date(); d.setDate(d.getDate()+1); function p(n){ return (n<10?"0":"")+n; }
   return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate());
 }
-/* ---- v11-132 · جسر فتح نموذج الجلسة (يحلّ مشكلة عدم فتح النموذج عند اختيار اليوم/غدًا) ---- */
+/* ---- v11-133 · جسر فتح نموذج الجلسة (يحلّ مشكلة عدم فتح النموذج عند اختيار اليوم/غدًا) ---- */
 function qdSessOpener(){
   try{ if(typeof window.qdOpenSessionForm==="function") return window.qdOpenSessionForm; }catch(e){}
   try{ if(typeof sessionForm==="function") return sessionForm; }catch(e){}
@@ -6955,7 +6955,7 @@ function qdlaStalled(ms){
 /* ---- الفتح المضمون: الوضع المحلي ثم إعادة التحميل (مرة واحدة في الجلسة) ---- */
 function qdlaAutoLocal(){
   try{
-    try{ if(localStorage.getItem("qd_ok_cloud")==="1") return false; }catch(e){}   /* v11-132 */
+    try{ if(localStorage.getItem("qd_ok_cloud")==="1") return false; }catch(e){}   /* v11-133 */
     try{ if(String(location.search||"").indexOf("qdcloud=1")>-1) return false; }catch(e){}
     if(qdlaFlagOn()) return false;
     if(document.getElementById("qdl2Box")) {} /* اللوحة تعمل — لا حاجة للإجبار */
@@ -14315,7 +14315,7 @@ function doLogin(){
   var em=(document.getElementById("qcEmail").value||"").trim();
   var pw=document.getElementById("qcPass").value||"";
   if(!em||!pw){ view("login",T10("msg_fill_login")); return; }
-  if(window.__qdLoggingIn){ return; }              /* v11-132: منع الضغط المزدوج */
+  if(window.__qdLoggingIn){ return; }              /* v11-133: منع الضغط المزدوج */
   window.__qdLoggingIn=true;
   var btn=document.querySelector("#qcGo,#loginBtn,.qc-go,button[onclick*='doLogin']");
   var oldTxt=btn?btn.textContent:"";
@@ -15405,7 +15405,7 @@ try{
 }catch(e){}
 
 /* QDBK-END */
-(function(){function mk(){try{var b=document.createElement("div");b.id="qdrBadge";b.textContent="v11-132 · META-SYNC";b.style.cssText="position:fixed;left:8px;bottom:8px;z-index:2147483647;background:#fff;color:#7E0E14;border:1px solid #7E0E14;font:800 11px/1.5 system-ui;padding:3px 9px;border-radius:20px;pointer-events:none;opacity:.97;box-shadow:0 2px 8px rgba(0,0,0,.35)";document.body.appendChild(b);}catch(e){}}if(document.body)mk();else setTimeout(mk,600);})();
+(function(){function mk(){try{var b=document.createElement("div");b.id="qdrBadge";b.textContent="v11-133 · REPORT-CTL";b.style.cssText="position:fixed;left:8px;bottom:8px;z-index:2147483647;background:#fff;color:#7E0E14;border:1px solid #7E0E14;font:800 11px/1.5 system-ui;padding:3px 9px;border-radius:20px;pointer-events:none;opacity:.97;box-shadow:0 2px 8px rgba(0,0,0,.35)";document.body.appendChild(b);}catch(e){}}if(document.body)mk();else setTimeout(mk,600);})();
 /* ---- PWA: install as an app on Android and iPhone / iPad ---- */
 (function(){
   Object.assign(STR.en,{
@@ -23987,7 +23987,7 @@ try{
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous">
 /* =====================================================================
-   v11-132 · META-SYNC — توحيد حالة اليوم (مباراة · تدريب · راحة · إجازة)
+   v11-133 · REPORT-CTL — توحيد حالة اليوم (مباراة · تدريب · راحة · إجازة)
    بين: لوحة التحكم · البرنامج الأسبوعي · التقويم · جدول المباريات
    ===================================================================== */
 (function(){
@@ -24091,7 +24091,7 @@ try{
 
 <script>
 /* =====================================================================
-   v11-132 · META-SYNC
+   v11-133 · REPORT-CTL
    إصلاح التجمد: يُبنى الهيكل مرة واحدة فقط، ويُحدَّث محتواه الداخلي
    (لا إعادة بناء للجذر ⇒ لا يفقد الهوية ولا يعلق)
    ===================================================================== */
@@ -24429,6 +24429,39 @@ try{
     try{ toast(Q("تم حفظ المشاركين","Squad saved")); }catch(e){}
     decorate();
   }
+  /* ============ تعديل التقرير ============ */
+  function editReport(r){
+    try{
+      mergeDupes();
+      var m=bestRound(r)||ensureMatch(r); fillMeta(m,r);
+      var f=window.fxOpenReport||window.qdOpenMatchForm||window.matchForm;
+      if(typeof f!=="function"){ try{ toast(Q("تعذّر فتح نموذج التقرير","Could not open the report form"),"bad"); }catch(e){} return; }
+      f(r);
+      /* إعادة تحميل اللوحة بعد فتح النموذج */
+      setTimeout(function(){ try{ var mc=document.getElementById("modalCard"); if(mc&&mc.querySelector('[data-act="saveMatch"]')){ var p=document.getElementById("p9Panel"); if(p&&p.parentNode) p.parentNode.removeChild(p); } }catch(e){} },150);
+    }catch(e){ try{ toast("ED: "+e.message,"bad"); }catch(x){} }
+  }
+
+  /* ============ مسح التقرير ============ */
+  function clearReport(r){
+    try{
+      var m=matchOfRound(r);
+      var nm=m&&m.opponent?(" — "+m.opponent):"";
+      var ok=false;
+      try{ ok=window.confirm(Q("هل تريد مسح تقرير هذه المباراة بالكامل؟ سيُحذف: التشكيلة · دقائق اللعب · الحالات الطبية · الإصابات · ورقة التشكيلة · الملاحظات. لا يمكن الرجوع.","Clear this match report completely? It removes the squad, minutes, medical status, injuries, lineup sheet and notes. This cannot be undone.")+"\n"+Q("الجولة","Round")+" "+r+nm); }
+      catch(e){ ok=false; }
+      if(!ok) return;
+      var a=MTS();
+      for(var i=a.length-1;i>=0;i--){ if(Number(a[i].fx)===Number(r)) a.splice(i,1); }
+      try{ var h=HAS(); delete h["r"+r]; }catch(e){}
+      SAVE();
+      try{ if(window.REND&&REND.fixtures) REND.fixtures(); }catch(e){}
+      try{ if(window.REND&&REND.matches) REND.matches(); }catch(e){}
+      decorate();
+      try{ toast(Q("تم مسح تقرير المباراة","Match report cleared"),"warn"); }catch(e){}
+    }catch(e){ try{ toast("CL: "+e.message,"bad"); }catch(x){} }
+  }
+
   function shrink(file,cb){
     try{
       if(!file||!/^image\//.test(file.type)) return cb("");
@@ -24450,8 +24483,12 @@ try{
         var rep=a.querySelector('[data-act="fxReport"]'); if(!rep) continue;
         var r=rep.getAttribute("data-r"); if(r==null) continue;
         var box=document.createElement("div"); box.className="p9-act";
+        var m=matchOfRound(r);
+        var hasRep=!!(m&&(((m.injuries||[]).length)||m.hasInjuries===false||((m.starters||[]).length)||((m.subs||[]).length)));
         box.innerHTML='<button type="button" class="btn sm" data-q9="1" data-go="sq" data-r="'+r+'">'+Q("المشاركون","Squad")+' ('+counts(r)+')</button>'+
-          '<button type="button" class="btn gold sm" data-q9="1" data-go="rp" data-r="'+r+'">'+Q("التقرير الشامل","Full report")+'</button>';
+          '<button type="button" class="btn gold sm" data-q9="1" data-go="rp" data-r="'+r+'">'+Q("التقرير الشامل","Full report")+'</button>'+
+          (hasRep?'<button type="button" class="btn ghost sm" data-q9="1" data-go="edit" data-r="'+r+'">'+Q("تعديل التقرير","Edit report")+'</button>'+
+                  '<button type="button" class="btn ghost sm" data-q9="1" data-go="del" data-r="'+r+'" style="color:#B5121B;border-color:rgba(181,18,27,.4)">'+Q("مسح التقرير","Clear report")+'</button>':"");
         a.appendChild(box);
       }
     }catch(e){}
@@ -24461,7 +24498,12 @@ try{
     var b=t.closest("[data-q9]"); if(!b) return;
     e.preventDefault(); if(e.stopPropagation) e.stopPropagation();
     var r=b.getAttribute("data-r"), go=b.getAttribute("data-go");
-    try{ if(go==="sq") open(r); else full(r); }catch(err){ try{ toast("QD9: "+err.message,"bad"); }catch(x){} }
+    try{
+      if(go==="sq") open(r);
+      else if(go==="rp") full(r);
+      else if(go==="edit") editReport(r);
+      else if(go==="del") clearReport(r);
+    }catch(err){ try{ toast("QD9: "+err.message,"bad"); }catch(x){} }
     return false;
   },true);
   setInterval(decorate,2000); setTimeout(decorate,300); setTimeout(decorate,900);
@@ -24691,7 +24733,7 @@ try{
     try{ var w=window.open("","_blank"); if(!w){ try{ toast(Q("اسمح بالنوافذ المنبثقة","Allow pop-ups"),"bad"); }catch(e){} return; }
       w.document.open(); w.document.write(h); w.document.close(); }catch(e){}
   }
-  window.QD9={open:open,close:close,full:full,decorate:decorate};
+  window.QD9={open:open,close:close,full:full,decorate:decorate,edit:editReport,clear:clearReport};
 })();
 </script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
