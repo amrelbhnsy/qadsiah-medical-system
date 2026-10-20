@@ -411,7 +411,7 @@ html[dir="rtl"] .filters .select{padding-left:34px}
 .rp-path-lbl{font-size:10.5px;font-weight:800;margin-top:3px;color:var(--slate);white-space:nowrap}
 .rp-batt{display:inline-flex;align-items:center;gap:5px}
 .rp-batt b{font-weight:900;line-height:1}
-/* ===== v11-131 · HAS-FIX — مسار اللاعب وشريط الإنجاز ===== */
+/* ===== v11-132 · META-SYNC — مسار اللاعب وشريط الإنجاز ===== */
 .rp-path2{display:flex;align-items:center;margin:5px 0 6px;min-width:150px}
 .rp-node{width:13px;height:13px;border-radius:50%;flex:0 0 auto;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;background:#fff;border:2px solid #D3D9E1;transition:background .25s,border-color .25s,box-shadow .25s}
 .rp-node.done{background:#15803D;border-color:#15803D}
@@ -3108,7 +3108,7 @@ function qdajTmrwK(){
   var d=new Date(); d.setDate(d.getDate()+1); function p(n){ return (n<10?"0":"")+n; }
   return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate());
 }
-/* ---- v11-131 · جسر فتح نموذج الجلسة (يحلّ مشكلة عدم فتح النموذج عند اختيار اليوم/غدًا) ---- */
+/* ---- v11-132 · جسر فتح نموذج الجلسة (يحلّ مشكلة عدم فتح النموذج عند اختيار اليوم/غدًا) ---- */
 function qdSessOpener(){
   try{ if(typeof window.qdOpenSessionForm==="function") return window.qdOpenSessionForm; }catch(e){}
   try{ if(typeof sessionForm==="function") return sessionForm; }catch(e){}
@@ -6955,7 +6955,7 @@ function qdlaStalled(ms){
 /* ---- الفتح المضمون: الوضع المحلي ثم إعادة التحميل (مرة واحدة في الجلسة) ---- */
 function qdlaAutoLocal(){
   try{
-    try{ if(localStorage.getItem("qd_ok_cloud")==="1") return false; }catch(e){}   /* v11-131 */
+    try{ if(localStorage.getItem("qd_ok_cloud")==="1") return false; }catch(e){}   /* v11-132 */
     try{ if(String(location.search||"").indexOf("qdcloud=1")>-1) return false; }catch(e){}
     if(qdlaFlagOn()) return false;
     if(document.getElementById("qdl2Box")) {} /* اللوحة تعمل — لا حاجة للإجبار */
@@ -14315,7 +14315,7 @@ function doLogin(){
   var em=(document.getElementById("qcEmail").value||"").trim();
   var pw=document.getElementById("qcPass").value||"";
   if(!em||!pw){ view("login",T10("msg_fill_login")); return; }
-  if(window.__qdLoggingIn){ return; }              /* v11-131: منع الضغط المزدوج */
+  if(window.__qdLoggingIn){ return; }              /* v11-132: منع الضغط المزدوج */
   window.__qdLoggingIn=true;
   var btn=document.querySelector("#qcGo,#loginBtn,.qc-go,button[onclick*='doLogin']");
   var oldTxt=btn?btn.textContent:"";
@@ -15405,7 +15405,7 @@ try{
 }catch(e){}
 
 /* QDBK-END */
-(function(){function mk(){try{var b=document.createElement("div");b.id="qdrBadge";b.textContent="v11-131 · HAS-FIX";b.style.cssText="position:fixed;left:8px;bottom:8px;z-index:2147483647;background:#fff;color:#7E0E14;border:1px solid #7E0E14;font:800 11px/1.5 system-ui;padding:3px 9px;border-radius:20px;pointer-events:none;opacity:.97;box-shadow:0 2px 8px rgba(0,0,0,.35)";document.body.appendChild(b);}catch(e){}}if(document.body)mk();else setTimeout(mk,600);})();
+(function(){function mk(){try{var b=document.createElement("div");b.id="qdrBadge";b.textContent="v11-132 · META-SYNC";b.style.cssText="position:fixed;left:8px;bottom:8px;z-index:2147483647;background:#fff;color:#7E0E14;border:1px solid #7E0E14;font:800 11px/1.5 system-ui;padding:3px 9px;border-radius:20px;pointer-events:none;opacity:.97;box-shadow:0 2px 8px rgba(0,0,0,.35)";document.body.appendChild(b);}catch(e){}}if(document.body)mk();else setTimeout(mk,600);})();
 /* ---- PWA: install as an app on Android and iPhone / iPad ---- */
 (function(){
   Object.assign(STR.en,{
@@ -23987,7 +23987,7 @@ try{
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous">
 /* =====================================================================
-   v11-131 · HAS-FIX — توحيد حالة اليوم (مباراة · تدريب · راحة · إجازة)
+   v11-132 · META-SYNC — توحيد حالة اليوم (مباراة · تدريب · راحة · إجازة)
    بين: لوحة التحكم · البرنامج الأسبوعي · التقويم · جدول المباريات
    ===================================================================== */
 (function(){
@@ -24091,7 +24091,7 @@ try{
 
 <script>
 /* =====================================================================
-   v11-131 · HAS-FIX
+   v11-132 · META-SYNC
    إصلاح التجمد: يُبنى الهيكل مرة واحدة فقط، ويُحدَّث محتواه الداخلي
    (لا إعادة بناء للجذر ⇒ لا يفقد الهوية ولا يعلق)
    ===================================================================== */
@@ -24296,11 +24296,14 @@ try{
   function fillMeta(m,r){
     try{
       var o=rowInfo(r); if(!o) return;
-      if(!m.opponent && o.opp) m.opponent=o.opp;
-      if(!m.comp && o.comp) m.comp=o.comp;
+      if(o.opp) m.opponent=o.opp;
+      if(o.comp) m.comp=o.comp;
       if(o.venue) m.venue=o.venue;
+      if(o.city) m.city=o.city;
+      if(o.home!==null&&o.home!==undefined) m.home=!!o.home;
       if(o.date) m.date=o.date+"T"+(o.time||"18:00");
       if(!m.result && o.result) m.result=o.result;
+      SAVE();
     }catch(e){}
   }
   function resolveTarget(){
@@ -24322,8 +24325,9 @@ try{
     var f=fxOf(r);
     if(!Array.isArray(s.matches)) s.matches=[];
     m={id:"mt"+Date.now().toString(36), fx:Number(r),
-       date:(f?f.date:"")+"T"+(f?f.time:"18:00"), opponent:f?f.opp:"", comp:(f?f.comp:""),
-       venue:(f&&f.home?"Home":"Away"), surface:"", squad:18, notes:"", injuries:[], result:(f?f.result:""),
+       date:(f?f.date:"")+"T"+(f?f.time:"18:00"), opponent:(f?f.opp:""), comp:(f?(f.comp||""):""),
+       venue:(f?(f.venue||""):""), city:(f?(f.city||""):""), home:(f?!!f.home:null),
+       surface:"", squad:18, notes:"", injuries:[], result:(f?(f.result||""):""),
        starters:[], subs:[], extraSquad:[], minutes:{}, medStatus:{}, hasInjuries:true, lineup:"", medicalNotes:""};
     s.matches.push(m); SAVE(); CACHE=s;
     return m;
@@ -24616,8 +24620,16 @@ try{
     var notInSquad=rws.filter(function(o){ return rk2(o.id)==="np"; }).length;
     var oth="";
     var injRows=inj.map(function(x,i){ return '<tr><td>'+(i+1)+'</td><td><b>'+E(NM(x.playerId))+'</b> '+tg(rk2(String(x.playerId)))+'</td><td>'+E(x.minute)+"'"+'</td><td>'+E(TR(x.type))+'</td><td>'+E(SITE(x.bodySites))+'</td><td>'+E(TR(x.mech))+'</td><td>'+E(TR(x.sev))+'</td><td>'+E(TR(x.action))+'</td><td>'+E(x.days)+'</td></tr>'; }).join("");
-    var dt=""; try{ dt=fmtDate(m.date,1); }catch(e){ dt=String(m.date||""); }
-    var tm=String(m.date||"").slice(11,16);
+    var F=null; try{ F=fxOf(r); }catch(e){ F=null; }
+    var dtSrc=(F&&F.date)?String(F.date):String(m.date||"");
+    var dt=""; try{ dt=fmtDate(dtSrc,1); }catch(e){ dt=dtSrc; }
+    var tm=(F&&F.time)?String(F.time):String(m.date||"").slice(11,16);
+    var OPP=(F&&F.opp)?String(F.opp):String(m.opponent||"—");
+    var ISHOME=(F&&typeof F.home==="boolean")?F.home:(m.home===true?true:(m.home===false?false:null));
+    var VEN=(F&&F.venue)?String(F.venue)+(F.city?" · "+F.city:""):(m.venue?String(m.venue)+(m.city?" · "+m.city:""):"—");
+    var COMP=(F&&F.comp)?String(F.comp):(m.comp?TR(m.comp):"—");
+    var SURF=(F&&F.surface)?String(F.surface):(m.surface?TR(m.surface):"—");
+    var RES=(m.result||(F&&F.result)||"—");
     var crest=""; try{ crest=window.QDCREST?window.QDCREST():""; }catch(e){}
     var C=['*{box-sizing:border-box}','body{font-family:Tajawal,Inter,system-ui,sans-serif;margin:0;padding:22px;background:#F4F6F8;color:#14181F;direction:rtl}',
      '.wrap{max-width:960px;margin:0 auto;background:#fff;border-radius:14px;box-shadow:0 6px 26px rgba(0,0,0,.1);overflow:hidden}',
@@ -24641,16 +24653,18 @@ try{
      '.ft{border-top:1px solid #EEF1F4;padding:11px 22px;font-size:11px;color:#7B8494;text-align:center}',
      '@media print{body{background:#fff;padding:0}.wrap{box-shadow:none}.bar{display:none}.hd,.ask{-webkit-print-color-adjust:exact;print-color-adjust:exact}}'].join("");
     var h='<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+Q("تقرير المباراة الشامل","Full match report")+'</title><style>'+C+'</style></head><body><div class="wrap">'+
-      '<div class="hd">'+crest+'<h1>'+Q("تقرير المباراة الشامل","Full match report")+'</h1><h2>'+Q("القادسية × ","Al Qadsiah vs ")+E(m.opponent||"—")+'</h2>'+
-      '<p>'+E(dt)+(tm?" · "+E(tm):"")+' · '+E(TR(m.comp||""))+' · '+E(TR(m.venue||""))+'</p>'+
+      '<div class="hd">'+crest+'<h1>'+Q("تقرير المباراة الشامل","Full match report")+'</h1><h2>'+E(ISHOME===false?(""+OPP+" × القادسية"):("القادسية × "+OPP))+
+      (ISHOME===null?"":' <span style="font-size:11px;background:rgba(255,255,255,.2);border-radius:999px;padding:1px 9px;vertical-align:middle">'+(ISHOME?Q("على أرضنا","Home"):Q("خارج الأرض","Away"))+'</span>')+'</h2>'+
+      '<p>'+E(dt)+(tm?" · "+E(tm):"")+' · '+E(COMP)+' · '+E(VEN)+'</p>'+
       '<p>'+Q("نادي القادسية · إدارة الإصابات الرياضية · تحت ١٨ سنة","Al Qadsiah · Sports Injury Management · U18")+'</p></div>'+
       '<div class="bd"><div class="ask"><b>'+Q("هل يوجد إصابات في هذه المباراة؟","Were there injuries in this match?")+'</b><span class="ans '+(has?"y":"n")+'">'+(has?Q("نعم","Yes"):Q("لا","No"))+'</span>'+
-      '<span style="font-size:11.5px;color:#64748B;margin-inline-start:auto">'+Q("النتيجة","Result")+': '+E(m.result||"—")+'</span></div>'+
+      '<span style="font-size:11.5px;color:#64748B;margin-inline-start:auto">'+Q("النتيجة","Result")+': '+E(RES)+'</span></div>'+
       '<div class="bar"><button onclick="window.print()">'+Q("طباعة / حفظ PDF","Print / Save PDF")+'</button><button class="alt" onclick="window.close()">'+Q("إغلاق","Close")+'</button></div>'+
       '<div class="sh"><i></i><h3>'+Q("معلومات المباراة","Match information")+'</h3></div><div class="sec"><div class="g">'+
-      '<div class="c"><i>'+Q("البطولة","Competition")+'</i><b>'+E(TR(m.comp||"—"))+'</b></div>'+
-      '<div class="c"><i>'+Q("الملعب","Venue")+'</i><b>'+E(TR(m.venue||"—"))+'</b></div>'+
-      '<div class="c"><i>'+Q("الأرضية","Surface")+'</i><b>'+E(TR(m.surface||"—"))+'</b></div>'+
+      '<div class="c"><i>'+Q("البطولة","Competition")+'</i><b>'+E(COMP)+'</b></div>'+
+      '<div class="c"><i>'+Q("الملعب","Venue")+'</i><b>'+E(VEN)+'</b></div>'+
+      '<div class="c"><i>'+Q("الأرضية","Surface")+'</i><b>'+E(SURF)+'</b></div>'+
+      '<div class="c"><i>'+Q("على أرضنا؟","Home?")+'</i><b>'+(ISHOME===null?"—":(ISHOME?Q("على أرضنا","Home"):Q("خارج الأرض","Away")))+'</b></div>'+
       '<div class="c"><i>'+Q("التاريخ","Date")+'</i><b>'+E(dt)+'</b></div>'+
       '<div class="c"><i>'+Q("التوقيت","Kick-off")+'</i><b>'+E(tm||"—")+'</b></div>'+
       '<div class="c"><i>'+Q("الأساسيون","Starters")+'</i><b>'+E(String(st.length))+'</b></div>'+
@@ -24673,7 +24687,7 @@ try{
       '<div class="sh"><i></i><h3>'+Q("الملاحظات الطبية","Medical notes")+'</h3></div><div class="sec">'+
       '<div class="note"><i>'+Q("ملاحظات طبية","Medical notes")+'</i>'+E(m.medicalNotes||"—")+'</div>'+
       '<div class="note"><i>'+Q("ملاحظات المباراة","Match notes")+'</i>'+E(m.notes||"—")+'</div></div></div>'+
-      '<div class="ft">'+E(Q("نادي القادسية","Al Qadsiah"))+' · '+E(m.opponent||"")+' · '+E(dt)+'</div></div></body></html>';
+      '<div class="ft">'+E(Q("نادي القادسية","Al Qadsiah"))+' · '+E(OPP)+' · '+E(dt)+(tm?' · '+E(tm):'')+'</div></div></body></html>';
     try{ var w=window.open("","_blank"); if(!w){ try{ toast(Q("اسمح بالنوافذ المنبثقة","Allow pop-ups"),"bad"); }catch(e){} return; }
       w.document.open(); w.document.write(h); w.document.close(); }catch(e){}
   }
