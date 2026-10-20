@@ -411,7 +411,7 @@ html[dir="rtl"] .filters .select{padding-left:34px}
 .rp-path-lbl{font-size:10.5px;font-weight:800;margin-top:3px;color:var(--slate);white-space:nowrap}
 .rp-batt{display:inline-flex;align-items:center;gap:5px}
 .rp-batt b{font-weight:900;line-height:1}
-/* ===== v11-116 · SESSION-FIX — مسار اللاعب وشريط الإنجاز ===== */
+/* ===== v11-117 · DAYKIND-SYNC — مسار اللاعب وشريط الإنجاز ===== */
 .rp-path2{display:flex;align-items:center;margin:5px 0 6px;min-width:150px}
 .rp-node{width:13px;height:13px;border-radius:50%;flex:0 0 auto;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;background:#fff;border:2px solid #D3D9E1;transition:background .25s,border-color .25s,box-shadow .25s}
 .rp-node.done{background:#15803D;border-color:#15803D}
@@ -2529,7 +2529,12 @@ function wkTable(){
      '<th>'+QDT("مباراة","Match")+'</th><th></th></tr></thead><tbody>';
   days.forEach(function(dt,ix){
     var mk=wkMatchDays(dt);
-    h+='<tr><td><b>'+WK_DAYNAMES[ix]+'</b></td><td class="tiny muted">'+esc(dt)+'</td><td style="line-height:2.1">';
+    var _DK=null; try{ _DK=(window.QDDAYKIND&&window.QDDAYKIND.get)?window.QDDAYKIND.get(dt):null; }catch(e){ _DK=null; }
+    var _kdc=(window.QDK2&&QDK2.color)?QDK2.color(_DK?_DK.kind:"unknown"):"#6B7280";
+    var _kdl=_DK?(QDT(_DK.dayAr,_DK.dayEn)||""):"";
+    h+='<tr class="qdk-row" style="box-shadow:inset -4px 0 0 '+_kdc+'"><td><b>'+WK_DAYNAMES[ix]+'</b>'+
+       (_kdl?'<div class="qdk-chip" style="background:'+_kdc+'1f;color:'+_kdc+';border:1px solid '+_kdc+'55">'+esc(_kdl)+'</div>':'')+
+       '</td><td class="tiny muted">'+esc(dt)+'</td><td style="line-height:2.1">';
     WK_U.forEach(function(u){
       var on=wkHas(dt,u.k);
       h+='<button class="btn '+(on?"primary":"ghost")+' sm" data-act="wkTog" data-d="'+esc(dt)+'" data-k="'+u.k+'" style="margin:2px 3px">'+esc(QDT(u.ar,u.en))+'</button>';
@@ -3103,7 +3108,7 @@ function qdajTmrwK(){
   var d=new Date(); d.setDate(d.getDate()+1); function p(n){ return (n<10?"0":"")+n; }
   return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate());
 }
-/* ---- v11-116 · جسر فتح نموذج الجلسة (يحلّ مشكلة عدم فتح النموذج عند اختيار اليوم/غدًا) ---- */
+/* ---- v11-117 · جسر فتح نموذج الجلسة (يحلّ مشكلة عدم فتح النموذج عند اختيار اليوم/غدًا) ---- */
 function qdSessOpener(){
   try{ if(typeof window.qdOpenSessionForm==="function") return window.qdOpenSessionForm; }catch(e){}
   try{ if(typeof sessionForm==="function") return sessionForm; }catch(e){}
@@ -6950,7 +6955,7 @@ function qdlaStalled(ms){
 /* ---- الفتح المضمون: الوضع المحلي ثم إعادة التحميل (مرة واحدة في الجلسة) ---- */
 function qdlaAutoLocal(){
   try{
-    try{ if(localStorage.getItem("qd_ok_cloud")==="1") return false; }catch(e){}   /* v11-116 */
+    try{ if(localStorage.getItem("qd_ok_cloud")==="1") return false; }catch(e){}   /* v11-117 */
     try{ if(String(location.search||"").indexOf("qdcloud=1")>-1) return false; }catch(e){}
     if(qdlaFlagOn()) return false;
     if(document.getElementById("qdl2Box")) {} /* اللوحة تعمل — لا حاجة للإجبار */
@@ -14310,7 +14315,7 @@ function doLogin(){
   var em=(document.getElementById("qcEmail").value||"").trim();
   var pw=document.getElementById("qcPass").value||"";
   if(!em||!pw){ view("login",T10("msg_fill_login")); return; }
-  if(window.__qdLoggingIn){ return; }              /* v11-116: منع الضغط المزدوج */
+  if(window.__qdLoggingIn){ return; }              /* v11-117: منع الضغط المزدوج */
   window.__qdLoggingIn=true;
   var btn=document.querySelector("#qcGo,#loginBtn,.qc-go,button[onclick*='doLogin']");
   var oldTxt=btn?btn.textContent:"";
@@ -15400,7 +15405,7 @@ try{
 }catch(e){}
 
 /* QDBK-END */
-(function(){function mk(){try{var b=document.createElement("div");b.id="qdrBadge";b.textContent="v11-116 · SESSION-FIX";b.style.cssText="position:fixed;left:8px;bottom:8px;z-index:2147483647;background:#fff;color:#7E0E14;border:1px solid #7E0E14;font:800 11px/1.5 system-ui;padding:3px 9px;border-radius:20px;pointer-events:none;opacity:.97;box-shadow:0 2px 8px rgba(0,0,0,.35)";document.body.appendChild(b);}catch(e){}}if(document.body)mk();else setTimeout(mk,600);})();
+(function(){function mk(){try{var b=document.createElement("div");b.id="qdrBadge";b.textContent="v11-117 · DAYKIND-SYNC";b.style.cssText="position:fixed;left:8px;bottom:8px;z-index:2147483647;background:#fff;color:#7E0E14;border:1px solid #7E0E14;font:800 11px/1.5 system-ui;padding:3px 9px;border-radius:20px;pointer-events:none;opacity:.97;box-shadow:0 2px 8px rgba(0,0,0,.35)";document.body.appendChild(b);}catch(e){}}if(document.body)mk();else setTimeout(mk,600);})();
 /* ---- PWA: install as an app on Android and iPhone / iPad ---- */
 (function(){
   Object.assign(STR.en,{
@@ -21342,8 +21347,17 @@ try{
         '<th>'+T2("colP")+'</th><th>'+T2("colR")+'</th><th>'+T2("src")+'</th><th>'+T2("colD")+'</th><th>'+T2("colT")+'</th><th></th>'+
         '</tr></thead><tbody>'+rows.map(rowHTML).join("")+'</tbody></table></div>';
     }
-    return '<div class="card" id="qdAbsCard" style="margin-bottom:18px">'+head+
-      '<div class="card-body">'+chips+body+
+    var _dk=null; try{ _dk=(window.QDDAYKIND&&window.QDDAYKIND.get)?window.QDDAYKIND.get(t):null; }catch(e){ _dk=null; }
+    var _kd=(_dk&&_dk.kind)||"unknown";
+    var _rest=(_kd==="rest"||_kd==="holiday");
+    if(_rest){
+      body='<div class="qd-restbox"><div class="qd-restic">'+icon("check")+'</div>'+
+        '<b>'+esc2(isAr()?"يوم راحة — لا توجد قائمة لاعبين":"Rest day — no player list")+'</b>'+
+        '<p class="tiny muted" style="margin:6px 0 0">'+esc2(isAr()?"اللاعبون مخفيون تلقائيًا في أيام الراحة والإجازات حسب البرنامج الأسبوعي. تعود القائمة عند أول يوم تدريب أو مباراة.":"Players are hidden automatically on rest and holiday days per the weekly programme. The list returns on the next training or match day.")+'</p></div>';
+    }
+    var _rb=(window.QDK2&&QDK2.ribbon)?QDK2.ribbon(t):"";
+    return '<div class="card" id="qdAbsCard" style="margin-bottom:18px">'+_rb+head+
+      '<div class="card-body">'+(_rest?"":chips)+body+
       '<p class="tiny muted" style="margin:12px 0 0">'+T2("note")+'</p></div></div>';
   }
 
@@ -23959,7 +23973,109 @@ try{
 
 </script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
-<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous">
+/* =====================================================================
+   v11-117 · DAYKIND-SYNC — توحيد حالة اليوم (مباراة · تدريب · راحة · إجازة)
+   بين: لوحة التحكم · البرنامج الأسبوعي · التقويم · جدول المباريات
+   ===================================================================== */
+(function(){
+  "use strict";
+  var COL={match:"#B5121B",training:"#1D4ED8",gym:"#0F766E",ice:"#0E7490",
+           rest:"#475569",holiday:"#B45309",event:"#7E0E14",unknown:"#64748B"};
+  function T(ar,en){ try{ return QDT(ar,en); }catch(e){ return ar; } }
+  function get(k){
+    try{ if(window.QDDAYKIND&&window.QDDAYKIND.get) return window.QDDAYKIND.get(k); }catch(e){}
+    return {kind:"unknown",dayAr:"",dayEn:"",titleAr:"",titleEn:""};
+  }
+  function color(kind){ return COL[kind]||COL.unknown; }
+  function opponentOf(k){
+    try{
+      var m=(S.matches||[]).filter(function(x){ return String((x&&x.date)||"").slice(0,10)===String(k).slice(0,10); })[0];
+      if(m&&m.opponent) return (T("ضد ","vs ")+m.opponent);
+    }catch(e){}
+    return "";
+  }
+  function ribbon(k){
+    var d=get(k), kd=d.kind||"unknown", c=color(kd);
+    var lab=T(d.dayAr||"",d.dayEn||"") || T("يوم غير محدد","Unspecified day");
+    var ttl=T(d.titleAr||"",d.titleEn||"") || "";
+    var opp=(kd==="match")?opponentOf(k):"";
+    var h='<div class="qdk-ribbon" style="--qdk:'+c+'">'+
+      '<span class="qdk-dot"></span>'+
+      '<b class="qdk-lab">'+esc(lab)+'</b>'+
+      (opp?'<span class="qdk-opp">'+esc(opp)+'</span>':"")+
+      (ttl?'<span class="qdk-ttl">'+esc(ttl)+'</span>':"")+
+      '<span class="qdk-date">'+esc(String(k||"").slice(0,10))+'</span></div>';
+    return h;
+  }
+  var css=document.createElement("style");
+  css.textContent=
+   ".qdk-ribbon{display:flex;align-items:center;gap:9px;flex-wrap:wrap;padding:10px 14px;border-radius:12px 12px 0 0;"+
+   "background:linear-gradient(90deg,var(--qdk),color-mix(in srgb,var(--qdk) 62%,#000));color:#fff;font-weight:800}"+
+   ".qdk-ribbon .qdk-dot{width:9px;height:9px;border-radius:50%;background:#fff;box-shadow:0 0 0 4px rgba(255,255,255,.28)}"+
+   ".qdk-ribbon .qdk-lab{font-size:13.5px;letter-spacing:.2px}"+
+   ".qdk-ribbon .qdk-opp{background:rgba(255,255,255,.2);border-radius:999px;padding:1px 9px;font-size:11.5px}"+
+   ".qdk-ribbon .qdk-ttl{font-size:11.5px;opacity:.92;font-weight:600}"+
+   ".qdk-ribbon .qdk-date{margin-inline-start:auto;font-size:11px;opacity:.85;font-variant-numeric:tabular-nums}"+
+   ".qdk-chip{display:inline-block;font-size:10.5px;font-weight:900;border-radius:999px;padding:1px 8px;margin-top:4px;white-space:nowrap}"+
+   ".qdk-row>td{background:rgba(15,23,42,.012)}"+
+   ".qd-restbox{text-align:center;padding:26px 14px;border:1px dashed #CBD5E1;border-radius:14px;background:#F8FAFC}"+
+   ".qd-restbox .qd-restic{width:46px;height:46px;border-radius:50%;background:rgba(71,85,105,.12);color:#475569;display:flex;align-items:center;justify-content:center;margin:0 auto 10px}"+
+   ".qd-restbox b{font-size:14px;display:block}";
+  try{ (document.head||document.documentElement).appendChild(css); }catch(e){}
+
+  /* التقويم: إضافة أيام البرنامج الأسبوعي (راحة · إجازة · تدريب · جيم · تلج) */
+  function syncCalendar(){
+    try{
+      var di=window.dayItems;
+      if(typeof di!=="function"||di.__qdk2) return false;
+      var w=function(){
+        var map=di.apply(this,arguments)||{};
+        try{
+          var arr=[]; try{ arr=(typeof wkArr==="function")?wkArr():((S&&S.prog)||[]); }catch(e){ arr=[]; }
+          var byK={};
+          arr.forEach(function(e){
+            var k=String((e&&e.date)||"").slice(0,10); if(!k) return;
+            var kk=String(e.kind||"");
+            (byK[k]=byK[k]||[]);
+            if(kk && byK[k].indexOf(kk)<0) byK[k].push(kk);
+          });
+          Object.keys(byK).forEach(function(k){
+            var ks=byK[k];
+            var has=function(x){ return ks.indexOf(x)>=0; };
+            var tone="training", lab="";
+            if(has("rest")){ tone="event"; lab=T("راحة","Rest"); }
+            else if(has("hol")){ tone="event"; lab=T("إجازة","Holiday"); }
+            else if(has("ice")){ tone="training"; lab=T("تلج / استشفاء","Ice / recovery"); }
+            else if(has("field")){ tone="training"; lab=T("تدريب ملعب","Field training"); }
+            else if(has("gym")||has("gymgk")){ tone="training"; lab=T("جيم","Gym"); }
+            else return;
+            var already=(map[k]||[]).some(function(it){ return it&&it.tone==="match"; });
+            if(already) return;
+            (map[k]=map[k]||[]).push({tone:tone,label:lab,sub:T("البرنامج الأسبوعي","Weekly programme")});
+          });
+        }catch(e){ try{ window.QDK2_ERR=String((e&&e.stack)||e); }catch(x){} }
+        return map;
+      };
+      w.__qdk2=1; window.dayItems=w;
+      return true;
+    }catch(e){ return false; }
+  }
+  function boot(){ syncCalendar(); }
+  setTimeout(boot,400); setTimeout(boot,1500);
+  document.addEventListener("DOMContentLoaded",boot);
+  window.addEventListener("load",boot);
+  try{
+    if(typeof REND!=="undefined"&&REND&&typeof REND.calendar==="function"&&!REND.calendar.__qdk2){
+      var rc=REND.calendar;
+      var rcw=function(){ boot(); return rc.apply(this,arguments); };
+      rcw.__qdk2=1; REND.calendar=rcw;
+    }
+  }catch(e){}
+  window.QDK2={color:color,ribbon:ribbon,get:get,syncCalendar:syncCalendar,COL:COL};
+})();
+/* ================= نهاية وحدة حالة اليوم ================= */
+</script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 </body>
 </html>
