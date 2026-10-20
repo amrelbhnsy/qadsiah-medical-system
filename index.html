@@ -19,6 +19,10 @@
 
 </script>
 <meta charset="UTF-8">
+<link rel="preconnect" href="https://tkvjdnwhwjdemkmipwgb.supabase.co" crossorigin>
+<link rel="dns-prefetch" href="https://tkvjdnwhwjdemkmipwgb.supabase.co">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#14181F">
 <meta name="color-scheme" content="light">
@@ -6901,6 +6905,8 @@ function qdlaStalled(ms){
 /* ---- الفتح المضمون: الوضع المحلي ثم إعادة التحميل (مرة واحدة في الجلسة) ---- */
 function qdlaAutoLocal(){
   try{
+    try{ if(localStorage.getItem("qd_ok_cloud")==="1") return false; }catch(e){}   /* v11-113 */
+    try{ if(String(location.search||"").indexOf("qdcloud=1")>-1) return false; }catch(e){}
     if(qdlaFlagOn()) return false;
     if(document.getElementById("qdl2Box")) {} /* اللوحة تعمل — لا حاجة للإجبار */
     var done=false;
@@ -6982,7 +6988,7 @@ try{
     window.__QDLA_W=1;
     qdlaTick();
     setInterval(qdlaTick,800);
-    setTimeout(qdlaTick,200); setTimeout(qdlaTick,1200); setTimeout(qdlaTick,3000); setTimeout(qdlaTick,6000);
+    setTimeout(qdlaTick,400); setTimeout(qdlaTick,2000);
   }
 }catch(e){}
 try{
@@ -14235,11 +14241,30 @@ function doLogin(){
   var em=(document.getElementById("qcEmail").value||"").trim();
   var pw=document.getElementById("qcPass").value||"";
   if(!em||!pw){ view("login",T10("msg_fill_login")); return; }
+  if(window.__qdLoggingIn){ return; }              /* v11-113: منع الضغط المزدوج */
+  window.__qdLoggingIn=true;
+  var btn=document.querySelector("#qcGo,#loginBtn,.qc-go,button[onclick*='doLogin']");
+  var oldTxt=btn?btn.textContent:"";
+  if(btn){ btn.disabled=true; try{ btn.textContent="جارٍ الدخول…"; }catch(e){} }
+  function done(msg){ window.__qdLoggingIn=false; if(btn){ btn.disabled=false; try{ btn.textContent=oldTxt||"دخول"; }catch(e){} } if(msg) view("login",msg); }
   view("load",T10("msg_saving_login"));
-  sb.auth.signInWithPassword({email:emailFor(em),password:pw}).then(function(r){
-    if(r.error||!r.data||!r.data.user){ view("login",T10("msg_bad_login")); return; }
-    afterAuth(r.data.user);
-  }).catch(function(){ view("login",T10("msg_net")); });
+  function attempt(n){
+    sb.auth.signInWithPassword({email:emailFor(em),password:pw}).then(function(r){
+      if(r.error||!r.data||!r.data.user){
+        var m=(r.error&&r.error.message)||"";
+        if(n<2 && /network|fetch|timeout|temporar|502|503|504|load failed/i.test(m)){ setTimeout(function(){ attempt(n+1); },700); return; }
+        done(T10("msg_bad_login")); return;
+      }
+      try{ localStorage.setItem("qd_ok_cloud","1"); }catch(e){}
+      window.__qdLoggingIn=false;
+      if(btn){ btn.disabled=false; }
+      afterAuth(r.data.user);
+    }).catch(function(){
+      if(n<2){ setTimeout(function(){ attempt(n+1); },700); return; }
+      done(T10("msg_net"));
+    });
+  }
+  attempt(1);
 }
 function doForgot(){
   view("login",T10("pw_lock_note")); return;   /* password change disabled */
@@ -15306,7 +15331,7 @@ try{
 }catch(e){}
 
 /* QDBK-END */
-(function(){function mk(){try{var b=document.createElement("div");b.id="qdrBadge";b.textContent="v11-112 · SINGLE-FILE";b.style.cssText="position:fixed;left:8px;bottom:8px;z-index:2147483647;background:#fff;color:#7E0E14;border:1px solid #7E0E14;font:800 11px/1.5 system-ui;padding:3px 9px;border-radius:20px;pointer-events:none;opacity:.97;box-shadow:0 2px 8px rgba(0,0,0,.35)";document.body.appendChild(b);}catch(e){}}if(document.body)mk();else setTimeout(mk,600);})();
+(function(){function mk(){try{var b=document.createElement("div");b.id="qdrBadge";b.textContent="v11-113 · FAST-BOOT";b.style.cssText="position:fixed;left:8px;bottom:8px;z-index:2147483647;background:#fff;color:#7E0E14;border:1px solid #7E0E14;font:800 11px/1.5 system-ui;padding:3px 9px;border-radius:20px;pointer-events:none;opacity:.97;box-shadow:0 2px 8px rgba(0,0,0,.35)";document.body.appendChild(b);}catch(e){}}if(document.body)mk();else setTimeout(mk,600);})();
 /* ---- PWA: install as an app on Android and iPhone / iPad ---- */
 (function(){
   Object.assign(STR.en,{
