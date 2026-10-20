@@ -411,7 +411,7 @@ html[dir="rtl"] .filters .select{padding-left:34px}
 .rp-path-lbl{font-size:10.5px;font-weight:800;margin-top:3px;color:var(--slate);white-space:nowrap}
 .rp-batt{display:inline-flex;align-items:center;gap:5px}
 .rp-batt b{font-weight:900;line-height:1}
-/* ===== v11-117 · DAYKIND-SYNC — مسار اللاعب وشريط الإنجاز ===== */
+/* ===== v11-118 · REPORT-LOGO — مسار اللاعب وشريط الإنجاز ===== */
 .rp-path2{display:flex;align-items:center;margin:5px 0 6px;min-width:150px}
 .rp-node{width:13px;height:13px;border-radius:50%;flex:0 0 auto;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;background:#fff;border:2px solid #D3D9E1;transition:background .25s,border-color .25s,box-shadow .25s}
 .rp-node.done{background:#15803D;border-color:#15803D}
@@ -3108,7 +3108,7 @@ function qdajTmrwK(){
   var d=new Date(); d.setDate(d.getDate()+1); function p(n){ return (n<10?"0":"")+n; }
   return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate());
 }
-/* ---- v11-117 · جسر فتح نموذج الجلسة (يحلّ مشكلة عدم فتح النموذج عند اختيار اليوم/غدًا) ---- */
+/* ---- v11-118 · جسر فتح نموذج الجلسة (يحلّ مشكلة عدم فتح النموذج عند اختيار اليوم/غدًا) ---- */
 function qdSessOpener(){
   try{ if(typeof window.qdOpenSessionForm==="function") return window.qdOpenSessionForm; }catch(e){}
   try{ if(typeof sessionForm==="function") return sessionForm; }catch(e){}
@@ -6955,7 +6955,7 @@ function qdlaStalled(ms){
 /* ---- الفتح المضمون: الوضع المحلي ثم إعادة التحميل (مرة واحدة في الجلسة) ---- */
 function qdlaAutoLocal(){
   try{
-    try{ if(localStorage.getItem("qd_ok_cloud")==="1") return false; }catch(e){}   /* v11-117 */
+    try{ if(localStorage.getItem("qd_ok_cloud")==="1") return false; }catch(e){}   /* v11-118 */
     try{ if(String(location.search||"").indexOf("qdcloud=1")>-1) return false; }catch(e){}
     if(qdlaFlagOn()) return false;
     if(document.getElementById("qdl2Box")) {} /* اللوحة تعمل — لا حاجة للإجبار */
@@ -8858,7 +8858,7 @@ function illShell(titleAr,titleEn,inner){
    +'<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">'
    +'<style>*{box-sizing:border-box}body{font-family:Tajawal,Inter,system-ui,sans-serif;margin:0;padding:26px;background:#F4F6F8;color:#14181F;direction:rtl}'
    +'.wrap{max-width:920px;margin:0 auto;background:#fff;border-radius:14px;box-shadow:0 6px 26px rgba(0,0,0,.10);overflow:hidden}'
-   +'.hd{background:linear-gradient(120deg,#7E0E14,#B5121B 60%,#8E0E16);color:#fff;padding:20px 22px}'
+   +'.hd{background:linear-gradient(120deg,#7E0E14,#B5121B 60%,#8E0E16);color:#fff;padding:20px 22px;padding-left:112px;position:relative;min-height:76px}\n.hd .qd-crest{position:absolute;left:20px;top:50%;transform:translateY(-50%);width:74px;height:74px;border-radius:16px;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(0,0,0,.3);overflow:hidden}\n.hd .qd-crest img{width:100%;height:100%;object-fit:contain;display:block}\n.hd .qd-crest b{font-size:19px;font-weight:900;color:#7E0E14;letter-spacing:.5px}\n@media print{.hd{-webkit-print-color-adjust:exact;print-color-adjust:exact}}'
    +'.hd h1{margin:0;font-size:19px}.hd h2{margin:6px 0 0;font-size:14px;opacity:.95}.hd p{margin:6px 0 0;font-size:12px;opacity:.85}'
    +'.bd{padding:18px 22px 26px}h3.sec{margin:20px 0 8px;font-size:14px;color:#7E0E14;border-inline-start:4px solid #7E0E14;padding-inline-start:8px}'
    +'table.tbl,table.ix{width:100%;border-collapse:collapse;margin:0 0 4px}'
@@ -8869,7 +8869,7 @@ function illShell(titleAr,titleEn,inner){
    +'table.ix td{border:1px solid #E3E7ED;padding:7px 10px;font-size:12.5px}table.ix tr:nth-child(even) td{background:#FAFBFC}'
    +'.ft{margin-top:20px;padding-top:12px;border-top:1px solid #E3E7ED;font-size:11.5px;color:#8B95A5;display:flex;gap:12px;justify-content:space-between;flex-wrap:wrap}'
    +'@media print{body{padding:0;background:#fff}.wrap{box-shadow:none;border-radius:0}}</style></head><body><div class="wrap">'
-   +'<div class="hd"><h1>'+esc(titleAr)+'</h1><h2 dir="ltr">'+esc(titleEn)+'</h2><p>'+esc(TILL("ill_sub"))+' · Al Qadsiah U18</p></div>'
+   +'<div class="hd">'+window.QDCREST()+'<h1>'+esc(titleAr)+'</h1><h2 dir="ltr">'+esc(titleEn)+'</h2><p>'+esc(TILL("ill_sub"))+' · Al Qadsiah U18</p></div>'
    +'<div class="bd">'+inner+'</div><div class="ft"><span>'+esc(TILL("r_app"))+'</span><span>'+esc(TILL("r_generated"))+': '+esc(fmtDate(nowLocal(),1))+'</span></div>'
    +'</div></body></html>';
 }
@@ -11772,7 +11772,7 @@ function clrShell(titleAr,titleEn,subTxt,inner){
    +'<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">'
    +'<style>*{box-sizing:border-box}body{font-family:Tajawal,Inter,system-ui,sans-serif;margin:0;padding:26px;background:#F4F6F8;color:#14181F;direction:rtl}'
    +'.wrap{max-width:1000px;margin:0 auto;background:#fff;border-radius:14px;box-shadow:0 6px 26px rgba(0,0,0,.10);overflow:hidden}'
-   +'.hd{background:linear-gradient(120deg,#7E0E14,#B5121B 60%,#8E0E16);color:#fff;padding:20px 22px}'
+   +'.hd{background:linear-gradient(120deg,#7E0E14,#B5121B 60%,#8E0E16);color:#fff;padding:20px 22px;padding-left:112px;position:relative;min-height:76px}\n.hd .qd-crest{position:absolute;left:20px;top:50%;transform:translateY(-50%);width:74px;height:74px;border-radius:16px;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(0,0,0,.3);overflow:hidden}\n.hd .qd-crest img{width:100%;height:100%;object-fit:contain;display:block}\n.hd .qd-crest b{font-size:19px;font-weight:900;color:#7E0E14;letter-spacing:.5px}\n@media print{.hd{-webkit-print-color-adjust:exact;print-color-adjust:exact}}'
    +'.hd h1{margin:0;font-size:19px}.hd h2{margin:6px 0 0;font-size:14px;opacity:.95}.hd p{margin:6px 0 0;font-size:12px;opacity:.85}'
    +'.bd{padding:18px 22px 26px}'
    +'.kpis{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 16px}'
@@ -11789,7 +11789,7 @@ function clrShell(titleAr,titleEn,subTxt,inner){
    +'.notes{border:1px solid #E3E7ED;border-radius:11px;padding:12px 14px;background:#FAFBFC;white-space:pre-wrap;font-size:13px;margin-top:6px}'
    +'.ft{margin-top:20px;padding-top:12px;border-top:1px solid #E3E7ED;font-size:11.5px;color:#8B95A5;display:flex;gap:12px;justify-content:space-between;flex-wrap:wrap}'
    +'@media print{body{padding:0;background:#fff}.wrap{box-shadow:none;border-radius:0}tr{page-break-inside:avoid}}'
-   +'</style></head><body><div class="wrap"><div class="hd"><h1>'+esc(titleAr)+'</h1><h2 dir="ltr">'+esc(titleEn)+'</h2>'
+   +'</style></head><body><div class="wrap"><div class="hd">'+window.QDCREST()+'<h1>'+esc(titleAr)+'</h1><h2 dir="ltr">'+esc(titleEn)+'</h2>'
    +'<p>'+esc(subTxt)+' · Al Qadsiah U18</p></div><div class="bd">'+inner+'</div>'
    +'<div class="ft"><span>'+esc(TCLR("clr_app"))+'</span><span>'+esc(TCLR("clr_generated"))+': '+esc(fmtDate(nowLocal(),1))+'</span></div>'
    +'</div></body></html>';
@@ -14315,7 +14315,7 @@ function doLogin(){
   var em=(document.getElementById("qcEmail").value||"").trim();
   var pw=document.getElementById("qcPass").value||"";
   if(!em||!pw){ view("login",T10("msg_fill_login")); return; }
-  if(window.__qdLoggingIn){ return; }              /* v11-117: منع الضغط المزدوج */
+  if(window.__qdLoggingIn){ return; }              /* v11-118: منع الضغط المزدوج */
   window.__qdLoggingIn=true;
   var btn=document.querySelector("#qcGo,#loginBtn,.qc-go,button[onclick*='doLogin']");
   var oldTxt=btn?btn.textContent:"";
@@ -15405,7 +15405,7 @@ try{
 }catch(e){}
 
 /* QDBK-END */
-(function(){function mk(){try{var b=document.createElement("div");b.id="qdrBadge";b.textContent="v11-117 · DAYKIND-SYNC";b.style.cssText="position:fixed;left:8px;bottom:8px;z-index:2147483647;background:#fff;color:#7E0E14;border:1px solid #7E0E14;font:800 11px/1.5 system-ui;padding:3px 9px;border-radius:20px;pointer-events:none;opacity:.97;box-shadow:0 2px 8px rgba(0,0,0,.35)";document.body.appendChild(b);}catch(e){}}if(document.body)mk();else setTimeout(mk,600);})();
+(function(){function mk(){try{var b=document.createElement("div");b.id="qdrBadge";b.textContent="v11-118 · REPORT-LOGO";b.style.cssText="position:fixed;left:8px;bottom:8px;z-index:2147483647;background:#fff;color:#7E0E14;border:1px solid #7E0E14;font:800 11px/1.5 system-ui;padding:3px 9px;border-radius:20px;pointer-events:none;opacity:.97;box-shadow:0 2px 8px rgba(0,0,0,.35)";document.body.appendChild(b);}catch(e){}}if(document.body)mk();else setTimeout(mk,600);})();
 /* ---- PWA: install as an app on Android and iPhone / iPad ---- */
 (function(){
   Object.assign(STR.en,{
@@ -17378,6 +17378,18 @@ try{ window.QDREPORT_READY=true; }catch(e){}
   function ensureCSS(){ try{ if(document.getElementById("qdBrandCSS")) return; var s=document.createElement("style"); s.id="qdBrandCSS";
     s.textContent='.qd-ltile{display:inline-flex;align-items:center;justify-content:center;background:#fff;border:1px solid #e4e1d8;border-radius:14px;padding:5px;flex:none}.qd-ltile img{height:60px;display:block}.qd-mono:not(input):not(select){width:64px;height:64px;border-radius:16px;background:#14181f;border:2px solid #e3b019;color:#e3b019;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;flex:none}.qd-by{margin-top:16px;padding-top:7px;border-top:1px solid #e4e1d8;font-size:10px;color:#8a93a1;text-align:left;direction:ltr}.qd-by b{color:#14181f}';
     document.head.appendChild(s); }catch(e){} }
+  window.QDCREST=function(){
+    var src="";
+    try{ src=(typeof LOGO_FULL!=="undefined"&&LOGO_FULL)||(typeof LOGO_MARK!=="undefined"&&LOGO_MARK)||""; }catch(e){}
+    if(!src){ try{ var se=(S&&S.settings)||{}; src=se.logoFull||se.logoMark||""; }catch(e){} }
+    if(!src){ try{ var bl=document.getElementById("brandLogo"); src=(bl&&bl.getAttribute("src"))||""; }catch(e){} }
+    src=String(src||"");
+    if(src&&src.indexOf("data:")!==0&&src.indexOf("http")!==0&&src.indexOf("/")!==0) src="";
+    if(src) return '<span class="qd-crest"><img src="'+src+'" alt="Al Qadsiah"></span>';
+    var t="U18";
+    try{ var se2=(S&&S.settings)||{}; var bd=se2.brand||{}; t=String(bd.short||bd.app_name||se2.team||"U18"); }catch(e){}
+    return '<span class="qd-crest"><b>'+String(t).slice(0,4).replace(/[<>&"]/g,"")+'</b></span>';
+  };
   window.QDBRAND=function(){
     var src="";
     try{ src=(typeof LOGO_FULL!=="undefined"&&LOGO_FULL)||(typeof LOGO_MARK!=="undefined"&&LOGO_MARK)||""; }catch(e){}
@@ -22085,7 +22097,7 @@ try{
       '*{box-sizing:border-box}',
       'body{font-family:Tajawal,Inter,system-ui,-apple-system,sans-serif;margin:0;padding:26px;background:#F4F6F8;color:#14181F;direction:rtl}',
       '.wrap{max-width:900px;margin:0 auto;background:#fff;border-radius:14px;box-shadow:0 6px 26px rgba(0,0,0,.10);overflow:hidden}',
-      '.hd{background:linear-gradient(120deg,#7E0E14,#B5121B 60%,#8E0E16);color:#fff;padding:20px 22px}',
+      '.hd{background:linear-gradient(120deg,#7E0E14,#B5121B 60%,#8E0E16);color:#fff;padding:20px 22px;padding-left:112px;position:relative;min-height:76px}\n.hd .qd-crest{position:absolute;left:20px;top:50%;transform:translateY(-50%);width:74px;height:74px;border-radius:16px;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(0,0,0,.3);overflow:hidden}\n.hd .qd-crest img{width:100%;height:100%;object-fit:contain;display:block}\n.hd .qd-crest b{font-size:19px;font-weight:900;color:#7E0E14;letter-spacing:.5px}\n@media print{.hd{-webkit-print-color-adjust:exact;print-color-adjust:exact}}',
       '.hd h1{margin:0;font-size:19px}',
       '.hd h2{margin:6px 0 0;font-size:15px;font-weight:700;opacity:.95}',
       '.hd p{margin:6px 0 0;font-size:12px;opacity:.85}',
@@ -22121,7 +22133,7 @@ try{
     return '<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8">'+
       '<meta name="viewport" content="width=device-width,initial-scale=1">'+
       '<title>'+escn(titleAr)+' — '+escn(titleEn)+'</title><style>'+css+'</style></head><body><div class="wrap">'+
-      '<div class="hd"><h1>'+escn(titleAr)+'</h1><h2>'+escn(titleEn)+'</h2>'+
+      '<div class="hd">'+window.QDCREST()+'<h1>'+escn(titleAr)+'</h1><h2>'+escn(titleEn)+'</h2>'+
       '<p>نادي القادسية · إدارة الإصابات الرياضية · تحت ١٨ سنة</p>'+
       '<p>Al Qadsiah · Sports Injury Management · U18</p>'+
       '<p>'+escn(stampFor(false))+' · '+escn(stampFor(true))+'</p></div>'+
@@ -22517,7 +22529,7 @@ try{
       '*{box-sizing:border-box}',
       'body{font-family:Tajawal,Inter,system-ui,-apple-system,sans-serif;margin:0;padding:26px;background:#F4F6F8;color:#14181F;direction:rtl}',
       '.wrap{max-width:900px;margin:0 auto;background:#fff;border-radius:14px;box-shadow:0 6px 26px rgba(0,0,0,.10);overflow:hidden}',
-      '.hd{background:linear-gradient(120deg,#7E0E14,#B5121B 60%,#8E0E16);color:#fff;padding:20px 22px}',
+      '.hd{background:linear-gradient(120deg,#7E0E14,#B5121B 60%,#8E0E16);color:#fff;padding:20px 22px;padding-left:112px;position:relative;min-height:76px}\n.hd .qd-crest{position:absolute;left:20px;top:50%;transform:translateY(-50%);width:74px;height:74px;border-radius:16px;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(0,0,0,.3);overflow:hidden}\n.hd .qd-crest img{width:100%;height:100%;object-fit:contain;display:block}\n.hd .qd-crest b{font-size:19px;font-weight:900;color:#7E0E14;letter-spacing:.5px}\n@media print{.hd{-webkit-print-color-adjust:exact;print-color-adjust:exact}}',
       '.hd h1{margin:0;font-size:19px}.hd h2{margin:6px 0 0;font-size:15px;font-weight:700;opacity:.95}',
       '.hd p{margin:6px 0 0;font-size:12px;opacity:.85}',
       '.bd{padding:18px 22px 24px}',
@@ -22538,7 +22550,7 @@ try{
     return '<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8">'+
       '<meta name="viewport" content="width=device-width,initial-scale=1">'+
       '<title>'+escn(titleAr)+' — '+escn(titleEn)+'</title><style>'+css+'</style></head><body><div class="wrap">'+
-      '<div class="hd"><h1>'+escn(titleAr)+'</h1><h2>'+escn(titleEn)+'</h2>'+
+      '<div class="hd">'+window.QDCREST()+'<h1>'+escn(titleAr)+'</h1><h2>'+escn(titleEn)+'</h2>'+
       '<p>نادي القادسية · إدارة الإصابات الرياضية · تحت ١٨ سنة</p>'+
       '<p>Al Qadsiah · Sports Injury Management · U18</p>'+
       '<p>'+escn(stampFor(false))+' · '+escn(stampFor(true))+'</p></div>'+
@@ -22556,7 +22568,7 @@ try{
       '*{box-sizing:border-box}',
       'body{font-family:Tajawal,Inter,system-ui,-apple-system,sans-serif;margin:0;padding:26px;background:#F4F6F8;color:#14181F;direction:rtl}',
       '.wrap{max-width:900px;margin:0 auto;background:#fff;border-radius:14px;box-shadow:0 6px 26px rgba(0,0,0,.10);overflow:hidden}',
-      '.hd{background:linear-gradient(120deg,#7E0E14,#B5121B 60%,#8E0E16);color:#fff;padding:20px 22px}',
+      '.hd{background:linear-gradient(120deg,#7E0E14,#B5121B 60%,#8E0E16);color:#fff;padding:20px 22px;padding-left:112px;position:relative;min-height:76px}\n.hd .qd-crest{position:absolute;left:20px;top:50%;transform:translateY(-50%);width:74px;height:74px;border-radius:16px;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(0,0,0,.3);overflow:hidden}\n.hd .qd-crest img{width:100%;height:100%;object-fit:contain;display:block}\n.hd .qd-crest b{font-size:19px;font-weight:900;color:#7E0E14;letter-spacing:.5px}\n@media print{.hd{-webkit-print-color-adjust:exact;print-color-adjust:exact}}',
       '.hd h1{margin:0;font-size:19px}.hd h2{margin:6px 0 0;font-size:15px;font-weight:700;opacity:.95}',
       '.hd p{margin:6px 0 0;font-size:12px;opacity:.85}',
       '.bd{padding:18px 22px 24px}',
@@ -22579,7 +22591,7 @@ try{
     return '<!doctype html><html lang="ar" dir="rtl"><head><meta charset="utf-8">'+
       '<meta name="viewport" content="width=device-width,initial-scale=1">'+
       '<title>'+escn(titleAr)+' — '+escn(titleEn)+'</title><style>'+css+'</style></head><body><div class="wrap">'+
-      '<div class="hd"><h1>'+escn(titleAr)+'</h1><h2>'+escn(titleEn)+'</h2>'+
+      '<div class="hd">'+window.QDCREST()+'<h1>'+escn(titleAr)+'</h1><h2>'+escn(titleEn)+'</h2>'+
       '<p>نادي القادسية · إدارة الإصابات الرياضية · تحت ١٨ سنة</p>'+
       '<p>Al Qadsiah · Sports Injury Management · U18</p>'+
       '<p>'+escn(stampFor(false))+' · '+escn(stampFor(true))+'</p></div>'+
@@ -23975,7 +23987,7 @@ try{
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous">
 /* =====================================================================
-   v11-117 · DAYKIND-SYNC — توحيد حالة اليوم (مباراة · تدريب · راحة · إجازة)
+   v11-118 · REPORT-LOGO — توحيد حالة اليوم (مباراة · تدريب · راحة · إجازة)
    بين: لوحة التحكم · البرنامج الأسبوعي · التقويم · جدول المباريات
    ===================================================================== */
 (function(){
