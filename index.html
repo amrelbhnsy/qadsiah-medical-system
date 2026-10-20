@@ -411,7 +411,7 @@ html[dir="rtl"] .filters .select{padding-left:34px}
 .rp-path-lbl{font-size:10.5px;font-weight:800;margin-top:3px;color:var(--slate);white-space:nowrap}
 .rp-batt{display:inline-flex;align-items:center;gap:5px}
 .rp-batt b{font-weight:900;line-height:1}
-/* ===== v11-135 · DEL-FIX — مسار اللاعب وشريط الإنجاز ===== */
+/* ===== v11-136 · LIVE-STATE — مسار اللاعب وشريط الإنجاز ===== */
 .rp-path2{display:flex;align-items:center;margin:5px 0 6px;min-width:150px}
 .rp-node{width:13px;height:13px;border-radius:50%;flex:0 0 auto;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;background:#fff;border:2px solid #D3D9E1;transition:background .25s,border-color .25s,box-shadow .25s}
 .rp-node.done{background:#15803D;border-color:#15803D}
@@ -3108,7 +3108,7 @@ function qdajTmrwK(){
   var d=new Date(); d.setDate(d.getDate()+1); function p(n){ return (n<10?"0":"")+n; }
   return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate());
 }
-/* ---- v11-135 · جسر فتح نموذج الجلسة (يحلّ مشكلة عدم فتح النموذج عند اختيار اليوم/غدًا) ---- */
+/* ---- v11-136 · جسر فتح نموذج الجلسة (يحلّ مشكلة عدم فتح النموذج عند اختيار اليوم/غدًا) ---- */
 function qdSessOpener(){
   try{ if(typeof window.qdOpenSessionForm==="function") return window.qdOpenSessionForm; }catch(e){}
   try{ if(typeof sessionForm==="function") return sessionForm; }catch(e){}
@@ -6955,7 +6955,7 @@ function qdlaStalled(ms){
 /* ---- الفتح المضمون: الوضع المحلي ثم إعادة التحميل (مرة واحدة في الجلسة) ---- */
 function qdlaAutoLocal(){
   try{
-    try{ if(localStorage.getItem("qd_ok_cloud")==="1") return false; }catch(e){}   /* v11-135 */
+    try{ if(localStorage.getItem("qd_ok_cloud")==="1") return false; }catch(e){}   /* v11-136 */
     try{ if(String(location.search||"").indexOf("qdcloud=1")>-1) return false; }catch(e){}
     if(qdlaFlagOn()) return false;
     if(document.getElementById("qdl2Box")) {} /* اللوحة تعمل — لا حاجة للإجبار */
@@ -14315,7 +14315,7 @@ function doLogin(){
   var em=(document.getElementById("qcEmail").value||"").trim();
   var pw=document.getElementById("qcPass").value||"";
   if(!em||!pw){ view("login",T10("msg_fill_login")); return; }
-  if(window.__qdLoggingIn){ return; }              /* v11-135: منع الضغط المزدوج */
+  if(window.__qdLoggingIn){ return; }              /* v11-136: منع الضغط المزدوج */
   window.__qdLoggingIn=true;
   var btn=document.querySelector("#qcGo,#loginBtn,.qc-go,button[onclick*='doLogin']");
   var oldTxt=btn?btn.textContent:"";
@@ -15405,7 +15405,7 @@ try{
 }catch(e){}
 
 /* QDBK-END */
-(function(){function mk(){try{var b=document.createElement("div");b.id="qdrBadge";b.textContent="v11-135 · DEL-FIX";b.style.cssText="position:fixed;left:8px;bottom:8px;z-index:2147483647;background:#fff;color:#7E0E14;border:1px solid #7E0E14;font:800 11px/1.5 system-ui;padding:3px 9px;border-radius:20px;pointer-events:none;opacity:.97;box-shadow:0 2px 8px rgba(0,0,0,.35)";document.body.appendChild(b);}catch(e){}}if(document.body)mk();else setTimeout(mk,600);})();
+(function(){function mk(){try{var b=document.createElement("div");b.id="qdrBadge";b.textContent="v11-136 · LIVE-STATE";b.style.cssText="position:fixed;left:8px;bottom:8px;z-index:2147483647;background:#fff;color:#7E0E14;border:1px solid #7E0E14;font:800 11px/1.5 system-ui;padding:3px 9px;border-radius:20px;pointer-events:none;opacity:.97;box-shadow:0 2px 8px rgba(0,0,0,.35)";document.body.appendChild(b);}catch(e){}}if(document.body)mk();else setTimeout(mk,600);})();
 /* ---- PWA: install as an app on Android and iPhone / iPad ---- */
 (function(){
   Object.assign(STR.en,{
@@ -23987,7 +23987,7 @@ try{
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous">
 /* =====================================================================
-   v11-135 · DEL-FIX — توحيد حالة اليوم (مباراة · تدريب · راحة · إجازة)
+   v11-136 · LIVE-STATE — توحيد حالة اليوم (مباراة · تدريب · راحة · إجازة)
    بين: لوحة التحكم · البرنامج الأسبوعي · التقويم · جدول المباريات
    ===================================================================== */
 (function(){
@@ -24091,7 +24091,7 @@ try{
 
 <script>
 /* =====================================================================
-   v11-135 · DEL-FIX
+   v11-136 · LIVE-STATE
    إصلاح التجمد: يُبنى الهيكل مرة واحدة فقط، ويُحدَّث محتواه الداخلي
    (لا إعادة بناء للجذر ⇒ لا يفقد الهوية ولا يعلق)
    ===================================================================== */
@@ -24103,7 +24103,15 @@ try{
   function E(v){ return String(v==null?"":v).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];}); }
 
   var CACHE=null;
+  function live(){
+    /* save() في البرنامج يضع window.QD_S = S (نفس الكائن الحيّ) — فنضغطه أولًا */
+    try{ if(typeof window.save==="function") window.save(); }catch(e){}
+    try{ if(window.QD_S&&window.QD_S.players&&window.QD_S.players.length) return window.QD_S; }catch(e){}
+    try{ if(typeof window.QD_save==="function") window.QD_save(); if(window.QD_S) return window.QD_S; }catch(e){}
+    return null;
+  }
   function ST(){
+    var L=live(); if(L) return L;
     var f=[function(){return window.QD_S;},function(){return (typeof gS==="function")?gS():null;},
            function(){return window.S;},function(){return (typeof S!=="undefined")?S:null;},
            function(){return window.qdS;}];
@@ -24116,7 +24124,8 @@ try{
     return null;
   }
   function PLS(){ if(!CACHE) CACHE=ST(); try{ return (CACHE&&CACHE.players)||[]; }catch(e){ return []; } }
-  function MTS(){ var s=ST(); try{ return (s&&s.matches)||[]; }catch(e){ return []; } }
+  function MTS(){ var s=live()||ST(); try{ return (s&&s.matches)||[]; }catch(e){ return []; } }
+  function LIVE(){ return live()||ST(); }
   function SAVE(){ try{ if(typeof window.save==="function"){ window.save(); return; } if(typeof save==="function") save(); }catch(e){} }
   function PL(id){ var a=PLS(); for(var i=0;i<a.length;i++){ if(String(a[i].id)===String(id)) return a[i]; } return null; }
   function NM(id){ var p=PL(id); try{ if(p) return pname(p.id); }catch(e){} return p?((p.first||"")+" "+(p.last||"")):String(id); }
@@ -24477,6 +24486,29 @@ try{
   function doClear(r){
     try{
       var a=MTS();
+      var rec=null;
+      for(var k=0;k<a.length;k++){ if(Number(a[k].fx)===Number(r)){ rec=a[k]; break; } }
+      if(rec&&window.ACT&&typeof ACT.delMatch==="function"){
+        try{ ACT.delMatch({id:rec.id}); }catch(e){}
+      }
+      if(rec){
+        var L=LIVE();
+        if(L&&Array.isArray(L.matches)){
+          for(var q=L.matches.length-1;q>=0;q--){ if(Number(L.matches[q].fx)===Number(r)) L.matches.splice(q,1); }
+          SAVE();
+        }
+      }
+      try{ var hh=HAS(); delete hh["r"+r]; SAVE(); }catch(e){}
+      try{ if(window.REND&&REND.fixtures) REND.fixtures(); }catch(e){}
+      setTimeout(function(){ try{ decorate(); }catch(e){} },150);
+      setTimeout(function(){ try{ decorate(); }catch(e){} },700);
+      try{ toast(Q("تم حذف التقرير — عاد الزر إلى «إضافة تقرير»","Report deleted — the button is back to “Add report”"),"warn"); }catch(e){}
+      return;
+    }catch(e){ try{ toast("CL: "+e.message,"bad"); }catch(x){} }
+  }
+  function doClearOld(){
+    try{
+      var a=MTS();
       for(var i=a.length-1;i>=0;i--){ if(Number(a[i].fx)===Number(r)) a.splice(i,1); }
       try{ var h=HAS(); delete h["r"+r]; }catch(e){}
       SAVE();
@@ -24520,10 +24552,12 @@ try{
         }
         var r=rep.getAttribute("data-r"); if(r==null) continue;
         var box=document.createElement("div"); box.className="p9-act";
+        var _m=matchOfRound(r);
+        var hasRep=!!(_m&&(((_m.injuries||[]).length)||_m.hasInjuries===false||((_m.starters||[]).length)||((_m.subs||[]).length)||((_m.extraSquad||[]).length)));
         box.innerHTML='<button type="button" class="btn sm" data-q9="1" data-go="sq" data-r="'+r+'">'+Q("المشاركون","Squad")+' ('+counts(r)+')</button>'+
           '<button type="button" class="btn gold sm" data-q9="1" data-go="rp" data-r="'+r+'">'+Q("التقرير الشامل","Full report")+'</button>'+
-          '<button type="button" class="btn ghost sm" data-q9="1" data-go="edit" data-r="'+r+'">'+Q("تعديل التقرير","Edit report")+'</button>'+
-          '<button type="button" class="btn sm" data-q9="1" data-go="del" data-r="'+r+'" style="background:#B5121B;border-color:#B5121B;color:#fff">'+Q("حذف التقرير","Delete report")+'</button>';
+          (hasRep?'<button type="button" class="btn ghost sm" data-q9="1" data-go="edit" data-r="'+r+'">'+Q("تعديل التقرير","Edit report")+'</button>':"")+
+          (hasRep?'<button type="button" class="btn sm" data-q9="1" data-go="del" data-r="'+r+'" onclick="try{QD9.clearNow(\''+r+'\')}catch(e){}" style="background:#B5121B;border-color:#B5121B;color:#fff">'+Q("حذف التقرير","Delete report")+'</button>':"");
         a.appendChild(box);
       }
     }catch(e){}
@@ -24768,7 +24802,16 @@ try{
     try{ var w=window.open("","_blank"); if(!w){ try{ toast(Q("اسمح بالنوافذ المنبثقة","Allow pop-ups"),"bad"); }catch(e){} return; }
       w.document.open(); w.document.write(h); w.document.close(); }catch(e){}
   }
-  window.QD9={open:open,close:close,full:full,decorate:decorate,edit:editReport,clear:clearReport};
+  window.QD9={open:open,close:close,full:full,decorate:decorate,edit:editReport,clear:clearReport,
+    clearNow:function(r){
+      setTimeout(function(){
+        try{
+          askConfirm(Q("حذف تقرير المباراة","Delete the match report"),
+            Q("سيُحذف: التشكيلة · دقائق اللعب · الحالات الطبية · الإصابات · ورقة التشكيلة · الملاحظات. المباراة تبقى في الجدول.","Removes squad, minutes, medical status, injuries, lineup sheet and notes. The fixture stays."),
+            function(){ doClear(r); });
+        }catch(e){ doClear(r); }
+      },0);
+    }};
 })();
 </script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
