@@ -411,7 +411,7 @@ html[dir="rtl"] .filters .select{padding-left:34px}
 .rp-path-lbl{font-size:10.5px;font-weight:800;margin-top:3px;color:var(--slate);white-space:nowrap}
 .rp-batt{display:inline-flex;align-items:center;gap:5px}
 .rp-batt b{font-weight:900;line-height:1}
-/* ===== v11-127 · SQUAD-127 — مسار اللاعب وشريط الإنجاز ===== */
+/* ===== v11-128 · SQUAD-PICK — مسار اللاعب وشريط الإنجاز ===== */
 .rp-path2{display:flex;align-items:center;margin:5px 0 6px;min-width:150px}
 .rp-node{width:13px;height:13px;border-radius:50%;flex:0 0 auto;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;background:#fff;border:2px solid #D3D9E1;transition:background .25s,border-color .25s,box-shadow .25s}
 .rp-node.done{background:#15803D;border-color:#15803D}
@@ -3108,7 +3108,7 @@ function qdajTmrwK(){
   var d=new Date(); d.setDate(d.getDate()+1); function p(n){ return (n<10?"0":"")+n; }
   return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate());
 }
-/* ---- v11-127 · جسر فتح نموذج الجلسة (يحلّ مشكلة عدم فتح النموذج عند اختيار اليوم/غدًا) ---- */
+/* ---- v11-128 · جسر فتح نموذج الجلسة (يحلّ مشكلة عدم فتح النموذج عند اختيار اليوم/غدًا) ---- */
 function qdSessOpener(){
   try{ if(typeof window.qdOpenSessionForm==="function") return window.qdOpenSessionForm; }catch(e){}
   try{ if(typeof sessionForm==="function") return sessionForm; }catch(e){}
@@ -6955,7 +6955,7 @@ function qdlaStalled(ms){
 /* ---- الفتح المضمون: الوضع المحلي ثم إعادة التحميل (مرة واحدة في الجلسة) ---- */
 function qdlaAutoLocal(){
   try{
-    try{ if(localStorage.getItem("qd_ok_cloud")==="1") return false; }catch(e){}   /* v11-127 */
+    try{ if(localStorage.getItem("qd_ok_cloud")==="1") return false; }catch(e){}   /* v11-128 */
     try{ if(String(location.search||"").indexOf("qdcloud=1")>-1) return false; }catch(e){}
     if(qdlaFlagOn()) return false;
     if(document.getElementById("qdl2Box")) {} /* اللوحة تعمل — لا حاجة للإجبار */
@@ -14315,7 +14315,7 @@ function doLogin(){
   var em=(document.getElementById("qcEmail").value||"").trim();
   var pw=document.getElementById("qcPass").value||"";
   if(!em||!pw){ view("login",T10("msg_fill_login")); return; }
-  if(window.__qdLoggingIn){ return; }              /* v11-127: منع الضغط المزدوج */
+  if(window.__qdLoggingIn){ return; }              /* v11-128: منع الضغط المزدوج */
   window.__qdLoggingIn=true;
   var btn=document.querySelector("#qcGo,#loginBtn,.qc-go,button[onclick*='doLogin']");
   var oldTxt=btn?btn.textContent:"";
@@ -15405,7 +15405,7 @@ try{
 }catch(e){}
 
 /* QDBK-END */
-(function(){function mk(){try{var b=document.createElement("div");b.id="qdrBadge";b.textContent="v11-127 · SQUAD-127";b.style.cssText="position:fixed;left:8px;bottom:8px;z-index:2147483647;background:#fff;color:#7E0E14;border:1px solid #7E0E14;font:800 11px/1.5 system-ui;padding:3px 9px;border-radius:20px;pointer-events:none;opacity:.97;box-shadow:0 2px 8px rgba(0,0,0,.35)";document.body.appendChild(b);}catch(e){}}if(document.body)mk();else setTimeout(mk,600);})();
+(function(){function mk(){try{var b=document.createElement("div");b.id="qdrBadge";b.textContent="v11-128 · SQUAD-PICK";b.style.cssText="position:fixed;left:8px;bottom:8px;z-index:2147483647;background:#fff;color:#7E0E14;border:1px solid #7E0E14;font:800 11px/1.5 system-ui;padding:3px 9px;border-radius:20px;pointer-events:none;opacity:.97;box-shadow:0 2px 8px rgba(0,0,0,.35)";document.body.appendChild(b);}catch(e){}}if(document.body)mk();else setTimeout(mk,600);})();
 /* ---- PWA: install as an app on Android and iPhone / iPad ---- */
 (function(){
   Object.assign(STR.en,{
@@ -23987,7 +23987,7 @@ try{
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous">
 /* =====================================================================
-   v11-127 · SQUAD-127 — توحيد حالة اليوم (مباراة · تدريب · راحة · إجازة)
+   v11-128 · SQUAD-PICK — توحيد حالة اليوم (مباراة · تدريب · راحة · إجازة)
    بين: لوحة التحكم · البرنامج الأسبوعي · التقويم · جدول المباريات
    ===================================================================== */
 (function(){
@@ -24091,7 +24091,7 @@ try{
 
 <script>
 /* =====================================================================
-   v11-127 · SQUAD-127
+   v11-128 · SQUAD-PICK
    • «المشاركون» يفتح شاشة مستقلة لاختيار اللاعبين المسجّلين (بلا أي اعتماد على النموذج)
    • إضافة لاعب يدويًا · رفع ورقة التشكيلة · تفريغها
    • الحفظ يكتب مباشرة في سجل المباراة (وينشئه إن لم يوجد)
@@ -24103,9 +24103,29 @@ try{
   if(window.__QD127) return; window.__QD127=1;
 
   /* ---- وصول آمن للحالة: S ليس على window في هذا البناء ---- */
+  var _LK=null;
   function ST(){
-    try{ if(window.S) return window.S; }catch(e){}
-    try{ if(typeof S!=="undefined" && S) return S; }catch(e){}
+    var c=[];
+    c.push(function(){ return window.QD_S; });
+    c.push(function(){ return (typeof gS==="function")?gS():null; });
+    c.push(function(){ return window.S; });
+    c.push(function(){ return (typeof S!=="undefined")?S:null; });
+    c.push(function(){ return window.qdS; });
+    for(var i=0;i<c.length;i++){ try{ var v=c[i](); if(v&&v.players&&v.players.length) return v; }catch(e){} }
+    /* قراءة مباشرة من التخزين المحلي — لا تعتمد على أي متغيّر */
+    try{
+      var keys=_LK?[_LK]:["qadsiah_u18_v2"];
+      for(var k=0;k<keys.length;k++){
+        var raw=localStorage.getItem(keys[k]); if(!raw) continue;
+        var o=JSON.parse(raw);
+        if(o&&o.players&&o.players.length){ _LK=keys[k]; return o; }
+      }
+      for(var j=0;j<localStorage.length;j++){
+        var kk=localStorage.key(j); if(!kk||kk.indexOf("qadsiah")<0) continue;
+        try{ var o2=JSON.parse(localStorage.getItem(kk)); if(o2&&o2.players&&o2.players.length){ _LK=kk; return o2; } }catch(e2){}
+      }
+    }catch(e){}
+    for(var m=0;m<c.length;m++){ try{ var v2=c[m](); if(v2&&v2.players) return v2; }catch(e3){} }
     return null;
   }
   function ARR(k){ var s=ST(); try{ return (s&&s[k])||[]; }catch(e){ return []; } }
@@ -24247,7 +24267,7 @@ try{
     }).join("");
     if(!list.length) lis='<li style="color:#94A3B8">'+Q("لا يوجد لاعب مطابق","No matching player")+'</li>';
     return '<div class="sq7"><div class="sq7-w">'+
-      '<div class="sq7-h"><b>'+Q("المشاركون في المباراة","Players in the match")+'</b><small>'+Q("اختر من اللاعبين المسجّلين","Select from registered players")+'</small>'+
+      '<div class="sq7-h"><b>'+Q("المشاركون في المباراة","Players in the match")+'</b><small>'+Q("لاعبون مسجّلون","registered")+': '+PLAYERS().length+' · '+Q("اختر من القائمة","pick from the list")+'</small>'+
       '<button type="button" class="sq7-x" onclick="QDSQ.close()">✕</button></div>'+
       '<div class="sq7-b">'+
         '<div class="sq7-m"><input id="sq7Name" placeholder="'+Q("أضف لاعبًا يدويًا — اكتب الاسم","Add a player manually — type the name")+'">'+
@@ -24323,6 +24343,21 @@ try{
   };
   window.QDSQ=api;
 
+  /* مستمع على window في طور الالتقاط: يعمل قبل أي مستمع آخر في الصفحة */
+  window.addEventListener("click",function(e){
+    var t=e.target; if(!t||!t.closest) return;
+    var b=t.closest("[data-q7]"); if(!b) return;
+    e.preventDefault(); if(e.stopPropagation) e.stopPropagation();
+    var r=b.getAttribute("data-r"), go=b.getAttribute("data-go");
+    try{
+      if(go==="sq"){ api.open(r); }
+      else { (window.QD127&&QD127.full)?QD127.full(r):null; }
+    }catch(err){
+      try{ alert("QD7: "+err.message); }catch(x){}
+    }
+    return false;
+  },true);
+
   /* ============ أزرار الصفوف — onclick مباشر ============ */
   function counts(r){
     var m=matchOfRound(r)||{};
@@ -24335,8 +24370,8 @@ try{
       var rep=a.querySelector('[data-act="fxReport"]'); if(!rep) continue;
       var r=rep.getAttribute("data-r"); if(r==null) continue;
       var box=document.createElement("div"); box.className="p127-act";
-      box.innerHTML='<button type="button" class="btn sm" data-q7="1" onclick="try{QDSQ.open(\''+r+'\')}catch(e){alert(\'SQ: \'+e.message)}">'+Q("المشاركون","Squad")+' ('+counts(r)+')</button>'+
-        '<button type="button" class="btn gold sm" data-q7="1" onclick="try{QD127.full(\''+r+'\')}catch(e){alert(\'RP: \'+e.message)}">'+Q("التقرير الشامل","Full report")+'</button>';
+      box.innerHTML='<button type="button" class="btn sm" data-q7="1" data-go="sq" data-r="'+r+'">'+Q("المشاركون","Squad")+' ('+counts(r)+')</button>'+
+        '<button type="button" class="btn gold sm" data-q7="1" data-go="rp" data-r="'+r+'">'+Q("التقرير الشامل","Full report")+'</button>';
       a.appendChild(box);
     }
   }
