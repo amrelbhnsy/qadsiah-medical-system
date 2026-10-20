@@ -411,6 +411,25 @@ html[dir="rtl"] .filters .select{padding-left:34px}
 .rp-path-lbl{font-size:10.5px;font-weight:800;margin-top:3px;color:var(--slate);white-space:nowrap}
 .rp-batt{display:inline-flex;align-items:center;gap:5px}
 .rp-batt b{font-weight:900;line-height:1}
+/* ===== v11-116 · SESSION-FIX — مسار اللاعب وشريط الإنجاز ===== */
+.rp-path2{display:flex;align-items:center;margin:5px 0 6px;min-width:150px}
+.rp-node{width:13px;height:13px;border-radius:50%;flex:0 0 auto;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;background:#fff;border:2px solid #D3D9E1;transition:background .25s,border-color .25s,box-shadow .25s}
+.rp-node.done{background:#15803D;border-color:#15803D}
+.rp-node.done:after{content:"";width:5px;height:2.5px;border-left:1.8px solid #fff;border-bottom:1.8px solid #fff;transform:rotate(-45deg) translateY(-.5px)}
+.rp-node.on{background:#fff;border-color:#B5121B;box-shadow:0 0 0 3.5px rgba(181,18,27,.15)}
+.rp-node.on:after{content:"";width:5px;height:5px;border-radius:50%;background:#B5121B}
+.rp-seg{height:3px;flex:1 1 auto;min-width:6px;background:#E4E8EE;border-radius:2px;margin:0 1px;display:inline-block;text-decoration:none}
+.rp-seg.done{background:#15803D}
+.rp-seg.on{background:linear-gradient(90deg,transparent,#B5121B);background:linear-gradient(90deg,#15803D,#B5121B)}
+.rp-now{display:block;max-width:100%;font-size:10.5px;font-weight:900;line-height:1.7;color:#7E0E14;background:rgba(181,18,27,.07);border:1px solid rgba(181,18,27,.2);border-radius:999px;padding:0 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rp-now.full{color:#0F6B4F;background:rgba(21,128,61,.09);border-color:rgba(21,128,61,.26)}
+.rp-prog{display:flex;align-items:center;gap:8px;margin:3px 0 2px}
+.rp-prog-track{display:block;position:relative;flex:1 1 auto;min-width:60px;height:10px;background:#EDF0F4;border-radius:999px;overflow:hidden;box-shadow:inset 0 1px 2px rgba(16,24,40,.09)}
+.rp-prog-track:before{content:"";position:absolute;inset:0;background-image:repeating-linear-gradient(90deg,rgba(255,255,255,.55) 0 1px,transparent 1px 25%);pointer-events:none}
+.rp-prog-fill{display:block;position:relative;height:100%;border-radius:999px;background:linear-gradient(90deg,#B5121B,#C8A24A);box-shadow:0 1px 3px rgba(181,18,27,.3);transition:width .6s cubic-bezier(.2,.8,.2,1)}
+.rp-prog-fill.full{background:linear-gradient(90deg,#0F6B4F,#15803D)}
+.rp-prog-pct{flex:0 0 auto;font-size:11px;font-weight:900;font-variant-numeric:tabular-nums;color:#7E0E14;background:#fff;border:1px solid rgba(181,18,27,.26);border-radius:999px;padding:1px 7px;line-height:1.5}
+.rp-prog-pct.full{color:#0F6B4F;border-color:rgba(21,128,61,.34)}
 .since-chip{display:inline-flex;align-items:center;gap:4px;font-size:10.5px;font-weight:800;color:var(--slate);background:var(--surface-2);border-radius:99px;padding:2px 8px;margin-top:3px;white-space:nowrap}
 .since-chip svg{opacity:.75}
 .ptl{position:relative;margin-top:4px}
@@ -3039,19 +3058,15 @@ function qdtlNewChoice(){
     var t=qdtlTodayK(), m=qdtlTmrw();
     var body='<div class="tiny muted" style="margin-bottom:10px">'+esc(qdtlT("qdtl_newsub"))+'</div>'+
       '<div style="display:flex;gap:10px;flex-wrap:wrap">'+
-        '<button class="btn primary" data-act="qdtlNewGo" data-w="today">'+esc(QDT("اليوم","Today"))+' · '+esc(t)+'</button>'+
-        '<button class="btn" data-act="qdtlNewGo" data-w="tomorrow">'+esc(QDT("غدًا","Tomorrow"))+' · '+esc(m)+'</button>'+
+        '<button type="button" class="btn primary" data-act="qdtlNewGo" data-w="today" onclick="try{qdOpenSessAt(\'today\')}catch(e){}">'+esc(QDT("اليوم","Today"))+' · '+esc(t)+'</button>'+
+        '<button type="button" class="btn" data-act="qdtlNewGo" data-w="tomorrow" onclick="try{qdOpenSessAt(\'tomorrow\')}catch(e){}">'+esc(QDT("غدًا","Tomorrow"))+' · '+esc(m)+'</button>'+
       '</div>';
     openModal({title:QDT("إضافة جلسة علاجية","Add a therapy session"),body:body,
       foot:'<button class="btn ghost" data-close>'+T("btn_cancel")+'</button>'});
   }catch(e){ try{ toast(QDT("تعذّر فتح النموذج","Could not open the form"),"bad"); }catch(x){} }
 }
 on("qdtlNew",function(){ qdtlNewChoice(); });
-on("qdtlNewGo",function(d){
-  var k=(d&&d.w==="tomorrow")?qdtlTmrw():qdtlTodayK();
-  try{ closeModal(); }catch(e){}
-  setTimeout(function(){ try{ sessionForm({date:k+"T09:00"}); }catch(e){} },80);
-});
+on("qdtlNewGo",function(d){ qdOpenSessAt(d&&d.w); });
 on("qdtlEditS",function(d){
   try{
     var s=qdtlSess().filter(function(x){ return x&&String(x.id)===String(d.id); })[0];
@@ -3088,6 +3103,40 @@ function qdajTmrwK(){
   var d=new Date(); d.setDate(d.getDate()+1); function p(n){ return (n<10?"0":"")+n; }
   return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate());
 }
+/* ---- v11-116 · جسر فتح نموذج الجلسة (يحلّ مشكلة عدم فتح النموذج عند اختيار اليوم/غدًا) ---- */
+function qdSessOpener(){
+  try{ if(typeof window.qdOpenSessionForm==="function") return window.qdOpenSessionForm; }catch(e){}
+  try{ if(typeof sessionForm==="function") return sessionForm; }catch(e){}
+  try{ if(typeof window.sessionForm==="function") return window.sessionForm; }catch(e){}
+  return null;
+}
+function qdOpenSessAt(w){
+  var k;
+  try{ k=(String(w)==="tomorrow")?qdajTmrwK():qdajTodayK(); }catch(e){ k=qdajTodayK(); }
+  var fn=qdSessOpener();
+  if(!fn){
+    try{ var a=ACT&&ACT.newSession; if(typeof a==="function"){ try{ closeModal(); }catch(x){} fn=function(){ a(); }; } }catch(e){}
+  }
+  if(!fn){
+    try{ toast(QDT("تعذّر فتح نموذج الجلسة — حدّث الصفحة وأعد المحاولة","Could not open the session form — refresh and retry"),"bad"); }catch(x){}
+    return;
+  }
+  try{ closeModal(); }catch(e){}
+  var tries=0;
+  (function go(){
+    tries++;
+    try{
+      fn({date:k+"T09:00"});
+      var mc=document.getElementById("modalCard");
+      var ok=!!(mc&&mc.querySelector&&mc.querySelector('[data-f="date"]'));
+      if(ok) return;
+    }catch(e){ try{ window.QDSESS_ERR=String((e&&e.stack)||e); }catch(x){} }
+    if(tries<6){ setTimeout(go,60); return; }
+    try{ toast(QDT("تعذّر فتح نموذج الجلسة","Could not open the session form"),"bad"); }catch(x){}
+  })();
+}
+try{ window.qdOpenSessAt=qdOpenSessAt; }catch(e){}
+
 function qdajInject(){
   try{
     qdajN();
@@ -3109,8 +3158,8 @@ function qdajChoose(){
     var t=qdajTodayK(), m=qdajTmrwK();
     var body='<div class="tiny muted" style="margin-bottom:10px">'+esc(qdajT("qdaj_sub"))+'</div>'+
       '<div style="display:flex;gap:10px;flex-wrap:wrap">'+
-        '<button class="btn primary" data-act="qdajGo" data-w="today">'+esc(qdajT("qdaj_today"))+' · '+esc(t)+'</button>'+
-        '<button class="btn" data-act="qdajGo" data-w="tomorrow">'+esc(qdajT("qdaj_tomorrow"))+' · '+esc(m)+'</button>'+
+        '<button type="button" class="btn primary" data-act="qdajGo" data-w="today" onclick="try{qdOpenSessAt(\'today\')}catch(e){}">'+esc(qdajT("qdaj_today"))+' · '+esc(t)+'</button>'+
+        '<button type="button" class="btn" data-act="qdajGo" data-w="tomorrow" onclick="try{qdOpenSessAt(\'tomorrow\')}catch(e){}">'+esc(qdajT("qdaj_tomorrow"))+' · '+esc(m)+'</button>'+
       '</div>';
     openModal({title:qdajT("qdaj_h"),body:body,
       foot:'<button class="btn ghost" data-close>'+T("btn_cancel")+'</button>'});
@@ -3126,11 +3175,7 @@ function qdajObserve(){
   }catch(e){}
 }
 on("qdajNew",function(){ qdajChoose(); });
-on("qdajGo",function(d){
-  var k=(d&&d.w==="tomorrow")?qdajTmrwK():qdajTodayK();
-  try{ closeModal(); }catch(e){}
-  setTimeout(function(){ try{ sessionForm({date:k+"T09:00"}); }catch(e){} },80);
-});
+on("qdajGo",function(d){ qdOpenSessAt(d&&d.w); });
 /* refresh the dashboard card after any session save so the new session appears at once.
    ملاحظة: on("saveSession") يُسجَّل بعد هذه الوحدة، فلا بدّ من إعادة المحاولة حتى يوجد المعالج. */
 function qdajWrapSave(){
@@ -6905,7 +6950,7 @@ function qdlaStalled(ms){
 /* ---- الفتح المضمون: الوضع المحلي ثم إعادة التحميل (مرة واحدة في الجلسة) ---- */
 function qdlaAutoLocal(){
   try{
-    try{ if(localStorage.getItem("qd_ok_cloud")==="1") return false; }catch(e){}   /* v11-113 */
+    try{ if(localStorage.getItem("qd_ok_cloud")==="1") return false; }catch(e){}   /* v11-116 */
     try{ if(String(location.search||"").indexOf("qdcloud=1")>-1) return false; }catch(e){}
     if(qdlaFlagOn()) return false;
     if(document.getElementById("qdl2Box")) {} /* اللوحة تعمل — لا حاجة للإجبار */
@@ -7466,7 +7511,7 @@ REND.injuries=function(){
      '<button class="btn ghost sm" data-act="injToggleHealed" onclick="try{if(window.qdHealToggle)window.qdHealToggle(event);}catch(e){}">'+(window.__injShowHealed?QDT("إخفاء اللاعبين المتشافين","Hide recovered"):QDT("إظهار اللاعبين المتشافين","Show recovered"))+'</button>'+
      '<button class="btn primary" data-act="newInjury">'+svg(I.plus,2.2)+' '+T("btn_record_injury")+'</button></div>'+
    (list.length?'<div class="card"><div class="card-body tight"><div class="table-wrap"><table><thead><tr><th>'+T("f_player")+'</th><th>'+T("f_date")+'</th><th>'+T("f_injury_type")+'</th><th>'+T("f_body_site")+'</th><th>'+T("rp_path_l")+'</th><th>'+T("rp_progress")+'</th><th>'+T("rp_days_left")+'</th><th>'+T("rep_status")+'</th><th></th></tr></thead><tbody>'+
-     list.map(i=>'<tr class="row-link" data-act="openInjury" data-id="'+i.id+'"><td><div class="pname">'+avatar(player(i.playerId)||{first:"?",last:""},"sm")+'<span>'+esc(pname(i.playerId))+medChip(i.playerId)+'</span></div>'+rpSinceChip(i)+'</td><td>'+fmtDate(i.date)+'</td><td>'+esc(tr(i.type))+'</td><td class="muted tiny">'+esc((i.bodySites||"—").split(",").slice(0,2).map(site).join(", "))+'</td><td>'+rpPathMini(i)+'</td><td class="tiny" style="min-width:120px">'+rpBar(i)+'<span class="rp-mini">'+rpStats(i).pct+'%</span></td><td>'+rpLeftCell(i)+'</td><td>'+statusBadge(i.status)+'</td><td style="white-space:nowrap"><button class="btn gold sm" data-rep="1" data-id="'+i.id+'" title="'+QDT("عرض التقرير الشامل","Open full report")+'">'+QDT("تقرير","Report")+'</button> <button class="btn sm" data-repdl="'+i.id+'" title="'+QDT("تحميل PDF / طباعة","Download PDF / Print")+'">PDF</button> <button class="btn ghost sm" data-reph="'+i.id+'" title="'+QDT("تنزيل نسخة HTML","Download HTML")+'">'+svg(I.down,2)+'</button>'+qdrstBtn(i)+'</td></tr>').join("")+'</tbody></table></div></div></div>'
+     list.map(i=>'<tr class="row-link" data-act="openInjury" data-id="'+i.id+'"><td><div class="pname">'+avatar(player(i.playerId)||{first:"?",last:""},"sm")+'<span>'+esc(pname(i.playerId))+medChip(i.playerId)+'</span></div>'+rpSinceChip(i)+'</td><td>'+fmtDate(i.date)+'</td><td>'+esc(tr(i.type))+'</td><td class="muted tiny">'+esc((i.bodySites||"—").split(",").slice(0,2).map(site).join(", "))+'</td><td>'+rpPathMini(i)+'</td><td style="min-width:160px">'+rpBar(i)+'</td><td>'+rpLeftCell(i)+'</td><td>'+statusBadge(i.status)+'</td><td style="white-space:nowrap"><button class="btn gold sm" data-rep="1" data-id="'+i.id+'" title="'+QDT("عرض التقرير الشامل","Open full report")+'">'+QDT("تقرير","Report")+'</button> <button class="btn sm" data-repdl="'+i.id+'" title="'+QDT("تحميل PDF / طباعة","Download PDF / Print")+'">PDF</button> <button class="btn ghost sm" data-reph="'+i.id+'" title="'+QDT("تنزيل نسخة HTML","Download HTML")+'">'+svg(I.down,2)+'</button>'+qdrstBtn(i)+'</td></tr>').join("")+'</tbody></table></div></div></div>'
      :emptyState(I.injury,T("inv_none"),T("inv_none_sub"),'<button class="btn gold" data-act="newInjury">'+svg(I.plus,2.2)+' '+T("btn_record_injury")+'</button>'));
   const q=$("#iSearch"); if(q){let t;q.oninput=e=>{clearTimeout(t);t=setTimeout(()=>{injFilter.q=e.target.value;REND.injuries();const n=$("#iSearch");n.focus();n.setSelectionRange(n.value.length,n.value.length);},250);};}
   $("#iStatus").onchange=e=>{injFilter.status=e.target.value;REND.injuries();};
@@ -8041,8 +8086,8 @@ function rpStageTable(i){
     '</div>'+
     '<div style="display:flex;align-items:center;gap:10px;margin:12px 0 4px">'+
       '<b class="tiny">'+T("rp_chain_progress")+'</b>'+
-      '<span style="flex:1;height:9px;background:#eef2f6;border-radius:999px;overflow:hidden;display:block"><span style="display:block;height:9px;width:'+pct+'%;background:linear-gradient(90deg,#7E0E14,#15803d)"></span></span>'+
-      '<b class="tiny">'+pct+'%</b></div>'+
+      '<span class="rp-prog-track" style="max-width:420px"><span class="rp-prog-fill'+(pct>=100?' full':'')+'" style="width:'+pct+'%"></span></span>'+
+      '<b class="rp-prog-pct'+(pct>=100?' full':'')+'">'+pct+'%</b></div>'+
     '<div class="table-wrap" style="margin-top:6px"><table><thead><tr><th>'+T("rp_stage_l")+'</th><th>'+T("f_stage_date")+'</th><th>'+T("rp_phase")+'</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+
     '<div class="tiny muted" style="margin-top:8px">'+T("rp_firstmatch_hint")+'</div>'+
   '</div>';
@@ -8134,12 +8179,21 @@ function rpPathMini(i,s){
   var st=rpSteps(i,s||rpStats(i));
   var cur=st.filter(function(x){return x.state==="on";})[0];
   if(!cur) cur=st[st.length-1];
+  var doneN=0; st.forEach(function(x){ if(x.state==="done") doneN++; });
+  var allDone=(doneN>=st.length)||(rpPctOf(i,s)>=100);
+  if(allDone) doneN=st.length;
   var inner="";
   for(var j=0;j<st.length;j++){
-    inner += '<i class="rp-dot '+(st[j].state||"")+(st[j].state==="on"?" cur":"")+'" title="'+esc(T(st[j].k))+'"></i>';
-    if(j<st.length-1) inner += '<u class="rp-lnk '+(st[j+1].state?"on":"")+'"></u>';
+    var stt=(allDone?"done":(st[j].state||""));
+    var tip=T(st[j].k)+(st[j].dt?" \u00b7 "+fmtDate(st[j].dt,1):"");
+    inner += '<span class="rp-node '+stt+'" title="'+esc(tip)+'"></span>';
+    if(j<st.length-1){
+      var nx=(st[j+1].state||"");
+      inner += '<u class="rp-seg '+(stt==="done"?"done":(stt==="on"?"on":""))+'"></u>';
+    }
   }
-  return '<div class="rp-path">'+inner+'</div><div class="rp-path-lbl">'+esc(T(cur.k))+'</div>';
+  return '<div class="rp-path2">'+inner+'</div>'+
+    '<span class="rp-now'+(allDone?" full":"")+'">'+esc(T(cur.k))+'</span>';
 }
 function rpPathFull(i,s){
   s=s||rpStats(i);
@@ -8240,9 +8294,24 @@ function rpStats(i){
           surgSince:surgSince,physioSince:physioSince,assessSince:assessSince,motorSince:motorSince,
           has:!!(total||rtp||grp||fit||surgSince!==null||physioSince!==null)};
 }
+function rpPctOf(i,s){
+  s=s||rpStats(i);
+  if(s.healed) return 100;
+  var st=null; try{ st=rpSteps(i,s); }catch(e){ st=null; }
+  if(st&&st.length>1){
+    var done=0; st.forEach(function(x){ if(x.state==="done") done++; });
+    var p=Math.round(done/(st.length-1)*100);
+    if(p>99) p=99; if(p<0) p=0;
+    return p;
+  }
+  var q=Number(s.pct)||0; if(q<0)q=0; if(q>99)q=99; return q;
+}
 function rpBar(i,s){
   s=s||rpStats(i);
-  return '<div class="rp-bar" data-rp-bar data-inj="'+esc(i.date||"")+'" data-rtp="'+esc(s.rtp||"")+'" data-total="'+s.total+'"><div class="rp-fill" data-rp-fill style="width:'+s.pct+'%"></div></div>';
+  var p=rpPctOf(i,s), full=(p>=100);
+  return '<div class="rp-prog" data-rp-bar data-inj="'+esc(i.date||"")+'" data-rtp="'+esc(s.rtp||"")+'" data-total="'+s.total+'">'+
+    '<span class="rp-prog-track"><span class="rp-prog-fill'+(full?' full':'')+'" data-rp-fill style="width:'+p+'%"></span></span>'+
+    '<b class="rp-prog-pct'+(full?' full':'')+'" data-rp-pct>'+p+'%</b></div>';
 }
 function rpCounter(i,s){
   s=s||rpStats(i);
@@ -8283,12 +8352,12 @@ function rpDashCard(){
     var num = s.has
       ? '<div class="rp-days" data-rp-left data-rtp="'+esc(s.rtp||"")+'" data-inj="'+esc(i.date||"")+'">'+(s.left!==null?(s.left>0?s.left:0):"\u2014")+'</div><div class="tiny muted">'+T("rp_days_left")+'</div>'+rpBattery(i,s)
       : '<div class="rp-days" style="color:var(--slate)">\u2014</div><div class="tiny muted">'+T("rp_none")+'</div>';
-    var pctTxt = s.has ? (s.pct+"%") : "\u2014";
+    var pctTxt = s.has ? (rpPctOf(i,s)+"%") : "\u2014";
     return '<div class="rp-trackrow"><div class="who"><div class="pname">'+avatar(player(i.playerId)||{first:"?",last:""},"sm")+
         '<span>'+esc(pname(i.playerId))+medChip(i.playerId)+'</span> <span class="badge '+ph.cls+'">'+rpPhaseTxt(ph)+'</span></div>'+
       '<div class="tiny muted">'+esc(tr(i.type))+' \u00b7 '+esc(String(i.bodySites||"\u2014").split(",")[0])+'</div>'+rpPathMini(i,s)+
-      '<div class="rp-bar" data-rp-bar data-inj="'+esc(i.date||"")+'" data-rtp="'+esc(s.rtp||"")+'" data-total="'+s.total+'" style="max-width:360px"><div class="rp-fill" data-rp-fill style="width:'+s.pct+'%"></div></div>'+
-      '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span class="rp-mini" data-rp-pct data-rtp="'+esc(s.rtp||"")+'" data-inj="'+esc(i.date||"")+'" data-total="'+s.total+'">'+T("rp_progress")+': '+pctTxt+'</span>'+
+      '<div style="max-width:380px">'+rpBar(i,s)+'</div>'+
+      '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">'+
         (s.has?(s.total?'<span class="rp-mini">'+T("rp_day_x").replace("{a}",String(Math.min(s.since,s.total))).replace("{b}",String(s.total))+'</span>':''):'')+
         '<span class="rp-mini" style="color:var(--slate)">'+T("rp_rtp")+': '+(s.rtp?esc(fmtDate(s.rtp,1)):T("rp_none"))+'</span></div>'+
       (!s.has?'<button class="btn ghost sm" style="margin-top:6px" data-act="editInjury" data-id="'+i.id+'">'+T("rp_set")+'</button>':'')+
@@ -8311,12 +8380,12 @@ function rpTick(){
       var inj=el.getAttribute("data-inj"), rtp=el.getAttribute("data-rtp"), tot=Number(el.getAttribute("data-total"))||0;
       if(!tot&&rtp) tot=daysBetween(inj,rtp);
       var _ci=null; try{ _ci=(S.injuries||[]).filter(function(z){ return String(z.date||"").slice(0,10)===String(inj||"").slice(0,10); })[0]||null; }catch(e){}
-      var _cp=(_ci?qdChainPct(_ci):null);
+      var _cp=(_ci?rpPctOf(_ci):null);
       if(_cp===null&&tot<=0) return;
       var pct=(_cp!==null?_cp:Math.max(0,Math.min(100,Math.round(daysBetween(inj)/tot*100))));
-      var l=rpDaysTo(rtp); if(l!==null&&l<=0) pct=100;
-      var f=el.querySelector("[data-rp-fill]"); if(f) f.style.width=pct+"%";
-      var pc=el.querySelector("[data-rp-pct]"); if(pc) pc.textContent=T("rp_progress")+": "+pct+"%";
+      var f=el.querySelector("[data-rp-fill]"); if(f){ f.style.width=pct+"%"; if(f.classList) f.classList.toggle("full",pct>=100); }
+      var pc=el.querySelector("[data-rp-pct]");
+      if(pc){ if(pc.classList&&pc.classList.contains("rp-prog-pct")){ pc.textContent=pct+"%"; pc.classList.toggle("full",pct>=100); } else { pc.textContent=T("rp_progress")+": "+pct+"%"; } }
     });
     document.querySelectorAll("[data-rp-batt]").forEach(function(el){
       var rtp=el.getAttribute("data-rtp"), tot=Number(el.getAttribute("data-total"))||0;
@@ -11918,7 +11987,7 @@ on("clShift",function(d){ var x=new Date(cDay+"T00:00"); x.setDate(x.getDate()+N
 on("clToday",function(){ cDay=todayKey(); REND.clinic(); });
 on("clPick",function(){ var v=$("#clDate"); if(v&&v.value) { cDay=v.value; REND.clinic(); } });
 document.addEventListener("change",function(e){ if(e.target&&e.target.id==="clDate"&&e.target.value){ cDay=e.target.value; REND.clinic(); } });
-on("newSession",function(){ sessionForm(null); });
+on("newSession",function(){ var f=qdSessOpener(); if(f){ f(null); } else { try{ toast(QDT("تعذّر فتح نموذج الجلسة","Could not open the session form"),"bad"); }catch(e){} } });
 on("editSession",function(d){ var s=S.sessions.find(function(x){return x.id===d.id;}); if(s) sessionForm(s); });
 on("saveSession",function(d){
   var v=collect($("#modalCard"));
@@ -14241,7 +14310,7 @@ function doLogin(){
   var em=(document.getElementById("qcEmail").value||"").trim();
   var pw=document.getElementById("qcPass").value||"";
   if(!em||!pw){ view("login",T10("msg_fill_login")); return; }
-  if(window.__qdLoggingIn){ return; }              /* v11-113: منع الضغط المزدوج */
+  if(window.__qdLoggingIn){ return; }              /* v11-116: منع الضغط المزدوج */
   window.__qdLoggingIn=true;
   var btn=document.querySelector("#qcGo,#loginBtn,.qc-go,button[onclick*='doLogin']");
   var oldTxt=btn?btn.textContent:"";
@@ -15331,7 +15400,7 @@ try{
 }catch(e){}
 
 /* QDBK-END */
-(function(){function mk(){try{var b=document.createElement("div");b.id="qdrBadge";b.textContent="v11-113 · FAST-BOOT";b.style.cssText="position:fixed;left:8px;bottom:8px;z-index:2147483647;background:#fff;color:#7E0E14;border:1px solid #7E0E14;font:800 11px/1.5 system-ui;padding:3px 9px;border-radius:20px;pointer-events:none;opacity:.97;box-shadow:0 2px 8px rgba(0,0,0,.35)";document.body.appendChild(b);}catch(e){}}if(document.body)mk();else setTimeout(mk,600);})();
+(function(){function mk(){try{var b=document.createElement("div");b.id="qdrBadge";b.textContent="v11-116 · SESSION-FIX";b.style.cssText="position:fixed;left:8px;bottom:8px;z-index:2147483647;background:#fff;color:#7E0E14;border:1px solid #7E0E14;font:800 11px/1.5 system-ui;padding:3px 9px;border-radius:20px;pointer-events:none;opacity:.97;box-shadow:0 2px 8px rgba(0,0,0,.35)";document.body.appendChild(b);}catch(e){}}if(document.body)mk();else setTimeout(mk,600);})();
 /* ---- PWA: install as an app on Android and iPhone / iPad ---- */
 (function(){
   Object.assign(STR.en,{
@@ -23889,6 +23958,7 @@ try{
 /* ---- QDHANG107-END ---- */
 
 </script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 </body>
