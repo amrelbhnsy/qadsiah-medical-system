@@ -411,7 +411,7 @@ html[dir="rtl"] .filters .select{padding-left:34px}
 .rp-path-lbl{font-size:10.5px;font-weight:800;margin-top:3px;color:var(--slate);white-space:nowrap}
 .rp-batt{display:inline-flex;align-items:center;gap:5px}
 .rp-batt b{font-weight:900;line-height:1}
-/* ===== v11-141 · DEL-REAL — مسار اللاعب وشريط الإنجاز ===== */
+/* ===== v11-142 · MATCH-CLEAN — مسار اللاعب وشريط الإنجاز ===== */
 .rp-path2{display:flex;align-items:center;margin:5px 0 6px;min-width:150px}
 .rp-node{width:13px;height:13px;border-radius:50%;flex:0 0 auto;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;background:#fff;border:2px solid #D3D9E1;transition:background .25s,border-color .25s,box-shadow .25s}
 .rp-node.done{background:#15803D;border-color:#15803D}
@@ -3108,7 +3108,7 @@ function qdajTmrwK(){
   var d=new Date(); d.setDate(d.getDate()+1); function p(n){ return (n<10?"0":"")+n; }
   return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate());
 }
-/* ---- v11-141 · جسر فتح نموذج الجلسة (يحلّ مشكلة عدم فتح النموذج عند اختيار اليوم/غدًا) ---- */
+/* ---- v11-142 · جسر فتح نموذج الجلسة (يحلّ مشكلة عدم فتح النموذج عند اختيار اليوم/غدًا) ---- */
 function qdSessOpener(){
   try{ if(typeof window.qdOpenSessionForm==="function") return window.qdOpenSessionForm; }catch(e){}
   try{ if(typeof sessionForm==="function") return sessionForm; }catch(e){}
@@ -6955,7 +6955,7 @@ function qdlaStalled(ms){
 /* ---- الفتح المضمون: الوضع المحلي ثم إعادة التحميل (مرة واحدة في الجلسة) ---- */
 function qdlaAutoLocal(){
   try{
-    try{ if(localStorage.getItem("qd_ok_cloud")==="1") return false; }catch(e){}   /* v11-141 */
+    try{ if(localStorage.getItem("qd_ok_cloud")==="1") return false; }catch(e){}   /* v11-142 */
     try{ if(String(location.search||"").indexOf("qdcloud=1")>-1) return false; }catch(e){}
     if(qdlaFlagOn()) return false;
     if(document.getElementById("qdl2Box")) {} /* اللوحة تعمل — لا حاجة للإجبار */
@@ -10506,9 +10506,11 @@ function fxWindowList(w){
     return true;
   });
 }
-function fxAbsentees(f){ var out=[];
+function fxAbsentees(f){ var out=[], seen={};
   (S.injuries||[]).forEach(function(i){ var w=fxWindow(i); if(!w) return;
     if(f.date<w.from) return; if(w.to){ if(f.date>w.to) return; } else { if(f.date>todayKey()) return; }
+    var k=String(i.playerId||i.id||pname(i.playerId));
+    if(seen[k]) return; seen[k]=1;
     out.push({name:pname(i.playerId),inj:i}); });
   return out;
 }
@@ -10622,14 +10624,17 @@ function fxInjBlock(m){
   var h='<table class="fx-mini"><thead><tr><th>'+esc(T("f_player"))+'</th><th>'+esc(T("m_minute"))+'</th><th>'+
     esc(T("m_type"))+'</th><th>'+esc(T("m_site"))+'</th><th>'+esc(T("m_sev"))+'</th><th>'+esc(T("m_action"))+
     '</th><th>'+esc(T("m_days"))+'</th></tr></thead><tbody>';
+  var _seen={};
   inj.forEach(function(x){
+    var _k=String(x.playerId||x.id); if(_seen[_k]) return; _seen[_k]=1;
     h+='<tr><td><b>'+esc(pname(x.playerId))+'</b></td><td>'+esc(x.minute)+"&#39;</td><td>"+esc(tr(x.type))+
       '</td><td>'+esc(String(x.bodySites||"—").split(",").filter(Boolean).map(site).join(", "))+
       '</td><td>'+esc(tr(x.sev))+'</td><td>'+esc(tr(x.action))+'</td><td>'+esc(x.days)+'</td></tr>'; });
   return h+'</tbody></table>';
 }
 function fxRowHtml(f){
-  var tk=todayKey(), m=fxMatch(f.r), mi=m?((m.injuries||[]).length):0;
+  var tk=todayKey(), m=fxMatch(f.r), mi=0;
+  try{ var _s={}; ((m&&m.injuries)||[]).forEach(function(x){ var k=String(x.playerId||x.id); if(!_s[k]){ _s[k]=1; mi++; } }); }catch(e){}
   var logo=(S.oppLogos||{})[f.opp];
   var wx=(typeof qdWxGet==="function")?qdWxGet(qdWxKey(f)):null;
   var ab=fxAbsentees(f), past=(f.date<tk), open=(fxOpen===Number(f.r));
@@ -14315,7 +14320,7 @@ function doLogin(){
   var em=(document.getElementById("qcEmail").value||"").trim();
   var pw=document.getElementById("qcPass").value||"";
   if(!em||!pw){ view("login",T10("msg_fill_login")); return; }
-  if(window.__qdLoggingIn){ return; }              /* v11-141: منع الضغط المزدوج */
+  if(window.__qdLoggingIn){ return; }              /* v11-142: منع الضغط المزدوج */
   window.__qdLoggingIn=true;
   var btn=document.querySelector("#qcGo,#loginBtn,.qc-go,button[onclick*='doLogin']");
   var oldTxt=btn?btn.textContent:"";
@@ -15405,7 +15410,7 @@ try{
 }catch(e){}
 
 /* QDBK-END */
-(function(){function mk(){try{var b=document.createElement("div");b.id="qdrBadge";b.textContent="v11-141 · DEL-REAL";b.style.cssText="position:fixed;left:8px;bottom:8px;z-index:2147483647;background:#fff;color:#7E0E14;border:1px solid #7E0E14;font:800 11px/1.5 system-ui;padding:3px 9px;border-radius:20px;pointer-events:none;opacity:.97;box-shadow:0 2px 8px rgba(0,0,0,.35)";document.body.appendChild(b);}catch(e){}}if(document.body)mk();else setTimeout(mk,600);})();
+(function(){function mk(){try{var b=document.createElement("div");b.id="qdrBadge";b.textContent="v11-142 · MATCH-CLEAN";b.style.cssText="position:fixed;left:8px;bottom:8px;z-index:2147483647;background:#fff;color:#7E0E14;border:1px solid #7E0E14;font:800 11px/1.5 system-ui;padding:3px 9px;border-radius:20px;pointer-events:none;opacity:.97;box-shadow:0 2px 8px rgba(0,0,0,.35)";document.body.appendChild(b);}catch(e){}}if(document.body)mk();else setTimeout(mk,600);})();
 /* ---- PWA: install as an app on Android and iPhone / iPad ---- */
 (function(){
   Object.assign(STR.en,{
@@ -23987,7 +23992,7 @@ try{
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous">
 /* =====================================================================
-   v11-141 · DEL-REAL — توحيد حالة اليوم (مباراة · تدريب · راحة · إجازة)
+   v11-142 · MATCH-CLEAN — توحيد حالة اليوم (مباراة · تدريب · راحة · إجازة)
    بين: لوحة التحكم · البرنامج الأسبوعي · التقويم · جدول المباريات
    ===================================================================== */
 (function(){
@@ -24091,7 +24096,7 @@ try{
 
 <script>
 /* =====================================================================
-   v11-141 · DEL-REAL
+   v11-142 · MATCH-CLEAN
    إصلاح التجمد: يُبنى الهيكل مرة واحدة فقط، ويُحدَّث محتواه الداخلي
    (لا إعادة بناء للجذر ⇒ لا يفقد الهوية ولا يعلق)
    ===================================================================== */
@@ -24546,6 +24551,23 @@ try{
         }
       }
     }catch(e){}
+    /* احتياطي: السجل موجود لكن المطابقة فشلت → امسح محتوى التقرير نفسه */
+    if(!n){
+      try{
+        var arr=MTS()||[];
+        for(var q=0;q<arr.length;q++){
+          var mm=arr[q]; if(!mm) continue;
+          var fq=null; try{ fq=fxOf(r); }catch(e){}
+          var sameDate=fq&&(String(mm.date||"").slice(0,10)===String(fq.date||"").slice(0,10));
+          var sameOpp=fq&&String(mm.opponent||"").trim()===String(fq.opp||"").trim();
+          if(!(sameDate||sameOpp)) continue;
+          if((mm.injuries||[]).length||(mm.starters||[]).length||(mm.subs||[]).length||(mm.extraSquad||[]).length||mm.lineup){
+            mm.injuries=[]; mm.starters=[]; mm.subs=[]; mm.extraSquad=[]; mm.minutes={}; mm.lineup=null;
+            n++; 
+          }
+        }
+      }catch(e){}
+    }
     SAVE();
     return n;
   }
@@ -24710,8 +24732,26 @@ try{
       n+=((m.starters||[]).length)+((m.subs||[]).length)+((m.extraSquad||[]).length); }
     return n;
   }
+  function dedupeAbs(){
+    try{
+      var nodes=document.querySelectorAll(".fx-abs");
+      for(var i=0;i<nodes.length;i++){
+        var n=nodes[i], txt=n.textContent||"", p=txt.indexOf(":");
+        if(p<0) continue;
+        var head=txt.slice(0,p+1), body=txt.slice(p+1);
+        var parts=body.split(/[،,]/), seen={}, out=[];
+        for(var j=0;j<parts.length;j++){
+          var nm=parts[j].replace(/^\s+|\s+$/g,""); if(!nm) continue;
+          if(seen[nm]) continue; seen[nm]=1; out.push(nm);
+        }
+        var fresh=head+" "+out.join("، ");
+        if(fresh!==txt) n.textContent=fresh;
+      }
+    }catch(e){}
+  }
   function decorate(){
     try{
+      dedupeAbs();
       var acts=document.querySelectorAll(".fx-act");
       for(var i=0;i<acts.length;i++){
         var a=acts[i];
@@ -24975,7 +25015,14 @@ try{
     try{ var w=window.open("","_blank"); if(!w){ try{ toast(Q("اسمح بالنوافذ المنبثقة","Allow pop-ups"),"bad"); }catch(e){} return; }
       w.document.open(); w.document.write(h); w.document.close(); }catch(e){}
   }
-  var __QD139API={open:open,close:close,full:full,decorate:decorate,edit:editReport,clear:clearReport,
+  function dump(){
+    var out=[], arr=[]; try{ arr=MTS(); }catch(e){}
+    for(var i=0;i<arr.length;i++){ var m=arr[i];
+      out.push({i:i,id:m.id,fx:m.fx,date:m.date,opp:m.opponent,inj:(m.injuries||[]).length,pl:((m.starters||[]).length+(m.subs||[]).length+(m.extraSquad||[]).length)}); }
+    try{ console.table(out); }catch(e){ console.log(out); }
+    return out;
+  }
+  var __QD139API={open:open, dump:dump,close:close,full:full,decorate:decorate,edit:editReport,clear:clearReport,
     del:del, doClear:function(r){ return delRound(r); },
     editNow:function(r){ setTimeout(function(){ try{ editReport(r); }catch(e){} },0); },
     clearNow:function(r){ del(r); }};
