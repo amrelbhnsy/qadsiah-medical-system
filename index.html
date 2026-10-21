@@ -411,7 +411,7 @@ html[dir="rtl"] .filters .select{padding-left:34px}
 .rp-path-lbl{font-size:10.5px;font-weight:800;margin-top:3px;color:var(--slate);white-space:nowrap}
 .rp-batt{display:inline-flex;align-items:center;gap:5px}
 .rp-batt b{font-weight:900;line-height:1}
-/* ===== v11-149 · NO-HUB — مسار اللاعب وشريط الإنجاز ===== */
+/* ===== v11-150 · ENR-DATE — مسار اللاعب وشريط الإنجاز ===== */
 .rp-path2{display:flex;align-items:center;margin:5px 0 6px;min-width:150px}
 .rp-node{width:13px;height:13px;border-radius:50%;flex:0 0 auto;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;background:#fff;border:2px solid #D3D9E1;transition:background .25s,border-color .25s,box-shadow .25s}
 .rp-node.done{background:#15803D;border-color:#15803D}
@@ -7153,6 +7153,14 @@ function cuBatchCard(b){
     dates+=meta(Q("فترة المعسكر","Camp period"),dr);
   }
   if(cuHasMatch(b.kind)&&b.matchDate) dates+=meta(Q("تاريخ المباراة","Match date"),fmtDate(b.matchDate,0));
+  /* فترة التدريب / أي التحاق بتاريخ فقط */
+  if(!cuHasCamp(b.kind)&&!cuHasMatch(b.kind)&&(b.dateFrom||b.dateTo)){
+    var dt=(b.dateFrom?fmtDate(b.dateFrom,0):"—")+(b.dateTo?(" → "+fmtDate(b.dateTo,0)):"");
+    dates+=meta(Q("تاريخ التدريب","Training date"),dt);
+  }
+  if(!cuHasCamp(b.kind)&&!cuHasMatch(b.kind)&&!b.dateFrom&&!b.dateTo&&b.matchDate){
+    dates+=meta(Q("التاريخ","Date"),fmtDate(b.matchDate,0));
+  }
   var injuries=b.players.filter(function(x){return x.injured==="YES";}).length;
 
   var h='<div class="qde-card" data-team="'+esc(b.hostTeam||"")+'" data-kind="'+esc(b.kind||"")+'">'+
@@ -7161,7 +7169,10 @@ function cuBatchCard(b){
       '<span class="qde-ic">'+svg(cuHasMatch(b.kind)?I.ball:I.calendar,2)+'</span>'+
       '<div class="qde-ttl">'+
         '<b>'+Q("التحاق","Enrollment")+' — '+esc(cuKindAr(b.kind))+'</b>'+
-        '<span class="qde-team">'+esc(cuLabel(b.hostTeam))+(b.opponent&&cuHasMatch(b.kind)?(' · '+Q("ضد ","vs ")+esc(b.opponent)):'')+'</span>'+
+        '<span class="qde-team">'+esc(cuLabel(b.hostTeam))+(b.opponent&&cuHasMatch(b.kind)?(' · '+Q("ضد ","vs ")+esc(b.opponent)):'')+
+          (function(){var d=(b.matchDate||b.campDate||b.dateFrom||"");
+            try{ d=cuBatches().filter(function(x){return x.id===b.id;})[0]||b; d=(b.matchDate||b.campDate||b.dateFrom||""); }catch(e){}
+            return d?(' · '+esc(fmtDate(d,0))):''; })()+'</span>'+
       '</div>'+
       '<div class="qde-nums">'+
         '<div class="qde-n"><b>'+b.players.length+'</b><i>'+Q("لاعب","players")+'</i></div>'+
@@ -7192,7 +7203,9 @@ function cuBatchCard(b){
     b.players.slice().sort(function(x,y){ return cuRecMin(y)-cuRecMin(x); }).map(function(r){
       var pp=player(r.playerId)||{first:"",last:""}, ab=""; try{ ab=posAbbr(pp.pos); }catch(e){}
       var mn=cuRecMin(r);
-      return '<tr><td><div class="pname">'+avatar(pp,"sm")+'<span>'+esc(pname(r.playerId))+'</span></div></td>'+
+      var rowDate=(r.matchDate||r.campDate||r.dateFrom||b.matchDate||b.campDate||b.dateFrom||"");
+      return '<tr><td><div class="pname">'+avatar(pp,"sm")+'<span class="qde-nmw"><b>'+esc(pname(r.playerId))+'</b>'+
+        (rowDate?'<s class="qde-ndate">'+esc(fmtDate(rowDate,0))+'</s>':'')+'</span></div></td>'+
         '<td><span class="qde-pos">'+esc((ab&&ab!=="\u2014")?ab:tr(pp.pos||""))+'</span></td>'+
         '<td class="qde-dim">'+esc(prDobYear(pp))+'</td>'+
         '<td>'+(cuHasMatch(b.kind)?(mn>0?'<span class="qde-min">'+mn+'<i>'+Q("د","′")+'</i></span>':'<span class="qde-no">'+Q("لم يشارك","DNP")+'</span>'):'<span class="qde-dim">'+Q("غير محتسبة","n/a")+'</span>')+'</td>'+
@@ -15567,7 +15580,7 @@ try{
 }catch(e){}
 
 /* QDBK-END */
-(function(){function mk(){try{var b=document.createElement("div");b.id="qdrBadge";b.textContent="v11-149 · NO-HUB";b.style.cssText="position:fixed;left:8px;bottom:8px;z-index:2147483647;background:#fff;color:#7E0E14;border:1px solid #7E0E14;font:800 11px/1.5 system-ui;padding:3px 9px;border-radius:20px;pointer-events:none;opacity:.97;box-shadow:0 2px 8px rgba(0,0,0,.35)";document.body.appendChild(b);}catch(e){}}if(document.body)mk();else setTimeout(mk,600);})();
+(function(){function mk(){try{var b=document.createElement("div");b.id="qdrBadge";b.textContent="v11-150 · ENR-DATE";b.style.cssText="position:fixed;left:8px;bottom:8px;z-index:2147483647;background:#fff;color:#7E0E14;border:1px solid #7E0E14;font:800 11px/1.5 system-ui;padding:3px 9px;border-radius:20px;pointer-events:none;opacity:.97;box-shadow:0 2px 8px rgba(0,0,0,.35)";document.body.appendChild(b);}catch(e){}}if(document.body)mk();else setTimeout(mk,600);})();
 /* ---- PWA: install as an app on Android and iPhone / iPad ---- */
 (function(){
   Object.assign(STR.en,{
@@ -24152,7 +24165,7 @@ try{
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous">
 /* =====================================================================
-   v11-149 · NO-HUB — توحيد حالة اليوم (مباراة · تدريب · راحة · إجازة)
+   v11-150 · ENR-DATE — توحيد حالة اليوم (مباراة · تدريب · راحة · إجازة)
    بين: لوحة التحكم · البرنامج الأسبوعي · التقويم · جدول المباريات
    ===================================================================== */
 (function(){
@@ -24256,7 +24269,7 @@ try{
 
 <script>
 /* =====================================================================
-   v11-149 · NO-HUB
+   v11-150 · ENR-DATE
    إصلاح التجمد: يُبنى الهيكل مرة واحدة فقط، ويُحدَّث محتواه الداخلي
    (لا إعادة بناء للجذر ⇒ لا يفقد الهوية ولا يعلق)
    ===================================================================== */
@@ -25582,6 +25595,14 @@ body{padding-bottom:56px}
   setInterval(kill,2500);
 })();
 </script>
+
+
+<style id="qdEnrDate150">
+.qde-nmw{display:flex;flex-direction:column;min-width:0;line-height:1.3}
+.qde-nmw b{font-weight:800;font-size:11.5px;color:#241a16;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.qde-ndate{font-style:normal;font-size:9.5px;font-weight:700;color:#8a827a;margin-top:1px;letter-spacing:.1px}
+tr:hover .qde-ndate{color:#7E0E14}
+</style>
 
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 </body>
