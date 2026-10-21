@@ -411,7 +411,7 @@ html[dir="rtl"] .filters .select{padding-left:34px}
 .rp-path-lbl{font-size:10.5px;font-weight:800;margin-top:3px;color:var(--slate);white-space:nowrap}
 .rp-batt{display:inline-flex;align-items:center;gap:5px}
 .rp-batt b{font-weight:900;line-height:1}
-/* ===== v11-159 · STABLE — مسار اللاعب وشريط الإنجاز ===== */
+/* ===== v11-160 · SINGLE — مسار اللاعب وشريط الإنجاز ===== */
 .rp-path2{display:flex;align-items:center;margin:5px 0 6px;min-width:150px}
 .rp-node{width:13px;height:13px;border-radius:50%;flex:0 0 auto;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;background:#fff;border:2px solid #D3D9E1;transition:background .25s,border-color .25s,box-shadow .25s}
 .rp-node.done{background:#15803D;border-color:#15803D}
@@ -12712,7 +12712,7 @@ function syncAll(){
       if(!rec.mi) rec.mi={matchId:m.id,miId:x.id,autoStatus:true};
       if(rec.mi.autoStatus!==false){ rec.status=statusFromDays(x.days); rec.daysOut=Number(x.days)||0; }
       x.status=rec.status;
-      if(fresh){ var _blk=(window.QD159&&window.QD159.dead&&window.QD159.dead(rec))||(window.QD156&&window.QD156.blocked&&window.QD156.blocked(rec)); if(!_blk){ S.injuries.push(rec); created++; } } else updated++;
+      if(fresh){ var _blk=(window.QD160&&window.QD160.dead&&window.QD159.dead(rec))||(window.QD156&&window.QD156.blocked&&window.QD156.blocked(rec)); if(!_blk){ S.injuries.push(rec); created++; } } else updated++;
     });
   });
   var before=S.injuries.length;
@@ -14651,11 +14651,11 @@ function fetchState(){
       /* لدينا تعديلات غير مرفوعة: ادمجها (المحلية تفوز) وارفعها لاحقًا بدل فقدانها */
       var m=Object.assign({},srv||{},loc);
       KEYS.forEach(function(k){ m[k]=mergeById(srv?srv[k]:[],loc[k]); });
-      try{ if(window.QD159&&window.QD159.scrub) window.QD159.scrub(m); }catch(e){}
+      try{ if(window.QD160&&window.QD160.scrub) window.QD159.scrub(m); }catch(e){}
       try{ localStorage.setItem(LSKEY,JSON.stringify(m)); }catch(e){}
       stateEmpty=false;
     } else {
-      try{ var b0=srv||{}, l0=(loc||{}); var un=Object.assign({},b0,l0); KEYS.forEach(function(k){ un[k]=mergeById(b0[k]||[],l0[k]||[]); }); try{ if(window.QD159&&window.QD159.scrub) window.QD159.scrub(un); }catch(e){} localStorage.setItem(LSKEY,JSON.stringify(un)); }catch(e){}
+      try{ var b0=srv||{}, l0=(loc||{}); var un=Object.assign({},b0,l0); KEYS.forEach(function(k){ un[k]=mergeById(b0[k]||[],l0[k]||[]); }); try{ if(window.QD160&&window.QD160.scrub) window.QD159.scrub(un); }catch(e){} localStorage.setItem(LSKEY,JSON.stringify(un)); }catch(e){}
     }
   });
 }
@@ -15623,7 +15623,7 @@ try{
 }catch(e){}
 
 /* QDBK-END */
-(function(){function mk(){try{var b=document.createElement("div");b.id="qdrBadge";b.textContent="v11-159 · STABLE";b.style.cssText="position:fixed;left:8px;bottom:8px;z-index:2147483647;background:#fff;color:#7E0E14;border:1px solid #7E0E14;font:800 11px/1.5 system-ui;padding:3px 9px;border-radius:20px;pointer-events:none;opacity:.97;box-shadow:0 2px 8px rgba(0,0,0,.35)";document.body.appendChild(b);}catch(e){}}if(document.body)mk();else setTimeout(mk,600);})();
+(function(){function mk(){try{var b=document.createElement("div");b.id="qdrBadge";b.textContent="v11-160 · SINGLE";b.style.cssText="position:fixed;left:8px;bottom:8px;z-index:2147483647;background:#fff;color:#7E0E14;border:1px solid #7E0E14;font:800 11px/1.5 system-ui;padding:3px 9px;border-radius:20px;pointer-events:none;opacity:.97;box-shadow:0 2px 8px rgba(0,0,0,.35)";document.body.appendChild(b);}catch(e){}}if(document.body)mk();else setTimeout(mk,600);})();
 /* ---- PWA: install as an app on Android and iPhone / iPad ---- */
 (function(){
   Object.assign(STR.en,{
@@ -24208,7 +24208,7 @@ try{
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous">
 /* =====================================================================
-   v11-159 · STABLE — توحيد حالة اليوم (مباراة · تدريب · راحة · إجازة)
+   v11-160 · SINGLE — توحيد حالة اليوم (مباراة · تدريب · راحة · إجازة)
    بين: لوحة التحكم · البرنامج الأسبوعي · التقويم · جدول المباريات
    ===================================================================== */
 (function(){
@@ -24312,7 +24312,7 @@ try{
 
 <script>
 /* =====================================================================
-   v11-159 · STABLE
+   v11-160 · SINGLE
    إصلاح التجمد: يُبنى الهيكل مرة واحدة فقط، ويُحدَّث محتواه الداخلي
    (لا إعادة بناء للجذر ⇒ لا يفقد الهوية ولا يعلق)
    ===================================================================== */
@@ -25621,23 +25621,6 @@ body{padding-bottom:56px}
 <style id="qdNoHub149">
 #qd360Card,qd360Card,[data-qd360]{display:none !important;visibility:hidden !important;height:0 !important;overflow:hidden !important;margin:0 !important;padding:0 !important;border:0 !important}
 </style>
-<script>
-(function(){
-  if(window.__QD149) return; window.__QD149=1;
-  function kill(){
-    var e=document.querySelectorAll("#qd360Card,[data-qd360]");
-    for(var i=e.length-1;i>=0;i--){ try{ e[i].parentNode.removeChild(e[i]); }catch(x){} }
-  }
-  kill();
-  document.addEventListener("click",function(){ setTimeout(kill,60); setTimeout(kill,400); },true);
-  var mo=new MutationObserver(function(m){
-    for(var i=0;i<m.length;i++){ var n=m[i];
-      if(n.addedNodes&&n.addedNodes.length){ kill(); return; } }
-  });
-  try{ mo.observe(document.body,{childList:true,subtree:true}); }catch(e){}
-  setInterval(kill,2500);
-})();
-</script>
 
 
 <style id="qdEnrDate150">
@@ -25647,118 +25630,6 @@ body{padding-bottom:56px}
 tr:hover .qde-ndate{color:#7E0E14}
 </style>
 
-<script>
-(function(){
-  if(window.__QD151) return; window.__QD151=1;
-  var LSKEY="qadsiah_u18_v2", REG="qd_del_reg_v151";
-  var STORES=["players","injuries","illnesses","therapies","activities","documents","matches","callups","loads","wellness","growth","posture","screenings","promo","pcma","mental","complaints","clinic","equipment"];
-
-  function reg(){ try{ return JSON.parse(localStorage.getItem(REG)||"{}"); }catch(e){ return {}; } }
-  function saveReg(o){ try{ localStorage.setItem(REG,JSON.stringify(o)); }catch(e){} }
-  function addDel(k,id){
-    if(!k||id==null||id==="") return;
-    var o=reg(); if(!Array.isArray(o[k])) o[k]=[];
-    var v=String(id);
-    if(o[k].indexOf(v)<0) o[k].push(v);
-    saveReg(o);
-  }
-  function delSet(k){ var o={},r=reg(); (r[k]||[]).forEach(function(x){ o[String(x)]=1; }); return o; }
-  function st(){
-    try{ if(typeof window.QDSIGN_STATE==="function"){ var s=window.QDSIGN_STATE(); if(s) return s; } }catch(e){}
-    try{ if(window.QD_S) return window.QD_S; }catch(e){}
-    try{ return JSON.parse(localStorage.getItem(LSKEY)||"null"); }catch(e){ return null; }
-  }
-  function sv(){
-    try{ if(typeof window.QD_save==="function"){ window.QD_save(); return true; } }catch(e){}
-    try{ if(typeof window.save==="function"){ window.save(); return true; } }catch(e){}
-    return false;
-  }
-  function purge(){
-    var s=st(); if(!s) return 0;
-    var r=reg(), n=0;
-    Object.keys(r).forEach(function(k){
-      if(!Array.isArray(s[k])) return;
-      var d=delSet(k), before=s[k].length;
-      s[k]=s[k].filter(function(x){ return !(x&&x.id!=null&&d[String(x.id)]); });
-      n+=before-s[k].length;
-    });
-    return n;
-  }
-  function repaint(){
-    try{ if(window.REND&&typeof REND.injuries==="function") REND.injuries(); }catch(e){}
-    try{ if(window.REND&&typeof REND.dashboard==="function") REND.dashboard(); }catch(e){}
-  }
-
-  /* 1) تصفية أي كتابة للحالة عبر أي مصدر (السحابة/الدمج/اللقطات) بشواهد الحذف */
-  try{
-    var _set=localStorage.setItem.bind(localStorage);
-    localStorage.setItem=function(k,v){
-      if(k===LSKEY && typeof v==="string"){
-        try{
-          var o=JSON.parse(v);
-          if(o&&typeof o==="object"){
-            var d=Object.assign({}, (o.__del&&typeof o.__del==="object")?o.__del:{});
-            var r=reg();
-            Object.keys(r).forEach(function(kk){ d[kk]=(d[kk]||[]).concat(r[kk]); });
-            Object.keys(d).forEach(function(kk){
-              if(!Array.isArray(o[kk])) return;
-              var set={}; (d[kk]||[]).forEach(function(x){ set[String(x)]=1; });
-              o[kk]=o[kk].filter(function(x){ return !(x&&x.id!=null&&set[String(x.id)]); });
-            });
-            v=JSON.stringify(o);
-          }
-        }catch(e){}
-      }
-      return _set(k,v);
-    };
-  }catch(e){}
-
-  /* 2) حذف الإصابة: يعمل مباشرة بلا نافذة تأكيد + يسجّل شاهد الحذف */
-  document.addEventListener("click",function(ev){
-    var t=ev.target, b=null;
-    try{ b=t&&t.closest?t.closest('[data-act]'):null; }catch(e){}
-    if(!b) return;
-    var act=String(b.getAttribute("data-act")||""), id=b.getAttribute("data-id");
-    if(!act||id==null||id==="") return;
-
-    if(act==="delInjury"){
-      ev.preventDefault(); if(ev.stopPropagation) ev.stopPropagation();
-      addDel("injuries",id);
-      var s=st();
-      if(s){
-        if(Array.isArray(s.injuries)) s.injuries=s.injuries.filter(function(x){ return String(x.id)!==String(id); });
-        if(Array.isArray(s.documents)) s.documents=s.documents.filter(function(x){ return String(x.injuryId)!==String(id); });
-        sv();
-      }
-      try{ if(typeof closeModal==="function") closeModal(); }catch(e){}
-      repaint();
-      try{ toast("تم حذف الإصابة نهائيًا","warn"); }catch(e){}
-      return;
-    }
-
-    /* بقية أزرار الحذف: تسجيل شاهد فقط دون تغيير السلوك */
-    if(/^(del|cuDel|prClear|miDel)/.test(act)){
-      var s3=st(); if(!s3) return;
-      for(var i=0;i<STORES.length;i++){
-        var k=STORES[i];
-        if(Array.isArray(s3[k]) && s3[k].some(function(x){ return x&&String(x.id)===String(id); })) addDel(k,id);
-      }
-    }
-  },true);
-
-  /* 3) تنظيف الحالة بعد الإقلاع من أي سجل محذوف رجع بالدمج */
-  function sweep(){
-    var n=purge();
-    if(n>0){ sv(); repaint(); }
-  }
-  setTimeout(sweep,2200);
-  setTimeout(sweep,5200);
-  var t0=Date.now();
-  var iv=setInterval(function(){ if(Date.now()-t0>180000){ clearInterval(iv); return; } sweep(); },9000);
-
-  window.QD151={reg:reg,add:addDel,purge:purge,reset:function(){ saveReg({}); }};
-})();
-</script>
 
 
 <style id="qdKpiPro152">
@@ -25830,29 +25701,36 @@ tr:hover .qde-ndate{color:#7E0E14}
 }
 </style>
 
+
+
+
+
+
+
+
 <script>
 (function(){
-  if(window.__QD159) return; window.__QD159=1;
-  var LSKEY="qadsiah_u18_v2", REG="qd_kill_reg_v159";
+  if(window.__QD160) return; window.__QD160=1;
+  var LSKEY="qadsiah_u18_v2", REG="qd_kill_v160";
   function reg(){ try{ var o=JSON.parse(localStorage.getItem(REG)||"{}"); o.ids=o.ids||[]; o.fps=o.fps||[]; o.mk=o.mk||[]; return o; }catch(e){ return {ids:[],fps:[],mk:[]}; } }
   function saveReg(o){ try{ localStorage.setItem(REG,JSON.stringify(o)); }catch(e){} }
   function norm(t){ return String(t||"").toLowerCase().replace(/[^a-z\u0600-\u06FF]+/g," ").replace(/\s+/g," ").trim(); }
   function day(d){ return String(d||"").slice(0,10); }
   function fp(r){ return r?(String(r.playerId||"")+"|"+norm(r.type)+"|"+day(r.date)):""; }
-  function mk(r){ return (r&&r.mi)?(String(r.mi.matchId||"")+"|"+String(r.mi.miId||"")):""; }
   function put(a,v){ v=String(v||""); if(!v||v==="|") return a; if(a.indexOf(v)<0) a.push(v); return a; }
   function addKill(r){
     var o=reg();
     o.ids=put(o.ids,r&&r.id); o.fps=put(o.fps,fp(r));
-    var m=mk(r); if(m) o.mk=put(o.mk,m);
-    if(r&&r.mi&&r.mi.matchId) o.mk=put(o.mk,String(r.mi.matchId)+"|p:"+String(r.playerId||"")+"|"+norm(r.type));
+    if(r&&r.mi&&r.mi.matchId){
+      o.mk=put(o.mk,String(r.mi.matchId)+"|"+String(r.mi.miId||""));
+      o.mk=put(o.mk,String(r.mi.matchId)+"|p:"+String(r.playerId||"")+"|"+norm(r.type));
+    }
     saveReg(o); return o;
   }
-  function deadId(id){ return reg().ids.indexOf(String(id))>=0; }
-  function deadRec(r){
+  function dead(r){
     if(!r) return false;
-    var o=reg();
-    if(o.ids.indexOf(String(r.id))>=0) return true;
+    var o=reg(), id=String(r.id);
+    if(o.ids.indexOf(id)>=0) return true;
     var f=fp(r); if(f&&f.split("|")[0]&&o.fps.indexOf(f)>=0) return true;
     if(r.mi){
       if(o.mk.indexOf(String(r.mi.matchId||"")+"|"+String(r.mi.miId||""))>=0) return true;
@@ -25868,15 +25746,20 @@ tr:hover .qde-ndate{color:#7E0E14}
     if(o.mk.indexOf(String(m.id)+"|p:"+String(x.playerId||"")+"|"+norm(x.type))>=0) return true;
     return false;
   }
-
-  /* ===== المفتاح: تطهير أي كائن حالة قبل استخدامه أو حفظه ===== */
   function scrub(obj){
     if(!obj||typeof obj!=="object") return 0;
     var n=0, o=reg();
     if(Array.isArray(obj.injuries)){
       var b=obj.injuries.length;
-      obj.injuries=obj.injuries.filter(function(x){ return !deadRec(x); });
+      obj.injuries=obj.injuries.filter(function(x){ return !dead(x); });
       n+=b-obj.injuries.length;
+      var best={}, ord=[];
+      obj.injuries.forEach(function(r){
+        var k=fp(r); if(!k||k.split("|")[0]===""){ ord.push(r); return; }
+        if(!best[k]){ best[k]=r; ord.push(k); }
+        else { n++; if((r.treatments||[]).length>(best[k].treatments||[]).length) best[k]=r; }
+      });
+      if(n){ var out=[]; ord.forEach(function(k){ out.push(typeof k==="string"?best[k]:k); }); obj.injuries=out; }
     }
     if(Array.isArray(obj.documents)){
       var b2=obj.documents.length;
@@ -25891,16 +25774,35 @@ tr:hover .qde-ndate{color:#7E0E14}
         n+=b3-m.injuries.length;
       });
     }
-    try{
-      var d=(obj.__del&&typeof obj.__del==="object")?obj.__del:{};
-      d.injuries=Array.from(new Set(((d.injuries)||[]).concat(o.ids||[])));
-      obj.__del=d;
-    }catch(e){}
+    try{ var d=(obj.__del&&typeof obj.__del==="object")?obj.__del:{}; d.injuries=Array.from(new Set(((d.injuries)||[]).concat(o.ids||[]))); obj.__del=d; }catch(e){}
     return n;
   }
-  window.QD159={scrub:scrub,add:addKill,reg:reg,dead:deadRec,reset:function(){ saveReg({ids:[],fps:[],mk:[]}); },diag:diagnose};
+  function live(){
+    try{ if(typeof window.QDSIGN_STATE==="function"){ var a=window.QDSIGN_STATE(); if(a&&a.players) return a; } }catch(e){}
+    try{ if(window.QD_S) return window.QD_S; }catch(e){}
+    try{ return JSON.parse(localStorage.getItem(LSKEY)||"null"); }catch(e){ return null; }
+  }
+  function persist(){
+    try{ if(typeof window.QD_save==="function"){ window.QD_save(); return true; } }catch(e){}
+    try{ if(typeof window.save==="function"){ window.save(); return true; } }catch(e){}
+    return false;
+  }
+  function repaint(){
+    try{ if(window.REND&&typeof REND.injuries==="function") REND.injuries(); }catch(e){}
+    try{ if(window.REND&&typeof REND.dashboard==="function") REND.dashboard(); }catch(e){}
+  }
+  function closeAll(){
+    for(var i=0;i<5;i++){
+      (function(n){ setTimeout(function(){
+        try{ if(typeof closeModal==="function") closeModal(); }catch(e){}
+        try{ var m=document.getElementById("modal"); if(m) m.classList.remove("on"); }catch(e){}
+        try{ document.body.style.overflow=""; }catch(e){}
+      },n*120); })(i);
+    }
+  }
+  window.QD160={scrub:scrub,dead:dead,add:addKill,reg:reg,reset:function(){ saveReg({ids:[],fps:[],mk:[]}); },diag:diag};
 
-  /* 1) تصفية أي كتابة للتخزين */
+  /* أي كتابة للتخزين تُطهَّر */
   try{
     var _set=localStorage.setItem.bind(localStorage);
     localStorage.setItem=function(k,v){
@@ -25910,232 +25812,100 @@ tr:hover .qde-ndate{color:#7E0E14}
       return _set(k,v);
     };
   }catch(e){}
-
-  /* 2) قفل save/QD_save مع منع الحفظ المتكرر بلا تغيير */
-  var lastSig="";
-  function sigOf(s){ try{ return (s.injuries||[]).map(function(x){return x.id;}).join(",")+"#"+(s.matches||[]).length+"#"+(s.documents||[]).length; }catch(e){ return ""; } }
   ["save","QD_save"].forEach(function(fn){
     try{
       var orig=window[fn]; if(typeof orig!=="function") return;
-      window[fn]=function(){
-        try{ var s=live(); if(s) scrub(s); }catch(e){}
-        return orig.apply(this,arguments);
-      };
+      window[fn]=function(){ try{ var s=live(); if(s) scrub(s); }catch(e){} return orig.apply(this,arguments); };
     }catch(e){}
   });
 
-  /* 3) منع حلقة إعادة التحميل (ترعش شاشة الدخول) */
+  /* منع حلقة إعادة التحميل */
   try{
-    var _rl=location.reload.bind(location), lastRL=0;
-    location.reload=function(){
-      var now=Date.now();
-      if(now-lastRL<45000){ try{ console.warn("[QD159] reload suppressed"); }catch(e){} return; }
-      lastRL=now; return _rl();
-    };
+    var _rl=location.reload.bind(location), last=0;
+    location.reload=function(){ var n=Date.now(); if(n-last<60000){ try{console.warn("[QD160] reload suppressed");}catch(e){} return; } last=n; return _rl(); };
   }catch(e){}
 
-  function live(){
-    try{ if(typeof window.QDSIGN_STATE==="function"){ var a=window.QDSIGN_STATE(); if(a&&a.players) return a; } }catch(e){}
-    try{ if(window.QD_S) return window.QD_S; }catch(e){}
-    try{ return JSON.parse(localStorage.getItem(LSKEY)||"null"); }catch(e){ return null; }
-  }
-  function persist(){
-    try{ if(typeof window.QD_save==="function"){ window.QD_save(); return true; } }catch(e){}
-    try{ if(typeof window.save==="function"){ window.save(); return true; } }catch(e){}
-    try{ var s=live(); if(s) localStorage.setItem(LSKEY,JSON.stringify(s)); }catch(e){}
-    return false;
-  }
-  function repaint(){
-    try{ if(window.REND&&typeof REND.injuries==="function") REND.injuries(); }catch(e){}
-    try{ if(window.REND&&typeof REND.dashboard==="function") REND.dashboard(); }catch(e){}
-  }
-  function closeM(){
-    try{ if(typeof closeModal==="function"){ closeModal(); return; } }catch(e){}
-    try{ var a=document.querySelectorAll(".modal-back,.modal-ov,.ovl"); for(var i=0;i<a.length;i++) a[i].remove(); }catch(e){}
-  }
-
-  /* 4) حذف الإصابة: شاهد ثم تطهير الحالة الحيّة والحفظ */
-  document.addEventListener("click",function(ev){
-    var t=ev.target,b=null;
-    try{ b=t&&t.closest?t.closest('[data-act="delInjury"]'):null; }catch(e){}
-    if(!b) return;
-    var id=b.getAttribute("data-id"); if(id==null||id==="") return;
-    ev.preventDefault(); if(ev.stopPropagation) ev.stopPropagation();
-    var s=live();
-    var v=(s&&Array.isArray(s.injuries))?(s.injuries.filter(function(x){ return String(x.id)===String(id); })[0]||{id:id}):{id:id};
-    addKill(v);
-    if(s){ scrub(s); persist(); }
-    closeM(); repaint();
-    try{ toast("تم حذف الإصابة نهائيًا — لن تعود","warn"); }catch(e){}
-  },true);
-
-  /* 5) كنس محدود: لا حلقات، لا حفظ متكرر */
-  var ticks=0;
-  function sweep(){
-    try{
-      var s=live(); if(!s) return;
-      var n=scrub(s);
-      if(n){ var sig=sigOf(s); if(sig!==lastSig){ lastSig=sig; persist(); repaint(); } }
-    }catch(e){}
-  }
-  [1200,3500,7000].forEach(function(ms){ setTimeout(sweep,ms); });
-  window.addEventListener("focus",function(){ setTimeout(sweep,300); });
-  document.addEventListener("visibilitychange",function(){ if(!document.hidden) setTimeout(sweep,300); });
-
-  function diagnose(){
-    var s=live(), o=reg();
-    console.log("[QD159] live injuries:",(s&&s.injuries||[]).map(function(x){ return {id:x.id,p:x.playerId,t:x.type,d:x.date}; }));
-    console.log("[QD159] matches:",((s&&s.matches)||[]).map(function(m){ return {id:m.id,opp:m.opponent,inj:(m.injuries||[]).length}; }));
-    console.log("[QD159] __del:",s&&s.__del);
-    console.log("[QD159] reg:",o);
-    return {live:(s&&s.injuries||[]).length,killed:o.ids.length,purged:scrub(s)};
-  }
-})();
-</script>
-
-
-
-
-
-
-<script>
-(function(){
-  if(window.__QD157) return; window.__QD157=1;
-
+  /* ===== نافذة التأكيد ===== */
   function css(){
-    if(document.getElementById("qd157css")) return;
-    var s=document.createElement("style"); s.id="qd157css";
-    s.textContent=[
-      '.qd157-b{position:fixed;inset:0;background:rgba(20,12,10,.55);z-index:99999;display:flex;align-items:center;justify-content:center;padding:18px;',
-      ' -webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);animation:qd157f .16s ease}',
-      '@keyframes qd157f{from{opacity:0}to{opacity:1}}',
-      '.qd157-c{background:#fff;border-radius:18px;max-width:420px;width:100%;overflow:hidden;',
-      ' box-shadow:0 24px 60px rgba(0,0,0,.35);animation:qd157p .18s ease;font-family:inherit}',
-      '@keyframes qd157p{from{transform:translateY(10px) scale(.98);opacity:.6}to{transform:none;opacity:1}}',
-      '.qd157-h{display:flex;align-items:center;gap:11px;padding:16px 18px 12px;background:linear-gradient(180deg,#FFF8F8,#FFFDFD);border-bottom:1px solid #F3E7E7}',
-      '.qd157-i{width:40px;height:40px;border-radius:12px;background:#FDF1F1;color:#B5121B;display:flex;align-items:center;justify-content:center;flex:0 0 auto}',
-      '.qd157-t{font-size:15px;font-weight:900;color:#241a16;line-height:1.3}',
-      '.qd157-s{font-size:10.5px;color:#9a8f8a;margin-top:2px}',
-      '.qd157-bd{padding:14px 18px 6px}',
-      '.qd157-m{font-size:12.5px;color:#3b322e;line-height:1.7}',
-      '.qd157-m b{color:#7E0E14}',
-      '.qd157-x{margin-top:10px;background:#FDFBF8;border:1px solid #F0E7DA;border-radius:11px;padding:9px 11px;font-size:10.5px;color:#7a726a;line-height:1.6}',
-      '.qd157-f{display:flex;gap:8px;padding:13px 18px 16px;justify-content:flex-start;flex-wrap:wrap}',
-      '.qd157-btn{font-family:inherit;cursor:pointer;border-radius:11px;font-size:12.5px;font-weight:800;padding:10px 17px;border:1px solid transparent;transition:.15s;display:inline-flex;align-items:center;gap:6px}',
-      '.qd157-ok{background:#B5121B;border-color:#B5121B;color:#fff}',
-      '.qd157-ok:hover{background:#9C1119}',
-      '.qd157-no{background:#fff;border-color:#E7DED2;color:#5c534c}',
-      '.qd157-no:hover{border-color:#C8A24A;color:#8a6b1f}',
-      '@media(max-width:520px){.qd157-c{max-width:100%}.qd157-btn{flex:1;justify-content:center}}'
-    ].join("");
-    (document.head||document.documentElement).appendChild(s);
+    if(document.getElementById("qd160css")) return;
+    var st=document.createElement("style"); st.id="qd160css";
+    st.textContent='.qd160b{position:fixed;inset:0;background:rgba(20,12,10,.55);z-index:99999;display:flex;align-items:center;justify-content:center;padding:18px}'+
+      '.qd160c{background:#fff;border-radius:18px;max-width:420px;width:100%;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.35);font-family:inherit}'+
+      '.qd160h{display:flex;gap:11px;align-items:center;padding:16px 18px 12px;background:linear-gradient(180deg,#FFF8F8,#FFFDFD);border-bottom:1px solid #F3E7E7}'+
+      '.qd160i{width:40px;height:40px;border-radius:12px;background:#FDF1F1;color:#B5121B;display:flex;align-items:center;justify-content:center}'+
+      '.qd160t{font-size:15px;font-weight:900;color:#241a16}.qd160s{font-size:10.5px;color:#9a8f8a;margin-top:2px}'+
+      '.qd160bd{padding:14px 18px 4px;font-size:12.5px;color:#3b322e;line-height:1.75}.qd160bd b{color:#7E0E14}'+
+      '.qd160x{margin-top:10px;background:#FDFBF8;border:1px solid #F0E7DA;border-radius:11px;padding:9px 11px;font-size:10.5px;color:#7a726a;line-height:1.6}'+
+      '.qd160f{display:flex;gap:8px;padding:13px 18px 16px;flex-wrap:wrap}'+
+      '.qd160btn{font-family:inherit;cursor:pointer;border-radius:11px;font-size:12.5px;font-weight:800;padding:10px 17px;border:1px solid transparent}'+
+      '.qd160ok{background:#B5121B;border-color:#B5121B;color:#fff}.qd160no{background:#fff;border-color:#E7DED2;color:#5c534c}'+
+      '@media(max-width:520px){.qd160c{max-width:100%}.qd160btn{flex:1;text-align:center}}';
+    (document.head||document.documentElement).appendChild(st);
   }
-
-  function svgTrash(){
-    return '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v6M14 11v6"/></svg>';
+  function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g,function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
+  function ask(t,sub,msg,note,ok,no){
+    css();
+    return new Promise(function(res){
+      var b=document.createElement("div"); b.className="qd160b";
+      b.innerHTML='<div class="qd160c"><div class="qd160h"><div class="qd160i">'+
+        '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6M10 11v6M14 11v6"/></svg>'+
+        '</div><div><div class="qd160t">'+esc(t)+'</div><div class="qd160s">'+esc(sub)+'</div></div></div>'+
+        '<div class="qd160bd">'+msg+(note?'<div class="qd160x">'+note+'</div>':'')+'</div>'+
+        '<div class="qd160f"><button type="button" class="qd160btn qd160ok">'+esc(ok)+'</button>'+
+        '<button type="button" class="qd160btn qd160no">'+esc(no)+'</button></div></div>';
+      document.body.appendChild(b);
+      var done=false; function fin(v){ if(done) return; done=true; try{b.remove();}catch(e){} res(v); }
+      b.querySelector(".qd160ok").onclick=function(e){ e.preventDefault(); e.stopPropagation(); fin(true); };
+      b.querySelector(".qd160no").onclick=function(e){ e.preventDefault(); e.stopPropagation(); fin(false); };
+      b.addEventListener("click",function(e){ if(e.target===b) fin(false); });
+      document.addEventListener("keydown",function kd(e){ if(e.key==="Escape"){ document.removeEventListener("keydown",kd); fin(false); } });
+    });
   }
-
-  function st(){
-    try{ if(typeof window.QDSIGN_STATE==="function"){ var a=window.QDSIGN_STATE(); if(a) return a; } }catch(e){}
-    try{ if(window.QD_S) return window.QD_S; }catch(e){}
-    try{ return JSON.parse(localStorage.getItem("qadsiah_u18_v2")||"null"); }catch(e){ return null; }
-  }
-  function nm(id){
-    try{ var p=(st()&&st().players||[]).filter(function(x){ return String(x.id)===String(id); })[0];
-      if(p) return [p.first,p.last].filter(Boolean).join(" ")||String(id);
-    }catch(e){}
+  function who(id){
+    try{ var s=live(), p=((s&&s.players)||[]).filter(function(x){ return String(x.id)===String(id); })[0];
+      if(p) return [p.first,p.last].filter(Boolean).join(" "); }catch(e){}
     return "";
   }
-  function injInfo(id){
-    try{
-      var i=(st()&&st().injuries||[]).filter(function(x){ return String(x.id)===String(id); })[0];
-      if(!i) return null;
-      return {type:i.type||"",date:i.date||"",player:i.playerId,site:i.bodySites||"",mi:i.mi};
-    }catch(e){ return null; }
-  }
-  window.QD157=window.QD157||{};
 
-  function ask(opts){
-    css();
-    return new Promise(function(resolve){
-      var back=document.createElement("div"); back.className="qd157-b";
-      var nid=opts.id||"";
-      var pl=nm(opts.playerId||"")||opts.playerName||"";
-      back.innerHTML='<div class="qd157-c" role="dialog" aria-modal="true">'+
-        '<div class="qd157-h"><span class="qd157-i">'+svgTrash()+'</span>'+
-          '<div><div class="qd157-t">'+opts.title+'</div><div class="qd157-s">'+opts.sub+'</div></div></div>'+
-        '<div class="qd157-bd"><div class="qd157-m">'+opts.msg+'</div>'+
-          (opts.note?'<div class="qd157-x">'+opts.note+'</div>':'')+'</div>'+
-        '<div class="qd157-f"><button type="button" class="qd157-btn qd157-ok">'+opts.ok+'</button>'+
-        '<button type="button" class="qd157-btn qd157-no">'+opts.no+'</button></div></div>';
-      document.body.appendChild(back);
-      var done=false;
-      function fin(v){ if(done) return; done=true; try{ back.remove(); }catch(e){} resolve(v); }
-      back.querySelector(".qd157-ok").addEventListener("click",function(e){ e.preventDefault(); e.stopPropagation(); fin(true); });
-      back.querySelector(".qd157-no").addEventListener("click",function(e){ e.preventDefault(); e.stopPropagation(); fin(false); });
-      back.addEventListener("click",function(e){ if(e.target===back) fin(false); });
-      document.addEventListener("keydown",function kd(e){ if(e.key==="Escape"){ document.removeEventListener("keydown",kd); fin(false); } });
-      setTimeout(function(){ var b=back.querySelector(".qd157-ok"); if(b) b.focus(); },40);
-    });
-  }
-  window.QD157.ask=ask;
-
-  /* اعتراض الحذف: سؤال أولًا ثم تنفيذ الحذف الأصلي */
+  /* ===== الحذف: تأكيد ← شاهد ← تطهير ← حفظ ← إغلاق النافذة ===== */
   document.addEventListener("click",function(ev){
     var t=ev.target,b=null;
     try{ b=t&&t.closest?t.closest('[data-act="delInjury"]'):null; }catch(e){}
     if(!b) return;
-    if(b.getAttribute("data-qd157")==="1") return;   /* مرّرت بعد التأكيد */
+    if(b.getAttribute("data-qd160")==="1") return;
     var id=b.getAttribute("data-id"); if(id==null||id==="") return;
-    ev.preventDefault(); if(ev.stopPropagation) ev.stopPropagation();
-    ev.stopImmediatePropagation&&ev.stopImmediatePropagation();
+    ev.preventDefault(); ev.stopImmediatePropagation&&ev.stopImmediatePropagation(); ev.stopPropagation();
 
-    var info=injInfo(id);
-    var who="";
-    try{ if(window.QD158&&window.QD158.name) who=window.QD158.name((info&&info.player)||b.getAttribute("data-pid")||""); }catch(e){}
-    if(!who) who=(info&&nm(info.player))||nm(b.getAttribute("data-pid")||"")||"";
-    if(!who){ try{ var row=b.closest("tr"); var cand=row?row.querySelector(".pname span,td b,td span"):null; who=cand&&cand.textContent?cand.textContent.trim():""; }catch(e){} }
-    if(!who) who="اللاعب المحدد";
-    var det=[];
-    if(info&&info.type) det.push("<b>"+esc(info.type)+"</b>");
-    if(info&&info.date) det.push("بتاريخ "+info.date);
-    if(info&&info.site) det.push(info.site);
-    var msg='هل توافق على حذف إصابة اللاعب <b>'+esc(who)+'</b>؟'+
-      (det.length?'<br><span style="font-size:11.5px;color:#6b6259">'+det.join(" · ")+'</span>':'');
-    var note=(info&&info.mi)?'⚠️ هذه الإصابة مسجّلة من تقرير مباراة — سيُحذف سطرها من تقرير المباراة أيضًا.':'الحذف نهائي ولا يمكن التراجع عنه.';
+    var s=live();
+    var rec=(s&&Array.isArray(s.injuries))?(s.injuries.filter(function(x){ return String(x.id)===String(id); })[0]||{id:id}):{id:id};
+    var name=who(rec.playerId)||"اللاعب المحدد";
+    var det=[]; if(rec.type) det.push("<b>"+esc(rec.type)+"</b>"); if(rec.date) det.push(esc(day(rec.date)));
+    var note=rec.mi?"⚠️ مسجّلة من تقرير مباراة — سيُحذف سطرها من التقرير أيضًا.":"الحذف نهائي ولا يمكن التراجع.";
 
-    ask({
-      title:"تأكيد حذف الإصابة",
-      sub:"لن يتم الحذف إلا بموافقتك",
-      msg:msg,
-      note:note,
-      ok:"نعم، احذف الإصابة",
-      no:"لا، إلغاء",
-      id:id, playerId:(info&&info.player)||""
-    }).then(function(yes){
+    ask("تأكيد حذف الإصابة","لن يتم الحذف إلا بموافقتك",
+        "هل توافق على حذف إصابة <b>"+esc(name)+"</b>؟"+(det.length?'<br><span style="font-size:11.5px;color:#6b6259">'+det.join(" · ")+'</span>':""),
+        note,"نعم، احذف الإصابة","لا، إلغاء").then(function(yes){
       if(!yes){ try{ toast("تم إلغاء الحذف","warn"); }catch(e){} return; }
-      b.setAttribute("data-qd157","1");
-      try{ b.click(); }catch(e){}
-      setTimeout(function(){ try{ b.removeAttribute("data-qd157"); }catch(e){} },1200);
+      addKill(rec);
+      if(s){ scrub(s); persist(); }
+      closeAll(); repaint();
+      try{ toast("تم حذف الإصابة نهائيًا — لن تعود","warn"); }catch(e){}
+      setTimeout(function(){ try{ var n=scrub(live()); if(n){ persist(); repaint(); } }catch(e){} },700);
     });
   },true);
 
-  /* تكرار الحماية للحذف العام (لوحة المباريات / أي زر del) */
-  document.addEventListener("click",function(ev){
-    var t=ev.target,b=null;
-    try{ b=t&&t.closest?t.closest('[data-act="del"]'):null; }catch(e){}
-    if(!b) return;
-    if(b.getAttribute("data-qd157")==="1") return;
-    ev.preventDefault(); if(ev.stopPropagation) ev.stopPropagation();
-    ask({title:"تأكيد الحذف",sub:"لن يتم الحذف إلا بموافقتك",
-         msg:"هل توافق على حذف هذا العنصر؟",note:"الحذف نهائي ولا يمكن التراجع عنه.",
-         ok:"نعم، احذف",no:"لا، إلغاء"}).then(function(yes){
-      if(!yes){ try{ toast("تم إلغاء الحذف","warn"); }catch(e){} return; }
-      b.setAttribute("data-qd157","1"); try{ b.click(); }catch(e){}
-      setTimeout(function(){ try{ b.removeAttribute("data-qd157"); }catch(e){} },1200);
-    });
-  },true);
-  function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g,function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
+  /* كنس محدود عند الإقلاع فقط */
+  function sweep(){ try{ var s=live(); if(!s) return; var n=scrub(s); if(n){ persist(); repaint(); } }catch(e){} }
+  [1500,4500].forEach(function(ms){ setTimeout(sweep,ms); });
+  window.addEventListener("focus",function(){ setTimeout(sweep,400); });
+
+  function diag(){
+    var s=live(),o=reg();
+    console.log("[QD160] injuries:",(s&&s.injuries||[]).map(function(x){return {id:x.id,p:x.playerId,t:x.type,d:x.date};}));
+    console.log("[QD160] matches:",((s&&s.matches)||[]).map(function(m){return {id:m.id,opp:m.opponent,inj:(m.injuries||[]).length};}));
+    console.log("[QD160] __del:",s&&s.__del," reg:",o);
+    return {live:(s&&s.injuries||[]).length,killed:o.ids.length};
+  }
 })();
 </script>
 
