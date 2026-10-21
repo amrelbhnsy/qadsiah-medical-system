@@ -411,7 +411,7 @@ html[dir="rtl"] .filters .select{padding-left:34px}
 .rp-path-lbl{font-size:10.5px;font-weight:800;margin-top:3px;color:var(--slate);white-space:nowrap}
 .rp-batt{display:inline-flex;align-items:center;gap:5px}
 .rp-batt b{font-weight:900;line-height:1}
-/* ===== v11-153 · DEL-ROOT — مسار اللاعب وشريط الإنجاز ===== */
+/* ===== v11-154 · NO-REVIVE — مسار اللاعب وشريط الإنجاز ===== */
 .rp-path2{display:flex;align-items:center;margin:5px 0 6px;min-width:150px}
 .rp-node{width:13px;height:13px;border-radius:50%;flex:0 0 auto;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;background:#fff;border:2px solid #D3D9E1;transition:background .25s,border-color .25s,box-shadow .25s}
 .rp-node.done{background:#15803D;border-color:#15803D}
@@ -12712,7 +12712,7 @@ function syncAll(){
       if(!rec.mi) rec.mi={matchId:m.id,miId:x.id,autoStatus:true};
       if(rec.mi.autoStatus!==false){ rec.status=statusFromDays(x.days); rec.daysOut=Number(x.days)||0; }
       x.status=rec.status;
-      if(fresh){ S.injuries.push(rec); created++; } else updated++;
+      if(fresh){ if(!(window.QD154&&window.QD154.blocked&&window.QD154.blocked(rec))){ S.injuries.push(rec); created++; } } else updated++;
     });
   });
   var before=S.injuries.length;
@@ -15622,7 +15622,7 @@ try{
 }catch(e){}
 
 /* QDBK-END */
-(function(){function mk(){try{var b=document.createElement("div");b.id="qdrBadge";b.textContent="v11-153 · DEL-ROOT";b.style.cssText="position:fixed;left:8px;bottom:8px;z-index:2147483647;background:#fff;color:#7E0E14;border:1px solid #7E0E14;font:800 11px/1.5 system-ui;padding:3px 9px;border-radius:20px;pointer-events:none;opacity:.97;box-shadow:0 2px 8px rgba(0,0,0,.35)";document.body.appendChild(b);}catch(e){}}if(document.body)mk();else setTimeout(mk,600);})();
+(function(){function mk(){try{var b=document.createElement("div");b.id="qdrBadge";b.textContent="v11-154 · NO-REVIVE";b.style.cssText="position:fixed;left:8px;bottom:8px;z-index:2147483647;background:#fff;color:#7E0E14;border:1px solid #7E0E14;font:800 11px/1.5 system-ui;padding:3px 9px;border-radius:20px;pointer-events:none;opacity:.97;box-shadow:0 2px 8px rgba(0,0,0,.35)";document.body.appendChild(b);}catch(e){}}if(document.body)mk();else setTimeout(mk,600);})();
 /* ---- PWA: install as an app on Android and iPhone / iPad ---- */
 (function(){
   Object.assign(STR.en,{
@@ -24207,7 +24207,7 @@ try{
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous">
 /* =====================================================================
-   v11-153 · DEL-ROOT — توحيد حالة اليوم (مباراة · تدريب · راحة · إجازة)
+   v11-154 · NO-REVIVE — توحيد حالة اليوم (مباراة · تدريب · راحة · إجازة)
    بين: لوحة التحكم · البرنامج الأسبوعي · التقويم · جدول المباريات
    ===================================================================== */
 (function(){
@@ -24311,7 +24311,7 @@ try{
 
 <script>
 /* =====================================================================
-   v11-153 · DEL-ROOT
+   v11-154 · NO-REVIVE
    إصلاح التجمد: يُبنى الهيكل مرة واحدة فقط، ويُحدَّث محتواه الداخلي
    (لا إعادة بناء للجذر ⇒ لا يفقد الهوية ولا يعلق)
    ===================================================================== */
@@ -25831,18 +25831,27 @@ tr:hover .qde-ndate{color:#7E0E14}
 
 <script>
 (function(){
-  if(window.__QD153) return; window.__QD153=1;
-  var LSKEY="qadsiah_u18_v2", REG="qd_del_reg_v153";
+  if(window.__QD154) return; window.__QD154=1;
+  var LSKEY="qadsiah_u18_v2", REG="qd_kill_reg_v154";
   function reg(){ try{ return JSON.parse(localStorage.getItem(REG)||"{}"); }catch(e){ return {}; } }
   function saveReg(o){ try{ localStorage.setItem(REG,JSON.stringify(o)); }catch(e){} }
-  function addDel(k,id){
-    if(!k||id==null||id==="") return;
-    var o=reg(); if(!Array.isArray(o[k])) o[k]=[];
-    var v=String(id);
-    if(o[k].indexOf(v)<0) o[k].push(v);
+  function fpOf(r){
+    if(!r) return "";
+    var p=String(r.playerId||r.pid||"");
+    var t=String(r.type||"").trim().toLowerCase();
+    return p?(p+"|"+t):"";
+  }
+  function put(list,v){ if(v==null||v==="") return list; v=String(v); if(list.indexOf(v)<0) list.push(v); return list; }
+  function addKill(r){
+    var o=reg();
+    o.ids=put(o.ids||[], r&&r.id);
+    o.fps=put(o.fps||[], fpOf(r));
     saveReg(o);
   }
-  function dset(k){ var o={},r=reg(); (r[k]||[]).forEach(function(x){ o[String(x)]=1; }); return o; }
+  function killedIds(){ var o={},r=reg(); (r.ids||[]).forEach(function(x){ o[String(x)]=1; }); return o; }
+  function killedFps(){ var o={},r=reg(); (r.fps||[]).forEach(function(x){ o[String(x)]=1; }); return o; }
+  function isDead(r){ return !!(r&&(killedIds()[String(r.id)]||(fpOf(r)&&killedFps()[fpOf(r)]))); }
+
   function st(){
     try{ if(typeof window.QDSIGN_STATE==="function"){ var s=window.QDSIGN_STATE(); if(s) return s; } }catch(e){}
     try{ if(window.QD_S) return window.QD_S; }catch(e){}
@@ -25856,135 +25865,137 @@ tr:hover .qde-ndate{color:#7E0E14}
   function repaint(){
     try{ if(window.REND&&typeof REND.injuries==="function") REND.injuries(); }catch(e){}
     try{ if(window.REND&&typeof REND.dashboard==="function") REND.dashboard(); }catch(e){}
+    try{ if(window.renderNav&&typeof window.renderNav==="function") window.renderNav(); }catch(e){}
   }
-  function closeM(){ try{ if(typeof closeModal==="function"){ closeModal(); return; } }catch(e){}
-                     try{ document.querySelectorAll(".modal-back,.modal-ov").forEach(function(x){ x.remove(); }); }catch(e){} }
-
-  /* ---- إزالة الإصابة من سجلات المباريات (مصدر إعادة إنشائها) ---- */
+  function closeM(){
+    try{ if(typeof closeModal==="function"){ closeModal(); return; } }catch(e){}
+    try{ var els=document.querySelectorAll(".modal-back,.modal-ov,.ovl"); for(var i=0;i<els.length;i++) els[i].remove(); }catch(e){}
+  }
   function detach(inj){
+    var s=st(); if(!s||!Array.isArray(s.matches)) return 0;
     var hits=0, mi=(inj&&inj.mi)||{};
-    var mKey=mi.matchId, xKey=mi.miId;
-    (st()&&st().matches||[]).forEach(function(m){
+    s.matches.forEach(function(m){
       if(!m||!Array.isArray(m.injuries)) return;
-      var before=m.injuries.length;
+      var b=m.injuries.length;
       m.injuries=m.injuries.filter(function(x){
         if(!x) return false;
-        if(xKey!=null&&String(x.id)===String(xKey)) return false;
+        if(mi.miId!=null&&String(x.id)===String(mi.miId)) return false;
         if(x.injuryId!=null&&String(x.injuryId)===String(inj.id)) return false;
         if(x.playerId!=null&&String(x.playerId)===String(inj.playerId)&&
-           String(x.type||"")===String(inj.type||"")&&
-           String(x.date||"").slice(0,10)===String(inj.date||"").slice(0,10)) return false;
+           String(x.type||"").trim().toLowerCase()===String(inj.type||"").trim().toLowerCase()) return false;
         return true;
       });
-      if(m.injuries.length!==before) hits+=before-m.injuries.length;
+      hits+=b-m.injuries.length;
     });
     return hits;
   }
 
-  /* ---- حذف كامل: الحالة + المستندات + المباريات + الشاهد ---- */
-  function killInjury(id){
-    var s=st(); if(!s) return 0;
-    addDel("injuries",id);
-    var victim=(s.injuries||[]).filter(function(x){ return String(x.id)===String(id); })[0]||{id:id};
-    if(Array.isArray(s.injuries)) s.injuries=s.injuries.filter(function(x){ return String(x.id)!==String(id); });
-    try{ s.documents=(s.documents||[]).filter(function(x){ return String(x.injuryId)!==String(id); }); }catch(e){}
-    detach(victim);
-    sv();
-    return 1;
-  }
-
-  /* ---- تنظيف التكرارات: نفس اللاعب + نفس النوع + نفس الموضع خلال 3 أيام ---- */
-  function dedupe(quiet){
-    var s=st(); if(!s||!Array.isArray(s.injuries)) return 0;
-    var keep={}, out=[], n=0;
-    s.injuries.slice().sort(function(a,b){ return String(b.date||"").localeCompare(String(a.date||"")); }).forEach(function(i){
-      var key=[String(i.playerId||""),String(i.type||""),String(i.bodySites||"").toLowerCase()].join("|");
-      var d=String(i.date||"").slice(0,10);
-      var kk=Object.keys(keep).filter(function(x){ return x.indexOf(key+"|")===0; });
-      var dup=false;
-      kk.forEach(function(x){
-        var prev=keep[x];
-        var both=[prev,d].sort();
-        var days=(new Date(both[1]+"T00:00:00")-new Date(both[0]+"T00:00:00"))/864e5;
-        if(isFinite(days)&&days<=3) dup=true;
+  /* ===== كشف إعادة الإحياء القادم من تقارير المباريات ===== */
+  window.QD154={
+    blocked:function(rec){ try{ return isDead(rec); }catch(e){ return false; } },
+    killed:function(){
+      var s=st(); if(!s||!Array.isArray(s.injuries)) return 0;
+      var idK=killedIds(), fpK=killedFps(), n=0;
+      s.injuries=s.injuries.filter(function(x){
+        var dead=idK[String(x.id)]||(fpOf(x)&&fpK[fpOf(x)]);
+        if(dead) n++;
+        return !dead;
       });
-      if(dup){ addDel("injuries",i.id); n++; }
-      else { keep[key+"|"+d]=d; out.push(i); }
-    });
-    if(n){ s.injuries=out; sv(); if(!quiet){ try{ toast("تم دمج "+n+" سجل إصابة مكرر","warn"); }catch(e){} } }
-    return n;
-  }
+      if(n){ sv(); }
+      return n;
+    },
+    dedupe:function(quiet){
+      var s=st(); if(!s||!Array.isArray(s.injuries)) return 0;
+      var seen={}, out=[], n=0;
+      s.injuries.slice().sort(function(a,b){ return String(b.date||"").localeCompare(String(a.date||"")); }).forEach(function(i){
+        var k=fpOf(i);
+        if(k&&seen[k]){ n++; addKill(i); return; }
+        if(k) seen[k]=1;
+        out.push(i);
+      });
+      if(n){ s.injuries=out; sv(); if(!quiet){ try{ toast("تم دمج "+n+" سجل مكرر","warn"); }catch(e){} } }
+      return n;
+    }
+  };
 
-  /* ---- تصفية الشواهد على كل كتابة + حقن __del حتى يُرفع الحذف للسحابة ---- */
+  /* تصفية كل كتابة + حقن __del */
   try{
     var _set=localStorage.setItem.bind(localStorage);
-    localStorage.setItem=function(k,v){
-      if(k===LSKEY&&typeof v==="string"){
+    localStorage.setItem=function(kk,v){
+      if(kk===LSKEY&&typeof v==="string"){
         try{
           var o=JSON.parse(v);
           if(o&&typeof o==="object"){
-            var r=reg();
-            var d=Object.assign({},(o.__del&&typeof o.__del==="object")?o.__del:{});
-            Object.keys(r).forEach(function(kk){ d[kk]=(d[kk]||[]).concat(r[kk]); });
-            Object.keys(d).forEach(function(kk){
-              if(!Array.isArray(o[kk])) return;
-              var set={}; (d[kk]||[]).forEach(function(x){ set[String(x)]=1; });
-              o[kk]=o[kk].filter(function(x){ return !(x&&x.id!=null&&set[String(x.id)]); });
+            var r=reg(), idK={}, fpK={};
+            (r.ids||[]).forEach(function(x){ idK[String(x)]=1; });
+            (r.fps||[]).forEach(function(x){ fpK[String(x)]=1; });
+            ["injuries","documents"].forEach(function(store){
+              if(!Array.isArray(o[store])) return;
+              o[store]=o[store].filter(function(x){
+                if(!x) return true;
+                if(store==="injuries") return !(idK[String(x.id)]||(fpOf(x)&&fpK[fpOf(x)]));
+                return true;
+              });
             });
+            if(Array.isArray(o.injuries)){
+              var seen={};
+              o.injuries=o.injuries.filter(function(x){ var k=fpOf(x); if(!k) return true; if(seen[k]) return false; seen[k]=1; return true; });
+            }
+            var d=(o.__del&&typeof o.__del==="object")?o.__del:{};
+            d.injuries=Array.from(new Set((d.injuries||[]).concat(r.ids||[])));
             o.__del=d;
             v=JSON.stringify(o);
           }
         }catch(e){}
       }
-      return _set(k,v);
+      return _set(kk,v);
     };
   }catch(e){}
 
-  /* ---- اعتراض زر الحذف: يمنع إعادة الإنشاء عبر سجلات المباريات ---- */
+  /* زر الحذف: حذف جذري + شاهد بصمة */
   document.addEventListener("click",function(ev){
     var t=ev.target, b=null;
     try{ b=t&&t.closest?t.closest('[data-act="delInjury"]'):null; }catch(e){}
     if(!b) return;
     var id=b.getAttribute("data-id"); if(id==null||id==="") return;
     ev.preventDefault(); if(ev.stopPropagation) ev.stopPropagation();
-    killInjury(id);
+    var s=st();
+    if(s&&Array.isArray(s.injuries)){
+      var v=(s.injuries||[]).filter(function(x){ return String(x.id)===String(id); })[0]||{id:id};
+      addKill(v);
+      s.injuries=s.injuries.filter(function(x){ return String(x.id)!==String(id); });
+      try{ s.documents=(s.documents||[]).filter(function(x){ return String(x.injuryId)!==String(id); }); }catch(e){}
+      detach(v);
+      sv();
+    } else { addKill({id:id}); }
     closeM(); repaint();
-    try{ toast("تم حذف الإصابة من السجل ومن تقارير المباريات","warn"); }catch(e){}
+    try{ toast("تم حذف الإصابة نهائيًا — لن تعود","warn"); }catch(e){}
   },true);
 
-  function scrub(){
-    var s=st(); if(!s) return 0;
-    var n=0, d=dset("injuries");
-    if(Array.isArray(s.injuries)){
-      var before=s.injuries.length;
-      s.injuries=s.injuries.filter(function(x){ return !(x&&d[String(x.id)]); });
-      n+=before-s.injuries.length;
-    }
-    var dd=dset("documents");
-    if(Array.isArray(s.documents)){
-      var b2=s.documents.length;
-      s.documents=s.documents.filter(function(x){ return !(x&&dd[String(x.id)]); });
-      n+=b2-s.documents.length;
-    }
-    return n;
+  /* كنس دوري دائم */
+  function sweep(){
+    try{
+      var a=window.QD154.killed();
+      var b=window.QD154.dedupe(true);
+      if(a||b){ repaint(); }
+    }catch(e){}
   }
-  function boot(){
-    var n=scrub();
-    var dd=dedupe(true);
-    if(n||dd){ sv(); repaint(); }
-  }
-  setTimeout(boot,2400);
-  setTimeout(function(){ var n=scrub(); if(n){ sv(); repaint(); } },6000);
-
-  window.QD153={reg:reg,purge:scrub,dedupe:function(){ return dedupe(false); },reset:function(){ saveReg({}); },
-    diag:function(){
-      var s=st(), r=reg();
-      console.log("[QD153] injuries:",(s&&s.injuries||[]).map(function(x){return {id:x.id,p:x.playerId,d:x.date,t:x.type,mi:!!x.mi};}));
-      console.log("[QD153] tombstones:",r);
-      return {injuries:(s&&s.injuries||[]).length, deleted:(r.injuries||[]).length};
-    }};
+  setTimeout(sweep,1800);
+  setTimeout(sweep,4000);
+  setTimeout(sweep,8000);
+  var iv=setInterval(sweep,7000);
+  window.addEventListener("focus",function(){ setTimeout(sweep,400); });
+  document.addEventListener("visibilitychange",function(){ if(!document.hidden) setTimeout(sweep,400); });
+  window.QD154.reset=function(){ saveReg({}); };
+  window.QD154.diag=function(){
+    var s=st(), r=reg();
+    console.log("[QD154] live:",(s&&s.injuries||[]).map(function(x){return {id:x.id,p:x.playerId,t:x.type,d:x.date};}));
+    console.log("[QD154] killed ids:",r.ids," fps:",r.fps);
+    return {live:(s&&s.injuries||[]).length,killedIds:(r.ids||[]).length};
+  };
 })();
 </script>
+
 
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 </body>
