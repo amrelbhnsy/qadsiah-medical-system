@@ -411,7 +411,7 @@ html[dir="rtl"] .filters .select{padding-left:34px}
 .rp-path-lbl{font-size:10.5px;font-weight:800;margin-top:3px;color:var(--slate);white-space:nowrap}
 .rp-batt{display:inline-flex;align-items:center;gap:5px}
 .rp-batt b{font-weight:900;line-height:1}
-/* ===== v11-150 · ENR-DATE — مسار اللاعب وشريط الإنجاز ===== */
+/* ===== v11-151 · DEL-PERSIST — مسار اللاعب وشريط الإنجاز ===== */
 .rp-path2{display:flex;align-items:center;margin:5px 0 6px;min-width:150px}
 .rp-node{width:13px;height:13px;border-radius:50%;flex:0 0 auto;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;background:#fff;border:2px solid #D3D9E1;transition:background .25s,border-color .25s,box-shadow .25s}
 .rp-node.done{background:#15803D;border-color:#15803D}
@@ -15580,7 +15580,7 @@ try{
 }catch(e){}
 
 /* QDBK-END */
-(function(){function mk(){try{var b=document.createElement("div");b.id="qdrBadge";b.textContent="v11-150 · ENR-DATE";b.style.cssText="position:fixed;left:8px;bottom:8px;z-index:2147483647;background:#fff;color:#7E0E14;border:1px solid #7E0E14;font:800 11px/1.5 system-ui;padding:3px 9px;border-radius:20px;pointer-events:none;opacity:.97;box-shadow:0 2px 8px rgba(0,0,0,.35)";document.body.appendChild(b);}catch(e){}}if(document.body)mk();else setTimeout(mk,600);})();
+(function(){function mk(){try{var b=document.createElement("div");b.id="qdrBadge";b.textContent="v11-151 · DEL-PERSIST";b.style.cssText="position:fixed;left:8px;bottom:8px;z-index:2147483647;background:#fff;color:#7E0E14;border:1px solid #7E0E14;font:800 11px/1.5 system-ui;padding:3px 9px;border-radius:20px;pointer-events:none;opacity:.97;box-shadow:0 2px 8px rgba(0,0,0,.35)";document.body.appendChild(b);}catch(e){}}if(document.body)mk();else setTimeout(mk,600);})();
 /* ---- PWA: install as an app on Android and iPhone / iPad ---- */
 (function(){
   Object.assign(STR.en,{
@@ -24165,7 +24165,7 @@ try{
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous">
 /* =====================================================================
-   v11-150 · ENR-DATE — توحيد حالة اليوم (مباراة · تدريب · راحة · إجازة)
+   v11-151 · DEL-PERSIST — توحيد حالة اليوم (مباراة · تدريب · راحة · إجازة)
    بين: لوحة التحكم · البرنامج الأسبوعي · التقويم · جدول المباريات
    ===================================================================== */
 (function(){
@@ -24269,7 +24269,7 @@ try{
 
 <script>
 /* =====================================================================
-   v11-150 · ENR-DATE
+   v11-151 · DEL-PERSIST
    إصلاح التجمد: يُبنى الهيكل مرة واحدة فقط، ويُحدَّث محتواه الداخلي
    (لا إعادة بناء للجذر ⇒ لا يفقد الهوية ولا يعلق)
    ===================================================================== */
@@ -25603,6 +25603,119 @@ body{padding-bottom:56px}
 .qde-ndate{font-style:normal;font-size:9.5px;font-weight:700;color:#8a827a;margin-top:1px;letter-spacing:.1px}
 tr:hover .qde-ndate{color:#7E0E14}
 </style>
+
+<script>
+(function(){
+  if(window.__QD151) return; window.__QD151=1;
+  var LSKEY="qadsiah_u18_v2", REG="qd_del_reg_v151";
+  var STORES=["players","injuries","illnesses","therapies","activities","documents","matches","callups","loads","wellness","growth","posture","screenings","promo","pcma","mental","complaints","clinic","equipment"];
+
+  function reg(){ try{ return JSON.parse(localStorage.getItem(REG)||"{}"); }catch(e){ return {}; } }
+  function saveReg(o){ try{ localStorage.setItem(REG,JSON.stringify(o)); }catch(e){} }
+  function addDel(k,id){
+    if(!k||id==null||id==="") return;
+    var o=reg(); if(!Array.isArray(o[k])) o[k]=[];
+    var v=String(id);
+    if(o[k].indexOf(v)<0) o[k].push(v);
+    saveReg(o);
+  }
+  function delSet(k){ var o={},r=reg(); (r[k]||[]).forEach(function(x){ o[String(x)]=1; }); return o; }
+  function st(){
+    try{ if(typeof window.QDSIGN_STATE==="function"){ var s=window.QDSIGN_STATE(); if(s) return s; } }catch(e){}
+    try{ if(window.QD_S) return window.QD_S; }catch(e){}
+    try{ return JSON.parse(localStorage.getItem(LSKEY)||"null"); }catch(e){ return null; }
+  }
+  function sv(){
+    try{ if(typeof window.QD_save==="function"){ window.QD_save(); return true; } }catch(e){}
+    try{ if(typeof window.save==="function"){ window.save(); return true; } }catch(e){}
+    return false;
+  }
+  function purge(){
+    var s=st(); if(!s) return 0;
+    var r=reg(), n=0;
+    Object.keys(r).forEach(function(k){
+      if(!Array.isArray(s[k])) return;
+      var d=delSet(k), before=s[k].length;
+      s[k]=s[k].filter(function(x){ return !(x&&x.id!=null&&d[String(x.id)]); });
+      n+=before-s[k].length;
+    });
+    return n;
+  }
+  function repaint(){
+    try{ if(window.REND&&typeof REND.injuries==="function") REND.injuries(); }catch(e){}
+    try{ if(window.REND&&typeof REND.dashboard==="function") REND.dashboard(); }catch(e){}
+  }
+
+  /* 1) تصفية أي كتابة للحالة عبر أي مصدر (السحابة/الدمج/اللقطات) بشواهد الحذف */
+  try{
+    var _set=localStorage.setItem.bind(localStorage);
+    localStorage.setItem=function(k,v){
+      if(k===LSKEY && typeof v==="string"){
+        try{
+          var o=JSON.parse(v);
+          if(o&&typeof o==="object"){
+            var d=Object.assign({}, (o.__del&&typeof o.__del==="object")?o.__del:{});
+            var r=reg();
+            Object.keys(r).forEach(function(kk){ d[kk]=(d[kk]||[]).concat(r[kk]); });
+            Object.keys(d).forEach(function(kk){
+              if(!Array.isArray(o[kk])) return;
+              var set={}; (d[kk]||[]).forEach(function(x){ set[String(x)]=1; });
+              o[kk]=o[kk].filter(function(x){ return !(x&&x.id!=null&&set[String(x.id)]); });
+            });
+            v=JSON.stringify(o);
+          }
+        }catch(e){}
+      }
+      return _set(k,v);
+    };
+  }catch(e){}
+
+  /* 2) حذف الإصابة: يعمل مباشرة بلا نافذة تأكيد + يسجّل شاهد الحذف */
+  document.addEventListener("click",function(ev){
+    var t=ev.target, b=null;
+    try{ b=t&&t.closest?t.closest('[data-act]'):null; }catch(e){}
+    if(!b) return;
+    var act=String(b.getAttribute("data-act")||""), id=b.getAttribute("data-id");
+    if(!act||id==null||id==="") return;
+
+    if(act==="delInjury"){
+      ev.preventDefault(); if(ev.stopPropagation) ev.stopPropagation();
+      addDel("injuries",id);
+      var s=st();
+      if(s){
+        if(Array.isArray(s.injuries)) s.injuries=s.injuries.filter(function(x){ return String(x.id)!==String(id); });
+        if(Array.isArray(s.documents)) s.documents=s.documents.filter(function(x){ return String(x.injuryId)!==String(id); });
+        sv();
+      }
+      try{ if(typeof closeModal==="function") closeModal(); }catch(e){}
+      repaint();
+      try{ toast("تم حذف الإصابة نهائيًا","warn"); }catch(e){}
+      return;
+    }
+
+    /* بقية أزرار الحذف: تسجيل شاهد فقط دون تغيير السلوك */
+    if(/^(del|cuDel|prClear|miDel)/.test(act)){
+      var s3=st(); if(!s3) return;
+      for(var i=0;i<STORES.length;i++){
+        var k=STORES[i];
+        if(Array.isArray(s3[k]) && s3[k].some(function(x){ return x&&String(x.id)===String(id); })) addDel(k,id);
+      }
+    }
+  },true);
+
+  /* 3) تنظيف الحالة بعد الإقلاع من أي سجل محذوف رجع بالدمج */
+  function sweep(){
+    var n=purge();
+    if(n>0){ sv(); repaint(); }
+  }
+  setTimeout(sweep,2200);
+  setTimeout(sweep,5200);
+  var t0=Date.now();
+  var iv=setInterval(function(){ if(Date.now()-t0>180000){ clearInterval(iv); return; } sweep(); },9000);
+
+  window.QD151={reg:reg,add:addDel,purge:purge,reset:function(){ saveReg({}); }};
+})();
+</script>
 
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 </body>
