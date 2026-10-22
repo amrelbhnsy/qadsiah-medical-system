@@ -411,7 +411,7 @@ html[dir="rtl"] .filters .select{padding-left:34px}
 .rp-path-lbl{font-size:10.5px;font-weight:800;margin-top:3px;color:var(--slate);white-space:nowrap}
 .rp-batt{display:inline-flex;align-items:center;gap:5px}
 .rp-batt b{font-weight:900;line-height:1}
-/* ===== v11-160 · SINGLE — مسار اللاعب وشريط الإنجاز ===== */
+/* ===== v11-162 · LINEUP — مسار اللاعب وشريط الإنجاز ===== */
 .rp-path2{display:flex;align-items:center;margin:5px 0 6px;min-width:150px}
 .rp-node{width:13px;height:13px;border-radius:50%;flex:0 0 auto;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;background:#fff;border:2px solid #D3D9E1;transition:background .25s,border-color .25s,box-shadow .25s}
 .rp-node.done{background:#15803D;border-color:#15803D}
@@ -15623,7 +15623,7 @@ try{
 }catch(e){}
 
 /* QDBK-END */
-(function(){function mk(){try{var b=document.createElement("div");b.id="qdrBadge";b.textContent="v11-160 · SINGLE";b.style.cssText="position:fixed;left:8px;bottom:8px;z-index:2147483647;background:#fff;color:#7E0E14;border:1px solid #7E0E14;font:800 11px/1.5 system-ui;padding:3px 9px;border-radius:20px;pointer-events:none;opacity:.97;box-shadow:0 2px 8px rgba(0,0,0,.35)";document.body.appendChild(b);}catch(e){}}if(document.body)mk();else setTimeout(mk,600);})();
+(function(){function mk(){try{var b=document.createElement("div");b.id="qdrBadge";b.textContent="v11-162 · LINEUP";b.style.cssText="position:fixed;left:8px;bottom:8px;z-index:2147483647;background:#fff;color:#7E0E14;border:1px solid #7E0E14;font:800 11px/1.5 system-ui;padding:3px 9px;border-radius:20px;pointer-events:none;opacity:.97;box-shadow:0 2px 8px rgba(0,0,0,.35)";document.body.appendChild(b);}catch(e){}}if(document.body)mk();else setTimeout(mk,600);})();
 /* ---- PWA: install as an app on Android and iPhone / iPad ---- */
 (function(){
   Object.assign(STR.en,{
@@ -24208,7 +24208,7 @@ try{
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous">
 /* =====================================================================
-   v11-160 · SINGLE — توحيد حالة اليوم (مباراة · تدريب · راحة · إجازة)
+   v11-162 · LINEUP — توحيد حالة اليوم (مباراة · تدريب · راحة · إجازة)
    بين: لوحة التحكم · البرنامج الأسبوعي · التقويم · جدول المباريات
    ===================================================================== */
 (function(){
@@ -24312,7 +24312,7 @@ try{
 
 <script>
 /* =====================================================================
-   v11-160 · SINGLE
+   v11-162 · LINEUP
    إصلاح التجمد: يُبنى الهيكل مرة واحدة فقط، ويُحدَّث محتواه الداخلي
    (لا إعادة بناء للجذر ⇒ لا يفقد الهوية ولا يعلق)
    ===================================================================== */
@@ -25046,7 +25046,7 @@ try{
   function paintPanel(){ var p=document.getElementById("p9Panel"); if(p) p.innerHTML=panelHTML(); hideInj(!Pd.has); }
   function persist(){
     try{
-      var m=modalMatch(); if(!m) return;
+      var m=modalMatch(); if(!m||!__pdWritable(m)) return;
       m.starters=Pd.st.slice(); m.subs=Pd.sb.slice(); m.extraSquad=Pd.ex.slice();
       m.minutes=Object.assign({},Pd.min); m.medStatus=Object.assign({},Pd.med);
       m.lineup=Pd.lineup||""; m.hasInjuries=(Pd.has!==false);
@@ -25119,6 +25119,15 @@ try{
   }
   setInterval(panelTick,800); setTimeout(panelTick,400);
 
+  /* QD162: حماية التشكيلة — لا تسمح للوحة القديمة (Pd) بمسح اختيارات اللاعبين */
+  function __pdWritable(m){
+    try{
+      if(!document.getElementById("p9Panel")) return false;
+      if(!Pd.st.length&&!Pd.sb.length&&(((m.starters||[]).length)||((m.subs||[]).length))) return false;
+    }catch(e){ return false; }
+    return true;
+  }
+  window.QD162={writable:__pdWritable,state:function(){return {v:V, p:Pd}; }};
   var t0=0;
   (function hookSave(){
     try{
@@ -25128,7 +25137,7 @@ try{
         var r=f.apply(this,arguments);
         try{
           var m=modalMatch()||resolveTarget();
-          if(m){
+          if(m&&__pdWritable(m)){
             m.starters=Pd.st.slice(); m.subs=Pd.sb.slice(); m.extraSquad=Pd.ex.slice();
             m.minutes=Object.assign({},Pd.min); m.medStatus=Object.assign({},Pd.med);
             m.lineup=Pd.lineup||""; m.hasInjuries=(Pd.has!==false);
@@ -25906,6 +25915,357 @@ tr:hover .qde-ndate{color:#7E0E14}
     console.log("[QD160] __del:",s&&s.__del," reg:",o);
     return {live:(s&&s.injuries||[]).length,killed:o.ids.length};
   }
+})();
+</script>
+
+<style id="qdNutCss">
+.qdnu{display:flex;flex-direction:column;gap:14px}
+.qdnu-top{display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:linear-gradient(115deg,#7E0E14,#9C1119 55%,#B5121B);border-radius:18px;padding:16px 20px;box-shadow:0 10px 26px rgba(126,14,20,.20);position:relative;overflow:hidden}
+.qdnu-top:after{content:"";position:absolute;inset:0;background:radial-gradient(70% 120% at 100% 0%,rgba(200,162,74,.35),transparent 60%);pointer-events:none}
+.qdnu-h{flex:1 1 220px;position:relative;z-index:1}
+.qdnu-h h2{margin:0;font-size:19px;font-weight:900;color:#fff}
+.qdnu-h p{margin:4px 0 0;font-size:11.5px;color:rgba(255,255,255,.82)}
+.qdnu-act{display:flex;gap:8px;flex-wrap:wrap;position:relative;z-index:1}
+.qdnu-act .btn{background:#fff!important;border-color:#fff!important;color:#7E0E14!important;font-weight:800!important}
+.qdnu-act .btn.ghost{background:rgba(255,255,255,.14)!important;border-color:rgba(255,255,255,.42)!important;color:#fff!important}
+.qdnu-k{display:grid;grid-template-columns:repeat(4,1fr);gap:11px}
+.qdnu-kc{background:#fff;border:1px solid rgba(126,14,20,.08);border-radius:15px;padding:12px 14px;box-shadow:0 4px 13px rgba(20,10,10,.05);position:relative;overflow:hidden}
+.qdnu-kc:before{content:"";position:absolute;inset-inline-start:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,#C8A24A,#8a6b1f)}
+.qdnu-kc b{display:block;font-size:24px;font-weight:900;color:#241a16;line-height:1}
+.qdnu-kc span{display:block;font-size:10.5px;color:#7a726a;margin-top:5px;font-weight:700}
+.qdnu-tabs{display:flex;gap:6px;flex-wrap:wrap;background:#fff;border:1px solid rgba(126,14,20,.08);border-radius:14px;padding:7px;box-shadow:0 3px 10px rgba(20,10,10,.04)}
+.qdnu-t{font-family:inherit;cursor:pointer;border:1px solid transparent;background:#fff;color:#5c534c;font-size:11.5px;font-weight:800;border-radius:10px;padding:8px 13px;transition:.15s}
+.qdnu-t:hover{background:#FDF8F3;border-color:#EFE4D4}
+.qdnu-t.on{background:#7E0E14;color:#fff;border-color:#7E0E14}
+.qdnu-card{background:#fff;border:1px solid rgba(126,14,20,.08);border-radius:16px;box-shadow:0 5px 16px rgba(20,10,10,.05);overflow:hidden}
+.qdnu-ch{display:flex;align-items:center;gap:9px;padding:12px 15px;background:linear-gradient(180deg,#fff,#FDFBF8);border-bottom:1px solid #F1ECE5;flex-wrap:wrap}
+.qdnu-ch h3{margin:0;font-size:13.5px;font-weight:900;color:#2b2320}
+.qdnu-ch .sp{flex:1}
+.qdnu-ch .sub{font-size:10.5px;color:#9a9089}
+.qdnu-b{padding:13px 15px}
+.qdnu-meal{border:1px solid #EFE8DF;border-radius:14px;margin-bottom:12px;overflow:hidden;background:#fff}
+.qdnu-mh{display:flex;align-items:center;gap:10px;padding:10px 13px;background:linear-gradient(180deg,#FFFDFA,#FBF6EE);border-bottom:1px solid #F2EADD;flex-wrap:wrap}
+.qdnu-mh b{font-size:12.5px;font-weight:900;color:#2b2320}
+.qdnu-mh .tm{font-size:9.5px;font-weight:800;color:#8a6b1f;background:#FBF1E0;border:1px solid #F0E1C6;border-radius:999px;padding:2px 8px}
+.qdnu-mh .sp{flex:1}
+.qdnu-it{display:flex;align-items:center;gap:9px;padding:7px 13px;border-bottom:1px dashed #F4EEE6;font-size:12px}
+.qdnu-it:last-child{border-bottom:0}
+.qdnu-it.off{opacity:.4}
+.qdnu-it .n{width:20px;height:20px;border-radius:6px;background:#FBF4E8;color:#8a6b1f;font-size:10px;font-weight:900;display:flex;align-items:center;justify-content:center;flex:0 0 auto}
+.qdnu-it .ar{flex:1;font-weight:700;color:#2b2320}
+.qdnu-it .en{font-size:10px;color:#a39a90;font-weight:600}
+.qdnu-it .ord{display:flex;gap:3px}
+.qdnu-it .ord button{width:22px;height:22px;border-radius:6px;border:1px solid #EDE5DA;background:#fff;color:#7a726a;font-size:11px;cursor:pointer;line-height:1}
+.qdnu-it .ord button:hover{border-color:#C8A24A;color:#8a6b1f}
+.qdnu-it .tg{font-size:9px;font-weight:800;border-radius:999px;padding:1px 7px;background:#EDF8F1;color:#15803D;border:1px solid #CFEBD9}
+.qdnu-it .tg.pr{background:#FBF1E6;color:#8a6b1f;border-color:#F0E1CC}
+.qdnu-f{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.qdnu-fld{display:flex;flex-direction:column;gap:4px}
+.qdnu-fld label{font-size:10.5px;font-weight:800;color:#6b6259}
+.qdnu-fld input,.qdnu-fld select,.qdnu-fld textarea{font-family:inherit;font-size:12.5px;padding:8px 10px;border:1px solid #E7DED2;border-radius:10px;background:#fff;color:#241a16;width:100%}
+.qdnu-fld input:focus,.qdnu-fld select:focus,.qdnu-fld textarea:focus{outline:none;border-color:#C8A24A;box-shadow:0 0 0 3px rgba(200,162,74,.16)}
+.qdnu-wa{background:#F0FDF4;border:1px solid #BBF7D0;border-radius:12px;padding:11px 13px;font-family:ui-monospace,Menlo,monospace;font-size:11px;color:#14532d;white-space:pre-wrap;line-height:1.7;max-height:280px;overflow:auto;direction:rtl;text-align:right}
+.qdnu-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.qdnu-wbtn{background:#25D366!important;border-color:#25D366!important;color:#fff!important;font-weight:800!important}
+.qdnu-tbl{width:100%;border-collapse:collapse;font-size:12px}
+.qdnu-tbl th{background:#FDFBF8;font-size:10px;font-weight:900;color:#8a827a;padding:9px 12px;text-align:start;border-bottom:1px solid #F1ECE5;white-space:nowrap}
+.qdnu-tbl td{padding:9px 12px;border-bottom:1px solid #F8F4EF;text-align:start}
+.qdnu-tbl tr:hover td{background:#FDF9F4}
+.qdnu-badge{font-size:9.5px;font-weight:800;border-radius:999px;padding:2px 8px}
+.qdnu-empty{text-align:center;color:#9a9089;font-size:12px;padding:26px}
+@media(max-width:860px){.qdnu-k{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:560px){.qdnu-it .en{display:none}.qdnu-top{padding:14px 15px}.qdnu-h h2{font-size:16px}}
+</style>
+<script>
+(function(){
+  if(window.__QDNUT) return; window.__QDNUT=1;
+  var KEY="qd_nutrition_v1";
+  function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g,function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
+  function load(){ try{ var o=JSON.parse(localStorage.getItem(KEY)||"{}"); o.players=o.players||{}; o.orders=o.orders||[]; o.order=o.order||{meals:{}}; o.off=o.off||{}; o.seq=o.seq||{}; return o; }catch(e){ return {players:{},orders:[],order:{meals:{}},off:{},seq:{}}; } }
+  function save(o){ try{ localStorage.setItem(KEY,JSON.stringify(o)); }catch(e){} }
+  var D=load();
+
+  /* ===== القائمة الرسمية (من القائمة الغذائية المصورة) ===== */
+  var MENU=[
+    {k:"dinner",ar:"عشاء ليلة المباراة",en:"Dinner — the night before",tm:"20:00",groups:[
+      {ar:"الشوربة",en:"Soup",it:[["شوربة خضار مشكلة","Vegetables soup",""],["شوربة عدس غنية بالبروتين","Lentils soup","pr"]]},
+      {ar:"الأطباق الرئيسية والبروتين",en:"Main courses & protein",it:[["كبسة (دجاج أو لحم)","Kabbsa (chicken / meat)",""],["أرز أبيض صحي بدون زيت","White rice (no oil)",""],["لحم ودجاج مشوي — قطع صغيرة","Grilled beef & chicken","pr"],["سمك سلمون مشوي بدون زيت","Grilled salmon","pr"],["داوود باشا (كرات لحم بالصلصة)","Dawood basha","pr"],["لزانيا صحية متوازنة","Lazania",""],["سباغيتي (صلصة حمراء/بيضاء وجبن)","Spaghetti & parmesan",""]]},
+      {ar:"الأطباق الجانبية والحلويات",en:"Sides, desserts & drinks",it:[["بطاطس مهروسة (بيوريه)","Mashed potatoes",""],["خضار سوتيه مسلوقة","Sautéed vegetables",""],["شرائح فواكه مشكلة","Sliced fruits",""],["حلوى أم علي الغنية بالطاقة","Um Ali",""],["عصائر طازجة (برتقال، تفاح، أناناس) وماء","Fresh juices & water",""]]}
+    ]},
+    {k:"breakfast",ar:"إفطار يوم المباراة",en:"Match-day breakfast",tm:"08:00",groups:[
+      {ar:"ركن البيض المباشر",en:"Eggs station",it:[["أومليت / بيض مخفوق / بيض مسلوق","Omelet, scramble, boiled","pr"],["سلطات متنوعة طازجة","Different salads",""],["تونة خفيفة مصفاة","Tuna","pr"]]},
+      {ar:"المخبوزات والنشويات",en:"Bakery & oats",it:[["بان كيك","Pancakes",""],["كيك إنجليزي","English cake",""],["كب كيك","Cupcakes",""],["عصيدة الشوفان الصحية","Porridge oats",""],["خبز توست أبيض وبني","Toast bread",""],["عسل طبيعي ومربى","Honey / jam",""]]},
+      {ar:"الألبان والفواكه والمشروبات",en:"Dairy, fruits & drinks",it:[["أنواع أجبان مختلفة","Different cheeses","pr"],["فول سوداني ومكسرات منوعة","Peanuts & nuts",""],["حليب (ساخن / بارد)","Milk (hot / cold)","pr"],["زبادي (كامل وقليل الدسم)","Yogurt","pr"],["شرائح فواكه وفواكه مجففة","Sliced & dried fruits",""],["عصائر طبيعية، قهوة، شاي، ماء","Juices, coffee, tea, water",""]]}
+    ]},
+    {k:"lunch",ar:"الغداء الرئيسي",en:"Lunch",tm:"13:30",groups:[
+      {ar:"الغداء",en:"Lunch",it:[["شوربة متنوعة وسلطات مختلفة","Soup & salads",""],["أرز أبيض مطهو على البخار","Steamed white rice",""],["بطاطس مهروسة (بيوريه)","Mashed potatoes",""],["سباغيتي مع بارميزان (صلصة جانبية)","Spaghetti & parmesan",""],["صدور دجاج مشوية","Grilled chicken breast","pr"],["ستيك لحم بقري مشوي (الصلصة جانبًا)","Grilled beef steak","pr"],["سمك سلمون مشوي بدون زيت","Grilled salmon","pr"],["خضار سوتيه، فواكه، عصائر طازجة وماء","Veg, fruits, juices, water",""]]}
+    ]},
+    {k:"snack",ar:"الوجبات الخفيفة (سناك)",en:"Snacks",tm:"17:00",groups:[
+      {ar:"وقت السناك",en:"Snacks time",it:[["شرائح فواكه طازجة منوعة","Fresh sliced fruits",""],["ساندويتشات صغيرة (سلطات، جبن، تونة)","Small sandwiches","pr"],["كب كيك وكيك إنجليزي","Cupcakes & English cake",""],["عصائر طازجة، قهوة، شاي، ماء","Juices, coffee, tea, water",""]]}
+    ]},
+    {k:"recovery",ar:"بروتوكول الاستشفاء بعد المباراة",en:"Post-match recovery",tm:"بعد الصافرة",groups:[
+      {ar:"المراحل الثماني",en:"8 steps",it:[["١ — صافرة نهاية المباراة","Step 1 · End of the match",""],["٢ — ترطيب فوري بالسوائل","Step 2 · Hydration",""],["٣ — عصير كرز حامض","Step 3 · Tart cherry juice",""],["٤ — حليب بالشوكولاتة","Step 4 · Chocolate milk","pr"],["٥ — حمام ماء بارد / ثلج","Step 5 · Cold bath",""],["٦ — وجبة استشفاء (بيتزا)","Step 6 · Recovery meal",""],["٧ — ملابس ضاغطة","Step 7 · Compression garments",""],["٨ — نوم عميق وراحة","Step 8 · Sleep & rest",""]]}
+    ]}
+  ];
+  function seqOf(k,len){ var s=D.seq[k]; if(!Array.isArray(s)||s.length!==len){ s=[]; for(var i=0;i<len;i++) s.push(i); D.seq[k]=s; } return s; }
+  function flat(meal){ var out=[]; meal.groups.forEach(function(g,gi){ g.it.forEach(function(it,ii){ out.push({g:gi,gr:g.ar,gi:gi,ii:ii,ar:it[0],en:it[1],tg:it[2],id:meal.k+"-"+gi+"-"+ii}); }); }); return out; }
+
+  /* ===== حساب الاحتياج (تقديري) ===== */
+  function calc(p){
+    var w=Number(p.w)||0, h=Number(p.h)||0, age=Number(p.age)||17;
+    if(!w) return null;
+    var bmr=10*w+6.25*(h||170)-5*age+5;
+    var act=p.act==="match"?1.75:(p.act==="train"?1.65:1.5);
+    var kcal=Math.round(bmr*act/10)*10;
+    var prot=Math.round(w*(p.goal==="cut"?1.9:(p.goal==="bulk"?2.0:1.7)));
+    return {kcal:kcal,prot:prot,carb:Math.round(kcal*0.55/4),fat:Math.round(kcal*0.25/9)};
+  }
+  function players(){ try{ return (window.QDSIGN_STATE&&QDSIGN_STATE().players)||(window.QD_S&&window.QD_S.players)||[]; }catch(e){ return []; } }
+  function pname(p){ return [p.first,p.last].filter(Boolean).join(" ")||p.id; }
+
+  /* ===== بناء رسالة واتساب ===== */
+  function buildMsg(){
+    var o=D.order, L=[];
+    L.push("🍽️ *طلب قائمة غذائية — أكاديمية نادي القادسية*");
+    L.push("");
+    if(o.hotel) L.push("🏨 الفندق: "+o.hotel);
+    if(o.from||o.to) L.push("📅 الفترة: "+(o.from||"—")+(o.to?(" → "+o.to):""));
+    if(o.guests) L.push("👥 عدد اللاعبين: "+o.guests);
+    if(o.contact) L.push("📞 مسؤول التنسيق: "+o.contact);
+    L.push("");
+    var used=0;
+    MENU.forEach(function(m){
+      if(!o.meals[m.k]) return;
+      used++;
+      L.push("— — — — —");
+      L.push("*"+m.ar+"*"+(m.tm?("  ("+m.tm+")"):""));
+      var items=flat(m), sq=seqOf(m.k,items.length), lastGr="";
+      sq.forEach(function(ix){
+        var it=items[ix]; if(!it) return;
+        if(D.off[it.id]) return;
+        if(it.gr!==lastGr){ L.push("  "+it.gr+":"); lastGr=it.gr; }
+        L.push("   • "+it.ar+(it.tg==="pr"?" (بروتين)":""));
+      });
+    });
+    if(!used){ L.push("⚠️ لم يختر أي وجبة بعد."); }
+    if(o.notes){ L.push(""); L.push("📝 ملاحظات: "+o.notes); }
+    L.push("");
+    L.push("نرجو التأكيد قبل الوصول. شكرًا لكم 🌿");
+    L.push("— القادسية · إدارة الإصابات والتغذية");
+    return L.join("\n");
+  }
+
+  /* ===== الواجهة ===== */
+  var TAB="menu";
+  function kpis(){
+    var ps=players(), n=0, kcal=0, prot=0, alg=0;
+    ps.forEach(function(p){ var r=D.players[p.id]; if(!r) return; var c=calc(r); if(c){ n++; kcal+=c.kcal; prot+=c.prot; } if(r.alg) alg++; });
+    return '<div class="qdnu-k">'+
+      '<div class="qdnu-kc"><b>'+n+'</b><span>لاعبون بملف تغذية</span></div>'+
+      '<div class="qdnu-kc"><b>'+(n?Math.round(kcal/n):0)+'</b><span>متوسط السعرات (ك.ك)</span></div>'+
+      '<div class="qdnu-kc"><b>'+(n?Math.round(prot/n):0)+'</b><span>متوسط البروتين (جم)</span></div>'+
+      '<div class="qdnu-kc"><b>'+alg+'</b><span>حساسيات / ممنوعات</span></div>'+
+    '</div>';
+  }
+  function tabMenu(){
+    var h='<div class="qdnu-card"><div class="qdnu-ch"><h3>القائمة الرسمية — مرتّبة للفندق</h3><span class="sp"></span>'+
+      '<span class="sub">رتّب الأصناف بالأسهم · أوقف أي صنف لا تريده</span></div><div class="qdnu-b">';
+    MENU.forEach(function(m){
+      var items=flat(m), sq=seqOf(m.k,items.length);
+      h+='<div class="qdnu-meal"><div class="qdnu-mh"><b>'+esc(m.ar)+'</b>'+(m.tm?'<span class="tm">'+esc(m.tm)+'</span>':'')+
+        '<span class="sp"></span><span class="sub" style="font-size:10px;color:#9a9089">'+esc(m.en)+'</span></div>';
+      var lastGr="";
+      sq.forEach(function(ix,pos){
+        var it=items[ix]; if(!it) return;
+        if(it.gr!==lastGr){ h+='<div style="padding:7px 13px 3px;font-size:10px;font-weight:900;color:#7E0E14;background:#FDFBF8;border-bottom:1px solid #F4EEE6">'+esc(it.gr)+'</div>'; lastGr=it.gr; }
+        var off=!!D.off[it.id];
+        h+='<div class="qdnu-it'+(off?" off":"")+'"><span class="n">'+(pos+1)+'</span>'+
+          '<span class="ar">'+esc(it.ar)+'</span><span class="en">'+esc(it.en)+'</span>'+
+          (it.tg==="pr"?'<span class="tg pr">بروتين</span>':'')+
+          '<span class="ord"><button data-ntup="'+it.id+'" title="أعلى">▲</button><button data-ntdn="'+it.id+'" title="أسفل">▼</button></span>'+
+          '<button class="btn ghost sm" data-ntoff="'+it.id+'" style="font-size:9.5px;padding:2px 8px">'+(off?"تشغيل":"إيقاف")+'</button></div>';
+      });
+      h+='</div>';
+    });
+    h+='</div></div>';
+    return h;
+  }
+  function tabPlayers(){
+    var ps=players();
+    var rows=ps.map(function(p){
+      var r=D.players[p.id]||{};
+      var c=calc(r);
+      return '<tr><td><b>'+esc(pname(p))+'</b><div style="font-size:9.5px;color:#a39a90">'+esc(p.pos||"")+'</div></td>'+
+        '<td><input class="input" data-np="w" data-pid="'+esc(p.id)+'" value="'+esc(r.w||"")+'" type="number" style="max-width:74px" placeholder="كجم"></td>'+
+        '<td><input class="input" data-np="h" data-pid="'+esc(p.id)+'" value="'+esc(r.h||"")+'" type="number" style="max-width:74px" placeholder="سم"></td>'+
+        '<td><select class="select" data-np="goal" data-pid="'+esc(p.id)+'" style="max-width:112px">'+
+          [["maintain","ثبات"],["bulk","بناء عضل"],["cut","خسارة دهون"]].map(function(o){ return '<option value="'+o[0]+'"'+((r.goal||"maintain")===o[0]?" selected":"")+'>'+o[1]+'</option>'; }).join("")+'</select></td>'+
+        '<td>'+(c?('<b style="color:#15803D">'+c.kcal+'</b><div style="font-size:9px;color:#9a9089">ك.ك</div>'):'<span style="color:#c0b8b0">—</span>')+'</td>'+
+        '<td>'+(c?('<b style="color:#8a6b1f">'+c.prot+'</b><div style="font-size:9px;color:#9a9089">جم بروتين</div>'):'<span style="color:#c0b8b0">—</span>')+'</td>'+
+        '<td><input class="input" data-np="alg" data-pid="'+esc(p.id)+'" value="'+esc(r.alg||"")+'" placeholder="حساسية / ممنوعات" style="min-width:120px"></td>'+
+        '<td><button class="btn ghost sm" data-nmeal="'+esc(p.id)+'">خطة</button></td></tr>';
+    }).join("");
+    return '<div class="qdnu-card"><div class="qdnu-ch"><h3>ملفات التغذية</h3><span class="sp"></span><span class="sub">الوزن والطول تُحسب منها السعرات والبروتين تقديريًا</span></div>'+
+      '<div class="table-wrap" style="overflow:auto"><table class="qdnu-tbl"><thead><tr><th>اللاعب</th><th>الوزن</th><th>الطول</th><th>الهدف</th><th>سعرات</th><th>بروتين</th><th>حساسية</th><th></th></tr></thead><tbody>'+
+      (rows||'<tr><td colspan="8" class="qdnu-empty">لا يوجد لاعبون</td></tr>')+'</tbody></table></div></div>';
+  }
+  function tabOrder(){
+    var o=D.order;
+    var meals=MENU.map(function(m){
+      var on=!!o.meals[m.k];
+      return '<label style="display:flex;align-items:center;gap:7px;background:'+(on?"#FDF7EC":"#fff")+';border:1px solid '+(on?"#E8D3A8":"#E7DED2")+';border-radius:10px;padding:8px 11px;font-size:11.5px;font-weight:800;cursor:pointer">'+
+        '<input type="checkbox" data-nmealck="'+m.k+'"'+(on?" checked":"")+'> '+esc(m.ar)+'</label>';
+    }).join("");
+    var msg=buildMsg();
+    return '<div class="qdnu-card"><div class="qdnu-ch"><h3>طلب الفندق</h3><span class="sp"></span><span class="sub">اختر الوجبات ثم أرسل القائمة واتساب</span></div>'+
+      '<div class="qdnu-b">'+
+      '<div class="qdnu-f">'+
+        '<div class="qdnu-fld"><label>اسم الفندق</label><input data-no="hotel" value="'+esc(o.hotel||"")+'" placeholder="فندق …"></div>'+
+        '<div class="qdnu-fld"><label>رقم واتساب الفندق</label><input data-no="phone" value="'+esc(o.phone||"")+'" placeholder="9665xxxxxxxx" inputmode="tel"></div>'+
+        '<div class="qdnu-fld"><label>من تاريخ</label><input type="date" data-no="from" value="'+esc(o.from||"")+'"></div>'+
+        '<div class="qdnu-fld"><label>إلى تاريخ</label><input type="date" data-no="to" value="'+esc(o.to||"")+'"></div>'+
+        '<div class="qdnu-fld"><label>عدد اللاعبين</label><input type="number" data-no="guests" value="'+esc(o.guests||"")+'" placeholder="26"></div>'+
+        '<div class="qdnu-fld"><label>مسؤول التنسيق</label><input data-no="contact" value="'+esc(o.contact||"")+'" placeholder="اسم + جوال"></div>'+
+      '</div>'+
+      '<div style="margin:12px 0 8px;font-size:11px;font-weight:900;color:#7E0E14">الوجبات المطلوبة</div>'+
+      '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:7px">'+meals+'</div>'+
+      '<div class="qdnu-fld" style="margin-top:11px"><label>ملاحظات للفندق</label><textarea data-no="notes" rows="2" placeholder="بدون مكسرات للاعب … · تقديم العشاء 20:00">'+esc(o.notes||"")+'</textarea></div>'+
+      '<div style="margin:13px 0 6px;font-size:11px;font-weight:900;color:#7E0E14">نص الرسالة الجاهزة</div>'+
+      '<div class="qdnu-wa" id="qdnuMsg">'+esc(msg)+'</div>'+
+      '<div class="qdnu-row">'+
+        '<button class="btn qdnu-wbtn" data-nwa="1">إرسال على واتساب</button>'+
+        '<button class="btn ghost" data-ncopy="1">نسخ النص</button>'+
+        '<button class="btn ghost" data-nsave="1">حفظ الطلب في السجل</button>'+
+        '<button class="btn ghost" data-nprint="1">طباعة / PDF</button>'+
+      '</div></div></div>';
+  }
+  function tabLog(){
+    var rows=D.orders.slice().reverse().map(function(o,i){
+      return '<tr><td>'+esc(o.date||"—")+'</td><td><b>'+esc(o.hotel||"—")+'</b></td><td>'+esc(o.from||"—")+(o.to?(" → "+esc(o.to)):"")+'</td>'+
+        '<td>'+esc(o.guests||"—")+'</td><td>'+esc(o.meals||"—")+'</td>'+
+        '<td><button class="btn ghost sm" data-nresend="'+(D.orders.length-1-i)+'">إعادة إرسال</button> '+
+        '<button class="btn ghost sm" data-ndel="'+(D.orders.length-1-i)+'">حذف</button></td></tr>';
+    }).join("");
+    return '<div class="qdnu-card"><div class="qdnu-ch"><h3>سجل طلبات الفندق</h3></div>'+
+      '<div class="table-wrap" style="overflow:auto"><table class="qdnu-tbl"><thead><tr><th>التاريخ</th><th>الفندق</th><th>الفترة</th><th>اللاعبون</th><th>الوجبات</th><th></th></tr></thead><tbody>'+
+      (rows||'<tr><td colspan="6" class="qdnu-empty">لا طلبات محفوظة بعد</td></tr>')+'</tbody></table></div></div>';
+  }
+  function render(){
+    var el=document.getElementById("v-nutrition"); if(!el) return;
+    var body = TAB==="menu"?tabMenu() : TAB==="players"?tabPlayers() : TAB==="order"?tabOrder() : tabLog();
+    el.innerHTML='<div class="qdnu">'+
+      '<div class="qdnu-top"><div class="qdnu-h"><h2>التغذية</h2><p>القائمة الرسمية · ملفات اللاعبين · طلب الفندق عبر واتساب</p></div>'+
+      '<div class="qdnu-act"><button class="btn sm" data-ntab="order">طلب الفندق</button>'+
+      '<button class="btn sm ghost" data-ntab="menu">القائمة</button>'+
+      '<button class="btn sm ghost" data-nprint="1">طباعة</button></div></div>'+
+      kpis()+
+      '<div class="qdnu-tabs">'+
+        ["menu|القائمة الرسمية","players|ملفات اللاعبين","order|طلب الفندق","log|سجل الطلبات"].map(function(t){
+          var k=t.split("|")[0]; return '<button class="qdnu-t" data-ntab="'+k+'"'+(TAB===k?' class="qdnu-t on"':"")+'>'+t.split("|")[1]+'</button>';
+        }).join("")+
+      '</div>'+body+'</div>';
+  }
+  window.QDNUT={render:render,msg:buildMsg,menu:MENU,state:function(){ return D; }};
+
+  /* ===== التنقل ===== */
+  function go(){
+    document.querySelectorAll(".view").forEach(function(v){ v.classList.remove("active"); });
+    var sec=document.getElementById("v-nutrition"); if(sec) sec.classList.add("active");
+    document.querySelectorAll(".nav-item").forEach(function(b){ b.classList.toggle("active",b.getAttribute("data-view")==="nutrition"); });
+    render();
+    try{ window.scrollTo(0,0); }catch(e){}
+  }
+  window.QDNUT.go=go;
+
+  function injectNav(){
+    var nav=document.getElementById("nav"); if(!nav) return false;
+    if(nav.querySelector('[data-view="nutrition"]')) return true;
+    var src=nav.querySelector('[data-view="load"]')||nav.querySelector(".nav-item");
+    if(!src) return false;
+    var b=src.cloneNode(true);
+    b.setAttribute("data-view","nutrition");
+    b.classList.remove("active");
+    var sp=b.querySelector("span"); if(sp) sp.textContent="التغذية";
+    var cnt=b.querySelector(".cnt"); if(cnt) cnt.remove();
+    var host=src.parentNode;
+    host.insertBefore(b,src.nextSibling);
+    return true;
+  }
+  function injectView(){
+    if(document.getElementById("v-nutrition")) return true;
+    var main=document.querySelector("main")||document.querySelector(".main");
+    var anchor=document.getElementById("v-load")||document.querySelector(".view");
+    if(!main||!anchor) return false;
+    var s=document.createElement("section");
+    s.className="view"; s.id="v-nutrition";
+    anchor.parentNode.insertBefore(s,anchor.nextSibling);
+    return true;
+  }
+
+  /* ===== الأحداث ===== */
+  document.addEventListener("click",function(e){
+    var t=e.target; if(!t||!t.closest) return;
+    var nb=t.closest('[data-view="nutrition"]');
+    if(nb){ e.preventDefault(); go(); return; }
+    var tb=t.closest("[data-ntab]");
+    if(tb){ TAB=tb.getAttribute("data-ntab"); render(); return; }
+    var up=t.closest("[data-ntup]"), dn=t.closest("[data-ntdn]");
+    if(up||dn){
+      var id=(up||dn).getAttribute(up?"data-ntup":"data-ntdn");
+      MENU.forEach(function(m){
+        var items=flat(m), sq=seqOf(m.k,items.length);
+        var idx=-1; items.forEach(function(it,i){ if(it.id===id) idx=i; });
+        if(idx<0) return;
+        var pos=sq.indexOf(idx); if(pos<0) return;
+        var np=pos+(up?-1:1); if(np<0||np>=sq.length) return;
+        var tmp=sq[pos]; sq[pos]=sq[np]; sq[np]=tmp; D.seq[m.k]=sq;
+      });
+      save(D); render(); return;
+    }
+    var off=t.closest("[data-ntoff]");
+    if(off){ var oid=off.getAttribute("data-ntoff"); D.off[oid]=!D.off[oid]; save(D); render(); return; }
+    var mealck=t.closest("[data-nmealck]");
+    if(mealck){ var mk=mealck.getAttribute("data-nmealck"); D.order.meals[mk]=mealck.checked; save(D); render(); return; }
+    var wa=t.closest("[data-nwa]");
+    if(wa){
+      var o=D.order, ph=String(o.phone||"").replace(/[^0-9]/g,"");
+      var url="https://wa.me/"+(ph||"")+"?text="+encodeURIComponent(buildMsg());
+      try{ window.open(url,"_blank"); }catch(e){ location.href=url; }
+      return;
+    }
+    var cp=t.closest("[data-ncopy]");
+    if(cp){ try{ navigator.clipboard.writeText(buildMsg()); if(window.toast) toast("تم نسخ القائمة"); }catch(e){} return; }
+    var sv=t.closest("[data-nsave]");
+    if(sv){
+      var ord=D.order, names=MENU.filter(function(m){ return ord.meals[m.k]; }).map(function(m){ return m.ar; }).join(" · ");
+      D.orders.push({date:new Date().toISOString().slice(0,10),hotel:ord.hotel,phone:ord.phone,from:ord.from,to:ord.to,guests:ord.guests,meals:names,notes:ord.notes,msg:buildMsg()});
+      save(D); if(window.toast) toast("تم حفظ الطلب"); TAB="log"; render(); return;
+    }
+    var rs=t.closest("[data-nresend]");
+    if(rs){ var rec=D.orders[Number(rs.getAttribute("data-nresend"))]; if(rec){ var p2=String(rec.phone||"").replace(/[^0-9]/g,""); try{ window.open("https://wa.me/"+p2+"?text="+encodeURIComponent(rec.msg||""),"_blank"); }catch(e){} } return; }
+    var dl=t.closest("[data-ndel]");
+    if(dl){ D.orders.splice(Number(dl.getAttribute("data-ndel")),1); save(D); render(); return; }
+    var pr=t.closest("[data-nprint]");
+    if(pr){ try{ var w=window.open("","_blank"); w.document.write('<html dir="rtl"><head><meta charset="utf-8"><title>قائمة الفندق</title><style>body{font-family:Tahoma;padding:24px;white-space:pre-wrap;line-height:1.9;font-size:13px}h3{color:#7E0E14}</style></head><body><h3>القائمة الغذائية — أكاديمية نادي القادسية</h3>'+esc(buildMsg())+'</body></html>'); w.document.close(); setTimeout(function(){ w.print(); },350); }catch(e){} return; }
+    var nm=t.closest("[data-nmeal]");
+    if(nm){ if(window.toast) toast("خطة اللاعب تُدار من ملفه الطبي — هذا الملف لحساب السعرات فقط"); return; }
+  },true);
+
+  document.addEventListener("input",function(e){
+    var t=e.target; if(!t) return;
+    var np=t.getAttribute&&t.getAttribute("data-np");
+    if(np){ var pid=t.getAttribute("data-pid"); D.players[pid]=D.players[pid]||{}; D.players[pid][np]=t.value; save(D); return; }
+    var no=t.getAttribute&&t.getAttribute("data-no");
+    if(no){ D.order[no]=t.value; save(D);
+      if(["hotel","phone","from","to","guests","contact","notes"].indexOf(no)>=0){
+        var box=document.getElementById("qdnuMsg"); if(box) box.textContent=buildMsg();
+      }
+      return; }
+  },true);
+
+  function boot(){ injectView(); injectNav(); }
+  setTimeout(boot,1500); setTimeout(boot,4000);
+  var tries=0, iv=setInterval(function(){ injectView(); injectNav(); if(++tries>25) clearInterval(iv); },1200);
 })();
 </script>
 
