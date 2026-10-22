@@ -411,7 +411,7 @@ html[dir="rtl"] .filters .select{padding-left:34px}
 .rp-path-lbl{font-size:10.5px;font-weight:800;margin-top:3px;color:var(--slate);white-space:nowrap}
 .rp-batt{display:inline-flex;align-items:center;gap:5px}
 .rp-batt b{font-weight:900;line-height:1}
-/* ===== v11-163 · LINEUP2 — مسار اللاعب وشريط الإنجاز ===== */
+/* ===== v11-164 · NUT-NAV — مسار اللاعب وشريط الإنجاز ===== */
 .rp-path2{display:flex;align-items:center;margin:5px 0 6px;min-width:150px}
 .rp-node{width:13px;height:13px;border-radius:50%;flex:0 0 auto;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;background:#fff;border:2px solid #D3D9E1;transition:background .25s,border-color .25s,box-shadow .25s}
 .rp-node.done{background:#15803D;border-color:#15803D}
@@ -15623,7 +15623,7 @@ try{
 }catch(e){}
 
 /* QDBK-END */
-(function(){function mk(){try{var b=document.createElement("div");b.id="qdrBadge";b.textContent="v11-163 · LINEUP2";b.style.cssText="position:fixed;left:8px;bottom:8px;z-index:2147483647;background:#fff;color:#7E0E14;border:1px solid #7E0E14;font:800 11px/1.5 system-ui;padding:3px 9px;border-radius:20px;pointer-events:none;opacity:.97;box-shadow:0 2px 8px rgba(0,0,0,.35)";document.body.appendChild(b);}catch(e){}}if(document.body)mk();else setTimeout(mk,600);})();
+(function(){function mk(){try{var b=document.createElement("div");b.id="qdrBadge";b.textContent="v11-164 · NUT-NAV";b.style.cssText="position:fixed;left:8px;bottom:8px;z-index:2147483647;background:#fff;color:#7E0E14;border:1px solid #7E0E14;font:800 11px/1.5 system-ui;padding:3px 9px;border-radius:20px;pointer-events:none;opacity:.97;box-shadow:0 2px 8px rgba(0,0,0,.35)";document.body.appendChild(b);}catch(e){}}if(document.body)mk();else setTimeout(mk,600);})();
 /* ---- PWA: install as an app on Android and iPhone / iPad ---- */
 (function(){
   Object.assign(STR.en,{
@@ -24208,7 +24208,7 @@ try{
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous">
 /* =====================================================================
-   v11-163 · LINEUP2 — توحيد حالة اليوم (مباراة · تدريب · راحة · إجازة)
+   v11-164 · NUT-NAV — توحيد حالة اليوم (مباراة · تدريب · راحة · إجازة)
    بين: لوحة التحكم · البرنامج الأسبوعي · التقويم · جدول المباريات
    ===================================================================== */
 (function(){
@@ -24312,7 +24312,7 @@ try{
 
 <script>
 /* =====================================================================
-   v11-163 · LINEUP2
+   v11-164 · NUT-NAV
    إصلاح التجمد: يُبنى الهيكل مرة واحدة فقط، ويُحدَّث محتواه الداخلي
    (لا إعادة بناء للجذر ⇒ لا يفقد الهوية ولا يعلق)
    ===================================================================== */
@@ -26307,6 +26307,81 @@ tr:hover .qde-ndate{color:#7E0E14}
 })();
 </script>
 
+<script>
+/* ===== QD164 · NUTRITION-NAV ===== زر «التغذية» يبقى ظاهرًا بعد كل إعادة رسم للقائمة ===== */
+(function(){
+  if(window.__QD164) return; window.__QD164=1;
+  function navEl(){ return document.getElementById("nav"); }
+  function hasTab(){ var n=navEl(); return !!(n&&n.querySelector('[data-view="nutrition"]')); }
+  function inject(){
+    try{
+      if(hasTab()) return true;
+      var n=navEl(); if(!n) return false;
+      var src=n.querySelector('[data-view="load"]')||n.querySelector('[data-view="mental"]')||n.querySelector(".nav-item");
+      if(!src) return false;
+      var b=src.cloneNode(true);
+      b.setAttribute("data-view","nutrition");
+      b.className="nav-item";
+      b.removeAttribute("aria-current");
+      var sp=b.querySelector("span"); if(sp) sp.textContent="التغذية";
+      var c=b.querySelector(".cnt"); if(c&&c.parentNode) c.parentNode.removeChild(c);
+      if(src.parentNode) src.parentNode.insertBefore(b,src.nextSibling);
+      return true;
+    }catch(e){ return false; }
+  }
+  function ensureView(){
+    try{
+      if(document.getElementById("v-nutrition")) return true;
+      var main=document.querySelector("main")||document.querySelector(".main"); if(!main) return false;
+      var s=document.createElement("section");
+      s.className="view"; s.id="v-nutrition";
+      main.appendChild(s);
+      return true;
+    }catch(e){ return false; }
+  }
+  function ensureRend(){
+    try{
+      if(typeof REND==="object"&&REND&&!REND.nutrition){
+        REND.nutrition=function(){ ensureView(); var s=document.getElementById("v-nutrition"); if(s) s.classList.add("active"); try{ if(window.QDNUT&&QDNUT.render) QDNUT.render(); }catch(e){} };
+      }
+    }catch(e){}
+  }
+  function boot(){ ensureView(); ensureRend(); inject(); }
+  /* الالتفاف حول renderNav — بعد كل بناء للقائمة نُعيد الزر */
+  try{
+    var rn=window.renderNav;
+    if(typeof rn==="function"&&!rn.__qd164){
+      var w=function(){ var r=rn.apply(this,arguments); try{ inject(); }catch(e){} return r; };
+      w.__qd164=1; window.renderNav=w;
+    }
+  }catch(e){}
+  /* مراقبة القائمة: أي إعادة بناء تُعيد الزر فورًا */
+  try{
+    var obs=new MutationObserver(function(){ try{ if(!hasTab()) inject(); }catch(e){} });
+    var t=setInterval(function(){ var n=navEl(); if(n){ try{ obs.observe(n,{childList:true,subtree:true}); }catch(e){} clearInterval(t); boot(); } },400);
+  }catch(e){}
+  /* شبكة أمان: فحص دوري رخيص */
+  setInterval(function(){ try{ if(!hasTab()) inject(); }catch(e){} },1500);
+  /* عند فتح «التغذية» نتأكد من بقاء القسم ظاهرًا */
+  try{
+    document.addEventListener("click",function(e){
+      var t=e.target; if(!t||!t.closest) return;
+      var b=t.closest('[data-view="nutrition"]'); if(!b) return;
+      setTimeout(function(){
+        try{
+          var s=document.getElementById("v-nutrition");
+          if(s){ document.querySelectorAll("main .view").forEach(function(v){ if(v!==s) v.classList.remove("active"); }); s.classList.add("active"); }
+          document.querySelectorAll(".nav-item").forEach(function(x){ x.classList.toggle("active",x.getAttribute("data-view")==="nutrition"); });
+          if(window.QDNUT&&QDNUT.render) QDNUT.render();
+        }catch(e){}
+      },80);
+    },false);
+  }catch(e){}
+  window.QD164={inject:inject,has:hasTab,boot:boot,nav:function(){ return (navEl()?navEl().innerText:""); }};
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",boot); else boot();
+  setTimeout(boot,600); setTimeout(boot,1800); setTimeout(boot,4000);
+})();
+</script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 </body>
 </html>
