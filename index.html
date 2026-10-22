@@ -411,7 +411,7 @@ html[dir="rtl"] .filters .select{padding-left:34px}
 .rp-path-lbl{font-size:10.5px;font-weight:800;margin-top:3px;color:var(--slate);white-space:nowrap}
 .rp-batt{display:inline-flex;align-items:center;gap:5px}
 .rp-batt b{font-weight:900;line-height:1}
-/* ===== v11-169 · REP-FIX — مسار اللاعب وشريط الإنجاز ===== */
+/* ===== v11-173 · I18N-MATCH — مسار اللاعب وشريط الإنجاز ===== */
 .rp-path2{display:flex;align-items:center;margin:5px 0 6px;min-width:150px}
 .rp-node{width:13px;height:13px;border-radius:50%;flex:0 0 auto;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;background:#fff;border:2px solid #D3D9E1;transition:background .25s,border-color .25s,box-shadow .25s}
 .rp-node.done{background:#15803D;border-color:#15803D}
@@ -745,7 +745,7 @@ const STR={
   act_title:"Call-up log", act_total:"Total call-ups", act_minutes:"Days",
   act_matches:"Matches", act_duration:"Duration of activity", modal_act:"Record new call-up", qdnt_from:"Period from", qdnt_to:"Period to", qdnt_period:"Period", qdnt_ctx:"Context", qdnt_camp:"Camp location", qdnt_injq:"Did the player suffer an injury during the call-up?", qdnt_report:"Upload medical report from the national team", qdnt_ntreport:"Medical report", qdnt_btn_inj:"Register injury", qdnt_edit:"Edit call-up", qdnt_inj_badge:"Injured on national duty", qdnt_origin:"From national call-up", qdnt_ntrep_dl:"National report",
   doc_title:"Medical Documents & Imaging", doc_type:"Document Type", doc_date:"Date & Time", doc_title_f:"Title",
-  doc_photos:"Attach files (any type)", doc_photos_hint:"Images, PDF, Word, Excel, video, audio — any extension (stored locally in this browser).", doc_too_big:"Some files were skipped — each file must be under 8 MB (total 12 MB per record), and images are compressed automatically to save space.", doc_download:"Download",st_title:"Storage usage",st_of:"used of 500 MB",st_hint:"Documents and photos consume the most space — images are compressed automatically.", rep_ext:"Reports & export", rep_monthly:"Monthly injury report", rep_annual:"Annual report", rep_matchrep:"Match injuries report", rep_all_matches:"All matches with injuries", rep_month:"Month", rep_year:"Year", rep_generate:"Generate", rep_dl:"Download (CSV / Excel)", rep_pdf:"Export PDF (print-ready)", rep_pdf_hint:"Choose \u201cSave as PDF\u201d in the print dialog", rep_pdf_fail:"Could not open the print dialog", rep_print_out:"Print", rep_no_data:"No data for this period", rep_dl_ok:"Report downloaded", rep_count:"Injuries in period", rep_avg:"Avg days lost", rep_days_in:"Days in period", rep_mech_l:"Mechanism", rep_min:"Minute", rep_match_l:"Match", rep_month_break:"Month-by-month breakdown", rep_by_month:"Month", rep_by_count:"Injuries", rp_title:"Expected Return Plan", rp_exp:"Expected duration (days)", rp_rehab:"Rehabilitation specialist", rp_fit:"Fitness specialist", rp_fitdate:"Functional rehab starts", rp_group:"Return to group training", rp_rtp:"Expected return to play", rp_days_since:"Days since injury", rp_days_left:"Days remaining", rp_to_group:"Days to group training", rp_phase:"Current phase", rp_ph_rehab:"Rehabilitation", rp_ph_fit:"Fitness", rp_ph_group:"Group training", rp_ph_rtp:"Return to play", rp_ph_assess:"Assessment & screening", rp_ph_physio:"Physiotherapy", rp_ph_medrehab:"Medical rehabilitation", rp_ph_motor:"Functional rehabilitation", rp_ph_healed:"Full recovery", rp_ph_team:"Team participation", rp_ph_imaging:"Imaging / Radiology", rp_ph_surgery:"Surgery", acc_surgery:"Surgical Operations", f_surgery:"Requires surgery?", f_img_date:"Imaging / radiology date", f_surg_date:"Surgery date", f_surg_notes:"Surgery details", f_team_date:"Team participation date", f_healed_date:"Full recovery date", rp_surg_track:"Surgical pathway (45+ days)", rp_ph_preop:"Pre-operative stage", rp_ph_preop_physio:"Pre-operative physiotherapy", rp_ph_postop_physio:"Post-operative physiotherapy", sign_p_btn:"Player signs on phone", sign_decl_btn:"Sign readiness declaration on phone", sign_dev_p:"Player signs on this device", sign_dev_c:"Clinician signs on this device", sign_dev_b:"Player & clinician sign together", sign_dev_d:"Sign readiness declaration", sign_device_hint:"Instant signing on this device — always works, no link, no QR, no internet.", edit_fail:"Could not open the edit form — please retry", sig_log_h:"Signature log", sig_who:"Signed by", sig_col_method:"Method", sig_col_device:"Device", sig_col_at:"Date & time", sig_none:"No signatures recorded yet", sign_c_btn:"Clinician signs on phone", sign_b_btn:"Player & clinician sign", sign_phone_hint:"Remote signature: pressing opens a QR code — open it on the iPhone, sign on the phone, and the signature returns here automatically. Note: open the app from the published site link (Netlify) so the code works on the phone.", appurl_l:"Public app URL (used in the QR code)", appurl_h:"Auto-detected when the app is opened from the published site.", appurl_save:"Save URL", appurl_ok:"App URL saved", appurl_bad:"Invalid URL — enter a link starting with https://", appurl_need:"Cannot generate a QR code: open the app from the published site link, or enter the public URL above and press Save URL.", openlink:"Open link on this device", whatsapp:"Send link via WhatsApp", device_h:"Sign on this device", device_hint:"A full-screen signing pad opens on this device — hand the phone or tablet to the signer, they sign with a finger and press confirm. No link, no QR, no internet needed.", device_go:"Open the signing screen", device_done:"Signature recorded", rp_ph_firstmatch:"First match played", f_preop_date:"Pre-operative start date", f_preop_notes:"Pre-operative preparation (work-up · tests · anaesthesia)", f_postop_physio:"Post-operative physiotherapy & rehab start date", rp_preop_hint:"Opens automatically when \"surgery required\" is selected.", f_firstmatch_date:"First match date (auto-detected)", rp_rpx_note:"يُفتح القسم الممتد تلقائيًّا عند تجاوز أسبوعين", rp_firstmatch_hint:"Auto-linked to the first match after the absence ends, from match reports and the absence record.", rp_stage_done:"Done", rp_stage_on:"Current stage", rp_stage_todo:"Not started", rp_chain_h:"Return-to-play stage chain", rp_chain_progress:"Completion", rp_of:"of", rp_stage_n:"stages", rp_preop_auto:"auto-set before surgery", rp_src_auto:"auto", rp_no_match:"No match recorded after the injury date", rp_flow:"Treatment pathway", rp_ph_injured:"Injured", rp_ph_injured_lbl:"Injury date", acc_stages:"Return-to-play stages", f_stage_now:"Current stage", f_stage_date:"Stage start date", rp_stage_l:"Stage", rp_stage_days:"Days in stage", rp_stage_now:"Current", f_stage_injured_hint:"The injury date above is the Injured stage. Enter the date each stage started (date only, no time needed).", rp_since_surg:"Days since surgery", rp_since_physio:"Days since physiotherapy started", rp_days_until_play:"Days until return to play", day_lbl:"days", acc_imaging:"Imaging & Radiology", f_img_done:"Was imaging done?", f_img_type:"Imaging type", f_img_files:"Imaging report & images (PDF / photos)", f_img_notes:"Imaging findings", f_surg_discharge:"Hospital discharge date", f_surg_files:"Surgery report (PDF / photos)", files_hint:"PDF or images — stored in this browser.", ok_uploaded:"File attached", rp_days_absent:"Days absent since injury", rp_days_remain:"Days remaining to return", rp_log_hint:"Set the stage the player has just started and its date — repeat after each stage to build the timeline.", rp_path_l:"Player path", acc_rtp:"Return-to-play plan & stages", rp_physio:"Physiotherapy starts", rp_med:"Medical rehab starts", rp_since_short:"days since injury", rp_none:"Not set", rp_set:"Set the return plan", rp_track:"Return-to-play tracker", rp_progress:"Progress", rp_hint:"Enter the duration and set each stage date manually.", rp_day_x:"Day {a} of {b}", rp_auto:"Auto-fill dates", rp_auto_done:"Dates filled automatically", rp_need_days:"Enter the expected duration in days first", rp_shared:"Shared with the rehab specialist, then the fitness specialist", doc_dl_all:"Download all",doc_download:"Download", doc_dl_all_docs:"Download all documents", doc_no_files:"No files to download", doc_dl_start:"Downloading {n} file(s) — allow multiple downloads if the browser asks.", doc_desc:"Description",
+  doc_photos:"Attach files (any type)", doc_photos_hint:"Images, PDF, Word, Excel, video, audio — any extension (stored locally in this browser).", doc_too_big:"Some files were skipped — each file must be under 8 MB (total 12 MB per record), and images are compressed automatically to save space.", doc_download:"Download",st_title:"Storage usage",st_of:"used of 500 MB",st_hint:"Documents and photos consume the most space — images are compressed automatically.", rep_ext:"Reports & export", rep_monthly:"Monthly injury report", rep_annual:"Annual report", rep_matchrep:"Match injuries report", rep_all_matches:"All matches with injuries", rep_month:"Month", rep_year:"Year", rep_generate:"Generate", rep_dl:"Download (CSV / Excel)", rep_pdf:"Export PDF (print-ready)", rep_pdf_hint:"Choose \u201cSave as PDF\u201d in the print dialog", rep_pdf_fail:"Could not open the print dialog", rep_print_out:"Print", rep_no_data:"No data for this period", rep_dl_ok:"Report downloaded", rep_count:"Injuries in period", rep_avg:"Avg days lost", rep_days_in:"Days in period", rep_mech_l:"Mechanism", rep_min:"Minute", rep_match_l:"Match", rep_month_break:"Month-by-month breakdown", rep_by_month:"Month", rep_by_count:"Injuries", rp_title:"Expected Return Plan", rp_exp:"Expected duration (days)", rp_rehab:"Rehabilitation specialist", rp_fit:"Fitness specialist", rp_fitdate:"Functional rehab starts", rp_group:"Return to group training", rp_rtp:"Expected return to play", rp_days_since:"Days since injury", rp_days_left:"Days remaining", rp_to_group:"Days to group training", rp_phase:"Current phase", rp_ph_rehab:"Rehabilitation", rp_ph_fit:"Fitness", rp_ph_group:"Group training", rp_ph_rtp:"Return to play", rp_ph_assess:"Assessment & screening", rp_ph_physio:"Physiotherapy", rp_ph_medrehab:"Medical rehabilitation", rp_ph_motor:"Functional rehabilitation", rp_ph_healed:"Full recovery", rp_ph_team:"Team participation", rp_ph_imaging:"Imaging / Radiology", rp_ph_surgery:"Surgery", acc_surgery:"Surgical Operations", f_surgery:"Requires surgery?", f_img_date:"Imaging / radiology date", f_surg_date:"Surgery date", f_surg_notes:"Surgery details", f_team_date:"Team participation date", f_healed_date:"Full recovery date", rp_surg_track:"Surgical pathway (45+ days)", rp_ph_preop:"Pre-operative stage", rp_ph_preop_physio:"Pre-operative physiotherapy", rp_ph_postop_physio:"Post-operative physiotherapy", sign_p_btn:"Player signs on phone", sign_decl_btn:"Sign readiness declaration on phone", sign_dev_p:"Player signs on this device", sign_dev_c:"Clinician signs on this device", sign_dev_b:"Player & clinician sign together", sign_dev_d:"Sign readiness declaration", sign_device_hint:"Instant signing on this device — always works, no link, no QR, no internet.", edit_fail:"Could not open the edit form — please retry", sig_log_h:"Signature log", sig_who:"Signed by", sig_col_method:"Method", sig_col_device:"Device", sig_col_at:"Date & time", sig_none:"No signatures recorded yet", sign_c_btn:"Clinician signs on phone", sign_b_btn:"Player & clinician sign", sign_phone_hint:"Remote signature: pressing opens a QR code — open it on the iPhone, sign on the phone, and the signature returns here automatically. Note: open the app from the published site link (Netlify) so the code works on the phone.", appurl_l:"Public app URL (used in the QR code)", appurl_h:"Auto-detected when the app is opened from the published site.", appurl_save:"Save URL", appurl_ok:"App URL saved", appurl_bad:"Invalid URL — enter a link starting with https://", appurl_need:"Cannot generate a QR code: open the app from the published site link, or enter the public URL above and press Save URL.", openlink:"Open link on this device", whatsapp:"Send link via WhatsApp", device_h:"Sign on this device", device_hint:"A full-screen signing pad opens on this device — hand the phone or tablet to the signer, they sign with a finger and press confirm. No link, no QR, no internet needed.", device_go:"Open the signing screen", device_done:"Signature recorded", rp_ph_firstmatch:"First match played", f_preop_date:"Pre-operative start date", f_preop_notes:"Pre-operative preparation (work-up · tests · anaesthesia)", f_postop_physio:"Post-operative physiotherapy & rehab start date", rp_preop_hint:"Opens automatically when \"surgery required\" is selected.", f_firstmatch_date:"First match played (from the squad list)", rp_rpx_note:"يُفتح القسم الممتد تلقائيًّا عند تجاوز أسبوعين", rp_firstmatch_hint:"Auto-set from “Players in the match”: the first match where you add the player to the squad (starter or sub) after the injury. It is not estimated from the fixture list — a fixture he was not selected for does not count.", rp_stage_done:"Done", rp_stage_on:"Current stage", rp_stage_todo:"Not started", rp_chain_h:"Return-to-play stage chain", rp_chain_progress:"Completion", rp_of:"of", rp_stage_n:"stages", rp_preop_auto:"auto-set before surgery", rp_src_auto:"auto", rp_no_match:"The player has not been added to any match squad since the injury", rp_flow:"Treatment pathway", rp_ph_injured:"Injured", rp_ph_injured_lbl:"Injury date", acc_stages:"Return-to-play stages", f_stage_now:"Current stage", f_stage_date:"Stage start date", rp_stage_l:"Stage", rp_stage_days:"Days in stage", rp_stage_now:"Current", f_stage_injured_hint:"The injury date above is the Injured stage. Enter the date each stage started (date only, no time needed).", rp_since_surg:"Days since surgery", rp_since_physio:"Days since physiotherapy started", rp_days_until_play:"Days until return to play", day_lbl:"days", acc_imaging:"Imaging & Radiology", f_img_done:"Was imaging done?", f_img_type:"Imaging type", f_img_files:"Imaging report & images (PDF / photos)", f_img_notes:"Imaging findings", f_surg_discharge:"Hospital discharge date", f_surg_files:"Surgery report (PDF / photos)", files_hint:"PDF or images — stored in this browser.", ok_uploaded:"File attached", rp_days_absent:"Days absent since injury", rp_days_remain:"Days remaining to return", rp_log_hint:"Set the stage the player has just started and its date — repeat after each stage to build the timeline.", rp_path_l:"Player path", acc_rtp:"Return-to-play plan & stages", rp_physio:"Physiotherapy starts", rp_med:"Medical rehab starts", rp_since_short:"days since injury", rp_none:"Not set", rp_set:"Set the return plan", rp_track:"Return-to-play tracker", rp_progress:"Progress", rp_hint:"Enter the duration and set each stage date manually.", rp_day_x:"Day {a} of {b}", rp_auto:"Auto-fill dates", rp_auto_done:"Dates filled automatically", rp_need_days:"Enter the expected duration in days first", rp_shared:"Shared with the rehab specialist, then the fitness specialist", doc_dl_all:"Download all",doc_download:"Download", doc_dl_all_docs:"Download all documents", doc_no_files:"No files to download", doc_dl_start:"Downloading {n} file(s) — allow multiple downloads if the browser asks.", doc_desc:"Description",
   doc_unlinked:"— Not linked —", ph_doc_title:"e.g. Left ankle X-ray", modal_doc:"Add Document",
   err_doc_title:"Enter the document title", ok_doc:"Document saved", ok_doc_deleted:"Document deleted",
   men_title:"Mental Health — APSQ Survey", men_intro:"The APSQ survey assesses player wellbeing over the last 30 days (10 questions, 1-5 scale). A higher score indicates a greater need for follow-up. This tool is for screening and monitoring only and does not replace specialist assessment.",
@@ -870,7 +870,7 @@ const STR={
   act_title:"سجل الاستدعاءات", act_total:"إجمالي الاستدعاءات", act_minutes:"عدد الأيام",
   act_matches:"مباريات", act_duration:"مدة النشاط", modal_act:"تسجيل استدعاء جديد", qdnt_from:"الفترة من", qdnt_to:"الفترة إلى", qdnt_period:"الفترة", qdnt_ctx:"السياق", qdnt_camp:"مكان المعسكر", qdnt_injq:"هل تعرض اللاعب لإصابة أثناء الاستدعاء؟", qdnt_report:"رفع تقرير طبي من المنتخب", qdnt_ntreport:"التقرير الطبي", qdnt_btn_inj:"تسجيل إصابة", qdnt_edit:"تعديل الاستدعاء", qdnt_inj_badge:"أُصيب في المنتخب", qdnt_origin:"من استدعاء المنتخب", qdnt_ntrep_dl:"تحميل تقرير المنتخب",
   doc_title:"المستندات والتصوير الطبي", doc_type:"نوع المستند", doc_date:"التاريخ والوقت", doc_title_f:"العنوان",
-  doc_photos:"إرفاق ملفات (أي نوع)", doc_photos_hint:"صور، PDF، Word، Excel، فيديو، صوت — أي امتداد (تُحفظ محليًا في هذا المتصفح).", doc_too_big:"تم تجاهل بعض الملفات — يجب أن يكون كل ملف أقل من 8 ميجابايت (والمجموع 12 ميجابايت للسجل)، وتُضغط الصور تلقائيًا.", doc_download:"تنزيل الملف",st_title:"مساحة التخزين",st_of:"مستخدمة من ٥٠٠ ميجابايت",st_hint:"المستندات والصور هي الأكثر استهلاكًا — وتُضغط الصور تلقائيًا.", rep_ext:"التقارير والتصدير", rep_monthly:"تقرير الإصابات الشهري", rep_annual:"التقرير السنوي", rep_matchrep:"تقرير إصابات المباريات", rep_all_matches:"جميع المباريات التي بها إصابات", rep_month:"الشهر", rep_year:"السنة", rep_generate:"إنشاء التقرير", rep_dl:"تنزيل (اكسل / CSV)", rep_pdf:"تصدير PDF (جاهز للطباعة)", rep_pdf_hint:"اختر «حفط كملف PDF» من نافذة الطباعة", rep_pdf_fail:"تعذّر فتح نافذة الطباعة", rep_print_out:"طباعة", rep_no_data:"لا توجد بيانات لهذه الفترة", rep_dl_ok:"تم تنزيل التقرير", rep_count:"عدد الإصابات في الفترة", rep_avg:"متوسط الأيام المفقودة", rep_days_in:"أيام داخل الفترة", rep_mech_l:"الميكانيكية", rep_min:"الدقيقة", rep_match_l:"المباراة", rep_month_break:"التفصيل الشهري", rep_by_month:"الشهر", rep_by_count:"عدد الإصابات", rp_title:"خطة العودة المتوقعة", rp_exp:"المدة المتوقعة (أيام)", rp_rehab:"أخصائي التأهيل", rp_fit:"أخصائي اللياقة البدنية", rp_fitdate:"بداية التأهيل الحركي", rp_group:"النزول للتدريب الجماعي", rp_rtp:"التاريخ المتوقع للعودة للعب", rp_days_since:"أيام منذ الإصابة", rp_days_left:"الأيام المتبقية", rp_to_group:"المتبقي للتدريب الجماعي", rp_phase:"المرحلة الحالية", rp_ph_rehab:"تأهيل", rp_ph_fit:"لياقة بدنية", rp_ph_group:"تدريب جماعي", rp_ph_rtp:"العودة للملعب", rp_ph_assess:"التقييم والفحص", rp_ph_physio:"العلاج الطبيعي", rp_ph_medrehab:"التأهيل الطبي", rp_ph_motor:"التأهيل الحركي", rp_ph_healed:"الشفاء", rp_ph_team:"المشاركة مع الفريق", rp_ph_imaging:"الأشعة والتصوير", rp_ph_surgery:"العملية الجراحية", acc_surgery:"العمليات الجراحية", f_surgery:"هل تستوجب عملية جراحية؟", f_img_date:"تاريخ الأشعة", f_surg_date:"تاريخ العملية", f_surg_notes:"تفاصيل العملية", f_team_date:"تاريخ المشاركة مع الفريق", f_healed_date:"تاريخ الاستشفاء التام", rp_surg_track:"المسار الجراحي (أكثر من ٤٥ يوم)", rp_ph_preop:"مرحلة ما قبل العملية", rp_ph_preop_physio:"العلاج الطبيعي قبل العملية", rp_ph_postop_physio:"العلاج الطبيعي بعد العملية", sign_p_btn:"توقيع اللاعب على الجوال", sign_decl_btn:"توقيع إقرار الجاهزية على الجوال", sign_dev_p:"توقيع اللاعب على هذا الجهاز", sign_dev_c:"توقيع الأخصائي على هذا الجهاز", sign_dev_b:"توقيع اللاعب والأخصائي معًا", sign_dev_d:"توقيع إقرار الجاهزية", sign_device_hint:"توقيع فوري على هذا الجهاز — يعمل دائمًا بلا رابط ولا رمز ولا إنترنت.", edit_fail:"تعذّر فتح نموذج التعديل — أعد المحاولة", sig_log_h:"سجل التوقيعات", sig_who:"الموقّع", sig_col_method:"الطريقة", sig_col_device:"الجهاز", sig_col_at:"التاريخ والوقت", sig_none:"لا يوجد سجل توقيعات بعد", sign_c_btn:"توقيع الأخصائي على الجوال", sign_b_btn:"توقيع اللاعب والأخصائي", sign_phone_hint:"التوقيع عن بُعد: عند الضغط يظهر رمز QR — افتحه بالآيفون ووقّع على الجوال، ويعود التوقيع تلقائيًا إلى هذه الخانة. ملاحظة: افتح التطبيق من رابط الموقع المنشور (Netlify) لكي يعمل الرمز على الجوال.", appurl_l:"رابط التطبيق العام (يُستخدم في رمز QR)", appurl_h:"يُكتشف تلقائيًا عند فتح التطبيق من الموقع المنشور.", appurl_save:"حفظ الرابط", appurl_ok:"تم حفظ رابط التطبيق", appurl_bad:"رابط غير صالح — أدخل رابطًا يبدأ بـ https://", appurl_need:"لا يمكن توليد رمز QR: افتح التطبيق من رابط الموقع المنشور، أو أدخل الرابط العام في الحقل أعلاه ثم اضغط «حفظ الرابط».", openlink:"فتح الرابط على هذا الجهاز", whatsapp:"إرسال الرابط بالواتساب", device_h:"التوقيع على هذا الجهاز", device_hint:"تُفتح شاشة توقيع كاملة على هذا الجهاز — اعرض الجوال أو الجهاز اللوحي على الموقّع ليوقّع بإصبعه، ثم اضغط تأكيد. لا يحتاج رابطًا ولا رمزًا ولا إنترنت.", device_go:"افتح شاشة التوقيع", device_done:"تم تسجيل التوقيع", rp_ph_firstmatch:"أول مباراة يشارك فيها", f_preop_date:"تاريخ بداية مرحلة ما قبل العملية", f_preop_notes:"استعدادات ما قبل العملية (تحضير · تحاليل · تخدير)", f_postop_physio:"تاريخ بداية العلاج الطبيعي والتأهيل بعد العملية", rp_preop_hint:"تُفتح تلقائيًا عند تحديد «يستوجب عملية جراحية».", f_firstmatch_date:"تاريخ أول مباراة (يُحدَّد تلقائيًا)", rp_firstmatch_hint:"يُربط تلقائيًا بأول مباراة بعد انتهاء فترة الغياب، من تقارير المباريات وسجل غياب المصابين.", rp_stage_done:"منجزة", rp_stage_on:"المرحلة الحالية", rp_stage_todo:"لم تبدأ", rp_chain_h:"سلسلة مراحل العودة للملعب", rp_chain_progress:"نسبة الإنجاز", rp_of:"من", rp_stage_n:"مرحلة", rp_preop_auto:"حُدّد تلقائيًا قبل العملية", rp_src_auto:"تلقائي", rp_no_match:"لم تُسجَّل مباراة بعد تاريخ الإصابة", rp_flow:"ترتيب العملية العلاجية", rp_ph_injured:"مصاب", rp_ph_injured_lbl:"تاريخ الإصابة", acc_stages:"مراحل العودة للعب", f_stage_now:"المرحلة الحالية", f_stage_date:"بداية المرحلة", rp_stage_l:"المرحلة", rp_stage_days:"الأيام في المرحلة", rp_stage_now:"الحالية", f_stage_injured_hint:"تاريخ الإصابة أعلاه هو مرحلة مصاب، وأدخل تاريخ بداية كل مرحلة (التاريخ فقط دون توقيت).", rp_since_surg:"أيام منذ العملية", rp_since_physio:"أيام منذ بدء العلاج الطبيعي", rp_days_until_play:"أيام حتى العودة للعب", day_lbl:"يوم", acc_imaging:"الأشعة والتصوير", f_img_done:"هل عملت أشعة؟", f_img_type:"نوع الأشعة", f_img_files:"تقرير الأشعة والصور (PDF / صور)", f_img_notes:"نتائج الأشعة", f_surg_discharge:"تاريخ الخروج من المستشفى", f_surg_files:"تقرير العملية (PDF / صور)", files_hint:"PDF أو صور — تُحفظ في هذا المتصفح.", ok_uploaded:"تم إرفاق الملف", rp_days_absent:"أيام الغياب من الإصابة", rp_days_remain:"باقي للعودة للعب", rp_log_hint:"حدّد المرحلة التي بدأها اللاعب وتاريخها — وكرّر بعد كل مرحلة لبناء السجل.", rp_path_l:"مسار اللاعب", acc_rtp:"خطة العودة للعب ومراحلها", rp_physio:"بداية العلاج الطبيعي", rp_med:"بداية التأهيل الطبي", rp_since_short:"يوم منذ الإصابة", rp_none:"غير محددة", rp_set:"حدد خطة العودة", rp_track:"مسار العودة للملعب", rp_progress:"نسبة الإنجاز", rp_hint:"أدخل المدة والتواريخ يدويًّا لكل مرحلة.", rp_day_x:"يوم {a} من {b}", rp_auto:"حساب تلقائي", rp_auto_done:"تم حساب التواريخ تلقائيًا", rp_need_days:"أدخل المدة المتوقعة أولًا", rp_shared:"تُشارك مع أخصائي التأهيل أولًا ثم أخصائي اللياقة البدنية", doc_dl_all:"تنزيل الكل",doc_download:"تنزيل الملف", doc_dl_all_docs:"تنزيل كل المستندات", doc_no_files:"لا توجد ملفات لتنزيلها", doc_dl_start:"جارٍ تنزيل {n} ملفات — اسمح بتنزيلات متعددة إن طلب المتصفح.", doc_desc:"الوصف",
+  doc_photos:"إرفاق ملفات (أي نوع)", doc_photos_hint:"صور، PDF، Word، Excel، فيديو، صوت — أي امتداد (تُحفظ محليًا في هذا المتصفح).", doc_too_big:"تم تجاهل بعض الملفات — يجب أن يكون كل ملف أقل من 8 ميجابايت (والمجموع 12 ميجابايت للسجل)، وتُضغط الصور تلقائيًا.", doc_download:"تنزيل الملف",st_title:"مساحة التخزين",st_of:"مستخدمة من ٥٠٠ ميجابايت",st_hint:"المستندات والصور هي الأكثر استهلاكًا — وتُضغط الصور تلقائيًا.", rep_ext:"التقارير والتصدير", rep_monthly:"تقرير الإصابات الشهري", rep_annual:"التقرير السنوي", rep_matchrep:"تقرير إصابات المباريات", rep_all_matches:"جميع المباريات التي بها إصابات", rep_month:"الشهر", rep_year:"السنة", rep_generate:"إنشاء التقرير", rep_dl:"تنزيل (اكسل / CSV)", rep_pdf:"تصدير PDF (جاهز للطباعة)", rep_pdf_hint:"اختر «حفط كملف PDF» من نافذة الطباعة", rep_pdf_fail:"تعذّر فتح نافذة الطباعة", rep_print_out:"طباعة", rep_no_data:"لا توجد بيانات لهذه الفترة", rep_dl_ok:"تم تنزيل التقرير", rep_count:"عدد الإصابات في الفترة", rep_avg:"متوسط الأيام المفقودة", rep_days_in:"أيام داخل الفترة", rep_mech_l:"الميكانيكية", rep_min:"الدقيقة", rep_match_l:"المباراة", rep_month_break:"التفصيل الشهري", rep_by_month:"الشهر", rep_by_count:"عدد الإصابات", rp_title:"خطة العودة المتوقعة", rp_exp:"المدة المتوقعة (أيام)", rp_rehab:"أخصائي التأهيل", rp_fit:"أخصائي اللياقة البدنية", rp_fitdate:"بداية التأهيل الحركي", rp_group:"النزول للتدريب الجماعي", rp_rtp:"التاريخ المتوقع للعودة للعب", rp_days_since:"أيام منذ الإصابة", rp_days_left:"الأيام المتبقية", rp_to_group:"المتبقي للتدريب الجماعي", rp_phase:"المرحلة الحالية", rp_ph_rehab:"تأهيل", rp_ph_fit:"لياقة بدنية", rp_ph_group:"تدريب جماعي", rp_ph_rtp:"العودة للملعب", rp_ph_assess:"التقييم والفحص", rp_ph_physio:"العلاج الطبيعي", rp_ph_medrehab:"التأهيل الطبي", rp_ph_motor:"التأهيل الحركي", rp_ph_healed:"الشفاء", rp_ph_team:"المشاركة مع الفريق", rp_ph_imaging:"الأشعة والتصوير", rp_ph_surgery:"العملية الجراحية", acc_surgery:"العمليات الجراحية", f_surgery:"هل تستوجب عملية جراحية؟", f_img_date:"تاريخ الأشعة", f_surg_date:"تاريخ العملية", f_surg_notes:"تفاصيل العملية", f_team_date:"تاريخ المشاركة مع الفريق", f_healed_date:"تاريخ الاستشفاء التام", rp_surg_track:"المسار الجراحي (أكثر من ٤٥ يوم)", rp_ph_preop:"مرحلة ما قبل العملية", rp_ph_preop_physio:"العلاج الطبيعي قبل العملية", rp_ph_postop_physio:"العلاج الطبيعي بعد العملية", sign_p_btn:"توقيع اللاعب على الجوال", sign_decl_btn:"توقيع إقرار الجاهزية على الجوال", sign_dev_p:"توقيع اللاعب على هذا الجهاز", sign_dev_c:"توقيع الأخصائي على هذا الجهاز", sign_dev_b:"توقيع اللاعب والأخصائي معًا", sign_dev_d:"توقيع إقرار الجاهزية", sign_device_hint:"توقيع فوري على هذا الجهاز — يعمل دائمًا بلا رابط ولا رمز ولا إنترنت.", edit_fail:"تعذّر فتح نموذج التعديل — أعد المحاولة", sig_log_h:"سجل التوقيعات", sig_who:"الموقّع", sig_col_method:"الطريقة", sig_col_device:"الجهاز", sig_col_at:"التاريخ والوقت", sig_none:"لا يوجد سجل توقيعات بعد", sign_c_btn:"توقيع الأخصائي على الجوال", sign_b_btn:"توقيع اللاعب والأخصائي", sign_phone_hint:"التوقيع عن بُعد: عند الضغط يظهر رمز QR — افتحه بالآيفون ووقّع على الجوال، ويعود التوقيع تلقائيًا إلى هذه الخانة. ملاحظة: افتح التطبيق من رابط الموقع المنشور (Netlify) لكي يعمل الرمز على الجوال.", appurl_l:"رابط التطبيق العام (يُستخدم في رمز QR)", appurl_h:"يُكتشف تلقائيًا عند فتح التطبيق من الموقع المنشور.", appurl_save:"حفظ الرابط", appurl_ok:"تم حفظ رابط التطبيق", appurl_bad:"رابط غير صالح — أدخل رابطًا يبدأ بـ https://", appurl_need:"لا يمكن توليد رمز QR: افتح التطبيق من رابط الموقع المنشور، أو أدخل الرابط العام في الحقل أعلاه ثم اضغط «حفظ الرابط».", openlink:"فتح الرابط على هذا الجهاز", whatsapp:"إرسال الرابط بالواتساب", device_h:"التوقيع على هذا الجهاز", device_hint:"تُفتح شاشة توقيع كاملة على هذا الجهاز — اعرض الجوال أو الجهاز اللوحي على الموقّع ليوقّع بإصبعه، ثم اضغط تأكيد. لا يحتاج رابطًا ولا رمزًا ولا إنترنت.", device_go:"افتح شاشة التوقيع", device_done:"تم تسجيل التوقيع", rp_ph_firstmatch:"أول مباراة يشارك فيها", f_preop_date:"تاريخ بداية مرحلة ما قبل العملية", f_preop_notes:"استعدادات ما قبل العملية (تحضير · تحاليل · تخدير)", f_postop_physio:"تاريخ بداية العلاج الطبيعي والتأهيل بعد العملية", rp_preop_hint:"تُفتح تلقائيًا عند تحديد «يستوجب عملية جراحية».", f_firstmatch_date:"تاريخ أول مباراة يشترك فيها (من قائمة المشاركين)", rp_firstmatch_hint:"يُحدَّد تلقائيًا من «المشاركون في المباراة»: أول مباراة تُضيف فيها اللاعب إلى القائمة (أساسي أو احتياطي) بعد إصابته. لا يُقدَّر من جدول المباريات — المباراة التي لم يُختر لها لا تُحتسب.", rp_stage_done:"منجزة", rp_stage_on:"المرحلة الحالية", rp_stage_todo:"لم تبدأ", rp_chain_h:"سلسلة مراحل العودة للملعب", rp_chain_progress:"نسبة الإنجاز", rp_of:"من", rp_stage_n:"مرحلة", rp_preop_auto:"حُدّد تلقائيًا قبل العملية", rp_src_auto:"تلقائي", rp_no_match:"لم يُضَف اللاعب إلى قائمة المشاركين في أي مباراة بعد الإصابة", rp_flow:"ترتيب العملية العلاجية", rp_ph_injured:"مصاب", rp_ph_injured_lbl:"تاريخ الإصابة", acc_stages:"مراحل العودة للعب", f_stage_now:"المرحلة الحالية", f_stage_date:"بداية المرحلة", rp_stage_l:"المرحلة", rp_stage_days:"الأيام في المرحلة", rp_stage_now:"الحالية", f_stage_injured_hint:"تاريخ الإصابة أعلاه هو مرحلة مصاب، وأدخل تاريخ بداية كل مرحلة (التاريخ فقط دون توقيت).", rp_since_surg:"أيام منذ العملية", rp_since_physio:"أيام منذ بدء العلاج الطبيعي", rp_days_until_play:"أيام حتى العودة للعب", day_lbl:"يوم", acc_imaging:"الأشعة والتصوير", f_img_done:"هل عملت أشعة؟", f_img_type:"نوع الأشعة", f_img_files:"تقرير الأشعة والصور (PDF / صور)", f_img_notes:"نتائج الأشعة", f_surg_discharge:"تاريخ الخروج من المستشفى", f_surg_files:"تقرير العملية (PDF / صور)", files_hint:"PDF أو صور — تُحفظ في هذا المتصفح.", ok_uploaded:"تم إرفاق الملف", rp_days_absent:"أيام الغياب من الإصابة", rp_days_remain:"باقي للعودة للعب", rp_log_hint:"حدّد المرحلة التي بدأها اللاعب وتاريخها — وكرّر بعد كل مرحلة لبناء السجل.", rp_path_l:"مسار اللاعب", acc_rtp:"خطة العودة للعب ومراحلها", rp_physio:"بداية العلاج الطبيعي", rp_med:"بداية التأهيل الطبي", rp_since_short:"يوم منذ الإصابة", rp_none:"غير محددة", rp_set:"حدد خطة العودة", rp_track:"مسار العودة للملعب", rp_progress:"نسبة الإنجاز", rp_hint:"أدخل المدة والتواريخ يدويًّا لكل مرحلة.", rp_day_x:"يوم {a} من {b}", rp_auto:"حساب تلقائي", rp_auto_done:"تم حساب التواريخ تلقائيًا", rp_need_days:"أدخل المدة المتوقعة أولًا", rp_shared:"تُشارك مع أخصائي التأهيل أولًا ثم أخصائي اللياقة البدنية", doc_dl_all:"تنزيل الكل",doc_download:"تنزيل الملف", doc_dl_all_docs:"تنزيل كل المستندات", doc_no_files:"لا توجد ملفات لتنزيلها", doc_dl_start:"جارٍ تنزيل {n} ملفات — اسمح بتنزيلات متعددة إن طلب المتصفح.", doc_desc:"الوصف",
   doc_unlinked:"— غير مرتبط —", ph_doc_title:"مثال: أشعة كاحل يسرى", modal_doc:"إضافة مستند",
   err_doc_title:"أدخل عنوان المستند", ok_doc:"تم حفظ المستند", ok_doc_deleted:"تم حذف المستند",
   men_title:"الصحة النفسية — استبيان APSQ", men_intro:"يُستخدم استبيان APSQ لتقييم الحالة النفسية للاعبين خلال آخر 30 يومًا (10 أسئلة، مقياس 1-5). الدرجة الأعلى تشير إلى حاجة أكبر للمتابعة. النظام لأغراض العرض والمتابعة فقط ولا يُغني عن التقييم المتخصص.",
@@ -8165,32 +8165,52 @@ function qdMinusDays(ds,n){
   d.setDate(d.getDate()-Number(n||0)); function p(x){return (x<10?"0":"")+x;}
   return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate());
 }
-/* أول مباراة يشارك فيها اللاعب: أول مباراة بعد تاريخ الإصابة لا يغطيها غياب اللاعب */
+/* QD171 — أول مباراة فعلية: تُحتسب فقط عندما يُضاف اللاعب إلى «المشاركون في المباراة» */
+function qdPartIn(m,pid){
+  try{
+    if(!m||pid==null) return false;
+    pid=String(pid);
+    var st=(m.starters||[]).map(String), sb=(m.subs||[]).map(String);
+    if(st.indexOf(pid)>-1||sb.indexOf(pid)>-1) return true;
+    if(m.minutes&&typeof m.minutes==="object"&&m.minutes[pid]!=null&&String(m.minutes[pid])!=="") return true;
+    if(m.medStatus&&typeof m.medStatus==="object"&&m.medStatus[pid]!=null) return true;
+    var nm=""; try{ nm=String(pname(pid)||"").trim().toLowerCase(); }catch(e){}
+    var ex=m.extraSquad||[];
+    for(var i=0;i<ex.length;i++){ var n=String(ex[i]&&ex[i].n||"").trim().toLowerCase(); if(n&&nm&&n===nm) return true; }
+    var fx=(m.fx!=null&&m.fx!=="")?m.fx:m.round;
+    try{
+      var L=(typeof S!=="undefined"&&S&&S.qdLineup)?S.qdLineup["r"+fx]:null;
+      if(L){ if((L.st||[]).map(String).indexOf(pid)>-1||(L.sb||[]).map(String).indexOf(pid)>-1) return true; }
+    }catch(e){}
+  }catch(e){}
+  return false;
+}
 function rpFirstMatch(i){
   if(!i) return null;
   var pl=rpPlan(i);
-  if(pl.firstMatchDate) return {date:pl.firstMatchDate,opponent:pl.firstMatchOpp||"",manual:true};
-  var pid=i.playerId, inj=String(i.date||"").slice(0,10), out=null;
+  if(pl&&pl.firstMatchDate) return {date:pl.firstMatchDate,opponent:pl.firstMatchOpp||"",manual:true};
+  var pid=i.playerId, inj=String(i.date||"").slice(0,10);
   try{
-    var src=[];
-    try{ if(typeof QD_FX!=="undefined"&&QD_FX) src=QD_FX.map(function(b){ try{return fxOf(b.r);}catch(e){return b;} }); }catch(e){}
-    if(!src.length) src=(S.matches||[]).map(function(m){ return {date:m.date,opponent:m.opponent}; });
-    src=src.filter(function(f){ return f&&f.date&&String(f.date).slice(0,10)>=inj; })
-           .sort(function(a,b){ return String(a.date).localeCompare(String(b.date)); });
-    /* نافذة الغياب: من تاريخ الإصابة حتى الالتئام/العودة — تُبنى من سجل الإصابة نفسه */
-    var absFrom=inj, absTo=(i.status==="cleared")?(pl.healedDate||pl.rtpDate||""):(pl.healedDate||"");
-    for(var j=0;j<src.length;j++){
-      var f=src[j], fd=String(f.date).slice(0,10), off=false;
-      (S.injuries||[]).forEach(function(x){ if(x.playerId!==pid) return; var w=null; try{ w=fxWindow(x); }catch(e){}
-        if(w){ if(fd<w.from) return; if(w.to&&fd>w.to) return; off=true; return; }
-        if(fd>=absFrom && (!absTo || fd<=absTo)) off=true;
-      });
-      if(!off){ out={date:f.date,opponent:f.opponent||"",auto:true}; break; }
+    var ms=(S.matches||[]).slice().filter(function(m){ return m&&String(m.date||"").slice(0,10)>=inj; });
+    ms.sort(function(a,b){ return String(a.date).localeCompare(String(b.date)); });
+    for(var j=0;j<ms.length;j++){
+      var m=ms[j];
+      if(!qdPartIn(m,pid)) continue;
+      var opp=m.opponent||"";
+      try{ var f=fxOf(m.fx); if(f&&f.opp) opp=f.opp; }catch(e){}
+      return {date:m.date,opponent:opp,auto:true,verified:true};
     }
   }catch(e){}
-  return out;
+  return null;
 }
+try{ window.qdRTPPart=qdPartIn; }catch(e){}
 try{ window.qdRTPFirst=rpFirstMatch; }catch(e){}
+try{ window.qdRTPDiag=function(pid){
+  var inj=(S.injuries||[]).filter(function(x){ return String(x.playerId)===String(pid); }).sort(function(a,b){ return String(b.date).localeCompare(String(a.date)); })[0];
+  var out={player:pname(pid),injuryDate:inj?inj.date:null,matches:[]};
+  (S.matches||[]).forEach(function(m){ out.matches.push({date:m.date,opp:m.opponent,part:qdPartIn(m,pid),st:(m.starters||[]).length,sb:(m.subs||[]).length}); });
+  out.firstMatch=inj?rpFirstMatch(inj):null;
+  return out; }; }catch(e){}
 function rpHasStages(i){ var pl=rpPlan(i); return !!((pl&&pl.stageNow)||(pl&&pl.surgDate)||((pl&&pl.stageLog&&pl.stageLog.length)||0)>0); }
 function rpStageLog(i){
   var pl=rpPlan(i), log=(pl.stageLog||[]).slice().filter(function(e){ return e&&e.k; });
@@ -10237,11 +10257,11 @@ function repExtraCard(){
   var k=repKind(), ks=repKeys();
   var list=(k==="annual")?ks.years:ks.months;
   if(!repKey()||list.indexOf(repKey())<0){ window.__repKey=(k==="annual")?ks.curY:ks.curM; }
-  var kindSel='<select class="select" style="width:auto" onchange="ACT.repKind({id:this.value})">'+
+  var kindSel='<select class="select" style="width:auto" data-repk="1" onchange="try{ACT.repKind({id:this.value})}catch(e){window.__repKind=this.value;window.__repKey=\"\";}">'+
       [["monthly",T("rep_monthly")],["annual",T("rep_annual")],["match",T("rep_matchrep")],["players",T("rep_players_list")]].map(function(o){
         return '<option value="'+o[0]+'"'+(k===o[0]?" selected":"")+'>'+esc(o[1])+'</option>'; }).join("")+'</select>';
   var keySel = (k==="match"||k==="players") ? '<span class="tiny muted">'+T(k==="players"?"rep_pl_all":"rep_all_matches")+'</span>'
-    : '<select class="select" style="width:auto" onchange="ACT.repKeySel({id:this.value})">'+
+    : '<select class="select" style="width:auto" data-repkey="1" onchange="try{ACT.repKeySel({id:this.value})}catch(e){window.__repKey=this.value;}">'+
       list.map(function(o){ return '<option value="'+esc(o)+'"'+(repKey()===o?" selected":"")+'>'+esc(o)+'</option>'; }).join("")+'</select>';
   return '<div class="card" id="repExport" style="margin-bottom:18px"><div class="card-head">'+svg(I.reports,2)+'<h3>'+T("rep_ext")+'</h3></div><div class="card-body">'+
     '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap" class="no-print">'+kindSel+keySel+
@@ -10313,7 +10333,10 @@ function repRender(){
   var box=document.getElementById("repOut"); if(!box) return;
   var d=repBuild();
   var has = d.kind==="match" ? (d.matches&&d.matches.length) : (d.kind==="players" ? (d.players&&d.players.length) : (d.list&&d.list.length));
-  var head='<div style="border:1px solid var(--line);border-radius:12px;padding:14px;background:var(--paper)">'+
+  var KINDAR={monthly:T("rep_monthly"),annual:T("rep_annual"),match:T("rep_matchrep"),players:T("rep_players_list")};
+  var echo='<div class="no-print" style="margin:0 0 8px;font-size:11.5px;font-weight:800;color:#7E0E14">'+
+    'النوع المحدد: '+esc(KINDAR[d.kind]||d.kind)+(d.key?(' · الفترة: '+esc(d.key)):'')+' · عدد الصفوف: '+esc(has?1:0)+'</div>';
+  var head=echo+'<div style="border:1px solid var(--line);border-radius:12px;padding:14px;background:var(--paper)">'+
     '<div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">'+
       '<img src="'+LOGO_FULL+'" style="height:58px;width:auto">'+
       '<div><div style="font-weight:900;font-size:16px">'+esc(d.title)+'</div>'+
@@ -10351,12 +10374,31 @@ function repRender(){
 }
 on("repKind",function(d){ window.__repKind=(d&&d.id)||"monthly"; window.__repKey=""; REND.reports(); try{ repRender(); }catch(e){} });
 on("repKeySel",function(d){ window.__repKey=(d&&d.id)||""; try{ repRender(); }catch(e){} });
-on("repRun",function(){ repRender(); });
+/* QD170 — مستمع تغيير مفوَّض: يضمن تبديل نوع التقرير/الفترة حتى لو تعطّل onchange المضمَّن */
+document.addEventListener("change",function(e){
+  var t=e.target; if(!t||!t.getAttribute) return;
+  try{
+    if(t.getAttribute("data-repk")){
+      window.__repKind=t.value||"monthly"; window.__repKey="";
+      try{ REND.reports(); }catch(x){}
+      try{ repRender(); }catch(x){}
+      try{ toast("نوع التقرير: "+t.options[t.selectedIndex].text); }catch(x){}
+    } else if(t.getAttribute("data-repkey")){
+      window.__repKey=t.value||"";
+      try{ repRender(); }catch(x){}
+      try{ toast("الفترة: "+t.value); }catch(x){}
+    }
+  }catch(x){}
+},true);
+on("repRun",function(){ window.__repOut=null; window.__repCsv=[]; repRender(); });
+window.QDREP={kind:function(){ return window.__repKind||"monthly"; },key:function(){ return window.__repKey||""; },
+  set:function(k,key){ window.__repKind=k||"monthly"; window.__repKey=key||""; REND.reports(); try{ repRender(); }catch(e){} },
+  out:function(){ try{ var d=repBuild(); return {kind:d.kind,key:d.key,title:d.title,rows:(d.list?d.list.length:(d.matches?d.matches.length:(d.players?d.players.length:0))),csv:(window.__repCsv||[]).map(function(s){return s.name+":"+(s.rows||[]).length;})}; }catch(e){ return {err:e.message}; } }};
 on("repPrintOut",function(){ window.print(); });
 
 /* ---- PDF export: build a print-only document then open the print dialog ---- */
 function repPdfHtml(){
-  var d = window.__repOut || repBuild();
+  var d = repBuild();
   var st = d.st || {n:0,cleared:0,act:0,avg:0,topType:"\u2014",topReg:"\u2014"};
   function esc2(s){ return String(s==null?"":s); }
   var hh = '';
@@ -10399,6 +10441,7 @@ on("repPdf",function(){
 });
 
 on("repCsv",function(){
+  try{ repBuild(); }catch(e){}
   var secs=window.__repCsv||[];
   if(!secs.length||!secs.some(function(s){return s.rows&&s.rows.length;})){ toast(T("rep_no_data"),"warn"); return; }
   function cell(v){ var s=String(v==null?"":v); return /[",\n]/.test(s)?('"'+s.replace(/"/g,'""')+'"'):s; }
@@ -15653,7 +15696,7 @@ try{
 }catch(e){}
 
 /* QDBK-END */
-(function(){function mk(){try{var b=document.createElement("div");b.id="qdrBadge";b.textContent="v11-169 · REP-FIX";b.style.cssText="position:fixed;left:8px;bottom:8px;z-index:2147483647;background:#fff;color:#7E0E14;border:1px solid #7E0E14;font:800 11px/1.5 system-ui;padding:3px 9px;border-radius:20px;pointer-events:none;opacity:.97;box-shadow:0 2px 8px rgba(0,0,0,.35)";document.body.appendChild(b);}catch(e){}}if(document.body)mk();else setTimeout(mk,600);})();
+(function(){function mk(){try{var b=document.createElement("div");b.id="qdrBadge";b.textContent="v11-173 · I18N-MATCH";b.style.cssText="position:fixed;left:8px;bottom:8px;z-index:2147483647;background:#fff;color:#7E0E14;border:1px solid #7E0E14;font:800 11px/1.5 system-ui;padding:3px 9px;border-radius:20px;pointer-events:none;opacity:.97;box-shadow:0 2px 8px rgba(0,0,0,.35)";document.body.appendChild(b);}catch(e){}}if(document.body)mk();else setTimeout(mk,600);})();
 /* ---- PWA: install as an app on Android and iPhone / iPad ---- */
 (function(){
   Object.assign(STR.en,{
@@ -24238,7 +24281,7 @@ try{
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous">
 /* =====================================================================
-   v11-169 · REP-FIX — توحيد حالة اليوم (مباراة · تدريب · راحة · إجازة)
+   v11-173 · I18N-MATCH — توحيد حالة اليوم (مباراة · تدريب · راحة · إجازة)
    بين: لوحة التحكم · البرنامج الأسبوعي · التقويم · جدول المباريات
    ===================================================================== */
 (function(){
@@ -24342,7 +24385,7 @@ try{
 
 <script>
 /* =====================================================================
-   v11-169 · REP-FIX
+   v11-173 · I18N-MATCH
    إصلاح التجمد: يُبنى الهيكل مرة واحدة فقط، ويُحدَّث محتواه الداخلي
    (لا إعادة بناء للجذر ⇒ لا يفقد الهوية ولا يعلق)
    ===================================================================== */
@@ -26802,6 +26845,341 @@ tr:hover .qde-ndate{color:#7E0E14}
   window.QD164={inject:inject,has:hasTab,boot:boot,nav:function(){ return (navEl()?navEl().innerText:""); }};
   if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",boot); else boot();
   setTimeout(boot,600); setTimeout(boot,1800); setTimeout(boot,4000);
+})();
+</script>
+<script>
+/* ===== QD172 · ترجمة قسم التغذية + فحص لغوي لكل الأقسام ===== */
+(function(){
+  if(window.__QD172) return; window.__QD172=1;
+  function isEn(){ try{ return (String(localStorage.getItem("qd_lang")||"ar").indexOf("en")===0)||(typeof LANG!=="undefined"&&LANG==="en"); }catch(e){ return false; } }
+
+  var UI={
+    "التغذية":"Nutrition",
+    "القائمة الرسمية · ملفات اللاعبين · طلب الفندق عبر واتساب":"Official menu · Player profiles · Hotel order via WhatsApp",
+    "طلب الفندق":"Hotel order",
+    "القائمة":"Menu",
+    "تعديل التوقيت":"Edit times",
+    "طباعة":"Print",
+    "القائمة الرسمية":"Official menu",
+    "مكتبة التغذية":"Nutrition library",
+    "ملفات اللاعبين":"Player profiles",
+    "سجل الطلبات":"Order log",
+    "لاعبون بملف تغذية":"Players with a profile",
+    "متوسط السعرات (ك.ك)":"Avg calories (kcal)",
+    "متوسط البروتين (جم)":"Avg protein (g)",
+    "حساسيات / ممنوعات":"Allergies / restricted",
+    "القائمة الرسمية — مرتّبة للفندق":"Official menu — ordered for the hotel",
+    "رتّب الأصناف بالأسهم · أوقف أي صنف لا تريده":"Reorder with the arrows · switch off any item you do not want",
+    "تم":"Done",
+    "إيقاف":"Off",
+    "تشغيل":"On",
+    "حذف":"Delete",
+    "أعلى":"Move up",
+    "أسفل":"Move down",
+    "20:00 أو بعد الصافرة":"20:00 or after the whistle",
+    "ملفات التغذية":"Nutrition profiles",
+    "الوزن والطول تُحسب منها السعرات والبروتين تقديريًا":"Calories and protein are estimated from weight and height",
+    "اللاعب":"Player","الوزن":"Weight","الطول":"Height","الهدف":"Goal",
+    "سعرات":"Calories","بروتين":"Protein","حساسية":"Allergy",
+    "ك.ك":"kcal","جم بروتين":"g protein","جم":"g","سم":"cm","كجم":"kg",
+    "ثبات":"Maintain","بناء عضل":"Build muscle","خسارة دهون":"Lose fat",
+    "حساسية / ممنوعات":"Allergy / restricted","خطة":"Plan",
+    "لا يوجد لاعبون":"No players",
+    "اختر الوجبات ثم أرسل القائمة واتساب":"Pick the meals, then send the list on WhatsApp",
+    "اسم الفندق":"Hotel name","رقم واتساب الفندق":"Hotel WhatsApp number",
+    "من تاريخ":"From date","إلى تاريخ":"To date","عدد اللاعبين":"Number of players",
+    "مسؤول التنسيق":"Coordinator","ملاحظات للفندق":"Notes for the hotel",
+    "الوجبات المطلوبة":"Meals required","نص الرسالة الجاهزة":"Ready message text",
+    "إرسال على واتساب":"Send on WhatsApp","نسخ النص":"Copy text",
+    "حفظ الطلب في السجل":"Save order to log","طباعة / PDF":"Print / PDF",
+    "بدون مكسرات للاعب … · تقديم العشاء 20:00":"No nuts for … · dinner served 20:00",
+    "فندق …":"Hotel …",
+    "اسم + جوال":"Name + mobile",
+    "سجل طلبات الفندق":"Hotel order log",
+    "التاريخ":"Date","الفندق":"Hotel","الفترة":"Period","اللاعبون":"Players","الوجبات":"Meals",
+    "إعادة إرسال":"Resend","لا طلبات محفوظة بعد":"No saved orders yet",
+    "مكتبة التغذية الرياضية":"Sports nutrition library",
+    "اختر ما تريد وأضفه إلى أي وجبة — القيم تقديرية لكل حصة":"Pick any item and add it to a meal — values are estimated per serving",
+    "ابحث عن صنف… (بروتين، إلكتروليت، SIS، تمر)":"Search an item… (protein, electrolyte, SIS, dates)",
+    "الكل":"All","فطور":"Breakfast","سناك":"Snack","غداء":"Lunch","عشاء":"Dinner",
+    "مشروبات":"Drinks","ريكفري":"Recovery","مكملات":"Supplements","ترطيب وإلكتروليتات":"Hydration & electrolytes",
+    "صنف خاص بك":"Your own item","اسم الصنف":"Item name","إضافة":"Add",
+    "لا نتائج مطابقة":"No matching results","أضف":"Add","تقديري":"estimated",
+    "(تقديري)":"(estimated)",
+    "أُضيفت الصورة":"Photo added","تعذّر حفظ الصورة":"Could not save the photo","أُضيف: ":"Added: ",
+    "حُذف الصنف":"Item removed","تم تعديل التوقيت: ":"Time updated: ",
+    "اكتب اسم الصنف":"Enter the item name",
+    "ك.ك · ":" kcal · ",
+    "عشاء ليلة المباراة":"Dinner — the night before",
+    "إفطار يوم المباراة":"Match-day breakfast",
+    "الغداء الرئيسي":"Main lunch",
+    "الوجبات الخفيفة (سناك)":"Snacks",
+    "بروتوكول الاستشفاء بعد المباراة":"Post-match recovery protocol",
+    "الشوربة":"Soup","الأطباق الرئيسية والبروتين":"Main courses & protein",
+    "الأطباق الجانبية والحلويات":"Sides, desserts & drinks",
+    "ركن البيض المباشر":"Eggs station","المخبوزات والنشويات":"Bakery & starches",
+    "الألبان والفواكه والمشروبات":"Dairy, fruits & drinks",
+    "الغداء":"Lunch","وقت السناك":"Snack time","المراحل الثماني":"The eight stages",
+    "إضافة":"Add","بروتين":"Protein","كارب":"Carb","ترطيب":"Hydration",
+    "ريكفري":"Recovery","مكمل":"Supplement","خضار":"Vegetables","مشروب":"Drink",
+    "بعد الصافرة":"After the whistle"
+  };
+  var MAP={};
+  function put(a,b){ if(a&&b&&String(a).trim()) MAP[String(a).trim()]=String(b).trim(); }
+  Object.keys(UI).forEach(function(k){ put(k,UI[k]); });
+
+  /* أسماء الأصناف تأتي من بيانات القائمة والمكتبة نفسها */
+  try{
+    (window.QDNUT.menu||[]).forEach(function(m){
+      put(m.ar,m.en);
+      (m.groups||[]).forEach(function(g){ (g.it||[]).forEach(function(it){ if(it[1]) put(it[0],it[1]); }); });
+    });
+    (window.QDNUT.lib||[]).forEach(function(it){ if(it.en) put(it.ar,it.en); });
+  }catch(e){}
+
+  var ATTRS=["title","placeholder","aria-label","value"];
+  function trText(t){
+    if(!t) return t;
+    var s=String(t), k=s.trim();
+    if(!k) return t;
+    if(MAP[k]) return s.replace(k,MAP[k]);
+    /* أنماط رقمية */
+    var m1=k.match(/^(\d+)\s*ك\.ك\s*·\s*(\d+)\s*جم بروتين\s*\(تقديري\)$/);
+    if(m1) return s.replace(k, m1[1]+" kcal · "+m1[2]+" g protein (estimated)");
+    var m2=k.match(/^(\d+)\s*ك\.ك\s*·\s*(\d+)\s*جم بروتين$/);
+    if(m2) return s.replace(k, m2[1]+" kcal · "+m2[2]+" g protein");
+    var m3=k.match(/^(\d+)\s*لاعب$/); if(m3) return s.replace(k, m3[1]+" players");
+    return t;
+  }
+  function walkNode(root){
+    if(!root) return 0;
+    var n=0, w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,null,false), t;
+    while((t=w.nextNode())){
+      if(!t.nodeValue) continue;
+      if(t.parentNode&&/^(SCRIPT|STYLE)$/.test(t.parentNode.nodeName)) continue;
+      var nv=trText(t.nodeValue);
+      if(nv!==t.nodeValue){ t.nodeValue=nv; n++; }
+    }
+    var els=root.querySelectorAll?root.querySelectorAll("*"):[];
+    for(var i=0;i<els.length;i++){
+      for(var a=0;a<ATTRS.length;a++){
+        var v=els[i].getAttribute&&els[i].getAttribute(ATTRS[a]);
+        if(!v) continue;
+        var nv2=trText(v); if(nv2!==v){ try{ els[i].setAttribute(ATTRS[a],nv2); }catch(e){} n++; }
+      }
+    }
+    return n;
+  }
+  function applyToNut(){
+    if(!isEn()) return 0;
+    var n=0;
+    try{ var s=document.getElementById("v-nutrition"); if(s) n+=walkNode(s); }catch(e){}
+    try{ var nv=document.getElementById("nav");
+      if(nv){ nv.querySelectorAll('[data-view="nutrition"]').forEach(function(b){ n+=walkNode(b); }); } }catch(e){}
+    return n;
+  }
+  /* غلاف على الرسم: يترجم بعد كل إعادة بناء */
+  try{
+    var r=window.QDNUT&&window.QDNUT.render;
+    if(typeof r==="function"&&!r.__qd172){
+      var w=function(){ var out=r.apply(this,arguments); try{ applyToNut(); }catch(e){} return out; };
+      w.__qd172=1; window.QDNUT.render=w;
+    }
+  }catch(e){}
+  /* عند تبديل اللغة: أعد رسم التغذية ثم ترجم */
+  try{
+    var sl=window.setLang;
+    if(typeof sl==="function"&&!sl.__qd172){
+      var w2=function(){ var out=sl.apply(this,arguments);
+        try{ if(window.QDNUT&&QDNUT.render) QDNUT.render(); }catch(e){}
+        try{ applyToNut(); }catch(e){}
+        try{ setTimeout(applyToNut,120); setTimeout(applyToNut,600); }catch(e){}
+        return out; };
+      w2.__qd172=1; window.setLang=w2;
+    }
+  }catch(e){}
+  setInterval(function(){ try{ applyToNut(); }catch(e){} },2500);
+  setTimeout(applyToNut,800); setTimeout(applyToNut,2000); setTimeout(applyToNut,4000);
+
+  /* ===== فحص لغوي لكل أقسام البرنامج ===== */
+  function arabicOnly(el){
+    var bad=[], w=document.createTreeWalker(el,NodeFilter.SHOW_TEXT,null,false), t;
+    while((t=w.nextNode())){
+      var v=String(t.nodeValue||"").trim();
+      if(v.length<2) continue;
+      if(!/[\u0600-\u06FF]/.test(v)) continue;
+      if(MAP[v]) continue;
+      if(t.parentNode&&/^(SCRIPT|STYLE)$/.test(t.parentNode.nodeName)) continue;
+      bad.push(v.slice(0,60));
+    }
+    var uniq=[]; bad.forEach(function(x){ if(uniq.indexOf(x)<0) uniq.push(x); });
+    return uniq;
+  }
+  function audit(cb){
+    var ids=[]; try{ (window.NAV||[]).forEach(function(n){ ids.push(n.id); }); }catch(e){}
+    var out=[], i=0;
+    function step(){
+      if(i>=ids.length){ try{ console.table(out); }catch(e){ console.log(out); } if(cb) cb(out); return; }
+      var id=ids[i++];
+      try{ if(typeof showView==="function") showView(id); }catch(e){}
+      setTimeout(function(){
+        try{
+          var el=document.getElementById("v-"+id);
+          var bad=el?arabicOnly(el):[];
+          out.push({view:id, arabicStrings:bad.length, samples:bad.slice(0,6).join(" | ")});
+        }catch(e){ out.push({view:id, arabicStrings:-1, samples:"error"}); }
+        step();
+      },260);
+    }
+    step();
+    return "جارٍ الفحص… سيطبع جدولًا بعد ~"+(ids.length*0.26).toFixed(0)+" ثانية";
+  }
+  window.QDI18N={ audit:audit, apply:applyToNut, map:MAP, present:function(){ return isEn(); } };
+})();
+</script>
+<script>
+/* ===== QD173 · تعريب كامل للمباريات والجدول والتقارير ===== */
+(function(){
+  if(window.__QD173) return; window.__QD173=1;
+  var M={
+    /* تشكيلة والمشاركون */
+    "أساسي":"Starter","احتياطي":"Substitute","المشاركون":"Participants","خارج القائمة":"Not in squad",
+    "إضافة يدوية":"Manual add","الأساسيون":"Starters","الاحتياط":"Substitutes","لم تُحدَّد":"Not set",
+    "لم يُحدد":"Not set","تشكيلة":"Lineup","ورقة التشكيلة":"Lineup sheet","اللاعبون":"Players",
+    "لاعبون مسجلون":"Registered players","عدد اللاعبين":"Number of players","حراس":"Goalkeepers",
+    "دفاع":"Defenders","وسط":"Midfielders","هجوم":"Forwards","حارس":"Goalkeeper","مدافع":"Defender",
+    "مهاجم":"Forward","المركز":"Position","القائمة":"Squad list","تم — حفظ":"Done — save",
+    "تم — الحفظ":"Done — save","حفظ":"Save","إغلاق":"Close","إلغاء":"Cancel","تم":"Done",
+    "نعم":"Yes","لا":"No","نعم — احذف":"Yes — delete","حذف":"Delete","تعديل":"Edit","إضافة":"Add",
+    /* المباريات */
+    "المباريات":"Matches","المباراة":"Match","مباراة":"Match","مباريات":"Matches","الجولة":"Round",
+    "جولة":"Round","البطولة":"Competition","الخصم":"Opponent","النتيجة":"Score","الملعب":"Venue",
+    "الملعب / المدينة":"Venue / city","الملعب — المدينة":"Venue — city","المدينة":"City",
+    "خارج الأرض":"Away","على أرضنا":"Home","ضد":"vs","ضد ":"vs ","التاريخ":"Date","التوقيت":"Time",
+    "الحرارة":"Temperature","الرطوبة":"Humidity","سجل فعلي : عند التوقيت":"Actual record: at kick-off",
+    "الغائبون":"Absent","فائتة بسبب الإصابة":"Missed through injury","مباريات فائتة":"Matches missed",
+    "الدقائق":"Minutes","دقائق":"Minutes","دقيقة":"min","دقائق اللعب":"Minutes played",
+    "مجموع الدقائق":"Total minutes","متوسط الدقائق":"Average minutes","إجمالي الدقائق":"Total minutes",
+    "الخطورة":"Severity","الإجراء":"Action","الإجراء المتخذ":"Action taken","الحالة الطبية":"Medical status",
+    "الميكانيكية":"Mechanism","طريقة الحدوث":"Mechanism of injury","الطبيب":"Doctor","الملاحظة":"Note",
+    "الملاحظات":"Notes","ملاحظات":"Notes","ملاحظة":"Note","التقدير":"Estimate","التوقّع الزمني":"Projection",
+    "الأيام":"Days","يوم":"day","أيام الغياب":"Days out","أيام منذ الإصابة":"Days since injury",
+    "العودة المتوقعة":"Expected return","العودة للعب":"Return to play","العودة للتدريب":"Return to training",
+    "هل يوجد إصابات في هذه المباراة؟":"Any injuries in this match?","نعم يوجد":"Yes","لا يوجد":"None",
+    "لا شيء":"None","— لا شيء —":"— None —","لا يوجد إصابات":"No injuries","إصابات المباريات":"Match injuries",
+    "تقرير المباراة":"Match report","تقرير المباراة الشامل":"Full match report","التقرير الشامل":"Full report",
+    "حذف تقرير المباراة":"Delete match report","تعديل تقرير الإصابات":"Edit injury report","تعديل التقرير":"Edit report",
+    "حذف التقرير":"Delete report","إضافة تقرير":"Add report","تقرير":"Report","تقارير":"Reports",
+    "تم حذف التقرير":"Report deleted","لا يوجد تقرير محفوظ لهذه المباراة":"No saved report for this match",
+    "سيُحذف":"This deletes","لا يمكن التراجع":"This cannot be undone","تأكيد الحذف":"Confirm delete",
+    "طباعة":"Print","تصدير":"Export","واتساب":"WhatsApp","إرسال على واتساب":"Send on WhatsApp",
+    "نسخ الرسالة":"Copy message","نسخ":"Copy","تم النسخ":"Copied",
+    /* الجدول الأسبوعي */
+    "البرنامج الأسبوعي":"Weekly programme","الجدول":"Schedule","جدول الأسبوع":"Week schedule",
+    "الأسبوع":"Week","أسبوع":"Week","الشهر":"Month","السنة":"Year","السابق":"Previous","التالي":"Next",
+    "أمس":"Yesterday","اليوم":"Today","غدًا":"Tomorrow","التقويم":"Calendar","المناسبات":"Events",
+    "مناسبة":"Event","تدريب":"Training","تدريب ملعب":"Pitch training","تدريب صالة":"Gym training",
+    "مباراة رسمية":"Official match","ودية":"Friendly","راحة":"Rest","راحة إجازة":"Rest / holiday",
+    "استشفاء":"Recovery","ثلج":"Ice","جيم":"Gym","ملعب":"Pitch","حراس":"Goalkeepers",
+    "مؤشرات الأسبوع":"Week totals","تفصيل الموسم":"Season breakdown","ملخص الموسم":"Season summary",
+    "الموسم":"Season","من":"From","إلى":"To","حفظ البرنامج":"Save programme","اعتماد":"Apply",
+    "استيراد":"Import","تصدير":"Export","تنزيل":"Download","رفع":"Upload","تحليل":"Analyse",
+    "البرنامج":"Programme","معاينة":"Preview","إلغاء":"Cancel",
+    /* تقارير */
+    "التقارير والتصدير":"Reports & export","إنشاء التقرير":"Generate report","تنزيل (اكسل / CSV)":"Download (CSV / Excel)",
+    "تصدير PDF (جاهز للطباعة)":"Export PDF (print-ready)","لا توجد بيانات لهذه الفترة":"No data for this period",
+    "تم تنزيل التقرير":"Report downloaded","عدد الإصابات في الفترة":"Injuries in period",
+    "متوسط الأيام المفقودة":"Avg days lost","أيام داخل الفترة":"Days in period","التفصيل الشهري":"Month-by-month",
+    "الشهر":"Month","عدد الإصابات":"Injury count","أكثر نوع إصابة":"Most common injury type",
+    "أكثر منطقة إصابة":"Most affected body site","إجمالي اللاعبين":"Total players","إصابات نشطة":"Active injuries",
+    "إصابات متعافية":"Recovered injuries","إجمالي أيام الغياب":"Total days lost","مؤشرات رئيسية":"Key indicators",
+    "التوزيع حسب السبب":"Distribution by cause","إجمالي":"Total","صدمة (Trauma)":"Trauma","إجهاد متكرر":"Overuse",
+    "غير محدد":"Unspecified","غير قادر":"Unable","متاح":"Available","شفاء تام":"Fully recovered","جزئي":"Partial",
+    "جلسات العلاج الرياضي":"Therapy sessions","الأنشطة المسجلة":"Recorded activities","استبيانات الصحة النفسية":"Wellness surveys",
+    "سجل الإصابات الكامل":"Full injury log","عدد الإصابات لكل لاعب":"Injuries per player",
+    "النوع المحدد":"Selected type","الفترة":"Period","عدد الصفوف":"Rows",
+    /* عام */
+    "لوحة التحكم":"Dashboard","نظرة عامة":"Overview","المصابون":"Injured","ملتحق بفريق آخر":"With another team",
+    "غير المشاركين في المباراة الرسمية":"Not playing the official match","غير المشاركين في تدريب اليوم":"Not training today",
+    "هذا يوم مباراة - القائمة أعلاه تعرض من لا يشارك في المباراة.":"Match day — the list above shows who is not playing.",
+    "الإجمالي":"Total","مصاب":"Injured","مريض":"Ill","حالات نشطة":"Active cases","فتح":"Open","شارك":"Played",
+    "دقيقة":"min","لاعبًا":"players","لاعب":"player","سنة":"year","التقدير":"Estimate","الملف":"Profile"
+  };
+  try{ Object.keys(M).forEach(function(k){ if(!window.QDI18N.map[k]) window.QDI18N.map[k]=M[k]; else window.QDI18N.map[k]=M[k]; }); }catch(e){}
+
+  function isEn(){ try{ return (String(localStorage.getItem("qd_lang")||"ar").indexOf("en")===0)||(typeof LANG!=="undefined"&&LANG==="en"); }catch(e){ return false; } }
+  var MAPF=function(){ try{ return window.QDI18N.map; }catch(e){ return M; } };
+  function tr(t){
+    if(!t) return t;
+    var s=String(t), k=s.trim(); if(!k) return t;
+    var map=MAPF();
+    if(map[k]) return s.replace(k,map[k]);
+    var r=k.replace(/\s+/g," ");
+    if(map[r]) return s.replace(k,map[r]);
+    return t;
+  }
+  var ATTRS=["title","placeholder","aria-label"];
+  function walk(root,acc){
+    if(!root) return acc;
+    var w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,null,false), t;
+    while((t=w.nextNode())){
+      if(!t.nodeValue) continue;
+      if(t.parentNode&&/^(SCRIPT|STYLE)$/.test(t.parentNode.nodeName)) continue;
+      var nv=tr(t.nodeValue); if(nv!==t.nodeValue){ t.nodeValue=nv; acc++; }
+    }
+    var els=root.querySelectorAll?root.querySelectorAll("*"):[];
+    for(var i=0;i<els.length;i++){ for(var a=0;a<ATTRS.length;a++){
+      var v=els[i].getAttribute&&els[i].getAttribute(ATTRS[a]); if(!v) continue;
+      var n2=tr(v); if(n2!==v){ try{ els[i].setAttribute(ATTRS[a],n2); }catch(e){} acc++; } } }
+    return acc;
+  }
+  var SEL=["#v-nutrition","#v-fixtures","#v-matches","#v-calendar","#v-reports","#v-dashboard","#v-load","#v-daily"];
+  var busy=false;
+  function apply(){
+    if(!isEn()) return 0;
+    busy=true; var n=0;
+    try{ SEL.forEach(function(s){ var e=document.querySelector(s); if(e) n+=walk(e,n?0:0)||0; }); }catch(e){}
+    try{
+      n=0;
+      SEL.forEach(function(s){ var e=document.querySelector(s); if(e){ var x=0; walk(e,x); } });
+      /* النوافذ والألواح العائمة */
+      var ovs=document.querySelectorAll(".modal,.overlay,#p9Panel,[id^='q9cf'],[class*='modal']");
+      for(var i=0;i<ovs.length;i++){ var x2=0; walk(ovs[i],x2); }
+      var nav=document.getElementById("nav"); if(nav){ walk(nav,0); }
+    }catch(e){}
+    busy=false;
+    return n;
+  }
+  window.QD173={apply:apply,map:M};
+  try{ if(window.QDI18N){ var old=window.QDI18N.apply; window.QDI18N.apply=function(){ try{ old&&old(); }catch(e){} return apply(); }; } }catch(e){}
+
+  /* إعادة التطبيق بعد كل رسم */
+  ["fixtures","matches","calendar","reports","dashboard","nutrition"].forEach(function(k){
+    try{
+      var f=REND[k]; if(typeof f!=="function"||f.__qd173) return;
+      var w=function(){ var r=f.apply(this,arguments); try{ setTimeout(apply,40); }catch(e){} return r; };
+      w.__qd173=1; REND[k]=w;
+    }catch(e){}
+  });
+  try{
+    var sl=window.setLang;
+    if(typeof sl==="function"&&!sl.__qd173){
+      var w2=function(){ var r=sl.apply(this,arguments);
+        try{ ["fixtures","matches","calendar","reports"].forEach(function(k){ if(REND[k]) REND[k](); }); }catch(e){}
+        try{ setTimeout(apply,60); setTimeout(apply,400); }catch(e){}
+        return r; };
+      w2.__qd173=1; window.setLang=w2;
+    }
+  }catch(e){}
+  /* مراقب: أي إضافة/تغيير في الصفحة يُترجم بعد 120ms */
+  try{
+    var pend=null;
+    var obs=new MutationObserver(function(){ if(busy) return; if(pend) return;
+      pend=setTimeout(function(){ pend=null; try{ apply(); }catch(e){} },120); });
+    obs.observe(document.body,{childList:true,subtree:true,characterData:true});
+  }catch(e){}
+  setInterval(function(){ try{ if(!busy) apply(); }catch(e){} },3000);
+  setTimeout(apply,600); setTimeout(apply,1500); setTimeout(apply,3500);
 })();
 </script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
