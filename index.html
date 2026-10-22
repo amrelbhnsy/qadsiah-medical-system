@@ -411,7 +411,7 @@ html[dir="rtl"] .filters .select{padding-left:34px}
 .rp-path-lbl{font-size:10.5px;font-weight:800;margin-top:3px;color:var(--slate);white-space:nowrap}
 .rp-batt{display:inline-flex;align-items:center;gap:5px}
 .rp-batt b{font-weight:900;line-height:1}
-/* ===== v11-178 · SAFE-BOOT — مسار اللاعب وشريط الإنجاز ===== */
+/* ===== v11-179 · BOOT-FORCE — مسار اللاعب وشريط الإنجاز ===== */
 .rp-path2{display:flex;align-items:center;margin:5px 0 6px;min-width:150px}
 .rp-node{width:13px;height:13px;border-radius:50%;flex:0 0 auto;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;background:#fff;border:2px solid #D3D9E1;transition:background .25s,border-color .25s,box-shadow .25s}
 .rp-node.done{background:#15803D;border-color:#15803D}
@@ -15696,7 +15696,7 @@ try{
 }catch(e){}
 
 /* QDBK-END */
-(function(){function mk(){try{var b=document.createElement("div");b.id="qdrBadge";b.textContent="v11-178 · SAFE-BOOT";b.style.cssText="position:fixed;left:8px;bottom:8px;z-index:2147483647;background:#fff;color:#7E0E14;border:1px solid #7E0E14;font:800 11px/1.5 system-ui;padding:3px 9px;border-radius:20px;pointer-events:none;opacity:.97;box-shadow:0 2px 8px rgba(0,0,0,.35)";document.body.appendChild(b);}catch(e){}}if(document.body)mk();else setTimeout(mk,600);})();
+(function(){function mk(){try{var b=document.createElement("div");b.id="qdrBadge";b.textContent="v11-179 · BOOT-FORCE";b.style.cssText="position:fixed;left:8px;bottom:8px;z-index:2147483647;background:#fff;color:#7E0E14;border:1px solid #7E0E14;font:800 11px/1.5 system-ui;padding:3px 9px;border-radius:20px;pointer-events:none;opacity:.97;box-shadow:0 2px 8px rgba(0,0,0,.35)";document.body.appendChild(b);}catch(e){}}if(document.body)mk();else setTimeout(mk,600);})();
 /* ---- PWA: install as an app on Android and iPhone / iPad ---- */
 (function(){
   Object.assign(STR.en,{
@@ -24281,7 +24281,7 @@ try{
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous">
 /* =====================================================================
-   v11-178 · SAFE-BOOT — توحيد حالة اليوم (مباراة · تدريب · راحة · إجازة)
+   v11-179 · BOOT-FORCE — توحيد حالة اليوم (مباراة · تدريب · راحة · إجازة)
    بين: لوحة التحكم · البرنامج الأسبوعي · التقويم · جدول المباريات
    ===================================================================== */
 (function(){
@@ -24385,7 +24385,7 @@ try{
 
 <script>
 /* =====================================================================
-   v11-178 · SAFE-BOOT
+   v11-179 · BOOT-FORCE
    إصلاح التجمد: يُبنى الهيكل مرة واحدة فقط، ويُحدَّث محتواه الداخلي
    (لا إعادة بناء للجذر ⇒ لا يفقد الهوية ولا يعلق)
    ===================================================================== */
@@ -28197,6 +28197,108 @@ tr:hover .qde-ndate{color:#7E0E14}
           d.appendChild(b); })();
     }catch(e){}
   },9000);
+})();
+</script>
+<script>
+/* ===== QD179 · فتح قسري: إزالة شاشة التحميل + فتح التأهيل دائمًا ===== */
+(function(){
+  if(window.__QD179) return; window.__QD179=1;
+  function txt(e){ return (e&&e.textContent)||""; }
+  function isOverlay(e){
+    try{
+      var cs=getComputedStyle(e);
+      if(cs.position!=="fixed"&&cs.position!=="absolute") return false;
+      var r=e.getBoundingClientRect();
+      if(r.width<200||r.height<120) return false;
+      var z=parseInt(cs.zIndex||"0",10);
+      return z>=50||/inset|100%/.test(cs.cssText||"");
+    }catch(x){ return false; }
+  }
+  function killLoaders(){
+    var n=0;
+    try{
+      var all=document.querySelectorAll("div,section,aside");
+      for(var i=0;i<all.length;i++){
+        var e=all[i];
+        var t=txt(e).trim();
+        if(t.length>90) continue;
+        if(!/جار\s*ال?تحميل|جارٍ\s*ال?تحميل|Loading|يرجى الانتظار|Please wait/i.test(t)) continue;
+        if(!isOverlay(e)) continue;
+        try{ e.parentNode.removeChild(e); n++; }catch(x){}
+      }
+    }catch(e){}
+    if(n){ try{ document.body.style.overflow=""; document.documentElement.style.overflow=""; }catch(e){} }
+    return n;
+  }
+  function ensureVisible(){
+    try{
+      var views=document.querySelectorAll("main .view, section.view");
+      var anyActive=false;
+      for(var i=0;i<views.length;i++){ if(views[i].classList.contains("active")){ anyActive=true; break; } }
+      if(!anyActive&&views.length){
+        var dash=document.getElementById("v-dashboard")||views[0];
+        dash.classList.add("active");
+      }
+      var nav=document.getElementById("nav"); if(nav) nav.style.display="";
+      var main=document.querySelector("main"); if(main) main.style.display="";
+      document.body.style.overflow="";
+    }catch(e){}
+  }
+  function openRehab(){
+    try{
+      if(window.QD177&&QD177.go){ QD177.go(); return true; }
+    }catch(e){}
+    try{
+      var main=document.querySelector("main")||document.querySelector(".main");
+      if(!main) return false;
+      var s=document.getElementById("v-rehab");
+      if(!s){ s=document.createElement("section"); s.className="view"; s.id="v-rehab"; main.appendChild(s); }
+      document.querySelectorAll(".view").forEach(function(v){ v.classList.remove("active"); });
+      s.classList.add("active");
+      if(window.QD177&&QD177.render) QD177.render();
+      return true;
+    }catch(e){ return false; }
+  }
+  function openRehabSafe(){
+    var ok=openRehab();
+    if(!ok){
+      try{ if(window.toast) toast("تعذّر فتح التأهيل — أعد التحميل بـ Ctrl+F5","bad"); }catch(e){}
+    }
+    return ok;
+  }
+  window.QD179={kill:killLoaders,open:openRehabSafe,visible:ensureVisible,
+    diag:function(){
+      var o={loaders:0,rehabView:!!document.getElementById("v-rehab"),
+        rehabNav:!!document.querySelector('#nav [data-view="rehab"]'),
+        qd177:!!window.QD177, activeView:(document.querySelector(".view.active")||{}).id||null,
+        navItems:document.querySelectorAll("#nav .nav-item").length};
+      try{ o.loaders=document.querySelectorAll("div").length; }catch(e){}
+      try{ console.log(o); }catch(e){}
+      return o; }};
+
+  /* فحص مبكر: أزل أي شاشة تحميل عالقة */
+  var tries=[2500,5000,8000,12000,20000];
+  tries.forEach(function(ms){ setTimeout(function(){ try{ killLoaders(); ensureVisible(); }catch(e){} },ms); });
+  /* بعد الإقلاع: تأكد أن «التأهيل» موجود في القائمة */
+  setTimeout(function(){ try{ if(window.QD177) { if(QD177.render) QD177.render(); } }catch(e){} },3000);
+
+  /* مستمع: أي ضغط على «التأهيل» يفتحه حتى لو تعطّل معالج الوحدة */
+  document.addEventListener("click",function(e){
+    var t=e.target; if(!t||!t.closest) return;
+    if(t.closest('[data-view="rehab"]')){ try{ e.preventDefault(); }catch(x){} setTimeout(openRehabSafe,0); }
+  },true);
+
+  /* زر طوارئ يظهر فقط إن لم توجد «التأهيل» في القائمة بعد 8 ثوانٍ */
+  setTimeout(function(){
+    try{
+      if(document.querySelector('#nav [data-view="rehab"]')) return;
+      var nav=document.getElementById("nav"); if(!nav) return;
+      var b=document.createElement("button");
+      b.className="nav-item"; b.setAttribute("data-view","rehab");
+      b.innerHTML='<span>التأهيل</span>';
+      nav.appendChild(b);
+    }catch(e){}
+  },8000);
 })();
 </script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
