@@ -411,7 +411,7 @@ html[dir="rtl"] .filters .select{padding-left:34px}
 .rp-path-lbl{font-size:10.5px;font-weight:800;margin-top:3px;color:var(--slate);white-space:nowrap}
 .rp-batt{display:inline-flex;align-items:center;gap:5px}
 .rp-batt b{font-weight:900;line-height:1}
-/* ===== v11-164 · NUT-NAV — مسار اللاعب وشريط الإنجاز ===== */
+/* ===== v11-166 · DEL-LOCK — مسار اللاعب وشريط الإنجاز ===== */
 .rp-path2{display:flex;align-items:center;margin:5px 0 6px;min-width:150px}
 .rp-node{width:13px;height:13px;border-radius:50%;flex:0 0 auto;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;background:#fff;border:2px solid #D3D9E1;transition:background .25s,border-color .25s,box-shadow .25s}
 .rp-node.done{background:#15803D;border-color:#15803D}
@@ -15623,7 +15623,7 @@ try{
 }catch(e){}
 
 /* QDBK-END */
-(function(){function mk(){try{var b=document.createElement("div");b.id="qdrBadge";b.textContent="v11-164 · NUT-NAV";b.style.cssText="position:fixed;left:8px;bottom:8px;z-index:2147483647;background:#fff;color:#7E0E14;border:1px solid #7E0E14;font:800 11px/1.5 system-ui;padding:3px 9px;border-radius:20px;pointer-events:none;opacity:.97;box-shadow:0 2px 8px rgba(0,0,0,.35)";document.body.appendChild(b);}catch(e){}}if(document.body)mk();else setTimeout(mk,600);})();
+(function(){function mk(){try{var b=document.createElement("div");b.id="qdrBadge";b.textContent="v11-166 · DEL-LOCK";b.style.cssText="position:fixed;left:8px;bottom:8px;z-index:2147483647;background:#fff;color:#7E0E14;border:1px solid #7E0E14;font:800 11px/1.5 system-ui;padding:3px 9px;border-radius:20px;pointer-events:none;opacity:.97;box-shadow:0 2px 8px rgba(0,0,0,.35)";document.body.appendChild(b);}catch(e){}}if(document.body)mk();else setTimeout(mk,600);})();
 /* ---- PWA: install as an app on Android and iPhone / iPad ---- */
 (function(){
   Object.assign(STR.en,{
@@ -24208,7 +24208,7 @@ try{
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous">
 /* =====================================================================
-   v11-164 · NUT-NAV — توحيد حالة اليوم (مباراة · تدريب · راحة · إجازة)
+   v11-166 · DEL-LOCK — توحيد حالة اليوم (مباراة · تدريب · راحة · إجازة)
    بين: لوحة التحكم · البرنامج الأسبوعي · التقويم · جدول المباريات
    ===================================================================== */
 (function(){
@@ -24312,7 +24312,7 @@ try{
 
 <script>
 /* =====================================================================
-   v11-164 · NUT-NAV
+   v11-166 · DEL-LOCK
    إصلاح التجمد: يُبنى الهيكل مرة واحدة فقط، ويُحدَّث محتواه الداخلي
    (لا إعادة بناء للجذر ⇒ لا يفقد الهوية ولا يعلق)
    ===================================================================== */
@@ -24409,6 +24409,11 @@ try{
 
   /* ============ الحالة ============ */
   var V={r:null,mid:null,st:[],sb:[],ex:[],min:{},med:{},lineup:"",has:true};
+  /* QD165 — شواهد حذف للجولة: التقارير المحذوفة لا تعود ولا يظهر زر حذفها */
+  function DR(){ var s=ST(); if(!s) return {}; if(!s.__delR||typeof s.__delR!=="object") s.__delR={}; return s.__delR; }
+  function isDeadR(r){ try{ return !!DR()["r"+String(r)]; }catch(e){ return false; } }
+  function markDeadR(r){ try{ DR()["r"+String(r)]=1; }catch(e){} }
+  function clearDeadR(r){ try{ delete DR()["r"+String(r)]; }catch(e){} }
   /* QD163 — مخزن تشكيلة مستقل بمفتاح الجولة (مثل qdHas) لا يتأثر بهوية سجل المباراة */
   function LUS(){ var s=ST(); if(!s) return {}; if(!s.qdLineup||typeof s.qdLineup!=="object") s.qdLineup={}; return s.qdLineup; }
   function lupGet(r){ try{ var a=LUS()["r"+String(r)]; if(a&&a.st) return a; }catch(e){} return null; }
@@ -24442,7 +24447,7 @@ try{
 
   /* ============ سجل المباراة ============ */
   function fxOf(r){ try{ if(typeof fxOf==="function") return fxOf(r); }catch(e){} try{ if(window.fxOf) return window.fxOf(r); }catch(e){} return null; }
-  function matchOfRound(r){ var a=MTS(); for(var i=0;i<a.length;i++){ if(Number(a[i].fx)===Number(r)) return a[i]; } return null; }
+  function matchOfRound(r){ if(isDeadR(r)) return null; var a=MTS(); for(var i=0;i<a.length;i++){ if(Number(a[i].fx)===Number(r)) return a[i]; } return null; }
   /* إجابة «هل يوجد إصابات» محفوظة لكل جولة — مستقلة عن هوية السجل (تحلّ اختلاف التقرير عن الاختيار) */
   function HAS(){
     var st=ST(); if(!st) return {};
@@ -24804,8 +24809,58 @@ try{
     return n;
   }
   function del(r){
+    /* QD165 — تأكيد إلزامي قبل الحذف (كان يُحذف مباشرة بلا سؤال) */
     try{
+      askConfirm(Q("حذف تقرير المباراة","Delete the match report"),
+        Q("سيُحذف تقرير هذه المباراة: المشاركون، دقائق اللعب، الإصابات، ورقة التشكيلة.\nلا يمكن التراجع عن الحذف.","This deletes the match report: squad, minutes, injuries and the lineup sheet.\nThis cannot be undone."),
+        function(){ doDel(r); });
+      return;
+    }catch(e){ try{ doDel(r); }catch(x){} }
+  }
+  function doDel(r){
+    try{
+      markDeadR(r);
+      try{ if(LIVE()&&LIVE().qdHas) delete LIVE().qdHas["r"+r]; }catch(e){}
+      try{ if(LIVE()&&LIVE().qdLineup) delete LIVE().qdLineup["r"+r]; }catch(e){}
       var n=delRound(r);
+      /* QD165 — تطهير كل مراجع الحالة (S الرسمي + النسخة الحيّة + المخزّن) */
+      try{
+        var cands=[];
+        try{ if(window.QD_S&&QD_S.matches) cands.push(QD_S); }catch(e){}
+        try{ if(window.QDB&&typeof QDB.S==="function"){ var s0=QDB.S(); if(s0&&s0.matches) cands.push(s0); } }catch(e){}
+        try{ if(window.QDSIGN_STATE){ var s1=QDSIGN_STATE(); if(s1&&s1.matches) cands.push(s1); } }catch(e){}
+        try{ var s2=ST(); if(s2&&s2.matches) cands.push(s2); }catch(e){}
+        for(var ci=0;ci<cands.length;ci++){
+          var st=cands[ci]; if(!st||!st.matches) continue;
+          var b4=st.matches.length;
+          st.matches=st.matches.filter(function(x){ return !sameRec(x,r); });
+          try{ st.__delR=st.__delR||{}; st.__delR["r"+String(r)]=1; }catch(e){}
+          if(st.matches.length!==b4 && n===0) n=b4-st.matches.length;
+        }
+      }catch(e){}
+      try{ if(window.save) window.save(); else if(window.QD_save) QD_save(); }catch(e){}
+      try{ var s3=ST(); if(s3) localStorage.setItem("qadsiah_u18_v2",JSON.stringify(s3)); }catch(e){}
+      /* QD166 — تحقّق ذاتي: إن عاد السجل بعد الحفظ يُحذف مرة أخرى تلقائيًا */
+      (function verify(){
+        var tries=[600,1800,3500];
+        for(var ti=0;ti<tries.length;ti++){
+          (function(ms){ setTimeout(function(){
+            try{
+              var a=MTS()||[], found=null;
+              for(var i=0;i<a.length;i++){ if(sameRec(a[i],r)){ found=a[i]; break; } }
+              if(!found) return;
+              markDeadR(r);
+              try{ if(found.id&&window.ACT&&typeof ACT.delMatch==="function") ACT.delMatch({id:found.id}); }catch(e){}
+              var st=ST(); if(st&&st.matches){ st.matches=st.matches.filter(function(x){ return !sameRec(x,r); });
+                try{ st.__delR=st.__delR||{}; st.__delR["r"+String(r)]=1; }catch(e){}
+                localStorage.setItem("qadsiah_u18_v2",JSON.stringify(st)); }
+              try{ if(window.save) window.save(); }catch(e){}
+              try{ if(window.REND&&REND.fixtures) REND.fixtures(); }catch(e){}
+              decorate();
+            }catch(e){}
+          },ms); })(tries[ti]);
+        }
+      })();
       try{ if(window.REND&&REND.fixtures) REND.fixtures(); }catch(e){}
       try{ if(window.REND&&REND.matches) REND.matches(); }catch(e){}
       setTimeout(function(){ try{ decorate(); }catch(e){} },150);
@@ -24958,6 +25013,7 @@ try{
 
   /* ============ أزرار الصفوف ============ */
   function counts(r){
+    if(isDeadR(r)) return 0;
     var n=0, arr=[]; try{ arr=MTS(); }catch(e){}
     for(var i=0;i<arr.length;i++){ var m=arr[i];
       if(!sameRec(m,r)) continue;
@@ -24998,6 +25054,7 @@ try{
         var r=rep.getAttribute("data-r"); if(r==null) continue;
         var box=document.createElement("div"); box.className="p9-act";
         var _m=matchOfRound(r); try{ if(!_m) _m=bestRound(r); }catch(e){}
+        if(isDeadR(r)) _m=null;
         var hasRep=!!_m;
         var extra=hasRep?('<button type="button" class="btn ghost sm" data-q9="1" data-go="edit" data-r="'+r+'" onclick="try{QD9.editNow(\''+r+'\')}catch(e){}">'+Q("تعديل التقرير","Edit report")+'</button>'+
           '<button type="button" class="btn sm" data-delbtn="1" data-r="'+r+'" onclick="try{QD9.del(\''+r+'\')}catch(e){alert(\'DEL: \'+e.message)}" style="background:#B5121B;border-color:#B5121B;color:#fff;cursor:pointer">'+Q("حذف التقرير","Delete report")+'</button>'):'';
@@ -25030,6 +25087,8 @@ try{
         var cur=lupGet(ff);
         if(!cur||(!((cur.st||[]).length)&&!((cur.sb||[]).length))) lupSet(ff,mm.starters,mm.subs,mm.extraSquad);
       } } })(); }catch(e){}
+  window.QD166=window.QD165=undefined; window.QD165={isDead:isDeadR,mark:markDeadR,unmark:clearDeadR,del:doDel,ask:function(r){ del(r); },
+    state:function(r){ return {round:r,dead:isDeadR(r),records:(function(){var g=[],a=MTS();for(var i=0;i<a.length;i++){ if(sameRec(a[i],r)) g.push({id:a[i].id,fx:a[i].fx,inj:(a[i].injuries||[]).length}); } return g; })(),counts:counts(r)}; }};
   window.QD163={lupGet:lupGet,lupSet:lupSet,counts:counts,
     diag:function(r){ var L=lupGet(r); var a=MTS(), rows=[];
       for(var i=0;i<a.length;i++){ if(sameRec(a[i],r)) rows.push({id:a[i].id,fx:a[i].fx,st:(a[i].starters||[]).length,sb:(a[i].subs||[]).length}); }
@@ -25291,6 +25350,20 @@ try{
     clearNow:function(r){ del(r); }};
   try{ window.QD9=Object.assign(window.QD9||{},__QD139API); }catch(e){ window.QD9=__QD139API; }
 
+  /* QD166 — مستمع أعلى أولوية لزر الحذف: نافذة تأكيد واحدة فقط، ولا يسرقه أحد */
+  try{
+    window.addEventListener("click",function(ev){
+      var t=ev.target, b=null;
+      try{ b=t&&t.closest?t.closest('[data-delbtn="1"]'):null; }catch(e){}
+      if(!b) return;
+      var rr=b.getAttribute("data-r");
+      try{ ev.preventDefault(); }catch(e){}
+      try{ if(ev.stopImmediatePropagation) ev.stopImmediatePropagation(); }catch(e){}
+      try{ ev.stopPropagation(); }catch(e){}
+      del(rr);
+      return false;
+    },true);
+  }catch(e){}
   /* التقاط مباشر لزر الحذف مهما كانت الطبقات أو المستمعات الأخرى */
   try{
     document.addEventListener("click",function(ev){
