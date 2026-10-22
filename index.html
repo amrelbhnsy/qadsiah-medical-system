@@ -411,7 +411,7 @@ html[dir="rtl"] .filters .select{padding-left:34px}
 .rp-path-lbl{font-size:10.5px;font-weight:800;margin-top:3px;color:var(--slate);white-space:nowrap}
 .rp-batt{display:inline-flex;align-items:center;gap:5px}
 .rp-batt b{font-weight:900;line-height:1}
-/* ===== v11-166 · DEL-LOCK — مسار اللاعب وشريط الإنجاز ===== */
+/* ===== v11-167 · NUT-LIB — مسار اللاعب وشريط الإنجاز ===== */
 .rp-path2{display:flex;align-items:center;margin:5px 0 6px;min-width:150px}
 .rp-node{width:13px;height:13px;border-radius:50%;flex:0 0 auto;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;background:#fff;border:2px solid #D3D9E1;transition:background .25s,border-color .25s,box-shadow .25s}
 .rp-node.done{background:#15803D;border-color:#15803D}
@@ -15623,7 +15623,7 @@ try{
 }catch(e){}
 
 /* QDBK-END */
-(function(){function mk(){try{var b=document.createElement("div");b.id="qdrBadge";b.textContent="v11-166 · DEL-LOCK";b.style.cssText="position:fixed;left:8px;bottom:8px;z-index:2147483647;background:#fff;color:#7E0E14;border:1px solid #7E0E14;font:800 11px/1.5 system-ui;padding:3px 9px;border-radius:20px;pointer-events:none;opacity:.97;box-shadow:0 2px 8px rgba(0,0,0,.35)";document.body.appendChild(b);}catch(e){}}if(document.body)mk();else setTimeout(mk,600);})();
+(function(){function mk(){try{var b=document.createElement("div");b.id="qdrBadge";b.textContent="v11-167 · NUT-LIB";b.style.cssText="position:fixed;left:8px;bottom:8px;z-index:2147483647;background:#fff;color:#7E0E14;border:1px solid #7E0E14;font:800 11px/1.5 system-ui;padding:3px 9px;border-radius:20px;pointer-events:none;opacity:.97;box-shadow:0 2px 8px rgba(0,0,0,.35)";document.body.appendChild(b);}catch(e){}}if(document.body)mk();else setTimeout(mk,600);})();
 /* ---- PWA: install as an app on Android and iPhone / iPad ---- */
 (function(){
   Object.assign(STR.en,{
@@ -24208,7 +24208,7 @@ try{
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous">
 /* =====================================================================
-   v11-166 · DEL-LOCK — توحيد حالة اليوم (مباراة · تدريب · راحة · إجازة)
+   v11-167 · NUT-LIB — توحيد حالة اليوم (مباراة · تدريب · راحة · إجازة)
    بين: لوحة التحكم · البرنامج الأسبوعي · التقويم · جدول المباريات
    ===================================================================== */
 (function(){
@@ -24312,7 +24312,7 @@ try{
 
 <script>
 /* =====================================================================
-   v11-166 · DEL-LOCK
+   v11-167 · NUT-LIB
    إصلاح التجمد: يُبنى الهيكل مرة واحدة فقط، ويُحدَّث محتواه الداخلي
    (لا إعادة بناء للجذر ⇒ لا يفقد الهوية ولا يعلق)
    ===================================================================== */
@@ -26084,6 +26084,20 @@ tr:hover .qde-ndate{color:#7E0E14}
 .qdnu-tbl tr:hover td{background:#FDF9F4}
 .qdnu-badge{font-size:9.5px;font-weight:800;border-radius:999px;padding:2px 8px}
 .qdnu-empty{text-align:center;color:#9a9089;font-size:12px;padding:26px}
+.qdnu-chips{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:10px}
+.qdnu-ch2{font:800 10.5px inherit;border:1px solid #E7DED2;background:#fff;color:#7a6f66;border-radius:999px;padding:4px 11px;cursor:pointer}
+.qdnu-ch2.on{background:#7E0E14;border-color:#7E0E14;color:#fff}
+.qdnu-libg{display:grid;grid-template-columns:repeat(auto-fill,minmax(215px,1fr));gap:8px}
+.qdnu-libc{border:1px solid #EFE6DA;border-radius:11px;padding:9px 10px;background:#fff;display:flex;flex-direction:column;gap:4px}
+.qdnu-libc b{font-size:12px;line-height:1.5}
+.qdnu-libc i{font-style:normal;font-size:9.5px;color:#a39a90}
+.qdnu-libh{display:flex;align-items:center;gap:5px}
+.qdnu-br{font:900 8.5px inherit;background:#0E7490;color:#fff;border-radius:5px;padding:1px 5px;letter-spacing:.4px}
+.qdnu-tg{font:800 8.5px inherit;border-radius:5px;padding:1px 6px}
+.qdnu-libk{font-size:9.5px;color:#8a8078}
+.qdnu-libr{display:flex;gap:5px;align-items:center;margin-top:3px}
+.qdnu-cust{margin-top:12px;border-top:1px dashed #E7DED2;padding-top:10px}
+.qdnu-cust b{font-size:11px;color:#7E0E14;display:block;margin-bottom:6px}
 @media(max-width:860px){.qdnu-k{grid-template-columns:repeat(2,1fr)}}
 @media(max-width:560px){.qdnu-it .en{display:none}.qdnu-top{padding:14px 15px}.qdnu-h h2{font-size:16px}}
 </style>
@@ -26118,8 +26132,129 @@ tr:hover .qde-ndate{color:#7E0E14}
       {ar:"المراحل الثماني",en:"8 steps",it:[["١ — صافرة نهاية المباراة","Step 1 · End of the match",""],["٢ — ترطيب فوري بالسوائل","Step 2 · Hydration",""],["٣ — عصير كرز حامض","Step 3 · Tart cherry juice",""],["٤ — حليب بالشوكولاتة","Step 4 · Chocolate milk","pr"],["٥ — حمام ماء بارد / ثلج","Step 5 · Cold bath",""],["٦ — وجبة استشفاء (بيتزا)","Step 6 · Recovery meal",""],["٧ — ملابس ضاغطة","Step 7 · Compression garments",""],["٨ — نوم عميق وراحة","Step 8 · Sleep & rest",""]]}
     ]}
   ];
+  /* ===== QD167 · مكتبة التغذية الرياضية + تعديل التوقيت ===== */
+  var TG={pr:["بروتين","#7E0E14","#FDF1F1"],carb:["كارب","#8a6b1f","#FDF7E7"],hyd:["ترطيب","#0E7490","#EFF8FA"],
+          rec:["ريكفري","#15803D","#EFF8F2"],sup:["مكمل","#6D28D9","#F4F0FD"],veg:["خضار","#15803D","#EFF8F2"],drink:["مشروب","#0E7490","#EFF8FA"]};
+  var CATS=[["breakfast","فطور"],["snack","سناك"],["lunch","غداء"],["dinner","عشاء"],["drinks","مشروبات"],["recovery","ريكفري"],["supp","مكملات"],["hydro","ترطيب وإلكتروليتات"]];
+  var CATNAME={}; CATS.forEach(function(c){ CATNAME[c[0]]=c[1]; });
+  var LIB=[
+    {c:"breakfast",b:"",ar:"شوفان بالحليب",en:"Oats with milk",tg:"carb",kc:350,pr:14},
+    {c:"breakfast",b:"",ar:"بيض مسلوق (٢)",en:"Boiled eggs x2",tg:"pr",kc:155,pr:13},
+    {c:"breakfast",b:"",ar:"أومليت بياض بيض",en:"Egg-white omelet",tg:"pr",kc:120,pr:20},
+    {c:"breakfast",b:"",ar:"بان كيك بالعسل",en:"Pancakes & honey",tg:"carb",kc:380,pr:9},
+    {c:"breakfast",b:"",ar:"توست أسمر",en:"Wholemeal toast",tg:"carb",kc:160,pr:7},
+    {c:"breakfast",b:"",ar:"زبدة فول سوداني",en:"Peanut butter",tg:"pr",kc:190,pr:8},
+    {c:"breakfast",b:"",ar:"زبادي يوناني",en:"Greek yogurt",tg:"pr",kc:130,pr:17},
+    {c:"breakfast",b:"",ar:"جبن قليل الدسم",en:"Low-fat cheese",tg:"pr",kc:90,pr:7},
+    {c:"breakfast",b:"",ar:"تمر (٤ حبات)",en:"Dates x4",tg:"carb",kc:110,pr:1},
+    {c:"breakfast",b:"",ar:"موز",en:"Banana",tg:"carb",kc:105,pr:1},
+    {c:"breakfast",b:"",ar:"فواكه مشكّلة",en:"Mixed fruit",tg:"carb",kc:90,pr:1},
+    {c:"breakfast",b:"",ar:"عصير برتقال طازج",en:"Fresh orange juice",tg:"drink",kc:110,pr:2},
+    {c:"breakfast",b:"",ar:"عسل طبيعي",en:"Honey",tg:"carb",kc:60,pr:0},
+    {c:"breakfast",b:"",ar:"قهوة سادة",en:"Black coffee",tg:"drink",kc:5,pr:0},
+    {c:"snack",b:"",ar:"ساندويتش تونة",en:"Tuna sandwich",tg:"pr",kc:300,pr:20},
+    {c:"snack",b:"",ar:"ساندويتش جبن",en:"Cheese sandwich",tg:"pr",kc:280,pr:14},
+    {c:"snack",b:"",ar:"تمر ومكسرات",en:"Dates & nuts",tg:"carb",kc:220,pr:5},
+    {c:"snack",b:"",ar:"مكسرات مشكّلة (٣٠جم)",en:"Mixed nuts 30g",tg:"pr",kc:180,pr:6},
+    {c:"snack",b:"",ar:"فواكه مجففة",en:"Dried fruit",tg:"carb",kc:120,pr:2},
+    {c:"snack",b:"",ar:"زبادي بالفواكه",en:"Fruit yogurt",tg:"pr",kc:140,pr:8},
+    {c:"snack",b:"",ar:"كيك إنجليزي",en:"English cake",tg:"carb",kc:250,pr:4},
+    {c:"snack",b:"",ar:"كب كيك",en:"Cupcake",tg:"carb",kc:220,pr:3},
+    {c:"snack",b:"",ar:"بروتين بار",en:"Protein bar",tg:"sup",kc:200,pr:18},
+    {c:"snack",b:"",ar:"موز وعسل",en:"Banana & honey",tg:"carb",kc:165,pr:1},
+    {c:"snack",b:"",ar:"عصيدة شوفان",en:"Porridge",tg:"carb",kc:300,pr:8},
+    {c:"lunch",b:"",ar:"أرز أبيض مطهو",en:"Steamed white rice",tg:"carb",kc:250,pr:5},
+    {c:"lunch",b:"",ar:"أرز بني",en:"Brown rice",tg:"carb",kc:230,pr:5},
+    {c:"lunch",b:"",ar:"كبسة دجاج",en:"Chicken kabsa",tg:"pr",kc:550,pr:32},
+    {c:"lunch",b:"",ar:"صدور دجاج مشوية",en:"Grilled chicken breast",tg:"pr",kc:220,pr:40},
+    {c:"lunch",b:"",ar:"ستيك لحم مشوي",en:"Grilled beef steak",tg:"pr",kc:280,pr:36},
+    {c:"lunch",b:"",ar:"سمك سلمون مشوي",en:"Grilled salmon",tg:"pr",kc:280,pr:30},
+    {c:"lunch",b:"",ar:"معكرونة بصلصة",en:"Pasta & sauce",tg:"carb",kc:380,pr:12},
+    {c:"lunch",b:"",ar:"بطاطس مهروسة",en:"Mashed potatoes",tg:"carb",kc:210,pr:4},
+    {c:"lunch",b:"",ar:"شوربة عدس",en:"Lentil soup",tg:"pr",kc:180,pr:10},
+    {c:"lunch",b:"",ar:"شوربة خضار",en:"Vegetable soup",tg:"veg",kc:90,pr:3},
+    {c:"lunch",b:"",ar:"سلطة خضراء",en:"Green salad",tg:"veg",kc:60,pr:2},
+    {c:"lunch",b:"",ar:"خضار سوتيه",en:"Sautéed vegetables",tg:"veg",kc:110,pr:4},
+    {c:"lunch",b:"",ar:"داوود باشا",en:"Dawood basha",tg:"pr",kc:420,pr:26},
+    {c:"lunch",b:"",ar:"قرص لحم مشوي",en:"Grilled beef patty",tg:"pr",kc:250,pr:26},
+    {c:"dinner",b:"",ar:"شوربة خضار مشكّلة",en:"Vegetable soup",tg:"veg",kc:90,pr:3},
+    {c:"dinner",b:"",ar:"شوربة عدس غنية بالبروتين",en:"Lentils soup",tg:"pr",kc:180,pr:10},
+    {c:"dinner",b:"",ar:"كبسة (دجاج أو لحم)",en:"Kabsa",tg:"pr",kc:550,pr:30},
+    {c:"dinner",b:"",ar:"أرز أبيض بدون زيت",en:"White rice (no oil)",tg:"carb",kc:240,pr:5},
+    {c:"dinner",b:"",ar:"دجاج مشوي — قطع صغيرة",en:"Grilled chicken",tg:"pr",kc:220,pr:38},
+    {c:"dinner",b:"",ar:"لحم مشوي — قطع صغيرة",en:"Grilled beef",tg:"pr",kc:270,pr:34},
+    {c:"dinner",b:"",ar:"سمك سلمون مشوي",en:"Grilled salmon",tg:"pr",kc:280,pr:30},
+    {c:"dinner",b:"",ar:"لزانيا صحية",en:"Healthy lasagna",tg:"carb",kc:400,pr:18},
+    {c:"dinner",b:"",ar:"سباغيتي بصلصة",en:"Spaghetti & sauce",tg:"carb",kc:380,pr:12},
+    {c:"dinner",b:"",ar:"بطاطس مهروسة (بيوريه)",en:"Mashed potatoes",tg:"carb",kc:210,pr:4},
+    {c:"dinner",b:"",ar:"خضار سوتيه مسلوقة",en:"Sautéed vegetables",tg:"veg",kc:110,pr:4},
+    {c:"dinner",b:"",ar:"شرائح فواكه مشكّلة",en:"Sliced fruits",tg:"carb",kc:90,pr:1},
+    {c:"dinner",b:"",ar:"عشاء خفيف قبل النوم: زبادي وعسل",en:"Light pre-sleep yogurt & honey",tg:"pr",kc:180,pr:16},
+    {c:"drinks",b:"",ar:"ماء",en:"Water",tg:"hyd",kc:0,pr:0},
+    {c:"drinks",b:"",ar:"ماء جوز الهند",en:"Coconut water",tg:"hyd",kc:45,pr:0},
+    {c:"drinks",b:"",ar:"عصير كرز حامض",en:"Tart cherry juice",tg:"rec",kc:130,pr:1},
+    {c:"drinks",b:"",ar:"عصير قبل النوم (حليب دافئ وعسل)",en:"Pre-sleep milk & honey",tg:"rec",kc:180,pr:8},
+    {c:"drinks",b:"",ar:"حليب كامل",en:"Whole milk",tg:"pr",kc:150,pr:8},
+    {c:"drinks",b:"",ar:"حليب قليل الدسم",en:"Low-fat milk",tg:"pr",kc:100,pr:8},
+    {c:"drinks",b:"",ar:"حليب بالشوكولاتة",en:"Chocolate milk",tg:"rec",kc:230,pr:9},
+    {c:"drinks",b:"",ar:"شاي أخضر",en:"Green tea",tg:"drink",kc:2,pr:0},
+    {c:"drinks",b:"",ar:"مشروب رياضي",en:"Sports drink",tg:"hyd",kc:130,pr:0},
+    {c:"drinks",b:"SIS",ar:"كربوهيدرات إيزوتونيك — SIS",en:"SIS Isotonic Hydrocarbs",tg:"carb",kc:140,pr:0},
+    {c:"drinks",b:"SIS",ar:"إيزوتونيك كربوهيدرات + إلكتروليتات — SIS",en:"SIS Isotonic Carb + Electrolytes",tg:"hyd",kc:140,pr:0},
+    {c:"drinks",b:"",ar:"كرب كندي (تحميل كربوهيدرات)",en:"Carb loading mix",tg:"carb",kc:200,pr:0},
+    {c:"recovery",b:"SIS",ar:"ريجو ريكفري — SIS",en:"SIS REGO Recovery",tg:"rec",kc:230,pr:20},
+    {c:"recovery",b:"SIS",ar:"بروتين SIS",en:"SIS Protein",tg:"pr",kc:120,pr:22},
+    {c:"recovery",b:"",ar:"حليب بالشوكولاتة (استشفاء)",en:"Chocolate milk",tg:"rec",kc:230,pr:9},
+    {c:"recovery",b:"",ar:"عصير كرز حامض (استشفاء)",en:"Tart cherry juice",tg:"rec",kc:130,pr:1},
+    {c:"recovery",b:"",ar:"تمر ولبن",en:"Dates & laban",tg:"rec",kc:250,pr:10},
+    {c:"recovery",b:"",ar:"موز وزبادي",en:"Banana & yogurt",tg:"rec",kc:240,pr:10},
+    {c:"supp",b:"SIS",ar:"بروتين SIS (بعد التمرين)",en:"SIS Protein",tg:"pr",kc:120,pr:22},
+    {c:"supp",b:"SIS",ar:"ريجو ريكفري — SIS",en:"SIS REGO Recovery",tg:"rec",kc:230,pr:20},
+    {c:"supp",b:"SIS",ar:"جل إيزوتونيك — SIS",en:"SIS Isotonic Gel",tg:"carb",kc:90,pr:0},
+    {c:"supp",b:"SIS",ar:"جل إيزوتونيك مع كافيين — SIS",en:"SIS Isotonic Gel + Caffeine",tg:"carb",kc:90,pr:0},
+    {c:"supp",b:"",ar:"كرياتين مونوهيدرات ٥جم",en:"Creatine monohydrate 5g",tg:"sup",kc:0,pr:0},
+    {c:"supp",b:"",ar:"بيتا ألانين",en:"Beta-alanine",tg:"sup",kc:0,pr:0},
+    {c:"supp",b:"",ar:"BCAA",en:"BCAA",tg:"sup",kc:40,pr:10},
+    {c:"supp",b:"",ar:"أوميغا ٣",en:"Omega-3",tg:"sup",kc:20,pr:0},
+    {c:"supp",b:"",ar:"فيتامين د",en:"Vitamin D",tg:"sup",kc:0,pr:0},
+    {c:"supp",b:"",ar:"ملتي فيتامين",en:"Multivitamin",tg:"sup",kc:0,pr:0},
+    {c:"supp",b:"",ar:"مغنيسيوم",en:"Magnesium",tg:"sup",kc:0,pr:0},
+    {c:"supp",b:"",ar:"زنك",en:"Zinc",tg:"sup",kc:0,pr:0},
+    {c:"supp",b:"",ar:"حديد",en:"Iron",tg:"sup",kc:0,pr:0},
+    {c:"supp",b:"",ar:"كولاجين + فيتامين C",en:"Collagen + Vitamin C",tg:"sup",kc:40,pr:9},
+    {c:"supp",b:"",ar:"كافيين (قبل المباراة)",en:"Caffeine pre-match",tg:"sup",kc:0,pr:0},
+    {c:"supp",b:"",ar:"بروتين واي",en:"Whey protein",tg:"pr",kc:120,pr:24},
+    {c:"supp",b:"",ar:"كازين (قبل النوم)",en:"Casein (pre-sleep)",tg:"pr",kc:120,pr:24},
+    {c:"hydro",b:"",ar:"أقراص إلكتروليت",en:"Electrolyte tablets",tg:"hyd",kc:0,pr:0},
+    {c:"hydro",b:"",ar:"مسحوق إلكتروليت",en:"Electrolyte powder",tg:"hyd",kc:10,pr:0},
+    {c:"hydro",b:"",ar:"ماء مملح (٥٠٠مل + رشة ملح)",en:"Salted water",tg:"hyd",kc:0,pr:0},
+    {c:"hydro",b:"",ar:"محلول ترطيب (ORS)",en:"ORS solution",tg:"hyd",kc:80,pr:0},
+    {c:"hydro",b:"",ar:"ماء جوز الهند",en:"Coconut water",tg:"hyd",kc:45,pr:0},
+    {c:"hydro",b:"",ar:"مشروب رياضي",en:"Sports drink",tg:"hyd",kc:130,pr:0},
+    {c:"hydro",b:"SIS",ar:"إيزوتونيك كربوهيدرات — SIS",en:"SIS Isotonic Hydrocarbs",tg:"hyd",kc:140,pr:0},
+    {c:"hydro",b:"SIS",ar:"إيزوتونيك مع إلكتروليتات — SIS",en:"SIS Isotonic + Electrolytes",tg:"hyd",kc:140,pr:0}
+  ];
+  function times(){ if(!D.times||typeof D.times!=="object") D.times={}; return D.times; }
+  function tmOf(m){ var t=times()[m.k]; return (t!=null&&t!=="")?t:(m.tm||""); }
+  function added(){ if(!Array.isArray(D.added)) D.added=[]; return D.added; }
+  function effMenu(){
+    var out=[], ad=added();
+    MENU.forEach(function(m){
+      var groups=m.groups.map(function(g){ return {ar:g.ar,en:g.en,it:g.it.slice()}; });
+      ad.forEach(function(a,ai){
+        if(!a||a.m!==m.k) return;
+        var g=null,i;
+        for(i=0;i<groups.length;i++){ if(groups[i].ar===a.c){ g=groups[i]; break; } }
+        if(!g){ g={ar:a.c,en:a.c,it:[]}; groups.push(g); }
+        var row=[a.ar, a.en||"", a.tg||""]; row._ai=ai; g.it.push(row);
+      });
+      out.push({k:m.k,ar:m.ar,en:m.en,tm:tmOf(m),groups:groups});
+    });
+    return out;
+  }
+  var TM_EDIT=null, LQ="", LC="all";
   function seqOf(k,len){ var s=D.seq[k]; if(!Array.isArray(s)||s.length!==len){ s=[]; for(var i=0;i<len;i++) s.push(i); D.seq[k]=s; } return s; }
-  function flat(meal){ var out=[]; meal.groups.forEach(function(g,gi){ g.it.forEach(function(it,ii){ out.push({g:gi,gr:g.ar,gi:gi,ii:ii,ar:it[0],en:it[1],tg:it[2],id:meal.k+"-"+gi+"-"+ii}); }); }); return out; }
+  function flat(meal){ var out=[]; meal.groups.forEach(function(g,gi){ g.it.forEach(function(it,ii){ out.push({g:gi,gr:g.ar,gi:gi,ii:ii,ar:it[0],en:it[1],tg:it[2],ai:(it._ai!=null?it._ai:-1),id:meal.k+"-"+gi+"-"+ii}); }); }); return out; }
 
   /* ===== حساب الاحتياج (تقديري) ===== */
   function calc(p){
@@ -26145,7 +26280,7 @@ tr:hover .qde-ndate{color:#7E0E14}
     if(o.contact) L.push("📞 مسؤول التنسيق: "+o.contact);
     L.push("");
     var used=0;
-    MENU.forEach(function(m){
+    effMenu().forEach(function(m){
       if(!o.meals[m.k]) return;
       used++;
       L.push("— — — — —");
@@ -26181,9 +26316,13 @@ tr:hover .qde-ndate{color:#7E0E14}
   function tabMenu(){
     var h='<div class="qdnu-card"><div class="qdnu-ch"><h3>القائمة الرسمية — مرتّبة للفندق</h3><span class="sp"></span>'+
       '<span class="sub">رتّب الأصناف بالأسهم · أوقف أي صنف لا تريده</span></div><div class="qdnu-b">';
-    MENU.forEach(function(m){
+    effMenu().forEach(function(m){
       var items=flat(m), sq=seqOf(m.k,items.length);
-      h+='<div class="qdnu-meal"><div class="qdnu-mh"><b>'+esc(m.ar)+'</b>'+(m.tm?'<span class="tm">'+esc(m.tm)+'</span>':'')+
+      var ed=(TM_EDIT==="__all"||TM_EDIT===m.k), tv=tmOf(m);
+      h+='<div class="qdnu-meal"><div class="qdnu-mh"><b>'+esc(m.ar)+'</b>'+
+        (ed?('<input class="input" data-ntmv="'+esc(m.k)+'" value="'+esc(tv)+'" placeholder="20:00 أو بعد الصافرة" style="max-width:150px;font-size:11px;padding:3px 8px">'+
+             '<button class="btn ghost sm" data-ntm="'+esc(m.k)+'" style="font-size:9.5px;padding:2px 8px">تم</button>')
+           :('<span class="tm">'+esc(tv||"—")+'</span><button class="btn ghost sm" data-ntm="'+esc(m.k)+'" style="font-size:9.5px;padding:2px 8px">تعديل التوقيت</button>'))+
         '<span class="sp"></span><span class="sub" style="font-size:10px;color:#9a9089">'+esc(m.en)+'</span></div>';
       var lastGr="";
       sq.forEach(function(ix,pos){
@@ -26192,8 +26331,9 @@ tr:hover .qde-ndate{color:#7E0E14}
         var off=!!D.off[it.id];
         h+='<div class="qdnu-it'+(off?" off":"")+'"><span class="n">'+(pos+1)+'</span>'+
           '<span class="ar">'+esc(it.ar)+'</span><span class="en">'+esc(it.en)+'</span>'+
-          (it.tg==="pr"?'<span class="tg pr">بروتين</span>':'')+
+          (it.tg&&TG[it.tg]?'<span class="tg" style="background:'+TG[it.tg][2]+';color:'+TG[it.tg][1]+'">'+TG[it.tg][0]+'</span>':'')+
           '<span class="ord"><button data-ntup="'+it.id+'" title="أعلى">▲</button><button data-ntdn="'+it.id+'" title="أسفل">▼</button></span>'+
+          (it.ai>-1?'<button class="btn ghost sm" data-nadel="'+it.ai+'" style="font-size:9.5px;padding:2px 8px;color:#B5121B">حذف</button>':'')+
           '<button class="btn ghost sm" data-ntoff="'+it.id+'" style="font-size:9.5px;padding:2px 8px">'+(off?"تشغيل":"إيقاف")+'</button></div>';
       });
       h+='</div>';
@@ -26222,7 +26362,7 @@ tr:hover .qde-ndate{color:#7E0E14}
   }
   function tabOrder(){
     var o=D.order;
-    var meals=MENU.map(function(m){
+    var meals=effMenu().map(function(m){
       var on=!!o.meals[m.k];
       return '<label style="display:flex;align-items:center;gap:7px;background:'+(on?"#FDF7EC":"#fff")+';border:1px solid '+(on?"#E8D3A8":"#E7DED2")+';border-radius:10px;padding:8px 11px;font-size:11.5px;font-weight:800;cursor:pointer">'+
         '<input type="checkbox" data-nmealck="'+m.k+'"'+(on?" checked":"")+'> '+esc(m.ar)+'</label>';
@@ -26250,6 +26390,46 @@ tr:hover .qde-ndate{color:#7E0E14}
         '<button class="btn ghost" data-nprint="1">طباعة / PDF</button>'+
       '</div></div></div>';
   }
+  function libRows(){
+    var q=String(LQ||"").trim().toLowerCase(), c=LC;
+    return LIB.map(function(it,i){ return {i:i,it:it}; }).filter(function(o){
+      var it=o.it;
+      if(c==="sis"){ if(it.b!=="SIS") return false; }
+      else if(c!=="all"){ if(it.c!==c) return false; }
+      if(!q) return true;
+      return (it.ar+" "+it.en+" "+(it.b||"")).toLowerCase().indexOf(q)>-1;
+    });
+  }
+  function libBody(){
+    var rows=libRows(), ms=effMenu();
+    var opts=ms.map(function(m){ return '<option value="'+esc(m.k)+'">'+esc(m.ar)+'</option>'; }).join("");
+    var cards=rows.map(function(o){
+      var it=o.it, tg=TG[it.tg]||["","#555","#eee"];
+      return '<div class="qdnu-libc">'+
+        '<div class="qdnu-libh">'+(it.b?'<span class="qdnu-br">'+esc(it.b)+'</span>':'')+
+          '<span class="qdnu-tg" style="background:'+tg[2]+';color:'+tg[1]+'">'+tg[0]+'</span></div>'+
+        '<b>'+esc(it.ar)+'</b><i>'+esc(it.en)+'</i>'+
+        '<div class="qdnu-libk">'+it.kc+' ك.ك · '+it.pr+' جم بروتين <span style="color:#b7aea5">(تقديري)</span></div>'+
+        '<div class="qdnu-libr"><select class="select" data-nlibm="'+o.i+'" style="font-size:10.5px;padding:2px 6px;flex:1">'+opts+'</select>'+
+        '<button class="btn sm" data-nlibadd="'+o.i+'" style="font-size:10px;padding:3px 9px">أضف</button></div></div>';
+    }).join("");
+    var chips=[["all","الكل"],["sis","SIS"]].concat(CATS).map(function(c){
+      return '<button class="qdnu-ch2'+(LC===c[0]?" on":"")+'" data-nlibc="'+c[0]+'">'+esc(c[1])+'</button>';
+    }).join("");
+    return '<input class="input" id="qdlibq" value="'+esc(LQ)+'" placeholder="ابحث عن صنف… (بروتين، إلكتروليت، SIS، تمر)" style="margin-bottom:9px">'+
+      '<div class="qdnu-chips">'+chips+'</div>'+
+      '<div class="qdnu-libg">'+(cards||'<div class="qdnu-empty">لا نتائج مطابقة</div>')+'</div>'+
+      '<div class="qdnu-cust"><b>صنف خاص بك</b>'+
+        '<div class="qdnu-row"><input class="input" id="qdcname" placeholder="اسم الصنف" style="flex:2;min-width:150px">'+
+        '<select class="select" id="qdccat" style="flex:1;min-width:110px">'+CATS.map(function(c){ return '<option value="'+c[1]+'">'+c[1]+'</option>'; }).join("")+'</select>'+
+        '<select class="select" id="qdcm" style="flex:1;min-width:110px">'+opts+'</select>'+
+        '<button class="btn sm" data-ncustom="1">إضافة</button></div></div>';
+  }
+  function tabLibrary(){
+    return '<div class="qdnu-card"><div class="qdnu-ch"><h3>مكتبة التغذية الرياضية</h3><span class="sp"></span>'+
+      '<span class="sub">اختر ما تريد وأضفه إلى أي وجبة — القيم تقديرية لكل حصة</span></div>'+
+      '<div class="qdnu-b" id="qdlibbody">'+libBody()+'</div></div>';
+  }
   function tabLog(){
     var rows=D.orders.slice().reverse().map(function(o,i){
       return '<tr><td>'+esc(o.date||"—")+'</td><td><b>'+esc(o.hotel||"—")+'</b></td><td>'+esc(o.from||"—")+(o.to?(" → "+esc(o.to)):"")+'</td>'+
@@ -26263,21 +26443,67 @@ tr:hover .qde-ndate{color:#7E0E14}
   }
   function render(){
     var el=document.getElementById("v-nutrition"); if(!el) return;
-    var body = TAB==="menu"?tabMenu() : TAB==="players"?tabPlayers() : TAB==="order"?tabOrder() : tabLog();
+    var body = TAB==="menu"?tabMenu() : TAB==="library"?tabLibrary() : TAB==="players"?tabPlayers() : TAB==="order"?tabOrder() : tabLog();
     el.innerHTML='<div class="qdnu">'+
       '<div class="qdnu-top"><div class="qdnu-h"><h2>التغذية</h2><p>القائمة الرسمية · ملفات اللاعبين · طلب الفندق عبر واتساب</p></div>'+
       '<div class="qdnu-act"><button class="btn sm" data-ntab="order">طلب الفندق</button>'+
       '<button class="btn sm ghost" data-ntab="menu">القائمة</button>'+
+      '<button class="btn sm ghost" data-ntm="__all">تعديل التوقيت</button>'+
       '<button class="btn sm ghost" data-nprint="1">طباعة</button></div></div>'+
       kpis()+
       '<div class="qdnu-tabs">'+
-        ["menu|القائمة الرسمية","players|ملفات اللاعبين","order|طلب الفندق","log|سجل الطلبات"].map(function(t){
+        ["menu|القائمة الرسمية","library|مكتبة التغذية","players|ملفات اللاعبين","order|طلب الفندق","log|سجل الطلبات"].map(function(t){
           var k=t.split("|")[0]; return '<button class="qdnu-t" data-ntab="'+k+'"'+(TAB===k?' class="qdnu-t on"':"")+'>'+t.split("|")[1]+'</button>';
         }).join("")+
       '</div>'+body+'</div>';
   }
-  window.QDNUT={render:render,msg:buildMsg,menu:MENU,state:function(){ return D; }};
+  window.QDNUT={render:render,msg:buildMsg,menu:MENU,lib:LIB,eff:effMenu,state:function(){ return D; },
+    setTime:function(k,v){ times()[k]=v; save(D); render(); return tmOf({k:k,tm:""}); }, tab:function(t){ TAB=t; render(); }};
 
+  /* ===== أحداث QD167 ===== */
+  document.addEventListener("click",function(e){
+    var t=e.target; if(!t||!t.closest) return;
+    var m1=t.closest("[data-ntm]");
+    if(m1){ var k=m1.getAttribute("data-ntm");
+      TM_EDIT=(TM_EDIT===k)?null:k;
+      render(); return; }
+    var c1=t.closest("[data-nlibc]");
+    if(c1){ LC=c1.getAttribute("data-nlibc"); var b1=document.getElementById("qdlibbody"); if(b1) b1.innerHTML=libBody(); return; }
+    var a1=t.closest("[data-nlibadd]");
+    if(a1){
+      var idx=Number(a1.getAttribute("data-nlibadd")), it=LIB[idx]; if(!it) return;
+      var sel=document.querySelector('[data-nlibm="'+idx+'"]');
+      var mk=sel?sel.value:"breakfast";
+      added().push({m:mk,c:CATNAME[it.c]||"إضافة",ar:it.ar,en:it.en,tg:it.tg,kc:it.kc,pr:it.pr,b:it.b||""});
+      save(D); TM_EDIT=null; render();
+      try{ toast("أُضيف: "+it.ar); }catch(x){}
+      return; }
+    var d1=t.closest("[data-nadel]");
+    if(d1){ var di=Number(d1.getAttribute("data-nadel")); var ad=added();
+      if(ad[di]!=null){ ad.splice(di,1); save(D); render(); try{ toast("حُذف الصنف","warn"); }catch(x){} }
+      return; }
+    var cu=t.closest("[data-ncustom]");
+    if(cu){
+      var nm=document.getElementById("qdcname"), ct=document.getElementById("qdccat"), mm=document.getElementById("qdcm");
+      var v=nm?String(nm.value||"").trim():"";
+      if(!v){ try{ toast("اكتب اسم الصنف","warn"); }catch(x){} return; }
+      added().push({m:mm?mm.value:"breakfast",c:ct?ct.value:"إضافة",ar:v,en:"",tg:"",kc:0,pr:0,b:""});
+      save(D); render(); try{ toast("أُضيف: "+v); }catch(x){}
+      return; }
+  },false);
+  document.addEventListener("input",function(e){
+    var t=e.target; if(!t||!t.getAttribute) return;
+    if(t.id==="qdlibq"){ LQ=t.value; var b=document.getElementById("qdlibbody");
+      if(b){ b.innerHTML=libBody(); var n=document.getElementById("qdlibq");
+        if(n){ n.focus(); try{ n.setSelectionRange(LQ.length,LQ.length); }catch(e){} } }
+      return; }
+  },false);
+  document.addEventListener("change",function(e){
+    var t=e.target; if(!t||!t.getAttribute) return;
+    var k=t.getAttribute("data-ntmv");
+    if(k!=null){ var v=String(t.value||"").trim(); times()[k]=v; save(D);
+      try{ toast("تم تعديل التوقيت: "+(v||"—")); }catch(x){} }
+  },false);
   /* ===== التنقل ===== */
   function go(){
     document.querySelectorAll(".view").forEach(function(v){ v.classList.remove("active"); });
