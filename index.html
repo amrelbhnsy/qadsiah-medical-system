@@ -411,7 +411,7 @@ html[dir="rtl"] .filters .select{padding-left:34px}
 .rp-path-lbl{font-size:10.5px;font-weight:800;margin-top:3px;color:var(--slate);white-space:nowrap}
 .rp-batt{display:inline-flex;align-items:center;gap:5px}
 .rp-batt b{font-weight:900;line-height:1}
-/* ===== v11-162 · LINEUP — مسار اللاعب وشريط الإنجاز ===== */
+/* ===== v11-163 · LINEUP2 — مسار اللاعب وشريط الإنجاز ===== */
 .rp-path2{display:flex;align-items:center;margin:5px 0 6px;min-width:150px}
 .rp-node{width:13px;height:13px;border-radius:50%;flex:0 0 auto;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;background:#fff;border:2px solid #D3D9E1;transition:background .25s,border-color .25s,box-shadow .25s}
 .rp-node.done{background:#15803D;border-color:#15803D}
@@ -15623,7 +15623,7 @@ try{
 }catch(e){}
 
 /* QDBK-END */
-(function(){function mk(){try{var b=document.createElement("div");b.id="qdrBadge";b.textContent="v11-162 · LINEUP";b.style.cssText="position:fixed;left:8px;bottom:8px;z-index:2147483647;background:#fff;color:#7E0E14;border:1px solid #7E0E14;font:800 11px/1.5 system-ui;padding:3px 9px;border-radius:20px;pointer-events:none;opacity:.97;box-shadow:0 2px 8px rgba(0,0,0,.35)";document.body.appendChild(b);}catch(e){}}if(document.body)mk();else setTimeout(mk,600);})();
+(function(){function mk(){try{var b=document.createElement("div");b.id="qdrBadge";b.textContent="v11-163 · LINEUP2";b.style.cssText="position:fixed;left:8px;bottom:8px;z-index:2147483647;background:#fff;color:#7E0E14;border:1px solid #7E0E14;font:800 11px/1.5 system-ui;padding:3px 9px;border-radius:20px;pointer-events:none;opacity:.97;box-shadow:0 2px 8px rgba(0,0,0,.35)";document.body.appendChild(b);}catch(e){}}if(document.body)mk();else setTimeout(mk,600);})();
 /* ---- PWA: install as an app on Android and iPhone / iPad ---- */
 (function(){
   Object.assign(STR.en,{
@@ -24208,7 +24208,7 @@ try{
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous">
 /* =====================================================================
-   v11-162 · LINEUP — توحيد حالة اليوم (مباراة · تدريب · راحة · إجازة)
+   v11-163 · LINEUP2 — توحيد حالة اليوم (مباراة · تدريب · راحة · إجازة)
    بين: لوحة التحكم · البرنامج الأسبوعي · التقويم · جدول المباريات
    ===================================================================== */
 (function(){
@@ -24312,7 +24312,7 @@ try{
 
 <script>
 /* =====================================================================
-   v11-162 · LINEUP
+   v11-163 · LINEUP2
    إصلاح التجمد: يُبنى الهيكل مرة واحدة فقط، ويُحدَّث محتواه الداخلي
    (لا إعادة بناء للجذر ⇒ لا يفقد الهوية ولا يعلق)
    ===================================================================== */
@@ -24409,6 +24409,11 @@ try{
 
   /* ============ الحالة ============ */
   var V={r:null,mid:null,st:[],sb:[],ex:[],min:{},med:{},lineup:"",has:true};
+  /* QD163 — مخزن تشكيلة مستقل بمفتاح الجولة (مثل qdHas) لا يتأثر بهوية سجل المباراة */
+  function LUS(){ var s=ST(); if(!s) return {}; if(!s.qdLineup||typeof s.qdLineup!=="object") s.qdLineup={}; return s.qdLineup; }
+  function lupGet(r){ try{ var a=LUS()["r"+String(r)]; if(a&&a.st) return a; }catch(e){} return null; }
+  function lupSet(r,st,sb,ex){ try{ LUS()["r"+String(r)]={st:(st||[]).slice(),sb:(sb||[]).slice(),
+    ex:(ex||[]).map(function(x){ return {n:String(x.n||""),r:String(x.r||"st")}; })}; }catch(e){} }
   function rk(id){
     if(V.st.indexOf(id)>-1) return "st";
     if(V.sb.indexOf(id)>-1) return "sb";
@@ -24567,6 +24572,10 @@ try{
     V.ex=((m.extraSquad)||[]).map(function(x){ return {n:String(x.n||""), r:String(x.r||"st")}; });
     V.min=Object.assign({},m.minutes||{}); V.med=Object.assign({},m.medStatus||{});
     V.lineup=m.lineup||""; V.has=getHas(m,m.fx);
+    var __L=lupGet(m.fx!=null?m.fx:V.r);
+    if(__L&&!V.st.length&&!V.sb.length&&(((__L.st||[]).length)||((__L.sb||[]).length))){
+      V.st=(__L.st||[]).slice(); V.sb=(__L.sb||[]).slice(); V.ex=(__L.ex||[]).slice();
+    }
   }
   function saveTo(){
     var a=MTS(), m=null;
@@ -24576,6 +24585,13 @@ try{
     m.minutes=Object.assign({},V.min); m.medStatus=Object.assign({},V.med);
     m.lineup=V.lineup||""; m.hasInjuries=(V.has!==false);
     if(!V.has) m.injuries=[];
+    try{
+      var __fr=(m.fx!=null&&m.fx!=="")?m.fx:V.r;
+      lupSet(__fr,V.st,V.sb,V.ex);
+      var __arr=MTS();
+      for(var __i=0;__i<__arr.length;__i++){ var __x=__arr[__i]; if(__x===m) continue;
+        if(sameRec(__x,__fr)){ __x.starters=V.st.slice(); __x.subs=V.sb.slice(); __x.extraSquad=V.ex.slice(); } }
+    }catch(e){}
     SAVE(); setHas(m,m.fx,V.has); return true;
   }
 
@@ -24946,6 +24962,7 @@ try{
     for(var i=0;i<arr.length;i++){ var m=arr[i];
       if(!sameRec(m,r)) continue;
       n+=((m.starters||[]).length)+((m.subs||[]).length)+((m.extraSquad||[]).length); }
+    if(!n){ var __L3=lupGet(r); if(__L3) n=((__L3.st||[]).length)+((__L3.sb||[]).length)+((__L3.ex||[]).length); }
     return n;
   }
   function dedupeAbs(){
@@ -25006,6 +25023,17 @@ try{
   },true);
   setInterval(decorate,2000); setTimeout(decorate,300); setTimeout(decorate,900);
   setTimeout(mergeDupes,1200); setTimeout(mergeDupes,4000);
+  /* QD163 — ترحيل تشكيلات محفوظة سابقًا إلى المخزن الجديد + تشخيص */
+  try{ (function migrate(){ var a=MTS();
+    for(var i=0;i<a.length;i++){ var mm=a[i], ff=mm.fx; if(ff==null||ff==="") continue;
+      if((((mm.starters||[]).length)||((mm.subs||[]).length))){
+        var cur=lupGet(ff);
+        if(!cur||(!((cur.st||[]).length)&&!((cur.sb||[]).length))) lupSet(ff,mm.starters,mm.subs,mm.extraSquad);
+      } } })(); }catch(e){}
+  window.QD163={lupGet:lupGet,lupSet:lupSet,counts:counts,
+    diag:function(r){ var L=lupGet(r); var a=MTS(), rows=[];
+      for(var i=0;i<a.length;i++){ if(sameRec(a[i],r)) rows.push({id:a[i].id,fx:a[i].fx,st:(a[i].starters||[]).length,sb:(a[i].subs||[]).length}); }
+      return {round:r,store:L,records:rows,rowCount:counts(r)}; }};
 
   /* ============ اللوحة داخل تقرير الإصابات ============ */
   var Pd={has:true,st:[],sb:[],ex:[],min:{},med:{},lineup:""};
@@ -25134,6 +25162,9 @@ try{
       var f=window.ACT&&ACT.saveMatch;
       if(typeof f!=="function"||f.__q9){ if(t0++<150) return setTimeout(hookSave,180); return; }
       var w=function(){
+        var __keep=null;
+        try{ var __m0=modalMatch()||resolveTarget();
+          if(__m0) __keep={st:(__m0.starters||[]).slice(),sb:(__m0.subs||[]).slice(),ex:(__m0.extraSquad||[]).slice(),fr:(__m0.fx!=null?__m0.fx:null)}; }catch(e){}
         var r=f.apply(this,arguments);
         try{
           var m=modalMatch()||resolveTarget();
@@ -25145,6 +25176,11 @@ try{
             SAVE();
           }
         }catch(e){}
+        try{ if(__keep&&((__keep.st.length)||(__keep.sb.length))){
+          var __m1=modalMatch()||resolveTarget();
+          if(__m1){ __m1.starters=__keep.st; __m1.subs=__keep.sb; __m1.extraSquad=__keep.ex;
+            lupSet(__keep.fr!=null?__keep.fr:__m1.fx,__keep.st,__keep.sb,__keep.ex); SAVE(); }
+        } }catch(e){}
         return r;
       };
       w.__q9=1; ACT.saveMatch=w;
@@ -25156,6 +25192,8 @@ try{
     mergeDupes();
     var m=bestRound(r)||ensureMatch(r); fillMeta(m,r); if(!m) return;
     var st=m.starters||[], sb=m.subs||[], ex=m.extraSquad||[];
+    var __L2=lupGet(r);
+    if(__L2&&!((st||[]).length||(sb||[]).length)){ st=(__L2.st||[]).slice(); sb=(__L2.sb||[]).slice(); ex=(__L2.ex||[]).slice(); }
     var has=getHas(m,r), inj=has?(m.injuries||[]):[];
     var mins=m.minutes||{}, meds=m.medStatus||{};
     var rws=PLS().map(function(p){ return {id:String(p.id), nm:NM(p.id)}; });
