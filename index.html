@@ -411,7 +411,7 @@ html[dir="rtl"] .filters .select{padding-left:34px}
 .rp-path-lbl{font-size:10.5px;font-weight:800;margin-top:3px;color:var(--slate);white-space:nowrap}
 .rp-batt{display:inline-flex;align-items:center;gap:5px}
 .rp-batt b{font-weight:900;line-height:1}
-/* ===== v11-177 · REHAB-BUILDER — مسار اللاعب وشريط الإنجاز ===== */
+/* ===== v11-178 · SAFE-BOOT — مسار اللاعب وشريط الإنجاز ===== */
 .rp-path2{display:flex;align-items:center;margin:5px 0 6px;min-width:150px}
 .rp-node{width:13px;height:13px;border-radius:50%;flex:0 0 auto;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;background:#fff;border:2px solid #D3D9E1;transition:background .25s,border-color .25s,box-shadow .25s}
 .rp-node.done{background:#15803D;border-color:#15803D}
@@ -15696,7 +15696,7 @@ try{
 }catch(e){}
 
 /* QDBK-END */
-(function(){function mk(){try{var b=document.createElement("div");b.id="qdrBadge";b.textContent="v11-177 · REHAB-BUILDER";b.style.cssText="position:fixed;left:8px;bottom:8px;z-index:2147483647;background:#fff;color:#7E0E14;border:1px solid #7E0E14;font:800 11px/1.5 system-ui;padding:3px 9px;border-radius:20px;pointer-events:none;opacity:.97;box-shadow:0 2px 8px rgba(0,0,0,.35)";document.body.appendChild(b);}catch(e){}}if(document.body)mk();else setTimeout(mk,600);})();
+(function(){function mk(){try{var b=document.createElement("div");b.id="qdrBadge";b.textContent="v11-178 · SAFE-BOOT";b.style.cssText="position:fixed;left:8px;bottom:8px;z-index:2147483647;background:#fff;color:#7E0E14;border:1px solid #7E0E14;font:800 11px/1.5 system-ui;padding:3px 9px;border-radius:20px;pointer-events:none;opacity:.97;box-shadow:0 2px 8px rgba(0,0,0,.35)";document.body.appendChild(b);}catch(e){}}if(document.body)mk();else setTimeout(mk,600);})();
 /* ---- PWA: install as an app on Android and iPhone / iPad ---- */
 (function(){
   Object.assign(STR.en,{
@@ -24281,7 +24281,7 @@ try{
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous">
 /* =====================================================================
-   v11-177 · REHAB-BUILDER — توحيد حالة اليوم (مباراة · تدريب · راحة · إجازة)
+   v11-178 · SAFE-BOOT — توحيد حالة اليوم (مباراة · تدريب · راحة · إجازة)
    بين: لوحة التحكم · البرنامج الأسبوعي · التقويم · جدول المباريات
    ===================================================================== */
 (function(){
@@ -24385,7 +24385,7 @@ try{
 
 <script>
 /* =====================================================================
-   v11-177 · REHAB-BUILDER
+   v11-178 · SAFE-BOOT
    إصلاح التجمد: يُبنى الهيكل مرة واحدة فقط، ويُحدَّث محتواه الداخلي
    (لا إعادة بناء للجذر ⇒ لا يفقد الهوية ولا يعلق)
    ===================================================================== */
@@ -26998,7 +26998,8 @@ tr:hover .qde-ndate{color:#7E0E14}
       w2.__qd172=1; window.setLang=w2;
     }
   }catch(e){}
-  setInterval(function(){ try{ applyToNut(); }catch(e){} },2500);
+  setInterval(function(){ try{ var s=document.getElementById("v-nutrition");
+      if(s&&s.classList&&s.classList.contains("active")) applyToNut(); }catch(e){} },7000);
   setTimeout(applyToNut,800); setTimeout(applyToNut,2000); setTimeout(applyToNut,4000);
 
   /* ===== فحص لغوي لكل أقسام البرنامج ===== */
@@ -27173,12 +27174,17 @@ tr:hover .qde-ndate{color:#7E0E14}
   }catch(e){}
   /* مراقب: أي إضافة/تغيير في الصفحة يُترجم بعد 120ms */
   try{
-    var pend=null;
-    var obs=new MutationObserver(function(){ if(busy) return; if(pend) return;
-      pend=setTimeout(function(){ pend=null; try{ apply(); }catch(e){} },120); });
-    obs.observe(document.body,{childList:true,subtree:true,characterData:true});
+    var pend=null, last=0;
+    var host=document.querySelector("main")||document.body;
+    var obs=new MutationObserver(function(){
+      if(busy) return; if(pend) return;
+      if(document.hidden) return;
+      var now=Date.now(); if(now-last<800) return;
+      pend=setTimeout(function(){ pend=null; last=Date.now(); try{ apply(); }catch(e){} },420);
+    });
+    obs.observe(host,{childList:true,subtree:true});
   }catch(e){}
-  setInterval(function(){ try{ if(!busy) apply(); }catch(e){} },3000);
+  setInterval(function(){ try{ if(!busy&&!document.hidden) apply(); }catch(e){} },9000);
   setTimeout(apply,600); setTimeout(apply,1500); setTimeout(apply,3500);
 })();
 </script>
@@ -27308,7 +27314,9 @@ tr:hover .qde-ndate{color:#7E0E14}
   try{ var sl=window.setLang;
     if(typeof sl==="function"&&!sl.__qd174){ var w2=function(){ var out=sl.apply(this,arguments); try{ setTimeout(paint,90); }catch(e){} return out; }; w2.__qd174=1; window.setLang=w2; } }catch(e){}
   try{ setTimeout(paint,700); setTimeout(paint,1800); setTimeout(paint,4200); }catch(e){}
-  setInterval(function(){ try{ if(document.getElementById("v-matches")||document.getElementById("v-fixtures")) paint(); }catch(e){} },9000);
+  setInterval(function(){ try{
+      var on=document.querySelector("#v-matches.active,#v-fixtures.active");
+      if(on&&!document.hidden) paint(); }catch(e){} },30000);
 })();
 </script>
 <script>
@@ -27870,7 +27878,7 @@ tr:hover .qde-ndate{color:#7E0E14}
     h+='<input class="input" id="r177q" data-r177q="1" value="'+esc(QEX)+'" placeholder="'+L("ابحث: nordic، hamstring، core…","Search: nordic, hamstring, core…")+'">';
     h+='<div class="r177-chips"><button class="r177-c'+(QEXC==="all"?" on":"")+'" data-r177c="all">'+L("الكل","All")+'</button>'+
       exCats().map(function(c){ return '<button class="r177-c'+(QEXC===c?" on":"")+'" data-r177c="'+esc(c)+'">'+esc(c)+'</button>'; }).join("")+'</div>';
-    h+='<div class="r177-lib">'+rows.slice(0,120).map(function(e){
+    h+='<div class="r177-lib">'+rows.slice(0,60).map(function(e){
       var i=(D.exercises||[]).indexOf(e);
       return '<div class="r177-libc"><div class="r177-libh">'+esc(e.cat||"")+'</div><b>'+esc(e.name)+'</b>'+
         (e.note?'<i>'+esc(e.note)+'</i>':'')+
@@ -28072,7 +28080,7 @@ tr:hover .qde-ndate{color:#7E0E14}
     if(typeof rn==="function"&&!rn.__qd177){ var w=function(){ var r=rn.apply(this,arguments); try{ injectNav(); }catch(e){} return r; }; w.__qd177=1; window.renderNav=w; } }catch(e){}
   try{ var obs=new MutationObserver(function(){ try{ if(!document.querySelector('#nav [data-view="rehab"]')) injectNav(); }catch(e){} });
     var iv=setInterval(function(){ var n=document.getElementById("nav"); if(n){ try{ obs.observe(n,{childList:true,subtree:true}); }catch(e){} clearInterval(iv); } },400); }catch(e){}
-  setInterval(function(){ try{ if(!document.querySelector('#nav [data-view="rehab"]')) injectNav(); }catch(e){} },1800);
+  setInterval(function(){ try{ if(!document.hidden&&!document.querySelector('#nav [data-view="rehab"]')) injectNav(); }catch(e){} },4000);
 
   /* ---- التنسيق ---- */
   var CSS=[
@@ -28136,6 +28144,59 @@ tr:hover .qde-ndate{color:#7E0E14}
   function boot(){ ensureView(); injectNav(); if(document.getElementById("v-rehab")) render(); }
   if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",boot); else boot();
   setTimeout(boot,600); setTimeout(boot,1800); setTimeout(boot,4000);
+})();
+</script>
+<script>
+/* ===== QD178 · حماية الإقلاع: شارة خطأ بدل شاشة بيضاء + وضع آمن ===== */
+(function(){
+  if(window.__QD178) return; window.__QD178=1;
+  function bar(msg,kind){
+    try{
+      var d=document.getElementById("qd178bar");
+      if(!d){ d=document.createElement("div"); d.id="qd178bar";
+        d.style.cssText="position:fixed;inset-inline:0;bottom:0;z-index:99999;padding:10px 14px;font:800 12px Tajawal,Arial,sans-serif;display:flex;gap:10px;align-items:center;flex-wrap:wrap";
+        document.body.appendChild(d); }
+      d.style.background=kind==="bad"?"#B5121B":"#B45309"; d.style.color="#fff";
+      d.innerHTML='<span style="flex:1">'+msg+'</span>';
+      return d;
+    }catch(e){ return null; }
+  }
+  window.qd178Bar=bar;
+  window.addEventListener("error",function(ev){
+    try{
+      var m=(ev&&ev.message)||"";
+      if(!m) return;
+      var d=bar('⚠ حدث خطأ: '+m+' — <span style="opacity:.85">يمكنك المتابعة، أو شغّل الوضع الآمن</span>',"bad");
+      if(d){ var b=document.createElement("button");
+        b.textContent="الوضع الآمن"; b.style.cssText="border:none;border-radius:8px;padding:6px 12px;font:900 11px inherit;cursor:pointer;background:#fff;color:#B5121B";
+        b.onclick=function(){ try{ localStorage.setItem("qd_safe_mode","1"); location.reload(); }catch(e){} };
+        d.appendChild(b); }
+      try{ console.error("[QD178]",ev.error||m); }catch(e){}
+    }catch(e){}
+  },true);
+  /* الوضع الآمن: يعطّل الوحدات الثقيلة فقط */
+  try{
+    if(localStorage.getItem("qd_safe_mode")==="1"){
+      window.__QD_SAFE=1;
+      ["__QD172","__QD173","__QD174","__QD176"].forEach(function(k){ window[k]=1; });
+      var b=bar('الوضع الآمن مفعّل — الوحدات الثقيلة معطّلة. <button id="qd178off" style="border:none;border-radius:8px;padding:5px 10px;font:900 11px inherit;cursor:pointer;background:#fff;color:#0F4C3A">إيقاف الوضع الآمن</button>',"warn");
+      setTimeout(function(){ var o=document.getElementById("qd178off");
+        if(o) o.onclick=function(){ try{ localStorage.removeItem("qd_safe_mode"); location.reload(); }catch(e){} }; },60);
+    }
+  }catch(e){}
+  /* مراقب إقلاع: إن بقيت الصفحة فارغة بعد 9 ثوانٍ اقترح الوضع الآمن */
+  setTimeout(function(){
+    try{
+      var app=document.querySelector("main")||document.querySelector(".layout")||document.querySelector("#nav");
+      var empty=!app||app.children.length===0;
+      if(empty) bar('الصفحة لم تكتمل — اضغط «الوضع الآمن» للمتابعة بسرعة','bad') &&
+        (function(){ var d=document.getElementById("qd178bar");
+          var b=document.createElement("button"); b.textContent="الوضع الآمن";
+          b.style.cssText="border:none;border-radius:8px;padding:6px 12px;font:900 11px inherit;cursor:pointer;background:#fff;color:#B5121B";
+          b.onclick=function(){ try{ localStorage.setItem("qd_safe_mode","1"); location.reload(); }catch(e){} };
+          d.appendChild(b); })();
+    }catch(e){}
+  },9000);
 })();
 </script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
