@@ -411,7 +411,7 @@ html[dir="rtl"] .filters .select{padding-left:34px}
 .rp-path-lbl{font-size:10.5px;font-weight:800;margin-top:3px;color:var(--slate);white-space:nowrap}
 .rp-batt{display:inline-flex;align-items:center;gap:5px}
 .rp-batt b{font-weight:900;line-height:1}
-/* ===== v11-193 · INTL-STANDARD — مسار اللاعب وشريط الإنجاز ===== */
+/* ===== v11-194 · READY-CLEAN — مسار اللاعب وشريط الإنجاز ===== */
 .rp-path2{display:flex;align-items:center;margin:5px 0 6px;min-width:150px}
 .rp-node{width:13px;height:13px;border-radius:50%;flex:0 0 auto;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;background:#fff;border:2px solid #D3D9E1;transition:background .25s,border-color .25s,box-shadow .25s}
 .rp-node.done{background:#15803D;border-color:#15803D}
@@ -15755,7 +15755,7 @@ try{
 }catch(e){}
 
 /* QDBK-END */
-(function(){function mk(){try{var b=document.createElement("div");b.id="qdrBadge";b.textContent="v11-193 · INTL-STANDARD";b.style.cssText="position:fixed;left:8px;bottom:8px;z-index:2147483647;background:#fff;color:#7E0E14;border:1px solid #7E0E14;font:800 11px/1.5 system-ui;padding:3px 9px;border-radius:20px;pointer-events:none;opacity:.97;box-shadow:0 2px 8px rgba(0,0,0,.35)";document.body.appendChild(b);}catch(e){}}if(document.body)mk();else setTimeout(mk,600);})();
+(function(){function mk(){try{var b=document.createElement("div");b.id="qdrBadge";b.textContent="v11-194 · READY-CLEAN";b.style.cssText="position:fixed;left:8px;bottom:8px;z-index:2147483647;background:#fff;color:#7E0E14;border:1px solid #7E0E14;font:800 11px/1.5 system-ui;padding:3px 9px;border-radius:20px;pointer-events:none;opacity:.97;box-shadow:0 2px 8px rgba(0,0,0,.35)";document.body.appendChild(b);}catch(e){}}if(document.body)mk();else setTimeout(mk,600);})();
 /* ---- PWA: install as an app on Android and iPhone / iPad ---- */
 (function(){
   Object.assign(STR.en,{
@@ -24340,7 +24340,7 @@ try{
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous">
 /* =====================================================================
-   v11-193 · INTL-STANDARD — توحيد حالة اليوم (مباراة · تدريب · راحة · إجازة)
+   v11-194 · READY-CLEAN — توحيد حالة اليوم (مباراة · تدريب · راحة · إجازة)
    بين: لوحة التحكم · البرنامج الأسبوعي · التقويم · جدول المباريات
    ===================================================================== */
 (function(){
@@ -24444,7 +24444,7 @@ try{
 
 <script>
 /* =====================================================================
-   v11-193 · INTL-STANDARD
+   v11-194 · READY-CLEAN
    إصلاح التجمد: يُبنى الهيكل مرة واحدة فقط، ويُحدَّث محتواه الداخلي
    (لا إعادة بناء للجذر ⇒ لا يفقد الهوية ولا يعلق)
    ===================================================================== */
@@ -29892,28 +29892,59 @@ tr:hover .qde-ndate{color:#7E0E14}
       '<div id="qd188bres" style="margin-top:10px;font-size:12px;font-weight:900"></div>'+
       '<div class="hint" style="margin-top:6px">'+T("عتبات معتمدة: تباين نوردبورد > 15% خطر متزايد لإصابة الهامسترينج · هبوط RSI > 10% يشير إلى إجهاد عصبي عضلي.","Thresholds: NordBord asymmetry > 15% = increased hamstring risk · RSI drop > 10% = neuromuscular fatigue.")+'</div></div></div>';
   }
-  function readiness(){
-    var inj=(S()&&S().injuries)||[], ps=((S()&&S().players)||[]);
-    var rows=inj.filter(function(r){ return r.status!=="cleared"; }).map(function(r){
-      var nm=""; try{ nm=(typeof pname==="function")?pname(r.playerId):""; }catch(e){}
-      var pos=""; try{ pos=(typeof POS==="function")?POS(r.playerId):""; }catch(e){}
-      var lvl=(r.status==="unable")?"r":(r.status==="partial")?"a":"g";
-      var lbl=(r.status==="unable")?T("خارج التدريب الجماعي","Out of team training"):(r.status==="partial")?T("تدريب معدّل","Modified training"):T("جاهز","Available");
-      var mod=T("حسب خطة التأهيل","Per rehab plan");
-      if(r.status==="partial") mod=T("بدون احتكاك — تجنب السرعات القصوى","No contact — avoid maximal sprinting");
-      if(r.status==="unable") mod=T("تأهيل انفرادي في العيادة","Individual rehab in clinic");
-      var ret=dk(r.returnDate||r.rtpDate||r.healedDate)||"—";
-      return '<tr><td><b>'+E(nm)+'</b></td><td>'+E(pos)+'</td><td><span class="dot" style="background:'+(lvl==="r"?"#B5121B":lvl==="a"?"#C8A24A":"#15803D")+'"></span><span class="bdg '+lvl+'">'+E(lbl)+'</span></td>'+
-        '<td style="font-weight:800;color:#475569">'+E(mod)+'</td><td>'+E(ret)+'</td></tr>';
-    }).join("");
-    var fit=ps.length-inj.filter(function(r){ return r.status!=="cleared"; }).length;
-    return '<div class="box"><div class="bh"><h3>'+T("لوحة جاهزية الفريق (الجهاز الفني)","Team availability board (coaching staff)")+'</h3><div class="sp"></div>'+
-      '<span class="bdg g">'+T("جاهز ","Fit ")+fit+'</span><button class="btn alt noprint" id="qd188print">'+T("طباعة A4","Print A4")+'</button></div><div class="bb">'+
-      '<table><thead><tr><th>'+T("اللاعب","Player")+'</th><th>'+T("المركز","Position")+'</th><th>'+T("الجاهزية","Readiness")+'</th><th>'+T("محددات التدريب","Training modifications")+'</th><th>'+T("العودة المتوقعة","Expected return")+'</th></tr></thead><tbody>'+
-      (rows||'<tr><td colspan="5" style="text-align:center;color:#15803D;font-weight:900;padding:16px">'+T("كل اللاعبين جاهزون","All players available")+'</td></tr>')+'</tbody></table>'+
-      '<div class="hint" style="margin-top:8px">'+T("لا تُعرض أي تفاصيل سريرية أو تشخيصية في هذه اللوحة — الحالة الضوئية والقيود فقط.","No clinical diagnosis is shown here — traffic light and restrictions only.")+'</div></div></div>';
+  function pInfo(pid){
+    var ps=[]; try{ ps=(S()&&S().players)||[]; }catch(e){}
+    for(var i=0;i<ps.length;i++){ if(String(ps[i].id)===String(pid)){
+      var pos=String(ps[i].pos||ps[i].position||ps[i].role||"");
+      try{ if(typeof tr==="function") pos=tr(pos); }catch(e){}
+      return {nm:String((ps[i].first||"")+" "+(ps[i].last||"")).trim()||String(pid), pos:pos};
+    } }
+    var nm=String(pid); try{ if(typeof pname==="function") nm=pname(pid); }catch(e){}
+    return {nm:nm,pos:""};
   }
-
+  function dk2(d){ var x=String(d||"").slice(0,10); return /^\d{4}-\d{2}-\d{2}$/.test(x)?x:""; }
+  function addDays(d,n){ if(!d||!n) return ""; var t=new Date(d); if(isNaN(t)) return "";
+    t.setDate(t.getDate()+Number(n)); return t.toISOString().slice(0,10); }
+  function readiness(){
+    var inj=((S()&&S().injuries)||[]).filter(function(r){ return r.status!=="cleared"; });
+    var by={};
+    inj.forEach(function(r){
+      var k=String(r.playerId);
+      var w=(r.status==="unable")?3:((r.status==="partial")?2:1);
+      var ret=dk2(r.returnDate||r.rtpDate||r.healedDate);
+      if(!ret){ var base=dk2(r.date), days=Number(r.days)||0; if(base&&days) ret=addDays(base,days); }
+      var cur=by[k];
+      if(!cur){ by[k]={pid:k,w:w,st:r.status,ret:ret,n:1}; }
+      else{ cur.n++; if(w>cur.w){ cur.w=w; cur.st=r.status; } if(!cur.ret&&ret) cur.ret=ret; }
+    });
+    return Object.keys(by).map(function(k){ return by[k]; }).sort(function(a,b){
+      return b.w-a.w || String(a.ret||"9999").localeCompare(String(b.ret||"9999")); });
+  }
+  function readinessHTML(){
+    var rows=readiness();
+    var total=0; try{ total=((S()&&S().players)||[]).length; }catch(e){}
+    var fit=(total||0)-rows.length; if(fit<0) fit=0;
+    var trs=rows.map(function(x){
+      var lvl=x.w===3?"r":(x.w===2?"a":"g");
+      var lbl=x.w===3?T("خارج التدريب الجماعي","Out of team training")
+             :(x.w===2?T("تدريب معدّل","Modified training"):T("جاهز بقيود","Available with limits"));
+      var mod=x.w===3?T("تأهيل انفرادي في العيادة","Individual clinic rehab")
+             :(x.w===2?T("بدون احتكاك — لا سرعات قصوى","No contact — no maximal sprinting")
+                      :T("مشاركة كاملة","Full participation"));
+      var pi=pInfo(x.pid);
+      return '<tr><td><b>'+E(pi.nm)+'</b>'+(x.n>1?' <span class="bdg a">'+x.n+' '+T("إصابات","inj.")+'</span>':'')+'</td>'+
+        '<td>'+E(pi.pos||"—")+'</td>'+
+        '<td><span class="dot" style="background:'+(lvl==="r"?"#B5121B":lvl==="a"?"#C8A24A":"#15803D")+'"></span><span class="bdg '+lvl+'">'+E(lbl)+'</span></td>'+
+        '<td style="font-weight:800;color:#475569">'+E(mod)+'</td>'+
+        '<td>'+E(x.ret||"—")+'</td></tr>';
+    }).join("");
+    return '<div class="box"><div class="bh"><h3>'+T("لوحة جاهزية الفريق (الجهاز الفني)","Team availability board (coaching staff)")+'</h3><div class="sp"></div>'+
+      '<span class="bdg g">'+T("جاهز ","Fit ")+fit+'</span><span class="bdg r">'+T("غير جاهز ","Unavailable ")+rows.length+'</span>'+
+      '<button class="btn alt noprint" id="qd194print">'+T("طباعة A4","Print A4")+'</button></div><div class="bb">'+
+      '<table><thead><tr><th>'+T("اللاعب","Player")+'</th><th>'+T("المركز","Position")+'</th><th>'+T("الجاهزية","Readiness")+'</th><th>'+T("محددات التدريب","Training modifications")+'</th><th>'+T("العودة المتوقعة","Expected return")+'</th></tr></thead><tbody>'+
+      (trs||'<tr><td colspan="5" style="text-align:center;color:#15803D;font-weight:900;padding:16px">'+T("كل اللاعبين جاهزون","All players available")+'</td></tr>')+'</tbody></table>'+
+      '<div class="hint" style="margin-top:8px">'+T("صف واحد لكل لاعب — بأشد حالة. لا تُعرض أي تفاصيل سريرية أو تشخيصية.","One row per player — worst status. No clinical detail is shown.")+'</div></div></div>';
+  }
   /* ================= الرسم والتفويض ================= */
   function render(){
     var v=document.getElementById("v-qpro"); if(!v) return false;
@@ -29926,7 +29957,7 @@ tr:hover .qde-ndate{color:#7E0E14}
       '<div class="sp" style="flex:1"></div><div class="noprint" style="display:flex;gap:7px">'+
       '<button class="btn alt" id="qd188role">'+(coach?T("تبديل إلى العرض الطبي","Switch to medical"):T("وضع المدرب","Coach mode"))+'</button>'+
       '<button class="btn alt" id="qd188csv">'+T("تصدير CSV","Export CSV")+'</button></div></div>'+
-      (coach? readiness() : (exposureSection()+osicsSection()+bioSection()+readiness()))+
+      (coach? readinessHTML() : (exposureSection()+osicsSection()+bioSection()+readinessHTML()))+
       '</div>';
     v.innerHTML=h;
     bind();
@@ -30539,8 +30570,12 @@ tr:hover .qde-ndate{color:#7E0E14}
   function pname(id){ try{ if(typeof window.pname==="function") return window.pname(id); }catch(e){}
     var a=players(); for(var i=0;i<a.length;i++) if(String(a[i].id)===String(id)) return String((a[i].first||"")+" "+(a[i].last||"")).trim();
     return String(id||""); }
-  function ppos(id){ var a=players(); for(var i=0;i<a.length;i++) if(String(a[i].id)===String(id)) return String(a[i].pos||"");
-    try{ if(typeof window.tr==="function") return tr(a[i].pos||""); }catch(e){} return ""; }
+  function ppos(id){ var a=players();
+    for(var i=0;i<a.length;i++){ if(String(a[i].id)!==String(id)) continue;
+      var p=String(a[i].pos||a[i].position||a[i].role||"");
+      try{ if(typeof window.tr==="function"&&p) p=tr(p); }catch(e){}
+      return p||"—"; }
+    return "—"; }
 
   /* ---------- الفترة ---------- */
   var SEASON_FROM="2026-09-01";
@@ -30610,8 +30645,10 @@ tr:hover .qde-ndate{color:#7E0E14}
     active.forEach(function(x){ var k=String(x.playerId);
       var w=x.status==="unable"?3:(x.status==="partial"?2:1);
       var cur=by[k];
-      if(!cur||w>cur.w){ by[k]={pid:k,w:w,st:x.status,ret:dk(x.returnDate||x.rtpDate||x.healedDate),n:1}; }
-      else { cur.n++; if(!cur.ret) cur.ret=dk(x.returnDate||x.rtpDate||x.healedDate); } });
+      var rt=dk(x.returnDate||x.rtpDate||x.healedDate);
+      if(!rt){ var b2=dk(x.date), dn=num(x.days); if(b2&&dn){ var t2=new Date(b2); t2.setDate(t2.getDate()+dn); rt=t2.toISOString().slice(0,10); } }
+      if(!cur||w>cur.w){ by[k]={pid:k,w:w,st:x.status,ret:rt,n:1}; }
+      else { cur.n++; if(!cur.ret) cur.ret=rt; } });
     return Object.keys(by).map(function(k){ return by[k]; })
       .sort(function(a,b){ return b.w-a.w; });
   }
