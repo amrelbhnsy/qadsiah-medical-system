@@ -411,7 +411,7 @@ html[dir="rtl"] .filters .select{padding-left:34px}
 .rp-path-lbl{font-size:10.5px;font-weight:800;margin-top:3px;color:var(--slate);white-space:nowrap}
 .rp-batt{display:inline-flex;align-items:center;gap:5px}
 .rp-batt b{font-weight:900;line-height:1}
-/* ===== v11-185 · EDIT-APPEND — مسار اللاعب وشريط الإنجاز ===== */
+/* ===== v11-186 · REPORT-FIELDS — مسار اللاعب وشريط الإنجاز ===== */
 .rp-path2{display:flex;align-items:center;margin:5px 0 6px;min-width:150px}
 .rp-node{width:13px;height:13px;border-radius:50%;flex:0 0 auto;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;background:#fff;border:2px solid #D3D9E1;transition:background .25s,border-color .25s,box-shadow .25s}
 .rp-node.done{background:#15803D;border-color:#15803D}
@@ -15696,7 +15696,7 @@ try{
 }catch(e){}
 
 /* QDBK-END */
-(function(){function mk(){try{var b=document.createElement("div");b.id="qdrBadge";b.textContent="v11-185 · EDIT-APPEND";b.style.cssText="position:fixed;left:8px;bottom:8px;z-index:2147483647;background:#fff;color:#7E0E14;border:1px solid #7E0E14;font:800 11px/1.5 system-ui;padding:3px 9px;border-radius:20px;pointer-events:none;opacity:.97;box-shadow:0 2px 8px rgba(0,0,0,.35)";document.body.appendChild(b);}catch(e){}}if(document.body)mk();else setTimeout(mk,600);})();
+(function(){function mk(){try{var b=document.createElement("div");b.id="qdrBadge";b.textContent="v11-186 · REPORT-FIELDS";b.style.cssText="position:fixed;left:8px;bottom:8px;z-index:2147483647;background:#fff;color:#7E0E14;border:1px solid #7E0E14;font:800 11px/1.5 system-ui;padding:3px 9px;border-radius:20px;pointer-events:none;opacity:.97;box-shadow:0 2px 8px rgba(0,0,0,.35)";document.body.appendChild(b);}catch(e){}}if(document.body)mk();else setTimeout(mk,600);})();
 /* ---- PWA: install as an app on Android and iPhone / iPad ---- */
 (function(){
   Object.assign(STR.en,{
@@ -24281,7 +24281,7 @@ try{
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous">
 /* =====================================================================
-   v11-185 · EDIT-APPEND — توحيد حالة اليوم (مباراة · تدريب · راحة · إجازة)
+   v11-186 · REPORT-FIELDS — توحيد حالة اليوم (مباراة · تدريب · راحة · إجازة)
    بين: لوحة التحكم · البرنامج الأسبوعي · التقويم · جدول المباريات
    ===================================================================== */
 (function(){
@@ -24385,7 +24385,7 @@ try{
 
 <script>
 /* =====================================================================
-   v11-185 · EDIT-APPEND
+   v11-186 · REPORT-FIELDS
    إصلاح التجمد: يُبنى الهيكل مرة واحدة فقط، ويُحدَّث محتواه الداخلي
    (لا إعادة بناء للجذر ⇒ لا يفقد الهوية ولا يعلق)
    ===================================================================== */
@@ -29205,6 +29205,139 @@ tr:hover .qde-ndate{color:#7E0E14}
         rows.push({id:m.id,fx:m.fx,date:nd(m.date),opp:m.opponent||"",
           inRecord:(m.injuries||[]).length,available:gather(m).length}); }
       var o={records:a.length,rows:rows,injuries:injAll().length,hasFX:fxList().length,hasForm:!!window.matchForm};
+      try{ console.log(o); }catch(e){}
+      return o; }};
+})();
+</script>
+<script>
+/* ===== QD186 · حقول التقرير الشامل: النتيجة · البطولة · الأرضية · الأرض · الدقائق ===== */
+(function(){
+  if(window.__QD186) return; window.__QD186=1;
+  function EN(){ try{ return String(localStorage.getItem("qd_lang")||"ar").indexOf("en")===0; }catch(e){ return false; } }
+  function T(a,e){ return EN()?e:a; }
+  var CLUB=/القادسية|القادسيه|Qadsiah|Al-?Qadsiah/i;
+  function S(){ try{ if(window.QD_S&&window.QD_S.matches) return window.QD_S; }catch(e){}
+    try{ if(typeof window.S!=="undefined"&&window.S&&window.S.matches) return window.S; }catch(e){}
+    try{ var r=localStorage.getItem("qadsiah_u18_v2"); if(r) return JSON.parse(r); }catch(e){} return null; }
+  function saveNow(){ try{ if(typeof window.save==="function"){ window.save(); return true; } }catch(e){} return false; }
+  function fxR(r){ try{ for(var i=0;i<QD_FX.length;i++) if(Number(QD_FX[i].r)===Number(r)) return fxOf(Number(r)); }catch(e){} return null; }
+  function nd(s){ s=String(s||""); var a=s.match(/(\d{4})-(\d{1,2})-(\d{1,2})/);
+    if(a) return a[1]+"-"+("0"+a[2]).slice(-2)+"-"+("0"+a[3]).slice(-2); return ""; }
+  function lc(m){ if(!m) return 0;
+    return ((m.starters||[]).length)+((m.subs||[]).length)+((m.extraSquad||[]).length); }
+  function w(m){ return lc(m)*5 + Object.keys(m.minutes||{}).length*2 + ((m.injuries||[]).length)*2
+    + (m.result?4:0) + (m.lineup?4:0) + (m.comp?1:0) + (m.surface?1:0); }
+
+  function pool(r){
+    var s=S(); if(!s||!Array.isArray(s.matches)) return [];
+    var f=fxR(r), d=f?nd(f.date):"", out=[];
+    for(var i=0;i<s.matches.length;i++){ var m=s.matches[i]; if(!m) continue;
+      if(m.fx!=null&&m.fx!==""&&Number(m.fx)===Number(r)){ out.push(m); continue; }
+      if(d&&nd(m.date)===d){ out.push(m); continue; }
+      if(d&&m.date&&String(m.date).slice(0,10)===d){ out.push(m); continue; }
+    }
+    return out;
+  }
+  /* دمج كل سجلات الجولة في سجل واحد غني */
+  function heal(r){
+    var s=S(); if(!s||!Array.isArray(s.matches)) return {ok:false};
+    var list=pool(r); if(!list.length) return {ok:false,reason:"no-record"};
+    list.sort(function(a,b){ return w(b)-w(a); });
+    var keep=list[0], moved=0;
+    for(var i=1;i<list.length;i++){
+      var o=list[i];
+      if(!keep.result&&o.result) keep.result=o.result;
+      if(!keep.comp&&o.comp) keep.comp=o.comp;
+      if(!keep.surface&&o.surface) keep.surface=o.surface;
+      if(keep.home==null&&o.home!=null) keep.home=o.home;
+      if(!keep.venue&&o.venue) keep.venue=o.venue;
+      if(!keep.city&&o.city) keep.city=o.city;
+      if(!keep.lineup&&o.lineup) keep.lineup=o.lineup;
+      if(!keep.notes&&o.notes) keep.notes=o.notes;
+      if(!keep.medicalNotes&&o.medicalNotes) keep.medicalNotes=o.medicalNotes;
+      if(lc(keep)===0&&lc(o)>0){ keep.starters=(o.starters||[]).slice(); keep.subs=(o.subs||[]).slice();
+        keep.extraSquad=(o.extraSquad||[]).slice(); }
+      if(!keep.minutes||!Object.keys(keep.minutes).length) keep.minutes=Object.assign({},o.minutes||{});
+      else if(o.minutes&&Object.keys(o.minutes).length){
+        for(var k in o.minutes){ if(keep.minutes[k]==null||keep.minutes[k]==="") keep.minutes[k]=o.minutes[k]; } }
+      if(!keep.medStatus||!Object.keys(keep.medStatus).length) keep.medStatus=Object.assign({},o.medStatus||{});
+      if(!(keep.injuries||[]).length&&(o.injuries||[]).length) keep.injuries=(o.injuries||[]).slice();
+      if(!keep.opponent||CLUB.test(keep.opponent)){ if(o.opponent&&!CLUB.test(o.opponent)) keep.opponent=o.opponent; }
+      var idx=s.matches.indexOf(o); if(idx>-1) s.matches.splice(idx,1);
+      moved++;
+    }
+    var f=fxR(r);
+    if(f){
+      if(!keep.opponent||CLUB.test(keep.opponent)) keep.opponent=f.opp;
+      if(!keep.comp){ if(!s.fx||typeof s.fx!=="object") s.fx={};
+        var ov=s.fx[Number(r)]||{}; if(!ov.comp){ try{ ov.comp=(typeof COMPS!=="undefined"&&COMPS&&COMPS[0])||""; }catch(e){} } s.fx[Number(r)]=ov; }
+      if(!keep.home&&keep.home!==false) keep.home=!!f.home;
+    }
+    /* تنظيف تعديلات الجدول التي تحمل اسم النادي كخصم */
+    try{ if(s.fx&&s.fx[Number(r)]&&CLUB.test(String(s.fx[Number(r)].opp||""))){ delete s.fx[Number(r)].opp; } }catch(e){}
+    if(moved||!keep.fx){ if(keep.fx==null&&f) keep.fx=Number(r); saveNow(); }
+    try{ if(window.QD181&&QD181.paint) QD181.paint(); }catch(e){}
+    return {ok:true,moved:moved,id:keep.id};
+  }
+  function healAll(){ var n=0; try{ for(var r=1;r<=34;r++){ var o=heal(r); if(o.moved) n++; } }catch(e){} return n; }
+
+  /* قبل فتح التقرير الشامل: أصلح السجل ثم افتح */
+  function hookFull(){
+    try{
+      if(!window.QD9||!QD9.full||QD9.full.__qd186) return false;
+      var orig=QD9.full;
+      var wrapped=function(r){ try{ heal(r); }catch(e){} return orig.apply(this,arguments); };
+      wrapped.__qd186=1; QD9.full=wrapped; return true;
+    }catch(e){ return false; }
+  }
+  /* قبل فتح «تعديل التقرير» أيضًا */
+  function hookEdit(){
+    try{
+      if(!window.QD9||QD9.edit||QD9.edit.__qd186) return false;
+      var oe=QD9.edit||QD9.editNow;
+      if(!oe) return false;
+      var wf=function(r){ try{ heal(r); }catch(e){} return oe.apply(this,arguments); };
+      wf.__qd186=1; QD9.edit=wf; return true;
+    }catch(e){ return false; }
+  }
+  /* تعبئة الحقول الناقصة عند حفظ نموذج المباراة: البطولة من الجدول، الأرض من الملعب */
+  window.addEventListener("click",function(e){
+    var t=e.target; if(!t||!t.closest) return;
+    if(!t.closest('[data-act="saveMatch"]')) return;
+    setTimeout(function(){
+      try{
+        var s=S(), a=(s&&s.matches)||[];
+        for(var i=0;i<a.length;i++){ var m=a[i]; if(m.fx==null||m.fx==="") continue;
+          var f=fxR(m.fx); if(!f) continue;
+          if(!m.comp){ if(!s.fx||typeof s.fx!=="object") s.fx={};
+            var ov=s.fx[Number(m.fx)]||{}; if(!ov.comp) ov.comp=(typeof COMPS!=="undefined"&&COMPS&&COMPS[0])||""; s.fx[Number(m.fx)]=ov; }
+          if(m.home==null) m.home=!!f.home;
+          if(!m.venue) m.venue=f.venue;
+          if(!m.city) m.city=f.city;
+        }
+        saveNow();
+      }catch(x){}
+      try{ healAll(); }catch(x){}
+    },600);
+  },true);
+
+  var Tt=[500,1500,3500,7000,12000];
+  Tt.forEach(function(x){ setTimeout(function(){ hookFull(); hookEdit(); healAll(); },x); });
+  setInterval(function(){ hookFull(); hookEdit(); },5000);
+
+  window.QD186={heal:heal,healAll:healAll,pool:pool,
+    audit:function(r){
+      var s=S(), rows=[];
+      for(var i=1;i<=34;i++){
+        var f=fxR(i); if(!f) continue;
+        var l=pool(i); if(!l.length) continue;
+        l.sort(function(a,b){ return w(b)-w(a); });
+        var m=l[0];
+        rows.push({round:i,copies:l.length,opp:m.opponent||"",result:m.result||"—",
+          comp:m.comp||"—",surface:m.surface||"—",home:(m.home==null?"?":(m.home?"home":"away")),
+          minutes:Object.keys(m.minutes||{}).length,players:lc(m)});
+      }
+      var o={rounds:rows.length,rows:rows};
       try{ console.log(o); }catch(e){}
       return o; }};
 })();
