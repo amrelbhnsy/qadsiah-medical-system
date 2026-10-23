@@ -411,7 +411,7 @@ html[dir="rtl"] .filters .select{padding-left:34px}
 .rp-path-lbl{font-size:10.5px;font-weight:800;margin-top:3px;color:var(--slate);white-space:nowrap}
 .rp-batt{display:inline-flex;align-items:center;gap:5px}
 .rp-batt b{font-weight:900;line-height:1}
-/* ===== v11-189 · DEL-LEDGER — مسار اللاعب وشريط الإنجاز ===== */
+/* ===== v11-190 · BOOT-RESCUE — مسار اللاعب وشريط الإنجاز ===== */
 .rp-path2{display:flex;align-items:center;margin:5px 0 6px;min-width:150px}
 .rp-node{width:13px;height:13px;border-radius:50%;flex:0 0 auto;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;background:#fff;border:2px solid #D3D9E1;transition:background .25s,border-color .25s,box-shadow .25s}
 .rp-node.done{background:#15803D;border-color:#15803D}
@@ -486,6 +486,65 @@ html[dir="rtl"] .filters .select{padding-left:34px}
 
 
 
+<script>
+/* ===== QD190 · إنقاذ الإقلاع: لا شاشة تحميل عالقة ===== */
+(function(){
+  if(window.__QD190L) return; window.__QD190L=1;
+  var t0=Date.now();
+  function kill(){
+    var n=0, all;
+    try{ all=document.querySelectorAll("body *"); }catch(e){ return 0; }
+    for(var i=0;i<all.length;i++){
+      var e=all[i]; if(!e||!e.parentNode) continue;
+      var t=(e.textContent||"").trim();
+      if(!t||t.length>150) continue;
+      if(!/جار\s*تحميل|جارٍ\s*التحميل|جار\s*التحميل|يرجى الانتظار|Loading|Please wait/i.test(t)) continue;
+      var p=e, hit=null;
+      for(var k=0;k<5&&p;p=p.parentElement){
+        var cs=null; try{ cs=getComputedStyle(p); }catch(x){}
+        if(!cs) continue;
+        var z=parseInt(cs.zIndex||"0",10);
+        if(cs.position==="fixed"||(!isNaN(z)&&z>=30)){ hit=p; break; }
+      }
+      if(!hit) continue;
+      try{ hit.parentNode.removeChild(hit); n++; }catch(x){}
+    }
+    try{
+      var ids=document.querySelectorAll("#qdSplash,.splash,.boot,#boot,#qdLoader,#loader,[data-qdboot]");
+      for(var j=0;j<ids.length;j++){ if(ids[j].parentNode){ ids[j].parentNode.removeChild(ids[j]); n++; } }
+    }catch(x){}
+    if(n){ try{ document.body.style.overflow=""; document.documentElement.style.overflow=""; }catch(x){} }
+    return n;
+  }
+  function show(){
+    try{
+      var views=document.querySelectorAll(".view"), act=false;
+      for(var i=0;i<views.length;i++) if(views[i].classList.contains("active")) act=true;
+      if(!act&&views.length){ (document.getElementById("v-dashboard")||views[0]).classList.add("active"); }
+      var nav=document.getElementById("nav"); if(nav) nav.style.display="";
+      var main=document.querySelector("main"); if(main) main.style.display="";
+      if(!act){ try{ if(window.REND&&REND.dashboard) REND.dashboard(); }catch(x){} }
+    }catch(x){}
+  }
+  function run(){
+    var n=kill();
+    if(n){
+      show();
+      window.__QD190KILLED=(window.__QD190KILLED||0)+n;
+      try{ if(window.toast) toast("تم تجاوز شاشة التحميل العالقة","warn"); }catch(x){}
+    }
+    return n;
+  }
+  window.QD190L={kill:kill,show:show,run:run};
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",function(){ setTimeout(run,2400); setTimeout(run,4200); });
+  else { setTimeout(run,1000); setTimeout(run,2600); }
+  window.addEventListener("load",function(){ setTimeout(run,1200); setTimeout(run,3000); setTimeout(run,6000); });
+  setInterval(function(){
+    var recent=(Date.now()-t0)<120000;
+    if(recent||document.querySelectorAll(".view.active").length===0) run();
+  },7000);
+})();
+</script>
 </head>
 <body>
 <div class="app">
@@ -15696,7 +15755,7 @@ try{
 }catch(e){}
 
 /* QDBK-END */
-(function(){function mk(){try{var b=document.createElement("div");b.id="qdrBadge";b.textContent="v11-189 · DEL-LEDGER";b.style.cssText="position:fixed;left:8px;bottom:8px;z-index:2147483647;background:#fff;color:#7E0E14;border:1px solid #7E0E14;font:800 11px/1.5 system-ui;padding:3px 9px;border-radius:20px;pointer-events:none;opacity:.97;box-shadow:0 2px 8px rgba(0,0,0,.35)";document.body.appendChild(b);}catch(e){}}if(document.body)mk();else setTimeout(mk,600);})();
+(function(){function mk(){try{var b=document.createElement("div");b.id="qdrBadge";b.textContent="v11-190 · BOOT-RESCUE";b.style.cssText="position:fixed;left:8px;bottom:8px;z-index:2147483647;background:#fff;color:#7E0E14;border:1px solid #7E0E14;font:800 11px/1.5 system-ui;padding:3px 9px;border-radius:20px;pointer-events:none;opacity:.97;box-shadow:0 2px 8px rgba(0,0,0,.35)";document.body.appendChild(b);}catch(e){}}if(document.body)mk();else setTimeout(mk,600);})();
 /* ---- PWA: install as an app on Android and iPhone / iPad ---- */
 (function(){
   Object.assign(STR.en,{
@@ -24281,7 +24340,7 @@ try{
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous">
 /* =====================================================================
-   v11-189 · DEL-LEDGER — توحيد حالة اليوم (مباراة · تدريب · راحة · إجازة)
+   v11-190 · BOOT-RESCUE — توحيد حالة اليوم (مباراة · تدريب · راحة · إجازة)
    بين: لوحة التحكم · البرنامج الأسبوعي · التقويم · جدول المباريات
    ===================================================================== */
 (function(){
@@ -24385,7 +24444,7 @@ try{
 
 <script>
 /* =====================================================================
-   v11-189 · DEL-LEDGER
+   v11-190 · BOOT-RESCUE
    إصلاح التجمد: يُبنى الهيكل مرة واحدة فقط، ويُحدَّث محتواه الداخلي
    (لا إعادة بناء للجذر ⇒ لا يفقد الهوية ولا يعلق)
    ===================================================================== */
@@ -30022,7 +30081,7 @@ tr:hover .qde-ndate{color:#7E0E14}
 
   var Tt=[400,900,1800,3000,5000,8000,12000,18000];
   Tt.forEach(function(ms){ setTimeout(function(){ ensureView(); ensureNav(); applyRole(); },ms); });
-  setInterval(function(){ ensureView(); ensureNav(); injectLoad(); },5000);
+  setInterval(function(){ if(localStorage.getItem("qd_safe2")==="1") return; ensureView(); ensureNav(); injectLoad(); },15000);
   document.addEventListener("click",function(){ setTimeout(function(){ injectInjuryField(); },260); },true);
   var mo=null;
   try{ mo=new MutationObserver(function(){ setTimeout(function(){ injectInjuryField(); },120); });
@@ -30184,8 +30243,8 @@ tr:hover .qde-ndate{color:#7E0E14}
     return a&&b&&c;
   }
   [300,900,1800,3000,5000,8000,12000,20000].forEach(function(ms){ setTimeout(function(){ wrapAll(); purge(); },ms); });
-  setInterval(function(){ wrapAll(); },4000);
-  setInterval(function(){ purge(); },10000);
+  setInterval(function(){ if(localStorage.getItem("qd_safe2")==="1") return; wrapAll(); },12000);
+  setInterval(function(){ if(localStorage.getItem("qd_safe2")==="1") return; purge(); },25000);
 
   /* ---------- زر صغير للتحكم ---------- */
   function ensureBtn(){
@@ -30208,7 +30267,7 @@ tr:hover .qde-ndate{color:#7E0E14}
   }
   function toast2(m){ try{ if(window.toast) toast(m,"ok"); }catch(e){} }
   [600,2000,4000,8000].forEach(function(ms){ setTimeout(ensureBtn,ms); });
-  setInterval(ensureBtn,6000);
+  setInterval(ensureBtn,20000);
 
   window.QD189={purge:purge,isDead:isDead,kill:function(id){ return addId(id); },
     undo:function(id){ var l=led(); delete l.ids[String(id)];
@@ -30225,6 +30284,53 @@ tr:hover .qde-ndate{color:#7E0E14}
         ids.push({src:"match:"+m.id,id:x.id,player:x.playerId,type:x.type,dead:isDead(x,m.id)}); }); });
       var o={total:ids.length,dead:[],ledger:this.ledger()};
       o.dead=ids.filter(function(x){ return x.dead; });
+      try{ console.log(o); }catch(e){}
+      return o; }};
+})();
+</script>
+<script>
+/* ===== QD190 · تشخيص الإقلاع + الوضع الآمن ===== */
+(function(){
+  if(window.__QD190) return; window.__QD190=1;
+  function EN(){ try{ return String(localStorage.getItem("qd_lang")||"ar").indexOf("en")===0; }catch(e){ return false; } }
+  function T(a,e){ return EN()?e:a; }
+  function bar(msg,kind){
+    try{
+      if(document.getElementById("qd190bar")) return;
+      var d=document.createElement("div"); d.id="qd190bar";
+      var bg=(kind==="bad")?"#B5121B":"#7E0E14";
+      d.style.cssText="position:fixed;inset-inline:0;bottom:0;z-index:99999;background:"+bg+";color:#fff;padding:9px 14px;font-family:Tajawal,system-ui,sans-serif;font-size:12px;font-weight:800;display:flex;gap:10px;align-items:center;flex-wrap:wrap";
+      d.innerHTML='<span>'+msg+'</span><span style="flex:1"></span><button id="qd190x" style="cursor:pointer;border:none;border-radius:8px;padding:5px 11px;font-family:inherit;font-weight:900;font-size:11.5px;background:rgba(255,255,255,.2);color:#fff">'+T("إخفاء","Hide")+'</button>';
+      document.body.appendChild(d);
+      var x=document.getElementById("qd190x"); if(x) x.onclick=function(){ d.remove(); };
+    }catch(e){}
+  }
+  function safeOn(){ try{ localStorage.setItem("qd_safe2","1"); localStorage.setItem("qd_safe_mode","1"); }catch(e){}
+    bar(T("الوضع الآمن مُفعّل — الأقسام الثقيلة معطّلة.","Safe mode on — heavy modules disabled."),"ok"); }
+  function safeOff(){ try{ localStorage.removeItem("qd_safe2"); localStorage.removeItem("qd_safe_mode"); }catch(e){}
+    bar(T("الوضع الآمن متوقف.","Safe mode off"),"ok"); }
+  function healthy(){
+    try{
+      var act=document.querySelectorAll(".view.active").length;
+      var nav=document.querySelectorAll("#nav [data-view]").length;
+      var txt=document.body.textContent||"";
+      var stuck=/(جار\s*تحميل بيانات|جار\s*التحميل)/.test(txt)&&act===0;
+      return {active:act,nav:nav,stuck:stuck};
+    }catch(e){ return {active:0,nav:0,stuck:true}; }
+  }
+  setTimeout(function(){ var h=healthy();
+    if(h.stuck) bar(T("شاشة التحميل عالقة — استخدم QD190.safe() من الكونسول ثم أعد التحميل","Boot stuck — run QD190.safe() then reload"),"bad");
+  },9000);
+  window.QD190={run:function(){ try{ return window.QD190L.run(); }catch(e){ return 0; } },
+    safe:safeOn,unsafe:safeOff,health:healthy,
+    diag:function(){
+      var o={booted:document.querySelectorAll(".view.active").length>0,
+        navItems:document.querySelectorAll("#nav [data-view]").length,
+        killedLoaders:window.__QD190KILLED||0,
+        safe:(function(){ try{ return localStorage.getItem("qd_safe2")==="1"; }catch(e){ return false; } })(),
+        qd177:!!window.QD177,qd181:!!window.QD181,qd185:!!window.QD185,qd186:!!window.QD186,
+        qd187:!!window.QD187,qd188:!!window.QD188,qd189:!!window.QD189,
+        players:(function(){ try{ return ((window.QD_S&&window.QD_S.players)||[]).length; }catch(e){ return 0; } })()};
       try{ console.log(o); }catch(e){}
       return o; }};
 })();
