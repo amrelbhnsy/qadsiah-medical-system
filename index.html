@@ -411,7 +411,7 @@ html[dir="rtl"] .filters .select{padding-left:34px}
 .rp-path-lbl{font-size:10.5px;font-weight:800;margin-top:3px;color:var(--slate);white-space:nowrap}
 .rp-batt{display:inline-flex;align-items:center;gap:5px}
 .rp-batt b{font-weight:900;line-height:1}
-/* ===== v11-195 · SAVE-PROOF — مسار اللاعب وشريط الإنجاز ===== */
+/* ===== v11-196 · SPLASH-KILL — مسار اللاعب وشريط الإنجاز ===== */
 .rp-path2{display:flex;align-items:center;margin:5px 0 6px;min-width:150px}
 .rp-node{width:13px;height:13px;border-radius:50%;flex:0 0 auto;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;background:#fff;border:2px solid #D3D9E1;transition:background .25s,border-color .25s,box-shadow .25s}
 .rp-node.done{background:#15803D;border-color:#15803D}
@@ -487,62 +487,78 @@ html[dir="rtl"] .filters .select{padding-left:34px}
 
 
 <script>
-/* ===== QD190 · إنقاذ الإقلاع: لا شاشة تحميل عالقة ===== */
+/* ===== QD196 · قاتل شاشة التحميل (يعمل قبل التطبيق) ===== */
 (function(){
-  if(window.__QD190L) return; window.__QD190L=1;
-  var t0=Date.now();
+  if(window.__QD196H) return; window.__QD196H=1;
+  var T0=Date.now(), killed=0;
+  var RE=/جار\s*تحميل|جارٍ\s*التحميل|جار\s*التحميل|جار\s*الاعداد|جار\s*الإعداد|Loading|Please wait|يرجى الانتظار/i;
+  function vw(){ return Math.max(window.innerWidth||0,1); }
+  function vh(){ return Math.max(window.innerHeight||0,1); }
+  function bigArea(e){
+    try{ var r=e.getBoundingClientRect(); return (r.width*r.height) >= (vw()*vh()*0.22); }catch(x){ return false; }
+  }
+  function overlayish(e){
+    try{ var cs=getComputedStyle(e);
+      if(cs.position==="fixed"||cs.position==="absolute") return true;
+      var z=parseInt(cs.zIndex||"0",10);
+      return (!isNaN(z)&&z>=20 && bigArea(e));
+    }catch(x){ return false; }
+  }
+  function covers(e){ try{ return bigArea(e)||overlayish(e); }catch(x){ return false; } }
+  function active(){
+    try{ return document.querySelectorAll(".view.active").length>0; }catch(e){ return false; }
+  }
+  function boot(){
+    try{
+      if(!active()){
+        var vs=document.querySelectorAll(".view");
+        if(vs.length){ (document.getElementById("v-dashboard")||vs[0]).classList.add("active"); }
+        try{ if(window.REND&&REND.dashboard) REND.dashboard(); }catch(e){}
+        try{ if(window.showView&&vs.length) window.showView("dashboard"); }catch(e){}
+      }
+      var nav=document.getElementById("nav|"); 
+      var n2=document.getElementById("nav"); if(n2) n2.style.display="";
+      var m=document.querySelector("main"); if(m) m.style.display="";
+      document.body.style.overflow=""; document.documentElement.style.overflow="";
+    }catch(e){}
+  }
   function kill(){
-    var n=0, all;
+    var hit=null, n=0, all;
     try{ all=document.querySelectorAll("body *"); }catch(e){ return 0; }
     for(var i=0;i<all.length;i++){
       var e=all[i]; if(!e||!e.parentNode) continue;
+      if(e.closest&&e.closest("#modalCard")) continue;
+      if(e.closest&&e.closest("#toasts")) continue;
       var t=(e.textContent||"").trim();
-      if(!t||t.length>150) continue;
-      if(!/جار\s*تحميل|جارٍ\s*التحميل|جار\s*التحميل|يرجى الانتظار|Loading|Please wait/i.test(t)) continue;
-      var p=e, hit=null;
-      for(var k=0;k<5&&p;p=p.parentElement){
-        var cs=null; try{ cs=getComputedStyle(p); }catch(x){}
-        if(!cs) continue;
-        var z=parseInt(cs.zIndex||"0",10);
-        if(cs.position==="fixed"||(!isNaN(z)&&z>=30)){ hit=p; break; }
+      if(!t||t.length>240) continue;
+      if(!RE.test(t)) continue;
+      /* اصعد لأقرب حاوية تغطي الشاشة */
+      var p=e, found=null;
+      for(var k=0;k<9&&p&&p!==document.body;p=p.parentElement){
+        if(covers(p)){ found=p; break; }
       }
-      if(!hit) continue;
-      try{ hit.parentNode.removeChild(hit); n++; }catch(x){}
+      if(!found){
+        /* لا حاوية شفافة: خذ الطفل المباشر من body */
+        var q=e; while(q&&q.parentElement&&q.parentElement!==document.body) q=q.parentElement;
+        if(q&&q!==document.body&&bigArea(q)) found=q;
+      }
+      if(!found) continue;
+      try{ found.parentNode.removeChild(found); n++; }catch(x){}
     }
-    try{
-      var ids=document.querySelectorAll("#qdSplash,.splash,.boot,#boot,#qdLoader,#loader,[data-qdboot]");
-      for(var j=0;j<ids.length;j++){ if(ids[j].parentNode){ ids[j].parentNode.removeChild(ids[j]); n++; } }
-    }catch(x){}
-    if(n){ try{ document.body.style.overflow=""; document.documentElement.style.overflow=""; }catch(x){} }
+    if(n){ killed+=n; boot(); }
     return n;
   }
-  function show(){
-    try{
-      var views=document.querySelectorAll(".view"), act=false;
-      for(var i=0;i<views.length;i++) if(views[i].classList.contains("active")) act=true;
-      if(!act&&views.length){ (document.getElementById("v-dashboard")||views[0]).classList.add("active"); }
-      var nav=document.getElementById("nav"); if(nav) nav.style.display="";
-      var main=document.querySelector("main"); if(main) main.style.display="";
-      if(!act){ try{ if(window.REND&&REND.dashboard) REND.dashboard(); }catch(x){} }
-    }catch(x){}
-  }
-  function run(){
-    var n=kill();
-    if(n){
-      show();
-      window.__QD190KILLED=(window.__QD190KILLED||0)+n;
-      try{ if(window.toast) toast("تم تجاوز شاشة التحميل العالقة","warn"); }catch(x){}
+  window.QD196H={kill:kill,boot:boot,killed:function(){ return killed; }};
+  function loop(){
+    var early=(Date.now()-T0)<45000;
+    if(early||!active()){
+      if(kill()===0&&!active()&&(Date.now()-T0)>5000) boot();
     }
-    return n;
   }
-  window.QD190L={kill:kill,show:show,run:run};
-  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",function(){ setTimeout(run,2400); setTimeout(run,4200); });
-  else { setTimeout(run,1000); setTimeout(run,2600); }
-  window.addEventListener("load",function(){ setTimeout(run,1200); setTimeout(run,3000); setTimeout(run,6000); });
-  setInterval(function(){
-    var recent=(Date.now()-t0)<120000;
-    if(recent||document.querySelectorAll(".view.active").length===0) run();
-  },7000);
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",function(){ setTimeout(loop,700); setTimeout(loop,1800); });
+  else { setTimeout(loop,400); setTimeout(loop,1400); }
+  setInterval(loop,900);
+  window.addEventListener("load",function(){ setTimeout(loop,300); setTimeout(loop,1500); });
 })();
 </script>
 </head>
@@ -15755,7 +15771,7 @@ try{
 }catch(e){}
 
 /* QDBK-END */
-(function(){function mk(){try{var b=document.createElement("div");b.id="qdrBadge";b.textContent="v11-195 · SAVE-PROOF";b.style.cssText="position:fixed;left:8px;bottom:8px;z-index:2147483647;background:#fff;color:#7E0E14;border:1px solid #7E0E14;font:800 11px/1.5 system-ui;padding:3px 9px;border-radius:20px;pointer-events:none;opacity:.97;box-shadow:0 2px 8px rgba(0,0,0,.35)";document.body.appendChild(b);}catch(e){}}if(document.body)mk();else setTimeout(mk,600);})();
+(function(){function mk(){try{var b=document.createElement("div");b.id="qdrBadge";b.textContent="v11-196 · SPLASH-KILL";b.style.cssText="position:fixed;left:8px;bottom:8px;z-index:2147483647;background:#fff;color:#7E0E14;border:1px solid #7E0E14;font:800 11px/1.5 system-ui;padding:3px 9px;border-radius:20px;pointer-events:none;opacity:.97;box-shadow:0 2px 8px rgba(0,0,0,.35)";document.body.appendChild(b);}catch(e){}}if(document.body)mk();else setTimeout(mk,600);})();
 /* ---- PWA: install as an app on Android and iPhone / iPad ---- */
 (function(){
   Object.assign(STR.en,{
@@ -24340,7 +24356,7 @@ try{
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous">
 /* =====================================================================
-   v11-195 · SAVE-PROOF — توحيد حالة اليوم (مباراة · تدريب · راحة · إجازة)
+   v11-196 · SPLASH-KILL — توحيد حالة اليوم (مباراة · تدريب · راحة · إجازة)
    بين: لوحة التحكم · البرنامج الأسبوعي · التقويم · جدول المباريات
    ===================================================================== */
 (function(){
@@ -24444,7 +24460,7 @@ try{
 
 <script>
 /* =====================================================================
-   v11-195 · SAVE-PROOF
+   v11-196 · SPLASH-KILL
    إصلاح التجمد: يُبنى الهيكل مرة واحدة فقط، ويُحدَّث محتواه الداخلي
    (لا إعادة بناء للجذر ⇒ لا يفقد الهوية ولا يعلق)
    ===================================================================== */
@@ -31053,6 +31069,45 @@ tr:hover .qde-ndate{color:#7E0E14}
       var m=null; ms().forEach(function(x){ if(Number(x.fx)===Number(r)) m=x; });
       var o={round:r,store:s||null,record:m?{id:m.id,result:m.result,comp:m.comp,surface:m.surface,home:m.home,venue:m.venue}:null};
       try{ console.log(o); }catch(e){} return o; }};
+})();
+</script>
+<script>
+/* ===== QD196 · تطهير إضافي وإقلاع قسري ===== */
+(function(){
+  if(window.__QD196) return; window.__QD196=1;
+  var T0=Date.now();
+  function active(){ try{ return document.querySelectorAll(".view.active").length>0; }catch(e){ return false; } }
+  function force(){
+    var n=0;
+    try{ if(window.QD196H&&QD196H.kill) n+=QD196H.kill(); }catch(e){}
+    try{ if(window.QD191&&QD191.sweep) n+=QD191.sweep(); }catch(e){}
+    if(!active()){
+      try{ if(window.QD196H&&QD196H.boot) QD196H.boot(); }catch(e){}
+      try{ if(window.showView) window.showView("dashboard"); }catch(e){}
+    }
+    /* إخفاء أي طبقة تغطي الشاشة وتحتوي نص تحميل */
+    try{
+      var kids=document.body.children;
+      for(var i=0;i<kids.length;i++){
+        var el=kids[i]; if(!el||!el.textContent) continue;
+        if(el.querySelector&&el.querySelector("#nav")) continue;
+        if(el.querySelector&&el.querySelector(".view")) continue;
+        var t=(el.textContent||"").trim();
+        if(t.length>0&&t.length<400&&/جار\s*تحميل|جارٍ\s*التحميل/i.test(t)){
+          var r=el.getBoundingClientRect();
+          if(r.height>=(window.innerHeight*0.25)){ el.style.display="none"; n++; }
+        }
+      }
+    }catch(e){}
+    return n;
+  }
+  window.QD196={force:force,alive:active,
+    diag:function(){ var o={active:active(),killed:(window.QD196H?QD196H.killed():0),
+      splashText:(function(){ try{ var t=document.body.textContent||""; return /جار\s*تحميل بيانات/.test(t); }catch(e){ return false; } })(),
+      ms:Date.now()-T0};
+      try{ console.log(o); }catch(e){} return o; }};
+  [500,1200,2200,3500,5000,7000,9000,12000,16000,22000,30000].forEach(function(ms){ setTimeout(force,ms); });
+  setInterval(function(){ if((Date.now()-T0)<90000||!active()) force(); },1200);
 })();
 </script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
