@@ -411,7 +411,7 @@ html[dir="rtl"] .filters .select{padding-left:34px}
 .rp-path-lbl{font-size:10.5px;font-weight:800;margin-top:3px;color:var(--slate);white-space:nowrap}
 .rp-batt{display:inline-flex;align-items:center;gap:5px}
 .rp-batt b{font-weight:900;line-height:1}
-/* ===== v11-179 · BOOT-FORCE — مسار اللاعب وشريط الإنجاز ===== */
+/* ===== v11-180 · LINEUP-GUARD — مسار اللاعب وشريط الإنجاز ===== */
 .rp-path2{display:flex;align-items:center;margin:5px 0 6px;min-width:150px}
 .rp-node{width:13px;height:13px;border-radius:50%;flex:0 0 auto;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;background:#fff;border:2px solid #D3D9E1;transition:background .25s,border-color .25s,box-shadow .25s}
 .rp-node.done{background:#15803D;border-color:#15803D}
@@ -15696,7 +15696,7 @@ try{
 }catch(e){}
 
 /* QDBK-END */
-(function(){function mk(){try{var b=document.createElement("div");b.id="qdrBadge";b.textContent="v11-179 · BOOT-FORCE";b.style.cssText="position:fixed;left:8px;bottom:8px;z-index:2147483647;background:#fff;color:#7E0E14;border:1px solid #7E0E14;font:800 11px/1.5 system-ui;padding:3px 9px;border-radius:20px;pointer-events:none;opacity:.97;box-shadow:0 2px 8px rgba(0,0,0,.35)";document.body.appendChild(b);}catch(e){}}if(document.body)mk();else setTimeout(mk,600);})();
+(function(){function mk(){try{var b=document.createElement("div");b.id="qdrBadge";b.textContent="v11-180 · LINEUP-GUARD";b.style.cssText="position:fixed;left:8px;bottom:8px;z-index:2147483647;background:#fff;color:#7E0E14;border:1px solid #7E0E14;font:800 11px/1.5 system-ui;padding:3px 9px;border-radius:20px;pointer-events:none;opacity:.97;box-shadow:0 2px 8px rgba(0,0,0,.35)";document.body.appendChild(b);}catch(e){}}if(document.body)mk();else setTimeout(mk,600);})();
 /* ---- PWA: install as an app on Android and iPhone / iPad ---- */
 (function(){
   Object.assign(STR.en,{
@@ -24281,7 +24281,7 @@ try{
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous">
 /* =====================================================================
-   v11-179 · BOOT-FORCE — توحيد حالة اليوم (مباراة · تدريب · راحة · إجازة)
+   v11-180 · LINEUP-GUARD — توحيد حالة اليوم (مباراة · تدريب · راحة · إجازة)
    بين: لوحة التحكم · البرنامج الأسبوعي · التقويم · جدول المباريات
    ===================================================================== */
 (function(){
@@ -24385,7 +24385,7 @@ try{
 
 <script>
 /* =====================================================================
-   v11-179 · BOOT-FORCE
+   v11-180 · LINEUP-GUARD
    إصلاح التجمد: يُبنى الهيكل مرة واحدة فقط، ويُحدَّث محتواه الداخلي
    (لا إعادة بناء للجذر ⇒ لا يفقد الهوية ولا يعلق)
    ===================================================================== */
@@ -28299,6 +28299,207 @@ tr:hover .qde-ndate{color:#7E0E14}
       nav.appendChild(b);
     }catch(e){}
   },8000);
+})();
+</script>
+<script>
+/* ===== QD180 · حارس التشكيلة: مخزن مستقل + عدّاد موحّد لكل الشاشات ===== */
+(function(){
+  if(window.__QD180) return; window.__QD180=1;
+  var KEY="qd_lineup_v3", LS="qadsiah_u18_v2";
+  function jget(k,d){ try{ var v=localStorage.getItem(k); return v?JSON.parse(v):d; }catch(e){ return d; } }
+  function jset(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); return true; }catch(e){ return false; } }
+
+  var _c=null,_ts=0;
+  function S(){
+    try{ if(window.QD_S&&window.QD_S.matches) return window.QD_S; }catch(e){}
+    try{ if(typeof window.S!=="undefined"&&window.S&&window.S.matches) return window.S; }catch(e){}
+    if(!_c||Date.now()-_ts>8000){ _c=jget(LS,null)||{}; _ts=Date.now(); }
+    return _c;
+  }
+  function matches(){ try{ return (S().matches)||[]; }catch(e){ return []; } }
+  function store(){ var s=jget(KEY,null); if(!s||typeof s!=="object"||Array.isArray(s)) s={}; return s; }
+  function tot(a){ if(!a) return 0;
+    return ((a.st||[]).length)+((a.sb||[]).length)+((a.ex||[]).length); }
+  function totM(m){ if(!m) return 0;
+    return ((m.starters||[]).length)+((m.subs||[]).length)+((m.extraSquad||[]).length); }
+  function nr(m){
+    if(!m) return null;
+    var c=[m.fx,m.round,m.r,m.fxRound];
+    for(var i=0;i<c.length;i++){ if(c[i]!=null&&c[i]!==""){ var n=Number(c[i]); if(!isNaN(n)) return n; } }
+    return null;
+  }
+  function recMatches(m,r){
+    var n=nr(m); if(n!=null&&n===Number(r)) return true;
+    try{
+      var f=fxOf(r); if(!f) return false;
+      var d=(m.date||"").slice(0,10), fd=(f.date||"").slice(0,10);
+      if(d&&fd&&d===fd) return true;
+      if(f.opp&&m.opponent&&String(m.opponent).trim()===String(f.opp).trim()) return true;
+      if(f.opp&&m.opp&&String(m.opp).trim()===String(f.opp).trim()) return true;
+    }catch(e){}
+    return false;
+  }
+  function fromStore(r){ var v=store()["r"+String(r)]; return (v&&tot(v))?v:null; }
+  function fromState(r){
+    try{ var s=S(), L=s.qdLineup||{}; var v=L["r"+String(r)]||L[r]; if(v&&tot(v)) return v; }catch(e){}
+    return null;
+  }
+  function fromMatches(r){
+    var a=matches(), best=null, bc=0;
+    for(var i=0;i<a.length;i++){ if(!recMatches(a[i],r)) continue;
+      var c=totM(a[i]); if(c>bc){ bc=c; best=a[i]; } }
+    return best?{st:best.starters||[],sb:best.subs||[],ex:best.extraSquad||[]}:null;
+  }
+  function best(r){
+    var cands=[fromStore(r),fromState(r),fromMatches(r)], bi=-1, bc=-1;
+    for(var i=0;i<cands.length;i++){ if(!cands[i]) continue; var c=tot(cands[i]); if(c>bc){ bc=c; bi=i; } }
+    return bi<0?null:{src:["store","state","match"][bi],data:cands[bi],n:bc};
+  }
+  function count(r){ var b=best(r); return b?b.n:0; }
+
+  /* نسخ من سجلات المباريات إلى المخزن المستقل */
+  function mirror(){
+    var a=matches(), st=store(), ch=false;
+    for(var i=0;i<a.length;i++){
+      var m=a[i], n=nr(m); if(n==null||!totM(m)) continue;
+      var k="r"+n, cur=st[k];
+      if(cur&&cur.locked&&Date.now()-cur.locked<60000) continue;
+      if(!cur||tot(cur)<totM(m)){
+        st[k]={st:(m.starters||[]).slice(),sb:(m.subs||[]).slice(),
+               ex:(m.extraSquad||[]).map(function(x){ return {n:String(x.n||""),r:String(x.r||"st")}; }),
+               ts:Date.now()};
+        ch=true;
+      }
+    }
+    if(ch) jset(KEY,st);
+    return ch;
+  }
+  /* نسخ من المخزن إلى S.qdLineup ثم حفظ — لتقرأه بقية الوحدات */
+  function syncState(){
+    try{
+      var s=S(); if(!s||!s.matches) return false;
+      if(!s.qdLineup||typeof s.qdLineup!=="object") s.qdLineup={};
+      var st=store(), n=0;
+      for(var k in st){ if(!Object.prototype.hasOwnProperty.call(st,k)) continue;
+        if(tot(s.qdLineup[k])<tot(st[k])){ s.qdLineup[k]={st:st[k].st,sb:st[k].sb,ex:st[k].ex}; n++; }
+      }
+      if(n&&typeof window.save==="function"){ window.save(); }
+      return n>0;
+    }catch(e){ return false; }
+  }
+  /* تعبئة سجلات المباريات الناقصة من المخزن — ليعمل التقرير الشامل */
+  function healMatches(){
+    var a=matches(), st=store(), n=0;
+    for(var i=0;i<a.length;i++){
+      var m=a[i], k="r"+nr(m); if(nr(m)==null) continue;
+      var v=st[k]; if(!v||!tot(v)) continue;
+      if(totM(m)<tot(v)){
+        m.starters=(v.st||[]).slice(); m.subs=(v.sb||[]).slice();
+        m.extraSquad=(v.ex||[]).slice(); n++;
+      }
+    }
+    if(n&&typeof window.save==="function"){ window.save(); }
+    return n;
+  }
+
+  var AR=true;
+  function lbl(){ try{ if(typeof LANG!=="undefined") return LANG!=="en"; }catch(e){} return AR; }
+  function paint(){
+    var n=0;
+    try{
+      var bs=document.querySelectorAll('[data-q9][data-go="sq"][data-r]');
+      for(var i=0;i<bs.length;i++){
+        var r=bs[i].getAttribute("data-r"); if(r==null) continue;
+        var c=count(r), t=(lbl()?"المشاركون":"Squad")+" ("+c+")";
+        if(bs[i].textContent!==t){ bs[i].textContent=t; }
+        bs[i].setAttribute("data-qdc",c); n++;
+      }
+    }catch(e){}
+    return n;
+  }
+  function cycle(){ try{ mirror(); syncState(); }catch(e){} paint(); }
+
+  /* قراءة الاختيار من النافذة نفسها — مسار مستقل تمامًا عن دوال الحفظ */
+  var lastR=null, pend=null;
+  function readModal(){
+    try{
+      var lis=document.querySelectorAll("#sq9list li[data-id]");
+      if(!lis.length) return null;
+      var out={st:[],sb:[]};
+      for(var i=0;i<lis.length;i++){
+        var li=lis[i], id=li.getAttribute("data-id"); if(id==null) continue;
+        if(li.querySelector("button.sq9-t.on")) out.st.push(String(id));
+        else if(li.querySelector("button.sq9-t.onb")) out.sb.push(String(id));
+      }
+      if(!out.st.length&&!out.sb.length) return null;
+      return out;
+    }catch(e){ return null; }
+  }
+  function commitLocal(){
+    try{
+      if(!pend||lastR==null) return false;
+      var st=store(), v={st:pend.st.slice(),sb:pend.sb.slice(),ex:[],ts:Date.now(),locked:Date.now()};
+      st["r"+lastR]=v; jset(KEY,st); pend=null; return true;
+    }catch(e){ return false; }
+  }
+  document.addEventListener("click",function(e){
+    var t=e.target; if(!t||!t.closest) return;
+    var b=t.closest('[data-q9][data-go="sq"]');
+    if(b){ var rr=b.getAttribute("data-r"); if(rr!=null) lastR=String(rr); }
+    if(t.closest("#sq9ok")){ pend=readModal(); }
+  },true);
+
+  /* اعتراض الحفظ: أي ضغطة اختيار أو زر حفظ تُتبَع بمزامنة فورية بعد 350/1200ms */
+  document.addEventListener("click",function(e){
+    var t=e.target; if(!t||!t.closest) return;
+    if(t.closest("#sq9ok")||t.closest("[data-pick]")||t.closest('[data-q9][data-go="sq"]')){
+      setTimeout(function(){ try{ commitLocal(); mirror(); syncState(); }catch(x){} paint(); },350);
+      setTimeout(function(){ try{ mirror(); syncState(); }catch(x){} paint(); },1200);
+    }
+  },true);
+
+  /* تجاوز عدّاد QD163 بالنسخة الموثوقة (يستخدمه تقرير المشاركة والتقرير الشامل) */
+  function hookCounts(){
+    try{
+      if(!window.QD163||QD163.__qd180) return false;
+      var orig=QD163.counts;
+      QD163.counts=function(r){
+        var c=count(r); if(c) return c;
+        try{ return orig?orig(r):0; }catch(e){ return 0; }
+      };
+      QD163.__qd180=1;
+      return true;
+    }catch(e){ return false; }
+  }
+
+  var T=[400,1200,2500,4500,7000];
+  T.forEach(function(ms){ setTimeout(function(){ try{ hookCounts(); }catch(e){} cycle(); },ms); });
+  setInterval(function(){ try{ hookCounts(); }catch(e){} paint(); },2500);
+  setInterval(function(){ try{ mirror(); syncState(); }catch(e){} },9000);
+
+  window.QD180={
+    count:count, best:best, store:store, paint:paint, mirror:mirror,
+    sync:syncState, syncState:syncState, heal:healMatches, commit:commitLocal,
+    fix:function(){ var m=mirror(), s=syncState(), h=healMatches(); paint(); hookCounts();
+      var o={mirrored:m,synced:s,healed:h}; try{ console.log("QD180.fix",o); }catch(e){} return o; },
+    audit:function(){
+      var a=matches(), st=store(), rows=[];
+      for(var i=0;i<a.length;i++){ var m=a[i], n=nr(m);
+        rows.push({id:m.id,fx:m.fx,round:n,st:(m.starters||[]).length,sb:(m.subs||[]).length,
+          ex:((m.extraSquad||[]).length),storeKey:(n!=null&&st["r"+n])?tot(st["r"+n]):0}); }
+      var btns=[];
+      try{ document.querySelectorAll('[data-q9][data-go="sq"][data-r]').forEach(function(b){
+        var r=b.getAttribute("data-r"); btns.push({r:r,txt:(b.textContent||"").trim(),calc:count(r)}); }); }catch(e){}
+      var pl=0; try{ pl=((S().players)||[]).length; }catch(e){}
+      var modal={open:!!document.getElementById("sq9"),rows:0,st:0,sb:0};
+      try{ if(modal.open){ var m2=readModal(); modal.rows=document.querySelectorAll("#sq9list li[data-id]").length;
+        modal.st=m2?m2.st.length:0; modal.sb=m2?m2.sb.length:0; } }catch(e){}
+      var o={players:pl, modal:modal, badge:(function(){ try{ var m=document.body.innerHTML.match(/v11-\d+\s*·\s*[A-Z0-9-]+/); return m?m[0]:""; }catch(e){ return ""; } })(),
+        matches:a.length, rows:rows, storeKeys:Object.keys(st), buttons:btns,
+        qd163:!!window.QD163, hooked:!!(window.QD163&&QD163.__qd180)};
+      try{ console.log(o); }catch(e){}
+      return o;
+    }};
 })();
 </script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
