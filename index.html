@@ -411,7 +411,7 @@ html[dir="rtl"] .filters .select{padding-left:34px}
 .rp-path-lbl{font-size:10.5px;font-weight:800;margin-top:3px;color:var(--slate);white-space:nowrap}
 .rp-batt{display:inline-flex;align-items:center;gap:5px}
 .rp-batt b{font-weight:900;line-height:1}
-/* ===== v11-191 · NO-SPLASH — مسار اللاعب وشريط الإنجاز ===== */
+/* ===== v11-192 · PRO-VISIBLE — مسار اللاعب وشريط الإنجاز ===== */
 .rp-path2{display:flex;align-items:center;margin:5px 0 6px;min-width:150px}
 .rp-node{width:13px;height:13px;border-radius:50%;flex:0 0 auto;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;background:#fff;border:2px solid #D3D9E1;transition:background .25s,border-color .25s,box-shadow .25s}
 .rp-node.done{background:#15803D;border-color:#15803D}
@@ -15755,7 +15755,7 @@ try{
 }catch(e){}
 
 /* QDBK-END */
-(function(){function mk(){try{var b=document.createElement("div");b.id="qdrBadge";b.textContent="v11-191 · NO-SPLASH";b.style.cssText="position:fixed;left:8px;bottom:8px;z-index:2147483647;background:#fff;color:#7E0E14;border:1px solid #7E0E14;font:800 11px/1.5 system-ui;padding:3px 9px;border-radius:20px;pointer-events:none;opacity:.97;box-shadow:0 2px 8px rgba(0,0,0,.35)";document.body.appendChild(b);}catch(e){}}if(document.body)mk();else setTimeout(mk,600);})();
+(function(){function mk(){try{var b=document.createElement("div");b.id="qdrBadge";b.textContent="v11-192 · PRO-VISIBLE";b.style.cssText="position:fixed;left:8px;bottom:8px;z-index:2147483647;background:#fff;color:#7E0E14;border:1px solid #7E0E14;font:800 11px/1.5 system-ui;padding:3px 9px;border-radius:20px;pointer-events:none;opacity:.97;box-shadow:0 2px 8px rgba(0,0,0,.35)";document.body.appendChild(b);}catch(e){}}if(document.body)mk();else setTimeout(mk,600);})();
 /* ---- PWA: install as an app on Android and iPhone / iPad ---- */
 (function(){
   Object.assign(STR.en,{
@@ -24340,7 +24340,7 @@ try{
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous">
 /* =====================================================================
-   v11-191 · NO-SPLASH — توحيد حالة اليوم (مباراة · تدريب · راحة · إجازة)
+   v11-192 · PRO-VISIBLE — توحيد حالة اليوم (مباراة · تدريب · راحة · إجازة)
    بين: لوحة التحكم · البرنامج الأسبوعي · التقويم · جدول المباريات
    ===================================================================== */
 (function(){
@@ -24444,7 +24444,7 @@ try{
 
 <script>
 /* =====================================================================
-   v11-191 · NO-SPLASH
+   v11-192 · PRO-VISIBLE
    إصلاح التجمد: يُبنى الهيكل مرة واحدة فقط، ويُحدَّث محتواه الداخلي
    (لا إعادة بناء للجذر ⇒ لا يفقد الهوية ولا يعلق)
    ===================================================================== */
@@ -30427,6 +30427,89 @@ tr:hover .qde-ndate{color:#7E0E14}
         try{ document.querySelectorAll("div").forEach(function(e){ var t=(e.textContent||"").trim();
           if(t.length<180&&/جار\s*تحميل/.test(t)&&covers(e)) n++; }); }catch(x){}
         return n; })()};
+      try{ console.log(o); }catch(e){}
+      return o; }};
+})();
+</script>
+<script>
+/* ===== QD192 · إظهار حزمة الاحترافية: دمج حقيقي في القائمة ولوحة التحكم ===== */
+(function(){
+  if(window.__QD192) return; window.__QD192=1;
+  function EN(){ try{ return String(localStorage.getItem("qd_lang")||"ar").indexOf("en")===0; }catch(e){ return false; } }
+  function T(a,e){ return EN()?e:a; }
+  function E(v){ return String(v==null?"":v).replace(/[&<>"]/g,function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
+
+  function install(){
+    var ok=false;
+    try{ if(typeof STR!=="undefined"&&STR){
+      if(STR.ar){ STR.ar.nav_qpro="الاحترافية"; STR.ar.sub_qpro="OSICS-10 · عبء الإصابة · الجاهزية"; }
+      if(STR.en){ STR.en.nav_qpro="Professional"; STR.en.sub_qpro="OSICS-10 · burden · readiness"; } } }catch(e){}
+    try{
+      if(typeof NAV!=="undefined"&&NAV&&NAV.push){
+        var has=false; for(var i=0;i<NAV.length;i++){ if(NAV[i]&&NAV[i].id==="qpro"){ has=true; break; } }
+        if(!has) NAV.splice(1,0,{id:"qpro",label:"nav_qpro",icon:"check",sub:"sub_qpro",grp:"grp_overview"});
+        ok=true;
+      }
+    }catch(e){}
+    try{ if(typeof REND!=="undefined"&&window.QD188) REND.qpro=function(){ try{ QD188.render(); }catch(e){} }; }catch(e){}
+    try{
+      var m=document.querySelector("main");
+      if(m&&!document.getElementById("v-qpro")){
+        var sc=document.createElement("section"); sc.className="view"; sc.id="v-qpro"; m.appendChild(sc);
+      }
+    }catch(e){}
+    try{ if(typeof window.renderNav==="function") window.renderNav(); }catch(e){}
+    try{ if(document.querySelector('#nav [data-view="qpro"]')) ok=true; }catch(e){}
+    return ok;
+  }
+  function goPro(){
+    try{
+      install();
+      if(typeof window.showView==="function"){ window.showView("qpro"); }
+      else { document.querySelectorAll(".view").forEach(function(x){ x.classList.remove("active"); });
+        var el=document.getElementById("v-qpro"); if(el) el.classList.add("active"); }
+      if(window.QD188) QD188.render();
+      if(typeof window.renderNav==="function") window.renderNav();
+    }catch(e){}
+  }
+  function cell(l,val){
+    return '<div style="background:#fff;padding:9px 12px"><i style="display:block;font-style:normal;font-size:10px;font-weight:900;color:#64748B">'+E(l)+'</i><b style="font-size:16px">'+E(String(val))+'</b></div>';
+  }
+  function dashboard(){
+    try{
+      var v=document.getElementById("v-dashboard"); if(!v) return;
+      if(!window.QD188||!QD188.exposure) return;
+      var old=document.getElementById("qd192kpi"); if(old&&old.parentNode) old.parentNode.removeChild(old);
+      var x=QD188.exposure();
+      var d=document.createElement("div"); d.id="qd192kpi";
+      d.style.cssText="margin:0 0 14px;background:#fff;border:1px solid #E7E2DA;border-radius:14px;overflow:hidden";
+      d.innerHTML='<div style="display:flex;align-items:center;gap:9px;padding:10px 14px;background:linear-gradient(115deg,#7E0E14,#B5121B);color:#fff">'+
+        '<b style="font-size:13px">'+T("مؤشرات احترافية","Professional KPIs")+'</b><span style="flex:1"></span>'+
+        '<button type="button" id="qd192go" style="cursor:pointer;border:none;border-radius:8px;padding:5px 12px;font-family:inherit;font-size:11.5px;font-weight:900;background:rgba(255,255,255,.2);color:#fff">'+T("التفاصيل","Details")+'</button></div>'+
+        '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:1px;background:#EDF0F4">'+
+        cell(T("ساعات التعرض","Exposure h"),x.totalHours)+
+        cell(T("إصابة/1000س","Incidence/1000h"),x.incidence.toFixed(2))+
+        cell(T("عبء/1000س","Burden/1000h"),x.burden)+
+        cell(T("أيام الغياب","Days lost"),x.daysLost)+'</div>';
+      v.insertBefore(d, v.firstChild);
+      var b=document.getElementById("qd192go"); if(b) b.onclick=goPro;
+    }catch(e){}
+  }
+  document.addEventListener("click",function(e){
+    var t=e.target; if(!t||!t.closest) return;
+    if(!t.closest('#nav [data-view="qpro"]')) return;
+    setTimeout(goPro,0);
+  },false);
+  function cycle(){ install(); if(document.getElementById("v-dashboard")&&document.getElementById("v-dashboard").classList.contains("active")) dashboard(); }
+  [400,1000,2000,3500,6000,10000,16000,24000].forEach(function(ms){ setTimeout(cycle,ms); });
+  setInterval(cycle,9000);
+  window.QD192={install:install,go:goPro,dashboard:dashboard,
+    diag:function(){
+      var o={navHasQpro:!!document.querySelector('#nav [data-view="qpro"]'),
+        inNAV:(function(){ try{ for(var i=0;i<NAV.length;i++) if(NAV[i].id==="qpro") return true; }catch(e){} return false; })(),
+        rendQpro:!!(typeof REND!=="undefined"&&REND.qpro),
+        viewExists:!!document.getElementById("v-qpro"),
+        qd188:!!window.QD188,kpi:!!document.getElementById("qd192kpi")};
       try{ console.log(o); }catch(e){}
       return o; }};
 })();
