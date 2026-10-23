@@ -411,7 +411,7 @@ html[dir="rtl"] .filters .select{padding-left:34px}
 .rp-path-lbl{font-size:10.5px;font-weight:800;margin-top:3px;color:var(--slate);white-space:nowrap}
 .rp-batt{display:inline-flex;align-items:center;gap:5px}
 .rp-batt b{font-weight:900;line-height:1}
-/* ===== v11-190 · BOOT-RESCUE — مسار اللاعب وشريط الإنجاز ===== */
+/* ===== v11-191 · NO-SPLASH — مسار اللاعب وشريط الإنجاز ===== */
 .rp-path2{display:flex;align-items:center;margin:5px 0 6px;min-width:150px}
 .rp-node{width:13px;height:13px;border-radius:50%;flex:0 0 auto;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;background:#fff;border:2px solid #D3D9E1;transition:background .25s,border-color .25s,box-shadow .25s}
 .rp-node.done{background:#15803D;border-color:#15803D}
@@ -15755,7 +15755,7 @@ try{
 }catch(e){}
 
 /* QDBK-END */
-(function(){function mk(){try{var b=document.createElement("div");b.id="qdrBadge";b.textContent="v11-190 · BOOT-RESCUE";b.style.cssText="position:fixed;left:8px;bottom:8px;z-index:2147483647;background:#fff;color:#7E0E14;border:1px solid #7E0E14;font:800 11px/1.5 system-ui;padding:3px 9px;border-radius:20px;pointer-events:none;opacity:.97;box-shadow:0 2px 8px rgba(0,0,0,.35)";document.body.appendChild(b);}catch(e){}}if(document.body)mk();else setTimeout(mk,600);})();
+(function(){function mk(){try{var b=document.createElement("div");b.id="qdrBadge";b.textContent="v11-191 · NO-SPLASH";b.style.cssText="position:fixed;left:8px;bottom:8px;z-index:2147483647;background:#fff;color:#7E0E14;border:1px solid #7E0E14;font:800 11px/1.5 system-ui;padding:3px 9px;border-radius:20px;pointer-events:none;opacity:.97;box-shadow:0 2px 8px rgba(0,0,0,.35)";document.body.appendChild(b);}catch(e){}}if(document.body)mk();else setTimeout(mk,600);})();
 /* ---- PWA: install as an app on Android and iPhone / iPad ---- */
 (function(){
   Object.assign(STR.en,{
@@ -24340,7 +24340,7 @@ try{
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous">
 /* =====================================================================
-   v11-190 · BOOT-RESCUE — توحيد حالة اليوم (مباراة · تدريب · راحة · إجازة)
+   v11-191 · NO-SPLASH — توحيد حالة اليوم (مباراة · تدريب · راحة · إجازة)
    بين: لوحة التحكم · البرنامج الأسبوعي · التقويم · جدول المباريات
    ===================================================================== */
 (function(){
@@ -24444,7 +24444,7 @@ try{
 
 <script>
 /* =====================================================================
-   v11-190 · BOOT-RESCUE
+   v11-191 · NO-SPLASH
    إصلاح التجمد: يُبنى الهيكل مرة واحدة فقط، ويُحدَّث محتواه الداخلي
    (لا إعادة بناء للجذر ⇒ لا يفقد الهوية ولا يعلق)
    ===================================================================== */
@@ -30331,6 +30331,102 @@ tr:hover .qde-ndate{color:#7E0E14}
         qd177:!!window.QD177,qd181:!!window.QD181,qd185:!!window.QD185,qd186:!!window.QD186,
         qd187:!!window.QD187,qd188:!!window.QD188,qd189:!!window.QD189,
         players:(function(){ try{ return ((window.QD_S&&window.QD_S.players)||[]).length; }catch(e){ return 0; } })()};
+      try{ console.log(o); }catch(e){}
+      return o; }};
+})();
+</script>
+<script>
+/* ===== QD191 · منع شاشة التحميل من العودة + إقلاع محلي فوري ===== */
+(function(){
+  if(window.__QD191) return; window.__QD191=1;
+  var T0=Date.now(), kills=0, busy=false;
+  function txtOf(e){ return (e&&e.textContent)||""; }
+  function covers(e){
+    try{
+      var cs=getComputedStyle(e);
+      if(cs.position!=="fixed"&&cs.position!=="absolute") return false;
+      var r=e.getBoundingClientRect();
+      if(r.width<240||r.height<140) return false;
+      var z=parseInt(cs.zIndex||"0",10);
+      return (cs.position==="fixed")||(!isNaN(z)&&z>=40);
+    }catch(x){ return false; }
+  }
+  function activeView(){
+    try{ return document.querySelectorAll(".view.active").length>0; }catch(e){ return false; }
+  }
+  function boot(){
+    try{
+      if(!activeView()){
+        var v=document.querySelectorAll(".view");
+        if(v.length){ (document.getElementById("v-dashboard")||v[0]).classList.add("active"); }
+        try{ if(window.REND&&REND.dashboard) REND.dashboard(); }catch(e){}
+      }
+      var nav=document.getElementById("nav"); if(nav) nav.style.display="";
+      var main=document.querySelector("main"); if(main) main.style.display="";
+      document.body.style.overflow=""; document.documentElement.style.overflow="";
+    }catch(e){}
+  }
+  function sweep(){
+    if(busy) return 0; busy=true;
+    var n=0;
+    try{
+      var nodes=document.querySelectorAll("div,section,aside");
+      for(var i=0;i<nodes.length;i++){
+        var e=nodes[i]; if(!e||!e.parentNode) continue;
+        var t=txtOf(e).trim();
+        if(!t||t.length>180) continue;
+        if(!/جار\s*تحميل|جارٍ\s*التحميل|جار\s*التحميل|يرجى الانتظار|Loading|Please wait/i.test(t)) continue;
+        if(!covers(e)) continue;
+        var host=e; while(host.parentElement&&covers(host.parentElement)&&host.parentElement!==document.body) host=host.parentElement;
+        try{ host.parentNode.removeChild(host); n++; }catch(x){}
+      }
+    }catch(e){}
+    if(n){ kills+=n; boot(); }
+    busy=false;
+    return n;
+  }
+  /* 1) مسح دوري في أول ٩٠ ثانية، ثم عند غياب القسم النشط فقط */
+  setInterval(function(){
+    var early=(Date.now()-T0)<90000;
+    if(early||!activeView()) sweep();
+  },1200);
+
+  /* 2) مراقب: إن عادت الطبقة تُزال في اللحظة نفسها */
+  try{
+    var t=null;
+    new MutationObserver(function(){
+      if(Date.now()-T0<2000) return;
+      if(t) return;
+      t=setTimeout(function(){ t=null; sweep(); },300);
+    }).observe(document.body,{childList:true,subtree:true});
+  }catch(e){}
+
+  /* 3) إقلاع محلي فوري: ٣ ثوانٍ بلا قسم نشط ⇒ اعرض المحلي */
+  [1800,3000,5000,8000].forEach(function(ms){
+    setTimeout(function(){ if(!activeView()){ sweep(); boot(); } },ms);
+  });
+
+  /* 4) زر التحديث اليدوي إن بقي شيء */
+  function btn(){
+    try{
+      if(document.getElementById("qd191btn")) return;
+      if(!document.body) return;
+      var d=document.createElement("button"); d.id="qd191btn";
+      d.textContent="استمرار العمل بالبيانات المحلية";
+      d.style.cssText="position:fixed;inset-inline-end:14px;bottom:14px;z-index:99998;cursor:pointer;border:none;border-radius:10px;padding:9px 15px;font-family:Tajawal,system-ui,sans-serif;font-size:12px;font-weight:900;background:#7E0E14;color:#fff;box-shadow:0 6px 18px rgba(0,0,0,.22);display:none";
+      d.onclick=function(){ sweep(); boot(); d.style.display="none"; };
+      document.body.appendChild(d);
+      setTimeout(function(){ if(!activeView()) d.style.display="block"; },5000);
+    }catch(e){}
+  }
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",btn); else btn();
+
+  window.QD191={sweep:sweep,boot:boot,
+    diag:function(){ var o={kills:kills,active:activeView(),
+      ms:Date.now()-T0,loaders:(function(){ var n=0;
+        try{ document.querySelectorAll("div").forEach(function(e){ var t=(e.textContent||"").trim();
+          if(t.length<180&&/جار\s*تحميل/.test(t)&&covers(e)) n++; }); }catch(x){}
+        return n; })()};
       try{ console.log(o); }catch(e){}
       return o; }};
 })();
