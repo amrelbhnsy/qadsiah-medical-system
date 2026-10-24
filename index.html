@@ -411,7 +411,7 @@ html[dir="rtl"] .filters .select{padding-left:34px}
 .rp-path-lbl{font-size:10.5px;font-weight:800;margin-top:3px;color:var(--slate);white-space:nowrap}
 .rp-batt{display:inline-flex;align-items:center;gap:5px}
 .rp-batt b{font-weight:900;line-height:1}
-/* ===== v11-200 · DATA-CORE — مسار اللاعب وشريط الإنجاز ===== */
+/* ===== v11-201 · KPI-SINGLE — مسار اللاعب وشريط الإنجاز ===== */
 .rp-path2{display:flex;align-items:center;margin:5px 0 6px;min-width:150px}
 .rp-node{width:13px;height:13px;border-radius:50%;flex:0 0 auto;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;background:#fff;border:2px solid #D3D9E1;transition:background .25s,border-color .25s,box-shadow .25s}
 .rp-node.done{background:#15803D;border-color:#15803D}
@@ -15771,7 +15771,7 @@ try{
 }catch(e){}
 
 /* QDBK-END */
-(function(){function mk(){try{var b=document.createElement("div");b.id="qdrBadge";b.textContent="v11-200 · DATA-CORE";b.style.cssText="position:fixed;left:8px;bottom:8px;z-index:2147483647;background:#fff;color:#7E0E14;border:1px solid #7E0E14;font:800 11px/1.5 system-ui;padding:3px 9px;border-radius:20px;pointer-events:none;opacity:.97;box-shadow:0 2px 8px rgba(0,0,0,.35)";document.body.appendChild(b);}catch(e){}}if(document.body)mk();else setTimeout(mk,600);})();
+(function(){function mk(){try{var b=document.createElement("div");b.id="qdrBadge";b.textContent="v11-201 · KPI-SINGLE";b.style.cssText="position:fixed;left:8px;bottom:8px;z-index:2147483647;background:#fff;color:#7E0E14;border:1px solid #7E0E14;font:800 11px/1.5 system-ui;padding:3px 9px;border-radius:20px;pointer-events:none;opacity:.97;box-shadow:0 2px 8px rgba(0,0,0,.35)";document.body.appendChild(b);}catch(e){}}if(document.body)mk();else setTimeout(mk,600);})();
 /* ---- PWA: install as an app on Android and iPhone / iPad ---- */
 (function(){
   Object.assign(STR.en,{
@@ -24356,7 +24356,7 @@ try{
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous">
 /* =====================================================================
-   v11-200 · DATA-CORE — توحيد حالة اليوم (مباراة · تدريب · راحة · إجازة)
+   v11-201 · KPI-SINGLE — توحيد حالة اليوم (مباراة · تدريب · راحة · إجازة)
    بين: لوحة التحكم · البرنامج الأسبوعي · التقويم · جدول المباريات
    ===================================================================== */
 (function(){
@@ -24460,7 +24460,7 @@ try{
 
 <script>
 /* =====================================================================
-   v11-200 · DATA-CORE
+   v11-201 · KPI-SINGLE
    إصلاح التجمد: يُبنى الهيكل مرة واحدة فقط، ويُحدَّث محتواه الداخلي
    (لا إعادة بناء للجذر ⇒ لا يفقد الهوية ولا يعلق)
    ===================================================================== */
@@ -31844,6 +31844,91 @@ tr:hover .qde-ndate{color:#7E0E14}
     links:function(){ var a=audit();
       var t=a.sections.map(function(s){ return s.label+": "+s.count+(s.orphans?" ("+s.orphans+" بلا لاعب)":""); }).join(" · ");
       try{ console.log("QD200",t); }catch(e){} return t; }};
+})();
+</script>
+<script>
+/* ===== QD201 · بطاقة مؤشرات واحدة فقط: منع التكرار على مستوى DOM ===== */
+(function(){
+  if(window.__QD201) return; window.__QD201=1;
+  var ID="qd192kpi";
+  function isCanon(n){
+    try{ return !!(n&&n.nodeType===1&&n.id===ID&&n.getAttribute&&n.getAttribute("data-qd199")==="1"); }catch(e){ return false; }
+  }
+  function isDup(n){
+    try{ return !!(n&&n.nodeType===1&&n.id===ID&&!isCanon(n)); }catch(e){ return false; }
+  }
+  function canonNode(){
+    try{ var c=document.querySelector('[id="'+ID+'"][data-qd199="1"]'); return c||null; }catch(e){ return null; }
+  }
+
+  /* 1) امنع إدخال نسخة ثانية، وامنع حذف النسخة الأصلية */
+  try{
+    var NP=Node.prototype;
+    if(!NP.__qd201){
+      NP.__qd201=1;
+      var _ins=NP.insertBefore;
+      NP.insertBefore=function(newNode,ref){
+        try{ if(isDup(newNode)) return newNode; }catch(e){}
+        return _ins.apply(this,arguments);
+      };
+      var _app=NP.appendChild;
+      NP.appendChild=function(n){
+        try{ if(isDup(n)) return n; }catch(e){}
+        return _app.apply(this,arguments);
+      };
+      var _rem=NP.removeChild;
+      NP.removeChild=function(c){
+        try{ if(isCanon(c)) return c; }catch(e){}
+        return _rem.apply(this,arguments);
+      };
+      var _rep=NP.replaceChild;
+      NP.replaceChild=function(n,o){
+        try{ if(isDup(n)||isCanon(o)) return o; }catch(e){}
+        return _rep.apply(this,arguments);
+      };
+    }
+  }catch(e){}
+
+  /* 2) مسح أي نسخة زائدة موجودة الآن */
+  function sweep(){
+    try{
+      var v=document.getElementById("v-dashboard");
+      var all=document.querySelectorAll('[id="'+ID+'"]');
+      if(all.length>1){
+        var keep=canonNode()||all[0];
+        for(var i=0;i<all.length;i++){ var n=all[i]; if(n!==keep&&n.parentNode){ try{ n.parentNode.removeChild(n); }catch(e){} } }
+      }
+      if(!v) return;
+      /* حذف أي بطاقة عنوانها «مؤشرات احترافية» وليست البطاقة المعتمدة */
+      var keep2=canonNode();
+      var kids=v.children||[];
+      for(var j=0;j<kids.length;j++){
+        var k=kids[j];
+        if(!k||k===keep2) continue;
+        var txt=""; try{ txt=String(k.textContent||"").slice(0,120); }catch(e){}
+        if(txt.indexOf("مؤشرات احترافية")===0||txt.indexOf("Professional KPIs")===0){
+          try{ k.parentNode.removeChild(k); }catch(e){}
+        }
+      }
+      /* البطاقة المعتمدة أولًا دائمًا */
+      if(keep2&&keep2.parentNode===v&&v.firstChild!==keep2){ try{ v.insertBefore(keep2,v.firstChild); }catch(e){} }
+    }catch(e){}
+  }
+
+  /* 3) أوقف مولّد QD192 من إنشاء البطاقة (نسخة الوظيفة العامة) */
+  function kill192(){
+    try{ if(window.QD192&&QD192.dashboard){ QD192.dashboard=function(){ return false; }; } }catch(e){}
+  }
+  [0,200,800,2000,5000,10000].forEach(function(ms){ setTimeout(function(){ kill192(); sweep(); },ms); });
+  setInterval(sweep,450);
+  setInterval(kill192,4000);
+  try{
+    var mo=new MutationObserver(function(){ sweep(); });
+    var t=setInterval(function(){ var v=document.getElementById("v-dashboard"); if(v){ clearInterval(t); try{ mo.observe(v,{childList:true}); }catch(e){} } },400);
+  }catch(e){}
+
+  window.QD201={sweep:sweep,count:function(){ try{ return document.querySelectorAll('[id="'+ID+'"]').length; }catch(e){ return -1; } },
+    audit:function(){ var o={count:window.QD201.count(),canon:!!canonNode()}; try{ console.log("QD201",o); }catch(e){} return o; }};
 })();
 </script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
