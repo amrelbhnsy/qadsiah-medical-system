@@ -15771,7 +15771,7 @@ try{
 }catch(e){}
 
 /* QDBK-END */
-(function(){function mk(){try{var b=document.createElement("div");b.id="qdrBadge";b.textContent="v11-208 · NAV-FAST";b.style.cssText="position:fixed;left:8px;bottom:8px;z-index:2147483647;background:#fff;color:#7E0E14;border:1px solid #7E0E14;font:800 11px/1.5 system-ui;padding:3px 9px;border-radius:20px;pointer-events:none;opacity:.97;box-shadow:0 2px 8px rgba(0,0,0,.35)";document.body.appendChild(b);}catch(e){}}if(document.body)mk();else setTimeout(mk,600);})();
+(function(){function mk(){try{var b=document.createElement("div");b.id="qdrBadge";b.textContent="v11-209 · THERAPY-ADD";b.style.cssText="position:fixed;left:8px;bottom:8px;z-index:2147483647;background:#fff;color:#7E0E14;border:1px solid #7E0E14;font:800 11px/1.5 system-ui;padding:3px 9px;border-radius:20px;pointer-events:none;opacity:.97;box-shadow:0 2px 8px rgba(0,0,0,.35)";document.body.appendChild(b);}catch(e){}}if(document.body)mk();else setTimeout(mk,600);})();
 /* ---- PWA: install as an app on Android and iPhone / iPad ---- */
 (function(){
   Object.assign(STR.en,{
@@ -32476,6 +32476,203 @@ tr:hover .qde-ndate{color:#7E0E14}
              active:(el&&el.querySelector(".nav-item.active")?1:0)};
       try{ console.log("QD208",o); }catch(e){} return o; }};
 })();
+</script>
+<script>
+/* ===== QD209 · زر «إضافة جلسة» داخل قسم العلاج الرياضي — بنموذج جلسة العيادة الكامل ===== */
+(function(){
+  if(window.__QD209) return; window.__QD209=1;
+  var FROM=false;
+
+  function EN(){ try{ return String(localStorage.getItem("qd_lang")||"ar").indexOf("en")===0; }catch(e){ return false; } }
+  function lbl(){ return EN()?"Add session":"إضافة جلسة"; }
+  function ttl(){ return EN()?"Add session — full clinic form (saved to the therapy log and the clinic log)"
+                             :"إضافة جلسة — نموذج جلسة العيادة الكامل (تُحفظ في سجل العلاج وسجل العيادة)"; }
+  function db(){ try{ return S; }catch(e){ return null; } }
+  function therapyArr(){ var s=db(); if(!s) return []; if(!Array.isArray(s.therapies)) s.therapies=[]; return s.therapies; }
+  function sessArr(){ var s=db(); if(!s) return []; if(!Array.isArray(s.sessions)) s.sessions=[]; return s.sessions; }
+  function str(v){ return String(v==null?"":v); }
+
+  /* ---------- 1) إنشاء/تحديث سجل العلاج الرياضي المرتبط بجلسة العيادة ---------- */
+  function mirror(rec){
+    try{
+      if(!rec||!rec.id) return null;
+      var arr=therapyArr(), thId="thc_"+rec.id, th=null, i;
+      for(i=0;i<arr.length;i++){
+        if(str(arr[i].id)===thId||str(arr[i].sessionRecId)===str(rec.id)){ th=arr[i]; break; }
+      }
+      var body=str(rec.injSites).split(",").filter(Boolean).join(",");
+      if(!body){
+        var inj=((db()||{}).injuries||[]).filter(function(x){ return str(x.id)===str(rec.injuryId); })[0];
+        if(inj) body=str(inj.bodySites);
+      }
+      var soap=[rec.subj,rec.obj,rec.assess,rec.plan].filter(Boolean).join(" · ");
+      var pain=(rec.painAfter!==null&&rec.painAfter!==undefined&&str(rec.painAfter)!=="")?str(rec.painAfter):str(rec.painBefore);
+      var data={ id:thId, playerId:rec.playerId, injuryId:str(rec.injuryId), date:rec.date,
+        type:str(rec.type)||(EN()?"Therapy session":"جلسة علاج"), duration:Number(rec.duration)||0,
+        bodySites:body, pain:pain, painBefore:str(rec.painBefore), painAfter:str(rec.painAfter),
+        injName:str(rec.injName), injType:str(rec.injType), mods:str(rec.mods),
+        clinician:str(rec.clinician), attend:str(rec.attend), able:str(rec.able),
+        subj:str(rec.subj), obj:str(rec.obj), assess:str(rec.assess), plan:str(rec.plan),
+        notes:str(rec.notes)||soap, sessionRecId:rec.id, src:"clinic",
+        created:(th&&th.created)||(typeof nowLocal==="function"?nowLocal():new Date().toISOString()) };
+      if(th) Object.assign(th,data); else arr.push(data);
+      rec.fromTherapy=thId;
+      return data;
+    }catch(e){ return null; }
+  }
+
+  /* ---------- 2) الزر بجوار «جلسة علاج رياضي» ---------- */
+  function ensureBtn(){
+    try{
+      var host=document.getElementById("v-therapy"); if(!host) return;
+      var bar=host.querySelector(".filters"); if(!bar) return;
+      if(bar.querySelector('[data-act="newSessionFromTherapy"]')) return;
+      var b=document.createElement("button");
+      b.type="button";
+      b.className="btn";
+      b.style.marginInlineStart="8px";
+      b.setAttribute("data-act","newSessionFromTherapy");
+      b.setAttribute("title",ttl());
+      b.innerHTML='<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg> <span>'+lbl()+'</span>';
+      var prim=bar.querySelector('[data-act="newTherapy"]');
+      if(prim&&prim.insertAdjacentElement) prim.insertAdjacentElement("afterend",b); else bar.appendChild(b);
+    }catch(e){}
+  }
+
+  function wrapRender(){
+    try{
+      if(typeof REND==="undefined"||!REND||typeof REND.therapy!=="function"||REND.therapy.__qd209) return;
+      var orig=REND.therapy;
+      var w=function(){ var r=orig.apply(this,arguments); try{ ensureBtn(); }catch(e){} return r; };
+      w.__qd209=1; REND.therapy=w;
+    }catch(e){}
+  }
+
+  /* ---------- 3) فتح نموذج جلسة العيادة الكامل + الحفظ في السجلين ---------- */
+  function opener(s){
+    var f=null;
+    try{ if(typeof window.qdOpenSessionForm==="function") f=window.qdOpenSessionForm; }catch(e){}
+    if(!f){ try{ if(typeof sessionForm==="function") f=sessionForm; }catch(e){} }
+    if(!f) return false;
+    FROM=true; f(s||null); return true;
+  }
+  function openFromTherapy(){ if(!opener(null)){ FROM=false; try{ toast(EN()?"Could not open the session form":"تعذّر فتح نموذج الجلسة","bad"); }catch(e){} } }
+
+  function wrapSave(){
+    try{
+      if(typeof ACT==="undefined"||!ACT||typeof ACT.saveSession!=="function"||ACT.saveSession.__qd209) return;
+      var orig=ACT.saveSession;
+      var w=function(d){
+        var ours=FROM; FROM=false;
+        var before=sessArr().length;
+        orig.apply(this,arguments);
+        if(!ours) return;
+        try{
+          var arr=sessArr();
+          var rec=(d&&d.id)?arr.filter(function(x){ return str(x.id)===str(d.id); })[0]:arr[arr.length-1];
+          var okNew=!!(d&&d.id)||arr.length>before;
+          if(rec&&okNew){
+            mirror(rec);
+            try{ save(); }catch(e){}
+            try{ REND.therapy(); }catch(e){}
+            try{ if(window.qdUnifyPaint) window.qdUnifyPaint(); }catch(e){}
+          }
+        }catch(e){}
+      };
+      w.__qd209=1; ACT.saveSession=w;
+    }catch(e){}
+  }
+
+  function wrapEdit(){
+    try{
+      if(typeof ACT==="undefined"||!ACT||typeof ACT.editTherapy!=="function"||ACT.editTherapy.__qd209) return;
+      var orig=ACT.editTherapy;
+      var w=function(d){
+        try{
+          var rec=therapyArr().filter(function(x){ return str(x.id)===str(d&&d.id); })[0];
+          if(rec&&rec.sessionRecId){
+            var cs=sessArr().filter(function(x){ return str(x.id)===str(rec.sessionRecId); })[0];
+            if(cs&&opener(cs)) return;
+            FROM=false;
+          }
+        }catch(e){ FROM=false; }
+        return orig.apply(this,arguments);
+      };
+      w.__qd209=1; ACT.editTherapy=w;
+    }catch(e){}
+  }
+
+  function wrapDel(){
+    try{
+      if(typeof ACT==="undefined"||!ACT||typeof ACT.delTherapy!=="function"||ACT.delTherapy.__qd209) return;
+      var orig=ACT.delTherapy;
+      var w=function(d){
+        try{
+          var rec=therapyArr().filter(function(x){ return str(x.id)===str(d&&d.id); })[0];
+          if(rec&&rec.sessionRecId){
+            var s=db();
+            if(s) s.sessions=(s.sessions||[]).filter(function(x){ return str(x.id)!==str(rec.sessionRecId); });
+          }
+        }catch(e){}
+        return orig.apply(this,arguments);
+      };
+      w.__qd209=1; ACT.delTherapy=w;
+    }catch(e){}
+  }
+
+  function wrapEditById(){
+    try{
+      var o=window.qdEditTherapyById;
+      if(typeof o!=="function"||o.__qd209) return;
+      var w=function(id){
+        try{
+          var rec=therapyArr().filter(function(x){ return str(x.id)===str(id); })[0];
+          if(rec&&rec.sessionRecId){
+            var cs=sessArr().filter(function(x){ return str(x.id)===str(rec.sessionRecId); })[0];
+            if(cs&&opener(cs)) return;
+            FROM=false;
+          }
+        }catch(e){ FROM=false; }
+        return o.apply(this,arguments);
+      };
+      w.__qd209=1; window.qdEditTherapyById=w;
+    }catch(e){}
+  }
+
+  /* ---------- 4) لا تكرار في القوائم المدمجة (عيادة + علاج) ---------- */
+  function wrapDedupe(){
+    try{
+      var cp=window.cpSessionsOnKey;
+      if(typeof cp!=="function"||cp.__qd209) return;
+      var w=function(k){
+        var arr=cp.apply(this,arguments)||[];
+        var live={};
+        sessArr().forEach(function(s){ if(str(s.date).slice(0,10)===str(k)) live[str(s.id)]=1; });
+        return arr.filter(function(x){
+          if(!x||x.src!=="therapy") return true;
+          var th=therapyArr().filter(function(t){ return str(t.id)===str(x.id); })[0];
+          return !(th&&th.sessionRecId&&live[str(th.sessionRecId)]);
+        });
+      };
+      w.__qd209=1; window.cpSessionsOnKey=w;
+    }catch(e){}
+  }
+
+  function install(){
+    wrapRender(); wrapSave(); wrapEdit(); wrapDel(); wrapEditById(); wrapDedupe(); ensureBtn();
+  }
+
+  try{
+    if(typeof ACT!=="undefined"&&ACT){ ACT.newSessionFromTherapy=openFromTherapy; }
+  }catch(e){}
+
+  if(document.readyState==="loading"){
+    document.addEventListener("DOMContentLoaded",function(){ install(); setTimeout(install,800); },{once:true});
+  }else{ install(); setTimeout(install,800); }
+
+  window.QD209={open:openFromTherapy, mirror:mirror, install:install};
+})();
+
 </script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 </body>
