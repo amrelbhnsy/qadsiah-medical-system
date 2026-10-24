@@ -411,7 +411,7 @@ html[dir="rtl"] .filters .select{padding-left:34px}
 .rp-path-lbl{font-size:10.5px;font-weight:800;margin-top:3px;color:var(--slate);white-space:nowrap}
 .rp-batt{display:inline-flex;align-items:center;gap:5px}
 .rp-batt b{font-weight:900;line-height:1}
-/* ===== v11-197 · CLEAN-IMPORT — مسار اللاعب وشريط الإنجاز ===== */
+/* ===== v11-198 · ENCODING-FIX — مسار اللاعب وشريط الإنجاز ===== */
 .rp-path2{display:flex;align-items:center;margin:5px 0 6px;min-width:150px}
 .rp-node{width:13px;height:13px;border-radius:50%;flex:0 0 auto;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;background:#fff;border:2px solid #D3D9E1;transition:background .25s,border-color .25s,box-shadow .25s}
 .rp-node.done{background:#15803D;border-color:#15803D}
@@ -15771,7 +15771,7 @@ try{
 }catch(e){}
 
 /* QDBK-END */
-(function(){function mk(){try{var b=document.createElement("div");b.id="qdrBadge";b.textContent="v11-197 · CLEAN-IMPORT";b.style.cssText="position:fixed;left:8px;bottom:8px;z-index:2147483647;background:#fff;color:#7E0E14;border:1px solid #7E0E14;font:800 11px/1.5 system-ui;padding:3px 9px;border-radius:20px;pointer-events:none;opacity:.97;box-shadow:0 2px 8px rgba(0,0,0,.35)";document.body.appendChild(b);}catch(e){}}if(document.body)mk();else setTimeout(mk,600);})();
+(function(){function mk(){try{var b=document.createElement("div");b.id="qdrBadge";b.textContent="v11-198 · ENCODING-FIX";b.style.cssText="position:fixed;left:8px;bottom:8px;z-index:2147483647;background:#fff;color:#7E0E14;border:1px solid #7E0E14;font:800 11px/1.5 system-ui;padding:3px 9px;border-radius:20px;pointer-events:none;opacity:.97;box-shadow:0 2px 8px rgba(0,0,0,.35)";document.body.appendChild(b);}catch(e){}}if(document.body)mk();else setTimeout(mk,600);})();
 /* ---- PWA: install as an app on Android and iPhone / iPad ---- */
 (function(){
   Object.assign(STR.en,{
@@ -24356,7 +24356,7 @@ try{
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous">
 /* =====================================================================
-   v11-197 · CLEAN-IMPORT — توحيد حالة اليوم (مباراة · تدريب · راحة · إجازة)
+   v11-198 · ENCODING-FIX — توحيد حالة اليوم (مباراة · تدريب · راحة · إجازة)
    بين: لوحة التحكم · البرنامج الأسبوعي · التقويم · جدول المباريات
    ===================================================================== */
 (function(){
@@ -24460,7 +24460,7 @@ try{
 
 <script>
 /* =====================================================================
-   v11-197 · CLEAN-IMPORT
+   v11-198 · ENCODING-FIX
    إصلاح التجمد: يُبنى الهيكل مرة واحدة فقط، ويُحدَّث محتواه الداخلي
    (لا إعادة بناء للجذر ⇒ لا يفقد الهوية ولا يعلق)
    ===================================================================== */
@@ -31218,10 +31218,15 @@ tr:hover .qde-ndate{color:#7E0E14}
     try{
       var fr=new FileReader();
       fr.onload=function(){
-        var m=magic(fr.result);
-        if(m){ t.value="";
-          toast2(T("الملف ليس جدولًا — نوعه: ","Not a spreadsheet — detected: ")+m.toUpperCase());
-        }
+        try{
+          var m=magic(fr.result), e2=(name.split(".").pop()||"").toLowerCase();
+          var okZip=(m==="zip"&&/^(xlsx|xlsm|xls)$/.test(e2));
+          var okPdf=(m==="pdf"&&e2==="pdf");
+          if((m==="jpg"||m==="png"||m==="gif")||(m&&!okZip&&!okPdf)){
+            t.value="";
+            toast2(T("الملف ليس جدولًا — نوعه: ","Not a spreadsheet — detected: ")+m.toUpperCase());
+          }
+        }catch(x){}
       };
       fr.readAsArrayBuffer(f.slice(0,2048));
     }catch(x){}
@@ -31234,6 +31239,7 @@ tr:hover .qde-ndate{color:#7E0E14}
       var v=ta.value;
       if(looksBinary(v)){
         ta.value="";
+        try{ window.imTextVal=""; }catch(x){}
         toast2(T("اللصق كان صورة أو ملفًا ثنائيًّا — لا يُقرأ كبرنامج. انسخ الجدول من Excel (خلايا) لا كصورة.","What you pasted was an image or a binary file — not a programme. Copy the table cells from Excel, not a picture."));
         return;
       }
@@ -31275,6 +31281,12 @@ tr:hover .qde-ndate{color:#7E0E14}
       b.style.cssText="margin:0 0 8px;background:#0E7490;border-color:#0E7490;color:#fff";
       b.onclick=function(){ cleanBox(); toast2(T("تم التنظيف","Cleaned"),"ok"); };
       ta.parentNode.insertBefore(b,ta);
+      var d=document.createElement("button");
+      d.type="button"; d.id="qd198diag"; d.className="btn sm";
+      d.textContent=T("تشخيص","Diagnose");
+      d.style.cssText="margin:0 6px 8px 0;background:#0E7490;border-color:#0E7490;color:#fff";
+      d.onclick=function(){ toast2(diagText(),"ok"); };
+      ta.parentNode.insertBefore(d,ta);
     }catch(e){}
   }
   var mo=null;
@@ -31318,6 +31330,71 @@ tr:hover .qde-ndate{color:#7E0E14}
     }catch(e){}
   })();
 
+  /* ---------- توحيد الخلايا: ترميز، محارف تحكّم، أرقام عربية ---------- */
+  function arN(s){ return (String(s==null?"":s).match(/[\u0600-\u06FF]/g)||[]).length; }
+  function laN(s){ return (String(s==null?"":s).match(/[\u00C0-\u00FF]/g)||[]).length; }
+  function normCell(v){
+    if(v==null) return "";
+    var s=String(v);
+    s=s.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\uFFFD\u200E\u200F\u202A-\u202E]/g,"");
+    s=s.replace(/\u0640/g,"");
+    try{ if(s.normalize) s=s.normalize("NFKC"); }catch(e){}
+    if(arN(s)===0 && laN(s)>=2) s=fixMojibake(s);
+    else if(laN(s)>=3 && arN(s)>0) s=s.replace(/[A-Za-z\u00C0-\u00FF]{0,}/g,function(m){ return m; });
+    s=s.replace(/[\u0660-\u0669]/g,function(c){ return String.fromCharCode(c.charCodeAt(0)-0x0660+48); });
+    s=s.replace(/[\u06F0-\u06F9]/g,function(c){ return String.fromCharCode(c.charCodeAt(0)-0x06F0+48); });
+    s=s.replace(/\s{2,}/g," ").trim();
+    return s;
+  }
+  function normMatrix(m){
+    try{
+      if(!m||!m.length) return m;
+      for(var i=0;i<m.length;i++){
+        var r=m[i]; if(!r||!r.length) continue;
+        for(var j=0;j<r.length;j++){ if(typeof r[j]==="string") r[j]=normCell(r[j]); }
+      }
+      window.__QD198_MAT=m;
+    }catch(e){}
+    return m;
+  }
+  function install(){
+    try{
+      if(typeof imSheetMatrix==="function" && !imSheetMatrix.__qd198){
+        var _sm=imSheetMatrix;
+        window.imSheetMatrix=function(wb){ var r=_sm(wb); if(r&&r.matrix) r.matrix=normMatrix(r.matrix); return r; };
+        window.imSheetMatrix.__qd198=1;
+      }
+      if(typeof imParseCsv==="function" && !imParseCsv.__qd198){
+        var _pc=imParseCsv;
+        window.imParseCsv=function(mx,an){ return _pc(normMatrix(mx),an); };
+        window.imParseCsv.__qd198=1;
+      }
+      if(typeof imParseText==="function" && !imParseText.__qd198){
+        var _pt=imParseText;
+        window.imParseText=function(t,an){ return _pt(fixMojibake(String(t||"")).replace(/\u0000/g,""),an); };
+        window.imParseText.__qd198=1;
+      }
+    }catch(e){}
+  }
+  setTimeout(install,0); setTimeout(install,1200); setInterval(install,4000);
+
+  /* ---------- تشخيص الحروف ---------- */
+  function diagText(){
+    try{
+      var m=window.__QD198_MAT||[], picks=[], bad=0, tot=0;
+      for(var i=0;i<m.length&&picks.length<6;i++){
+        for(var j=0;j<(m[i]||[]).length;j++){
+          var c=m[i][j]; if(typeof c!=="string"||!c.trim()) continue;
+          tot++; if(arN(c)===0&&laN(c)>=2) bad++;
+          if(picks.length<6) picks.push(c.slice(0,40));
+        }
+      }
+      var o={cells:tot,suspect:bad,sample:picks,match:(window.imDraft&&imDraft.rows)?imDraft.rows.length:0};
+      try{ console.log("QD198",o); }catch(e){}
+      return "خلية: "+tot+" · مشبوهة: "+bad+"\nعيّنة: "+picks.join(" | ");
+    }catch(e){ return "لا بيانات"; }
+  }
+  window.QD198={norm:normCell,diag:diagText,install:install};
   /* ---------- قراءة نصية آمنة لأي استيراد ---------- */
   window.QD197={fixMojibake:fixMojibake,looksBinary:looksBinary,pick:pickText,clean:cleanBox,
     audit:function(){ var o={weeklyOpen:isWeeklyModal(),hasBox:!!document.getElementById("imText"),
