@@ -411,7 +411,7 @@ html[dir="rtl"] .filters .select{padding-left:34px}
 .rp-path-lbl{font-size:10.5px;font-weight:800;margin-top:3px;color:var(--slate);white-space:nowrap}
 .rp-batt{display:inline-flex;align-items:center;gap:5px}
 .rp-batt b{font-weight:900;line-height:1}
-/* ===== v11-207 · LAYOUT-FIX — مسار اللاعب وشريط الإنجاز ===== */
+/* ===== v11-208 · NAV-FAST — مسار اللاعب وشريط الإنجاز ===== */
 .rp-path2{display:flex;align-items:center;margin:5px 0 6px;min-width:150px}
 .rp-node{width:13px;height:13px;border-radius:50%;flex:0 0 auto;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;background:#fff;border:2px solid #D3D9E1;transition:background .25s,border-color .25s,box-shadow .25s}
 .rp-node.done{background:#15803D;border-color:#15803D}
@@ -15771,7 +15771,7 @@ try{
 }catch(e){}
 
 /* QDBK-END */
-(function(){function mk(){try{var b=document.createElement("div");b.id="qdrBadge";b.textContent="v11-207 · LAYOUT-FIX";b.style.cssText="position:fixed;left:8px;bottom:8px;z-index:2147483647;background:#fff;color:#7E0E14;border:1px solid #7E0E14;font:800 11px/1.5 system-ui;padding:3px 9px;border-radius:20px;pointer-events:none;opacity:.97;box-shadow:0 2px 8px rgba(0,0,0,.35)";document.body.appendChild(b);}catch(e){}}if(document.body)mk();else setTimeout(mk,600);})();
+(function(){function mk(){try{var b=document.createElement("div");b.id="qdrBadge";b.textContent="v11-208 · NAV-FAST";b.style.cssText="position:fixed;left:8px;bottom:8px;z-index:2147483647;background:#fff;color:#7E0E14;border:1px solid #7E0E14;font:800 11px/1.5 system-ui;padding:3px 9px;border-radius:20px;pointer-events:none;opacity:.97;box-shadow:0 2px 8px rgba(0,0,0,.35)";document.body.appendChild(b);}catch(e){}}if(document.body)mk();else setTimeout(mk,600);})();
 /* ---- PWA: install as an app on Android and iPhone / iPad ---- */
 (function(){
   Object.assign(STR.en,{
@@ -24356,7 +24356,7 @@ try{
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous">
 /* =====================================================================
-   v11-207 · LAYOUT-FIX — توحيد حالة اليوم (مباراة · تدريب · راحة · إجازة)
+   v11-208 · NAV-FAST — توحيد حالة اليوم (مباراة · تدريب · راحة · إجازة)
    بين: لوحة التحكم · البرنامج الأسبوعي · التقويم · جدول المباريات
    ===================================================================== */
 (function(){
@@ -24460,7 +24460,7 @@ try{
 
 <script>
 /* =====================================================================
-   v11-207 · LAYOUT-FIX
+   v11-208 · NAV-FAST
    إصلاح التجمد: يُبنى الهيكل مرة واحدة فقط، ويُحدَّث محتواه الداخلي
    (لا إعادة بناء للجذر ⇒ لا يفقد الهوية ولا يعلق)
    ===================================================================== */
@@ -32377,6 +32377,104 @@ tr:hover .qde-ndate{color:#7E0E14}
       try{ console.log("QD207",out); }catch(e){}
       return out;
     }};
+})();
+</script>
+<script>
+/* ===== QD208 · قائمة فورية بلا وميض: رسم أول مرة ثم تحديث فقط عند التغيّر ===== */
+(function(){
+  if(window.__QD208) return; window.__QD208=1;
+  var T0=performance.now(), last="", paintMs=null, writes=0, skips=0;
+
+  function EN(){ try{ return String(localStorage.getItem("qd_lang")||"ar").indexOf("en")===0; }catch(e){ return false; } }
+  function TT(k){ try{ return (typeof T==="function")?T(k):String(k); }catch(e){ return String(k); } }
+  function esc2(v){ return String(v==null?"":v).replace(/[&<>"]/g,function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
+  function navEl(){ try{ return document.getElementById("nav"); }catch(e){ return null; } }
+  function S(){ try{ return window.QD_S|| (typeof S!=="undefined"?S:null); }catch(e){ return null; } }
+  function nArr(x){ try{ return Array.isArray(x)?x.length:0; }catch(e){ return 0; } }
+
+  function counts(){
+    var s=S(), c={};
+    try{
+      c.players=nArr(s.players);
+      c.injuries=nArr(s.injuries);
+      c.currentinj=c.injuries;
+      c.illnesses=nArr(s.illnesses);
+      c.documents=nArr(s.documents);
+      c.mental=nArr(s.mental);
+      c.therapy=nArr(s.therapies);
+      c.activities=nArr(s.activities);
+      c.daily=(typeof dlTodayCount==="function")?dlTodayCount():0;
+    }catch(e){}
+    return c;
+  }
+  function build(){
+    var NAVX=null; try{ NAVX=(typeof NAV!=="undefined")?NAV:null; }catch(e){}
+    if(!NAVX||!NAVX.length) return "";
+    var cnt=counts(), cur=null; try{ cur=(typeof current!=="undefined")?current:null; }catch(e){}
+    var h='<div class="grp">'+TT("grp_overview")+'</div>', lastG="";
+    for(var i=0;i<NAVX.length;i++){
+      var n=NAVX[i]; if(!n) continue;
+      var g=n.grp||"";
+      if(g&&g!==lastG){ h+='<div class="grp">'+TT(g)+'</div>'; lastG=g; }
+      var icon=""; try{ icon=(typeof svg==="function")?svg(n.icon,1.9):""; }catch(e){}
+      h+='<button class="nav-item'+(n.id===cur?" active":"")+'" data-view="'+esc2(n.id)+'">'+icon+
+         '<span>'+esc2(TT(n.label))+'</span>'+(cnt[n.id]?'<span class="cnt">'+cnt[n.id]+'</span>':'')+'</button>';
+    }
+    return h;
+  }
+  function paint(force){
+    var el=navEl(); if(!el) return false;
+    var h="";
+    try{ h=build(); }catch(e){ return false; }
+    if(!h) return false;                       /* لا تكتب فراغًا أبدًا */
+    if(!force&&h===last) { skips++; return true; }  /* لا إعادة كتابة بلا تغيير */
+    last=h; writes++;
+    try{ el.innerHTML=h; }catch(e){ return false; }
+    if(paintMs==null){ paintMs=Math.round(performance.now()-T0);
+      try{ document.documentElement.setAttribute("data-qd208",String(paintMs)); }catch(e){} }
+    return true;
+  }
+  /* استبدل renderNav بنسخة تكتب فقط عند التغيّر */
+  try{
+    var o=(typeof window.renderNav==="function")?window.renderNav:null;
+    var w=function(){ paint(false); };
+    w.__qd208=1;
+    window.renderNav=w;
+    try{ if(typeof renderNav==="function") renderNav=w; }catch(e){}
+  }catch(e){}
+
+  /* ارسم بأسرع وقت ممكن: فورًا، ثم في أول frame، ثم عند جهوزية DOM */
+  paint(true);
+  try{ if(window.requestAnimationFrame) requestAnimationFrame(function(){ paint(false); }); }catch(e){}
+  try{
+    if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",function(){ paint(false); },{once:true});
+    else paint(false);
+  }catch(e){}
+
+  /* أي مسح خارجي للقائمة يعاد رسمه فورًا */
+  try{
+    var mo=new MutationObserver(function(){
+      var el=navEl(); if(!el) return;
+      if(!el.children.length){ paint(true); }
+    });
+    var t=setInterval(function(){ var el=navEl(); if(el){ clearInterval(t); try{ mo.observe(el,{childList:true}); }catch(e){} } },200);
+  }catch(e){}
+
+  /* تجميع نداءات التحديث المتقاربة */
+  var pend=null;
+  try{
+    var iv=setInterval(function(){
+      var el=navEl();
+      if(el&&!el.children.length) paint(true);
+      if(paintMs!=null) clearInterval(iv);
+    },250);
+  }catch(e){}
+
+  window.QD208={paint:paint,refresh:function(){ return paint(true); },
+    audit:function(){ var el=navEl();
+      var o={firstPaintMs:paintMs,writes:writes,skips:skips,items:(el?el.children.length:0),
+             active:(el&&el.querySelector(".nav-item.active")?1:0)};
+      try{ console.log("QD208",o); }catch(e){} return o; }};
 })();
 </script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
