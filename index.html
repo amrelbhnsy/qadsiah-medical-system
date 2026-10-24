@@ -15771,7 +15771,7 @@ try{
 }catch(e){}
 
 /* QDBK-END */
-(function(){function mk(){try{var b=document.createElement("div");b.id="qdrBadge";b.textContent="v11-217 · MSG-EDIT";b.style.cssText="position:fixed;left:8px;bottom:8px;z-index:2147483647;background:#fff;color:#7E0E14;border:1px solid #7E0E14;font:800 11px/1.5 system-ui;padding:3px 9px;border-radius:20px;pointer-events:none;opacity:.97;box-shadow:0 2px 8px rgba(0,0,0,.35)";document.body.appendChild(b);}catch(e){}}if(document.body)mk();else setTimeout(mk,600);})();
+(function(){function mk(){try{var b=document.createElement("div");b.id="qdrBadge";b.textContent="v11-219 · ANATOMY";b.style.cssText="position:fixed;left:8px;bottom:8px;z-index:2147483647;background:#fff;color:#7E0E14;border:1px solid #7E0E14;font:800 11px/1.5 system-ui;padding:3px 9px;border-radius:20px;pointer-events:none;opacity:.97;box-shadow:0 2px 8px rgba(0,0,0,.35)";document.body.appendChild(b);}catch(e){}}if(document.body)mk();else setTimeout(mk,600);})();
 /* ---- PWA: install as an app on Android and iPhone / iPad ---- */
 (function(){
   Object.assign(STR.en,{
@@ -33904,6 +33904,750 @@ tr:hover .qde-ndate{color:#7E0E14}
     }catch(e){}
     try{ setInterval(function(){ inject(); badge(); hookMsg(); },1500); }catch(e){}
   };
+  boot();
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",boot,{once:true});
+})();
+
+</script>
+<script>
+/* ===== QD218 · تنظيم تسجيل الإصابة: إزالة التكرار في أنواع الإصابات والمواضع التشريحية + تقرير إصابة معتمد دوليًا ===== */
+(function(){
+  if(window.__QD218) return; window.__QD218=1;
+
+  function EN(){ try{ return String(localStorage.getItem("qd_lang")||"ar").indexOf("en")===0; }catch(e){ return false; } }
+  function L(a,e){ return EN()?e:a; }
+  function str(v){ return String(v==null?"":v); }
+  function say(m,k){ try{ if(typeof window.toast==="function") window.toast(m,k); }catch(e){} }
+  function esc(v){ return str(v).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+  function norm(v){ return str(v).toLowerCase().replace(/[\u064B-\u065F\u0670]/g,"").replace(/[أإآ]/g,"ا").replace(/ى/g,"ي").replace(/ة/g,"ه").replace(/[\s\-_/.,()]+/g," ").trim(); }
+
+  function ST(){
+    try{ if(window.QD_S&&Array.isArray(window.QD_S.injuries)) return window.QD_S; }catch(e){}
+    try{ if(typeof window.QDSIGN_STATE==="function"){ var s=window.QDSIGN_STATE(); if(s) return s; } }catch(e){}
+    try{ return window.QD_S||null; }catch(e){ return null; }
+  }
+  function PLRS(){ var s=ST(); return (s&&Array.isArray(s.players))?s.players:[]; }
+  function INJS(){ var s=ST(); return (s&&Array.isArray(s.injuries))?s.injuries:[]; }
+  function CFG(){ var s=ST(); return (s&&s.settings)||{}; }
+  function player(id){ return PLRS().filter(function(p){ return str(p.id)===str(id); })[0]||null; }
+  function fullName(p){ return p?((p.first||"")+" "+(p.last||"")).trim():""; }
+
+  /* ================= 1) المواضع التشريحية: أسماء موحّدة بلا تكرار ================= */
+  var SITE_CANON=[
+    ["HEAD","الرأس","Head"],["FACE","الوجه","Face"],["NECK","الرقبة","Neck"],
+    ["SHOULDER","الكتف","Shoulder"],["CLAVICLE","الترقوة","Clavicle"],["UPPER ARM","العضد (أعلى الذراع)","Upper arm"],
+    ["ELBOW","المرفق","Elbow"],["FOREARM","الساعد","Forearm"],["WRIST","الرسغ","Wrist"],["HAND","اليد","Hand"],
+    ["CHEST","الصدر","Chest"],["RIBS","الأضلاع","Ribs"],["UPPER BACK","أعلى الظهر","Upper back"],
+    ["MID BACK","وسط الظهر","Mid back"],["LOW BACK","أسفل الظهر","Lower back"],["ABDOMEN","البطن","Abdomen"],
+    ["PELVIS","الحوض","Pelvis"],["GROIN","المنطقة الإربية","Groin"],["HIP","الورك","Hip"],
+    ["GLUTEAL","الألوية","Gluteal"],["THIGH","الفخذ","Thigh"],["HAMSTRING","الخلفية (المأبضية)","Hamstring"],
+    ["QUADRICEPS","الرباعية (أمامي الفخذ)","Quadriceps"],["ADDUCTOR","المقربات","Adductor"],
+    ["KNEE","الركبة","Knee"],["PATELLA","الرضفة","Patella"],["LOWER LEG","الساق","Lower leg"],
+    ["CALF","السمانة (بطّة الساق)","Calf"],["SHIN","مقدمة الساق","Shin"],["ACHILLES","وتر أخيل","Achilles"],
+    ["ANKLE","الكاحل","Ankle"],["FOOT","القدم","Foot"],["HEEL","الكعب","Heel"],["TOES","الأصابع","Toes"]
+  ];
+  var SITE_AR={}, SITE_EN={};
+  SITE_CANON.forEach(function(x){ SITE_AR[x[0]]=x[1]; SITE_EN[x[0]]=x[2]; });
+  function siteLabel(v){
+    var raw=str(v).trim(); if(!raw) return "";
+    var up=raw.toUpperCase();
+    var side="";
+    if(/^L(E)?[\.\s]/.test(up)||/LEFT/.test(up)) side=L("يسار","L");
+    if(/^R(IGHT)?[\.\s]/.test(up)||/RIGHT/.test(up)) side=L("يمين","R");
+    var base=up.replace(/^(L|R)\.?\s*/,"").replace(/^(LEFT|RIGHT)\s*/,"")
+               .replace(/\s*\((FRONT|BACK)\)/g,"").replace(/\s*(FRONT|BACK)$/g,"").trim();
+    var key=SITE_CANON.map(function(x){ return x[0]; }).filter(function(k){ return base.indexOf(k)>-1; })[0];
+    if(!key) return EN()?raw:raw;
+    var nm=EN()?SITE_EN[key]:SITE_AR[key];
+    return (side?side+" — ":"")+nm;
+  }
+
+  /* ================= 2) أنواع الإصابات: قائمة واحدة موحّدة (OSIICS-10) ================= */
+  var TYPE_CANON=[
+    ["Muscle injury / strain","إصابة عضلية / شد عضلي","MUSCLE",[["Hamstring strain","شد في الخلفية"],["Quadriceps strain","شد في الرباعية"],["Adductor strain","شد في المقربات"],["Calf strain","شد في السمانة"],["Other muscle strain","شد عضلي آخر"]]],
+    ["Tendon injury / tendinopathy","إصابة وترية / التهاب وتر","TENDON",[["Achilles tendinopathy","التهاب وتر أخيل"],["Patellar tendinopathy","التهاب وتر الرضفة"],["Tendon rupture","تمزق وتر"],["Other tendinopathy","اعتلال وتر آخر"]]],
+    ["Ligament sprain","التواء رباط","LIGAMENT",[["Ankle sprain","التواء الكاحل"],["Knee sprain (ACL/PCL)","التواء الرباط الصليبي"],["MCL / LCL sprain","التواء الرباط الجانبي"],["Other joint sprain","التواء مفصل آخر"]]],
+    ["Meniscus / cartilage lesion","إصابة الغضروف الهلالي","CARTILAGE",[["Meniscus tear","تمزق الغضروف الهلالي"],["Chondral lesion","تلف غضروفي"]]],
+    ["Fracture (suspected / confirmed)","كسر (مشتبه أو مؤكد)","FRACTURE",[["Stress fracture","كسر إجهادي"],["Traumatic fracture","كسر رضحي"]]],
+    ["Dislocation / subluxation","خلع أو خلع جزئي","DISLOCATION",[["Shoulder dislocation","خلع الكتف"],["Patellar dislocation","خلع الرضفة"]]],
+    ["Contusion / haematoma","كدمة أو ورم دموي","CONTUSION",[["Muscle contusion","كدمة عضلية"],["Bone contusion","كدمة عظمية"]]],
+    ["Laceration / skin injury","جرح / إصابة جلدية","SKIN",[["Laceration","جرح قطعي"],["Blister / abrasion","بثور أو سحجات"],["Skin infection","عدوى جلدية"]]],
+    ["Concussion","ارتجاج الدماغ","CONCUSSION",[["Concussion without loss of consciousness","ارتجاج دون فقدان وعي"],["Concussion with loss of consciousness","ارتجاج مع فقدان وعي"]]],
+    ["Nerve injury","إصابة عصبية","NERVE",[["Neuropraxia","شلل عصبي مؤقت"],["Nerve compression","انضغاط عصبي"]]],
+    ["Overuse / load injury","إصابة إجهاد مفرط","OVERUSE",[["Periostitis / shin pain","التهاب سمحاق / ألم الظنبوب"],["Bursitis","التهاب الجراب"],["Stress reaction","تفاعل إجهادي عظمي"]]],
+    ["Illness (non-injury)","مرض (ليس إصابة)","ILLNESS",[["Respiratory infection","عدوى تنفسية"],["Gastrointestinal","اضطراب هضمي"],["Other illness","مرض آخر"]]],
+    ["Other injury","إصابة أخرى","OTHER",[["Dental","إصابة أسنان"],["Visceral","إصابة أحشاء"],["Unspecified","غير محددة"]]]
+  ];
+
+
+  var LEGACY={"muscle rupture strain":"Muscle injury / strain","muscle strain":"Muscle injury / strain","muscle rupture":"Muscle injury / strain",
+    "sprain ligament":"Ligament sprain","ligament sprain":"Ligament sprain","sprain":"Ligament sprain",
+    "concussion":"Concussion","structural brain injury":"Concussion",
+    "fracture suspected or confirmed":"Fracture (suspected / confirmed)","fracture":"Fracture (suspected / confirmed)",
+    "dislocation or subluxation":"Dislocation / subluxation","dislocation":"Dislocation / subluxation",
+    "haematoma contusion bruise":"Contusion / haematoma","contusion":"Contusion / haematoma","haematoma":"Contusion / haematoma",
+    "laceration":"Laceration / skin injury","abrasion":"Blister / abrasion",
+    "lesion of meniscus cartilage":"Meniscus / cartilage lesion","meniscus":"Meniscus tear","cartilage":"Chondral lesion",
+    "nerve":"Nerve injury","spinal cord compression transection":"Nerve injury",
+    "other bone injury":"Other injury","overuse unspecified":"Overuse / load injury","synovitis effusion":"Overuse / load injury",
+    "tendon rupture tendinosis":"Tendon injury / tendinopathy","tendon":"Tendon injury / tendinopathy",
+    "visceral injury":"Visceral","dental":"Dental","other":"Unspecified"};
+  function mapLegacy(v){
+    var k=norm(v); if(!k) return "";
+    if(LEGACY[k]) return LEGACY[k];
+    var keys=Object.keys(LEGACY);
+    for(var i=0;i<keys.length;i++){ if(k.indexOf(keys[i])>-1||keys[i].indexOf(k)>-1) return LEGACY[keys[i]]; }
+    return "";
+  }
+
+  function rebuildTypeSelect(){
+    try{
+      var root=document.getElementById("modalCard"); if(!root) return 0;
+      var sel=root.querySelector('select[data-f="type"]'); if(!sel) return 0;
+      if(sel.__qd218) return 0;
+      var cur=str(sel.value||""); var mapped=mapLegacy(cur); var n=0;
+      var html='';
+      TYPE_CANON.forEach(function(g){
+        html+='<optgroup label="'+esc(EN()?g[0]:g[1])+'">';
+        /* التصنيف الرئيسي نفسه خيارًا (يمنع فقدان تصنيف السجلات القديمة) */
+        html+='<option value="'+esc(g[0])+'"'+((mapped===g[0]||norm(cur)===norm(g[0]))?" selected":"")+'>'+esc(g[0])+' — '+(EN()?"general":g[1])+'</option>';
+        g[3].forEach(function(it){
+          var v=EN()?it[0]:it[1];
+          /* القيمة المحفوظة قد تكون الاسم القديم — نُبقي التوافق */
+          var val=it[0];
+          html+='<option value="'+esc(val)+'"'+(norm(cur)===norm(val)||norm(cur)===norm(v)||mapped===val?" selected":"")+'>'+esc(EN()?it[0]:it[1])+'</option>';
+          n++;
+        });
+        html+='</optgroup>';
+      });
+      sel.innerHTML=html; sel.__qd218=1;
+      /* إزالة حقل «تحديد النوع (إذا كان أخرى)» المكرر — لم يعد لازمًا */
+      var other=root.querySelector('input[data-f="typeOther"]');
+      if(other){ var f=other.closest(".field"); if(f) f.style.display="none"; }
+      return n;
+    }catch(e){ return 0; }
+  }
+
+  /* إزالة تكرار المواضع في شريط الوسم أسفل الخريطة */
+  function dedupeSites(){
+    try{
+      var root=document.getElementById("modalCard"); if(!root) return 0;
+      var bm=root.querySelector('.bodymap[data-f="bodySites"]'); if(!bm) return 0;
+      var arr=str(bm.getAttribute("data-val")).split(",").filter(Boolean);
+      var seen={}, out=[];
+      arr.forEach(function(v){ var k=norm(siteLabel(v)); if(seen[k]) return; seen[k]=1; out.push(v); });
+      if(out.length!==arr.length){
+        bm.setAttribute("data-val",out.join(","));
+        Array.prototype.forEach.call(bm.querySelectorAll(".bmz"),function(z){
+          z.classList.toggle("on",out.indexOf(z.getAttribute("data-v"))>-1);
+        });
+        var lab=root.querySelector("#bmSel");
+        if(lab) lab.textContent=out.length?siteLabelList(out):(typeof T==="function"?T("bm_none_sel"):"");
+      }
+      return out.length;
+    }catch(e){ return 0; }
+  }
+  function siteLabelList(arr){ return arr.map(siteLabel).filter(Boolean).join(" — "); }
+
+  /* ================= 3) التقرير المعتمد دوليًا ================= */
+  function daysLost(i){
+    try{
+      var end=(i.plan&&(i.plan.healedDate||i.plan.rtpDate))||i.clearedDate||"";
+      var d1=new Date(str(i.date).replace(" ","T")), d2=end?new Date(end):new Date();
+      if(isNaN(d1.getTime())) return 0;
+      return Math.max(0,Math.round((d2-d1)/864e5));
+    }catch(e){ return 0; }
+  }
+  function age(p){
+    try{ var y=+str(p.dob).slice(0,4); if(!y) return ""; return (new Date().getFullYear()-y); }catch(e){ return ""; }
+  }
+  function osiics(i){
+    try{
+      var t=norm(i.type); var map=[["hamstring","M. Hamstring"],["quadriceps","M. Quadriceps"],["adductor","M. Adductor"],["calf","M. Calf"],
+        ["muscle","M. Other"],["tendon","T. Tendon"],["achilles","T. Achilles"],["ligament","L. Ligament"],["sprain","L. Sprain"],
+        ["meniscus","C. Meniscus"],["cartilage","C. Chondral"],["fracture","B. Fracture"],["disloc","D. Dislocation"],
+        ["contusion","K. Contusion"],["haematoma","K. Haematoma"],["laceration","S. Laceration"],["concussion","H. Concussion"],
+        ["nerve","N. Nerve"],["overuse","O. Overuse"]];
+      for(var k=0;k<map.length;k++){ if(t.indexOf(map[k][0])>-1) return map[k][1]; }
+      var m=(i.exam&&i.exam.diagnosis)?norm(i.exam.diagnosis):"";
+      for(var q=0;q<map.length;q++){ if(m.indexOf(map[q][0])>-1) return map[q][1]; }
+      return "—";
+    }catch(e){ return "—"; }
+  }
+  function row(lab,val){ return '<tr><th>'+esc(lab)+'</th><td>'+esc(str(val)||"—")+'</td></tr>'; }
+  function reportHTML(i){
+    var p=player(i.playerId)||{};
+    var s=CFG();
+    var dmgs=str(i.bodySites).split(",").filter(Boolean).map(siteLabel).join(" · ")||"—";
+    var kind=str(i.type);
+    var ctx=(i.football&&i.football.context)||"";
+    var mech=str(i.mechanism)+((i.mechNotes)?(" — "+i.mechNotes):"");
+    var contact=(i.contact&&str(i.contact.fromContact).toUpperCase()==="YES")?L("حادث تلامسي","Contact"):L("بدون تلامس","Non-contact");
+    var grade=str(i.grade)||"—";
+    var nature=str(i.nature)||"—";
+    var dmg=daysLost(i);
+    var status=str(i.status)||"—";
+    var plan=i.plan||{};
+    var diag=(i.exam&&i.exam.diagnosis)||"";
+    var ability=(i.signoff&&i.signoff.ability)||"";
+    var reps=(INJS()||[]).length;
+    var rid="INJ-"+str(i.id).slice(-6).toUpperCase();
+    var today=new Date();
+    var pd=function(n){ return (n<10?"0":"")+n; };
+    var gdate=today.getFullYear()+"-"+pd(today.getMonth()+1)+"-"+pd(today.getDate());
+    var sig=(i.signoff&&i.signoff.clinicianSig)?'<img src="'+esc(i.signoff.clinicianSig)+'" style="height:52px">':'<span class="ph">..........................</span>';
+    var psig=(i.signoff&&i.signoff.playerSig)?'<img src="'+esc(i.signoff.playerSig)+'" style="height:52px">':'<span class="ph">..........................</span>';
+    var trs=(i.treatments||[]).length;
+
+    return '<!doctype html><html dir="'+(EN()?"ltr":"rtl")+'"><head><meta charset="utf-8"><title>'+esc(L("تقرير إصابة","Injury Report")+" — "+fullName(p))+'</title>'+
+    '<style>'+
+    '@page{size:A4;margin:12mm 12mm 14mm}'+
+    'body{font-family:"Segoe UI",Tahoma,Arial,sans-serif;color:#141414;font-size:11.5px;line-height:1.55;margin:0}'+
+    '.hdr{display:flex;align-items:center;gap:14px;border-bottom:3px solid #7E0E14;padding-bottom:10px}'+
+    '.hdr .logo{width:56px;height:56px;border-radius:12px;background:#7E0E14;color:#fff;display:grid;place-items:center;font-weight:900;font-size:18px}'+
+    '.hdr h1{font-size:17px;margin:0}.hdr .sub{font-size:10.5px;color:#666;margin-top:3px}'+
+    '.hdr .meta{margin-inline-start:auto;text-align:end;font-size:10px;color:#555}'+
+    'h2{font-size:12px;margin:14px 0 6px;padding:5px 9px;background:#f3ece9;border-inline-start:4px solid #7E0E14;border-radius:4px}'+
+    'table{width:100%;border-collapse:collapse;margin-bottom:4px}'+
+    'th,td{border:1px solid #dcd6d1;padding:5px 7px;vertical-align:top;font-size:10.8px;text-align:start}'+
+    'th{background:#faf7f4;width:32%;font-weight:700;color:#3d3a37}'+
+    '.two{display:flex;gap:10px}.two>div{flex:1}'+
+    '.kpis{display:flex;gap:8px;margin:8px 0}'+
+    '.kpi{flex:1;border:1px solid #dcd6d1;border-radius:8px;padding:7px 9px;text-align:center}'+
+    '.kpi b{display:block;font-size:15px;color:#7E0E14}.kpi span{font-size:9.5px;color:#666}'+
+    '.sig{display:flex;gap:10px;margin-top:6px}.sig>div{flex:1;border:1px solid #dcd6d1;border-radius:8px;padding:10px;min-height:78px}'+
+    '.sig .lbl{font-size:10px;color:#666;margin-bottom:6px}'+
+    '.ph{color:#9a9a9a;letter-spacing:2px}'+
+    '.ft{margin-top:14px;border-top:1px solid #dcd6d1;padding-top:7px;font-size:9px;color:#777;display:flex;gap:10px}'+
+    '.ft .sp{flex:1}'+
+    '.badge{display:inline-block;padding:1px 8px;border-radius:20px;background:#7E0E14;color:#fff;font-size:9.5px;font-weight:800}'+
+    '.note{font-size:9.5px;color:#777;margin-top:4px}'+
+    '@media print{.no-print{display:none}}'+
+    '.bar{position:fixed;inset-inline:0;top:0;background:#141414;color:#fff;padding:8px 14px;display:flex;gap:10px;font-size:12px;z-index:9}'+
+    '.bar button{background:#fff;color:#141414;border:0;border-radius:8px;padding:6px 14px;font-weight:800;cursor:pointer}'+
+    '@media print{.bar{display:none}body{padding-top:0}}'+
+    'body{padding-top:44px}@media print{body{padding-top:0}}'+
+    '</style></head><body>'+
+    '<div class="bar no-print"><b style="flex:1">'+esc(L("تقرير إصابة معتمد — اضغط طباعة ثم «حفظ كـ PDF»","Certified injury report — press Print then “Save as PDF”"))+'</b>'+
+      '<button onclick="window.print()">'+esc(L("طباعة / PDF","Print / PDF"))+'</button></div>'+
+    '<div class="hdr"><div class="logo">'+(s.logoText?s.logoText.slice(0,3):"FC")+'</div>'+
+      '<div><h1>'+esc(L("تقرير إصابة رياضي معتمد","Certified Sports Injury Report"))+'</h1>'+
+        '<div class="sub">'+esc(s.club||"")+' · '+esc(s.team||"")+' · '+esc(L("الموسم","Season")+" "+(s.season||""))+'</div></div>'+
+      '<div class="meta"><div><b>'+esc(rid)+'</b></div><div>'+esc(L("تاريخ الإصدار","Issued")+": "+gdate)+'</div>'+
+        '<div>OSIICS-10 · FIFA/F-MARC</div></div></div>'+
+
+    '<h2>'+esc(L("١ · بيانات اللاعب","1 · Player"))+'</h2>'+
+    '<table>'+row(L("الاسم","Name"),fullName(p)) + row(L("الرقم / الهوية","No. / ID"),str(p.number||p.no||"")+" / "+str(p.pid||p.code||""))+
+      '<tr><th>'+esc(L("تاريخ الميلاد / العمر","DOB / Age"))+'</th><td>'+esc(str(p.dob)||"—")+' / '+esc(age(p)||"—")+'</td></tr>'+
+      row(L("المركز","Position"),str(p.pos)||"—")+'</table>'+
+
+    '<h2>'+esc(L("٢ · تفاصيل الإصابة","2 · Injury"))+'</h2>'+
+    '<div class="two"><div><table>'+
+      row(L("تاريخ ووقت الإصابة","Date & time"),str(i.date).replace("T"," "))+
+      row(L("نوع الإصابة","Injury type"),kind)+
+      row(L("تصنيف OSIICS-10","OSIICS-10 code"),osiics(i))+
+      row(L("الطبيعة","Nature"),nature)+
+      row(L("الدرجة","Grade"),grade)+
+      row(L("الموضع التشريحي","Anatomical site"),dmgs)+
+      row(L("التراكيب المصابة","Structures involved"),(window.QD219&&window.QD219.label)?window.QD219.label(i.structures):str(i.structures))+
+    '</table></div><div><table>'+
+      row(L("السياق","Context"),ctx||"—")+
+      row(L("الملعب","Surface"),str(i.football&&i.football.surface)||"—")+
+      row(L("الدقائق المُلعوبة","Minutes played"),str(i.football&&i.football.minutes)||"—")+
+      row(L("آلية الإصابة","Mechanism"),mech||"—")+
+      row(L("تلامس","Contact"),contact)+
+      row(L("إصابة متكررة","Recurrence"),(i.recurrence&&str(i.recurrence.recurrent).toUpperCase()==="YES")?L("نعم","Yes"):L("لا","No"))+
+    '</table></div></div>'+
+
+    '<h2>'+esc(L("٣ · التشخيص وشدة الإصابة","3 · Diagnosis & severity"))+'</h2>'+
+    '<table>'+row(L("التشخيص","Diagnosis"),diag||"—")+
+      row(L("الحالة الحالية","Status"),status)+
+      row(L("القدرة على المشاركة","Participation ability"),ability||"—")+'</table>'+
+    '<div class="kpis">'+
+      '<div class="kpi"><b>'+dmg+'</b><span>'+esc(L("يوم غياب","Days lost"))+'</span></div>'+
+      '<div class="kpi"><b>'+esc(str(plan.expDays)||"—")+'</b><span>'+esc(L("المدة المتوقعة (يوم)","Expected (days)"))+'</span></div>'+
+      '<div class="kpi"><b>'+esc(str(plan.rtpDate)||"—")+'</b><span>'+esc(L("العودة للملعب","Return to play"))+'</span></div>'+
+      '<div class="kpi"><b>'+trs+'</b><span>'+esc(L("جلسات علاج","Treatment sessions"))+'</span></div>'+
+    '</div>'+
+    '<table>'+row(L("بداية العلاج الطبيعي","Physiotherapy start"),str(plan.physioStart)||"—")+
+      row(L("العودة للتدريب الجماعي","Return to group training"),str(plan.groupDate)||"—")+
+      row(L("المرحلة الحالية","Current phase"),str(plan.stageNow)||"—")+
+      row(L("الاختبارات/الأشعة","Imaging / tests"),str(plan.imgType?plan.imgType+" "+(plan.imgDate||""):"—"))+'</table>'+
+
+    '<h2>'+esc(L("٤ · الاعتماد والتوقيعات","4 · Certification & signatures"))+'</h2>'+
+    '<div class="sig">'+
+      '<div><div class="lbl">'+esc(L("اللاعب","Player"))+'</div>'+psig+'<div class="note">'+esc(fullName(p))+'</div></div>'+
+      '<div><div class="lbl">'+esc(L("المسؤول الطبي","Medical lead"))+'</div>'+sig+'<div class="note">'+esc(s.clinician||"")+'</div></div>'+
+      '<div><div class="lbl">'+esc(L("ختم النادي","Club stamp"))+'</div><div style="height:52px"></div><div class="note">'+esc(s.club||"")+'</div></div>'+
+    '</div>'+
+    '<div class="ft"><span class="badge">OSIICS-10</span><span>'+esc(L("أُعدّ وفق تصنيف الإصابات الدولي OSIICS-10 ونموذج FIFA/F-MARC لتسجيل الإصابات","Prepared per the OSIICS-10 international injury classification and the FIFA/F-MARC injury surveillance model"))+'</span>'+
+      '<span class="sp"></span><span>'+esc(rid)+' · '+esc(gdate)+'</span></div>'+
+    '<div class="note">'+esc(L("وثيقة سرّية — للاستخدام الطبي الداخلي وللاتحادات الرياضية فقط.","Confidential — for internal medical use and sporting federations only."))+'</div>'+
+    '</body></html>';
+  }
+
+  function openReport(i){
+    var w=window.open("","_blank");
+    if(!w){ say(L("اسمح بالنوافذ المنبثقة لفتح التقرير","Allow pop-ups to open the report"),"bad"); return; }
+    try{ w.document.open(); w.document.write(reportHTML(i)); w.document.close(); }catch(e){ say(L("تعذّر إنشاء التقرير","Could not build the report"),"bad"); }
+  }
+
+  /* أزرار التقرير في قائمة الإصابات + ملف الإصابة */
+  function addButtons(){
+    try{
+      Array.prototype.forEach.call(document.querySelectorAll('#v-injuries tr[data-id]'),function(tr){
+        if(tr.querySelector(".qd218-rep")) return;
+        var td=tr.querySelector("td:last-child"); if(!td) return;
+        var id=tr.getAttribute("data-id");
+        var b=document.createElement("button");
+        b.type="button"; b.className="btn sm qd218-rep";
+        b.style.marginInlineStart="6px";
+        b.textContent=L("تقرير معتمد","Certified report");
+        b.addEventListener("click",function(e){
+          e.preventDefault(); e.stopPropagation();
+          var inj=INJS().filter(function(x){ return str(x.id)===str(id); })[0];
+          if(!inj){ say(L("لم يُعثر على الإصابة","Injury not found"),"bad"); return; }
+          openReport(inj);
+        },true);
+        td.appendChild(b);
+      });
+      /* داخل ملف الإصابة */
+      var mc=document.getElementById("modalCard");
+      if(mc&&mc.querySelector('[data-repdl],[data-reph]')&&!mc.querySelector(".qd218-rep")){
+        var host=mc.querySelector('[data-repdl]');
+        var id2=(host&&host.getAttribute("data-repdl"))||window.__qdOpenInjId||"";
+        var b2=document.createElement("button");
+        b2.type="button"; b2.className="btn primary sm qd218-rep"; b2.style.marginInlineStart="6px";
+        b2.textContent=L("تقرير معتمد دوليًا","Certified report");
+        b2.addEventListener("click",function(e){
+          e.preventDefault(); e.stopPropagation();
+          var inj=INJS().filter(function(x){ return str(x.id)===str(id2); })[0]||INJS()[0];
+          if(inj) openReport(inj);
+        },true);
+        if(host&&host.parentNode) host.parentNode.appendChild(b2);
+      }
+    }catch(e){}
+  }
+
+  function badge(){
+    try{ var b=document.getElementById("qdrBadge"); if(!b) return;
+      var w="v11-218 · INJ-CLEAN";
+      if(b.textContent!==w+" · BTN-OK") b.textContent=w+" · BTN-OK"; }catch(e){}
+  }
+
+  var iv=null;
+  function loop(){
+    try{
+      if(document.getElementById("modalCard")&&document.getElementById("modal").classList.contains("on")){
+        rebuildTypeSelect(); dedupeSites();
+      }
+      addButtons(); badge();
+    }catch(e){}
+  }
+  window.QD218={types:rebuildTypeSelect,sites:dedupeSites,report:openReport,siteLabel:siteLabel,html:reportHTML};
+  var boot=function(){ loop(); try{ iv=setInterval(loop,900); }catch(e){}
+    try{ new MutationObserver(function(){ setTimeout(loop,60); }).observe(document.body,{childList:true,subtree:true}); }catch(e){} };
+  boot();
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",boot,{once:true});
+})();
+
+</script>
+<script>
+/* ===== QD219 · ربط التشريح بالمجسم: عند اختيار موضع تظهر كل تراكيبه (عضل · عظم · وتر · رباط · مفصل · عصب · غضروف) وتُختار وتُربط بالإصابة ===== */
+(function(){
+  if(window.__QD219) return; window.__QD219=1;
+
+  function EN(){ try{ return String(localStorage.getItem("qd_lang")||"ar").indexOf("en")===0; }catch(e){ return false; } }
+  function L(a,e){ return EN()?e:a; }
+  function str(v){ return String(v==null?"":v); }
+  function say(m,k){ try{ if(typeof window.toast==="function") window.toast(m,k); }catch(e){} }
+  function esc(v){ return str(v).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+
+  /* ---------- أنواع الأنسجة ---------- */
+  var TISSUE={
+    muscle:   {a:"عضل",   e:"Muscle",    c:"#B5121B"},
+    tendon:   {a:"وتر",   e:"Tendon",    c:"#C2721A"},
+    ligament: {a:"رباط",  e:"Ligament",  c:"#6B4FA0"},
+    bone:     {a:"عظم",   e:"Bone",      c:"#2E6E8E"},
+    joint:    {a:"مفصل",  e:"Joint",     c:"#0E7490"},
+    nerve:    {a:"عصب",   e:"Nerve",     c:"#6C7A00"},
+    cartilage:{a:"غضروف", e:"Cartilage", c:"#8A6D00"},
+    bursa:    {a:"جراب",  e:"Bursa",     c:"#8B6B4A"},
+    fascia:   {a:"لفافة", e:"Fascia",    c:"#7A6E63"}
+  };
+
+  /* ---------- قاعدة التشريح: كل موضع ← تراكيبه ---------- */
+  function S(t,a,e){ return {t:t,a:a,e:e}; }
+  var ANAT={
+    "HEAD":[
+      S("muscle","العضلة الصدغية","Temporalis"),S("muscle","العضلة الماضغة","Masseter"),
+      S("bone","عظم الجمجمة / الجبهي","Skull / frontal bone"),S("bone","الفك السفلي","Mandible"),S("bone","عظم الوجنة","Zygomatic bone"),
+      S("joint","المفصل الصدغي الفكي","Temporomandibular joint"),S("nerve","أعصاب الوجه","Facial nerve branches")
+    ],
+    "NECK":[
+      S("muscle","العضلة القصية الترقوية الحلمية","Sternocleidomastoid"),S("muscle","العضلة شبه المنحرفة (العلوي)","Trapezius (upper)"),
+      S("muscle","العضلات الأخمعية","Scalenes"),S("bone","الفقرات العنقية C1–C7","Cervical vertebrae C1–C7"),
+      S("ligament","الرباط القفوي","Nuchal ligament"),S("nerve","الضفيرة العضدية","Brachial plexus"),
+      S("joint","المفاصل الوجيهية العنقية","Cervical facet joints")
+    ],
+    "CHEST":[
+      S("muscle","العضلة الصدرية الكبرى","Pectoralis major"),S("muscle","العضلة الصدرية الصغرى","Pectoralis minor"),
+      S("muscle","العضلات الوربية","Intercostal muscles"),S("muscle","العضلة المنشارية الأمامية","Serratus anterior"),
+      S("bone","القص","Sternum"),S("bone","الأضلاع","Ribs"),S("bone","الترقوة","Clavicle"),
+      S("joint","المفصل القصي الترقوي","Sternoclavicular joint"),S("cartilage","الغضاريف الضلعية","Costal cartilage")
+    ],
+    "ABDOMEN":[
+      S("muscle","العضلة المستقيمة البطنية","Rectus abdominis"),S("muscle","العضلات المائلة الخارجية","External oblique"),
+      S("muscle","العضلات المائلة الداخلية","Internal oblique"),S("muscle","العضلة المستعرضة البطنية","Transversus abdominis"),
+      S("bone","الأضلاع السفلية","Lower ribs"),S("fascia","الغلالة البيضاء","Linea alba / rectus sheath")
+    ],
+    "GROIN":[
+      S("muscle","العضلة الضامة الطويلة","Adductor longus"),S("muscle","العضلة الضامة القصيرة","Adductor brevis"),
+      S("muscle","العضلة الضامة الكبيرة","Adductor magnus"),S("muscle","العضلة الرشيقة","Gracilis"),
+      S("muscle","العضلة العانية","Pectineus"),S("muscle","العضلة الحرقفية القطنية","Iliopsoas"),
+      S("tendon","وتر الضامة الطويلة","Adductor longus tendon"),S("ligament","الرباط الإربي","Inguinal ligament"),
+      S("bone","ارتفاق العانة","Pubic symphysis")
+    ],
+    "SHOULDER":[
+      S("muscle","العضلة الدالية","Deltoid"),S("muscle","العضلة فوق الشوكة","Supraspinatus"),
+      S("muscle","العضلة تحت الشوكة","Infraspinatus"),S("muscle","العضلة تحت الكتف","Subscapularis"),
+      S("muscle","العضلة المدورة الصغرى","Teres minor"),S("tendon","أوتار الكفة المدورة","Rotator cuff tendons"),
+      S("tendon","الوتر الطويل للعضلة ذات الرأسين","Long head biceps tendon"),
+      S("bone","رأس العضد","Humeral head"),S("bone","الأخرم","Acromion"),S("bone","الناتئ الغرابي","Coracoid process"),
+      S("ligament","الرباط الترقوي الأخرمي","Acromioclavicular ligament"),
+      S("joint","المفصل الحقاني العضدي","Glenohumeral joint"),S("bursa","الجراب تحت الأخرم","Subacromial bursa")
+    ],
+    "UPPER ARM":[
+      S("muscle","العضلة ذات الرأسين العضدية","Biceps brachii"),S("muscle","العضلة العضدية","Brachialis"),
+      S("muscle","العضلة ثلاثية الرؤوس","Triceps brachii"),S("muscle","العضلة الغرابية العضدية","Coracobrachialis"),
+      S("bone","عظم العضد","Humerus"),S("tendon","الوتر البعيد للعضلة ذات الرأسين","Distal biceps tendon"),
+      S("nerve","العصب الكعبري","Radial nerve"),S("nerve","العصب المتوسط","Median nerve")
+    ],
+    "ELBOW":[
+      S("muscle","منشأ العضلات الباسطة المشتركة","Common extensor origin"),
+      S("muscle","منشأ العضلات القابضة المشتركة","Common flexor origin"),
+      S("muscle","العضلة العضدية الكعبرية","Brachioradialis"),
+      S("bone","الزند الأعلى (الزج)","Olecranon"),S("bone","اللقيمة الوحشية","Lateral epicondyle"),
+      S("bone","اللقيمة الإنسية","Medial epicondyle"),S("bone","رأس الكعبرة","Radial head"),
+      S("tendon","الوتر الباسط المشترك","Common extensor tendon"),S("tendon","الوتر القابض المشترك","Common flexor tendon"),
+      S("ligament","الرباط الجانبي الإنسي","Ulnar collateral ligament"),S("ligament","الرباط الجانبي الوحشي","Radial collateral ligament"),
+      S("joint","المفصل العضدي الزندي","Humeroulnar joint"),S("bursa","جراب الزج","Olecranon bursa")
+    ],
+    "FOREARM":[
+      S("muscle","مجموعة العضلات القابضة","Flexor group"),S("muscle","مجموعة العضلات الباسطة","Extensor group"),
+      S("muscle","العضلة الكابة المدورة","Pronator teres"),
+      S("bone","عظم الكعبرة","Radius"),S("bone","عظم الزند","Ulna"),
+      S("tendon","أوتار قابضات الرسغ والأصابع","Wrist & finger flexor tendons"),
+      S("nerve","العصب المتوسط","Median nerve"),S("nerve","العصب الزندي","Ulnar nerve"),
+      S("fascia","اللفافة العضلية للساعد","Forearm fascia")
+    ],
+    "HAND":[
+      S("muscle","عضلات الرانفة (Thenar)","Thenar muscles"),S("muscle","عضلات الضرة (Hypothenar)","Hypothenar muscles"),
+      S("muscle","العضلات بين العظمية","Interossei"),
+      S("bone","عظام الرسغ","Carpal bones"),S("bone","عظام المشط","Metacarpals"),S("bone","السلاميات","Phalanges"),
+      S("tendon","أوتار القابضات","Flexor digitorum tendons"),S("tendon","أوتار الباسطات","Extensor digitorum tendons"),
+      S("ligament","الأربطة الجانبية للأصابع","Collateral ligaments"),
+      S("cartilage","الغضروف المثلثي الليفي (TFCC)","TFCC"),
+      S("joint","المفاصل السلامية","MCP / PIP / DIP joints"),S("joint","مفصل الرسغ","Radiocarpal joint")
+    ],
+    "UPPER BACK":[
+      S("muscle","العضلة شبه المنحرفة","Trapezius"),S("muscle","العضلات المعينية","Rhomboids"),
+      S("muscle","العضلة رافعة الكتف","Levator scapulae"),S("muscle","العضلة الظهرية العريضة","Latissimus dorsi"),
+      S("muscle","الناصبة الفقرية (العلوي)","Erector spinae (upper)"),
+      S("bone","الفقرات الصدرية","Thoracic vertebrae"),S("bone","لوح الكتف","Scapula"),
+      S("joint","المفاصل الوجيهية الصدرية","Thoracic facet joints")
+    ],
+    "MID BACK":[
+      S("muscle","الناصبة الفقرية","Erector spinae"),S("muscle","العضلة متعددة الفلق","Multifidus"),
+      S("muscle","العضلة الظهرية العريضة","Latissimus dorsi"),
+      S("bone","الفقرات الصدرية T5–T12","Thoracic vertebrae T5–T12"),
+      S("fascia","اللفافة الصدرية القطنية","Thoracolumbar fascia"),
+      S("joint","المفاصل الضلعية الفقرية","Costovertebral joints")
+    ],
+    "LOWER BACK":[
+      S("muscle","الناصبة الفقرية (القطني)","Erector spinae (lumbar)"),S("muscle","العضلة متعددة الفلق","Multifidus"),
+      S("muscle","العضلة المربعة القطنية","Quadratus lumborum"),
+      S("bone","الفقرات القطنية L1–L5","Lumbar vertebrae L1–L5"),S("bone","العجز","Sacrum"),S("bone","حرف الحرقفة","Iliac crest"),
+      S("ligament","الرباط الحرقفي القطني","Iliolumbar ligament"),
+      S("joint","المفصل القطني العجزي","Lumbosacral joint"),S("joint","المفصل العجزي الحرقفي","Sacroiliac joint"),
+      S("nerve","جذور العصب الوركي","Sciatic nerve roots")
+    ],
+    "GLUTES":[
+      S("muscle","العضلة الألوية الكبرى","Gluteus maximus"),S("muscle","العضلة الألوية المتوسطة","Gluteus medius"),
+      S("muscle","العضلة الألوية الصغرى","Gluteus minimus"),S("muscle","العضلة الكمثرية","Piriformis"),
+      S("muscle","العضلة الموترة للفافة العريضة","Tensor fasciae latae"),
+      S("tendon","الوتر الألوي","Gluteal tendons"),S("fascia","الشريط الحرقفي الظنبوبي (ITB)","Iliotibial band"),
+      S("bone","عظم الحرقفة","Ilium"),S("bone","المدور الكبير","Greater trochanter"),
+      S("bursa","الجراب المدوري","Trochanteric bursa"),S("nerve","العصب الوركي","Sciatic nerve")
+    ],
+    "THIGH":[
+      S("muscle","العضلة المستقيمة الفخذية","Rectus femoris"),S("muscle","العضلة المتسعة الوحشية","Vastus lateralis"),
+      S("muscle","العضلة المتسعة الإنسية","Vastus medialis"),S("muscle","العضلة المتسعة الوسطية","Vastus intermedius"),
+      S("muscle","العضلة الخياطية","Sartorius"),S("muscle","مجموعة المقربات","Adductor group"),
+      S("muscle","العضلة الحرقفية القطنية","Iliopsoas"),
+      S("bone","عظم الفخذ","Femur"),S("tendon","الوتر الرباعي","Quadriceps tendon"),
+      S("nerve","العصب الفخذي","Femoral nerve"),S("fascia","اللفافة العريضة","Fascia lata")
+    ],
+    "HAMSTRING":[
+      S("muscle","العضلة ذات الرأسين الفخذية","Biceps femoris"),S("muscle","العضلة نصف الوترية","Semitendinosus"),
+      S("muscle","العضلة نصف الغشائية","Semimembranosus"),S("muscle","العضلة الضامة الكبيرة","Adductor magnus"),
+      S("tendon","الوتر القريب للخلفية","Proximal hamstring tendon"),
+      S("tendon","الوتر البعيد للخلفية","Distal hamstring tendon"),
+      S("bone","الحدبة الإسكية","Ischial tuberosity"),S("bone","عظم الفخذ (الخلفي)","Femur (posterior)"),
+      S("nerve","العصب الوركي","Sciatic nerve")
+    ],
+    "KNEE":[
+      S("muscle","الوتر الرباعي المنتهي بالرضفة","Quadriceps insertion"),
+      S("bone","الرضفة","Patella"),S("bone","لقمات الفخذ","Femoral condyles"),S("bone","صفيحة الظنبوب","Tibial plateau"),
+      S("tendon","الوتر الرباعي","Quadriceps tendon"),S("tendon","الوتر الرضفي","Patellar tendon"),
+      S("ligament","الرباط الصليبي الأمامي (ACL)","ACL"),S("ligament","الرباط الصليبي الخلفي (PCL)","PCL"),
+      S("ligament","الرباط الجانبي الإنسي (MCL)","MCL"),S("ligament","الرباط الجانبي الوحشي (LCL)","LCL"),
+      S("cartilage","الغضروف الهلالي الإنسي","Medial meniscus"),S("cartilage","الغضروف الهلالي الوحشي","Lateral meniscus"),
+      S("joint","المفصل الرضفي الفخذي","Patellofemoral joint"),S("bursa","الجراب أمام الرضفة","Prepatellar bursa")
+    ],
+    "KNEE BACK":[
+      S("muscle","العضلة المأبضية","Popliteus"),S("muscle","رأسا التوأمية","Gastrocnemius heads"),
+      S("tendon","أوتار الخلفية (المنتهية)","Hamstring tendons"),
+      S("ligament","الرباط المأبضي المائل","Oblique popliteal ligament"),
+      S("nerve","العصب الظنبوبي","Tibial nerve"),S("nerve","العصب الشظوي المشترك","Common peroneal nerve"),
+      S("bursa","كيس بيكر المأبضي","Popliteal (Baker) cyst"),
+      S("joint","المفصل المأبضي","Popliteal joint")
+    ],
+    "SHIN":[
+      S("muscle","العضلة الظنبوبية الأمامية","Tibialis anterior"),S("muscle","العضلة الباسطة الطويلة للأصابع","Extensor digitorum longus"),
+      S("muscle","العضلة الشظوية الثالثة","Peroneus tertius"),
+      S("bone","عظم الظنبوب (الجسم)","Tibia (shaft)"),S("bone","عظم الشظية","Fibula"),
+      S("tendon","وتر الظنبوبية الأمامية","Tibialis anterior tendon"),
+      S("nerve","العصب الشظوي العميق","Deep peroneal nerve"),S("fascia","سمحاق الظنبوب","Tibial periosteum")
+    ],
+    "CALF":[
+      S("muscle","العضلة التوأمية","Gastrocnemius"),S("muscle","العضلة النعلية","Soleus"),
+      S("muscle","العضلة الأخمصية الرقيقة","Plantaris"),S("muscle","العضلة الظنبوبية الخلفية","Tibialis posterior"),
+      S("muscle","العضلة القابضة الطويلة لإبهام القدم","Flexor hallucis longus"),
+      S("tendon","وتر أخيل","Achilles tendon"),S("bone","الظنبوب والشظية (خلفي)","Tibia / fibula (posterior)"),
+      S("nerve","العصب الظنبوبي","Tibial nerve"),S("fascia","اللفافة الساقية العميقة","Deep crural fascia")
+    ],
+    "FOOT":[
+      S("muscle","العضلات الداخلية للقدم","Intrinsic foot muscles"),
+      S("bone","عظم الكاحل (Talus)","Talus"),S("bone","العقب (Calcaneus)","Calcaneus"),
+      S("bone","العظم الزورقي","Navicular"),S("bone","العظم النردي","Cuboid"),S("bone","العظام الإسفينية","Cuneiforms"),
+      S("bone","عظام المشط","Metatarsals"),S("bone","سلاميات الأصابع","Phalanges"),
+      S("tendon","انغراس وتر أخيل","Achilles insertion"),S("tendon","أوتار الشظوية","Peroneal tendons"),
+      S("tendon","وتر الظنبوبية الخلفية","Tibialis posterior tendon"),S("fascia","اللفافة الأخمصية","Plantar fascia"),
+      S("ligament","الرباط الأمامي الظنبوبي الشظوي (ATFL)","ATFL"),S("ligament","الرباط العقبي الشظوي (CFL)","CFL"),
+      S("ligament","الرباط المثلثي الإنسي","Deltoid ligament"),S("ligament","رباط ليزفرانك","Lisfranc ligament"),
+      S("joint","مفصل الكاحل","Ankle (talocrural) joint"),S("joint","المفصل تحت الكاحل","Subtalar joint"),
+      S("nerve","العصب الربلي","Sural nerve")
+    ]
+  };
+
+  var ZONE_AR={"HEAD":"الرأس","NECK":"الرقبة","CHEST":"الصدر","ABDOMEN":"البطن","GROIN":"المنطقة الإربية",
+    "SHOULDER":"الكتف","UPPER ARM":"العضد","ELBOW":"المرفق","FOREARM":"الساعد","HAND":"اليد",
+    "UPPER BACK":"أعلى الظهر","MID BACK":"وسط الظهر","LOWER BACK":"أسفل الظهر","GLUTES":"الألوية",
+    "THIGH":"الفخذ","HAMSTRING":"الخلفية (المأبضية)","KNEE":"الركبة","KNEE BACK":"خلف الركبة",
+    "SHIN":"الساق (أمامي)","CALF":"السمانة (خلفي)","FOOT":"القدم"};
+  var ZONE_EN={"HEAD":"Head","NECK":"Neck","CHEST":"Chest","ABDOMEN":"Abdomen","GROIN":"Groin",
+    "SHOULDER":"Shoulder","UPPER ARM":"Upper arm","ELBOW":"Elbow","FOREARM":"Forearm","HAND":"Hand",
+    "UPPER BACK":"Upper back","MID BACK":"Mid back","LOWER BACK":"Lower back","GLUTES":"Gluteal",
+    "THIGH":"Thigh","HAMSTRING":"Hamstring","KNEE":"Knee","KNEE BACK":"Popliteal","SHIN":"Shin","CALF":"Calf","FOOT":"Foot"};
+
+  /* "L. THIGH" → {side:"L", base:"THIGH"} */
+  function parseZone(v){
+    var raw=str(v).toUpperCase().trim();
+    var side="";
+    if(/^L[\.\s]/.test(raw)) side="L";
+    else if(/^R[\.\s]/.test(raw)) side="R";
+    var base=raw.replace(/^(L|R)\.?\s*/,"").replace(/\s+/g," ").trim();
+    if(base==="THIGH"&&/HAMSTRING/.test(raw)) base="HAMSTRING";
+    return {side:side, base:base};
+  }
+
+  /* ---------- اختيار التراكيب (يُحفظ في حقل structures) ---------- */
+  function picker(){
+    var mc=document.getElementById("modalCard"); if(!mc) return null;
+    var p=mc.querySelector('[data-mp="structures"]');
+    if(p) return p;
+    p=document.createElement("div");
+    p.className="mp"; p.setAttribute("data-mp","structures"); p.setAttribute("data-val","");
+    p.style.display="none";
+    mc.appendChild(p);
+    return p;
+  }
+  function selList(){
+    var p=picker(); if(!p) return [];
+    return str(p.getAttribute("data-val")).split("|").filter(Boolean);
+  }
+  function setSel(arr){
+    var p=picker(); if(!p) return;
+    var seen={}, out=[];
+    arr.forEach(function(x){ if(!seen[x]){ seen[x]=1; out.push(x); } });
+    p.setAttribute("data-val",out.join("|"));
+  }
+
+  /* ---------- بناء لوحة التشريح ---------- */
+  function panelHTML(zones){
+    var groups={};
+    zones.forEach(function(z){
+      var list=ANAT[z.base]||[]; if(!list.length) return;
+      var sideTxt=z.side?(z.side==="L"?L("يسار","Left"):L("يمين","Right")):"";
+      list.forEach(function(st){
+        var key=st.a+"~"+sideTxt+"~"+z.base;
+        (groups[st.t]=groups[st.t]||[]).push({key:key, st:st, side:sideTxt, zone:z.base});
+      });
+    });
+    var sel=selList();
+    var total=0;
+    var h='<div style="border:1px solid var(--line,#e6e1d8);border-radius:14px;margin-top:12px;overflow:hidden;background:var(--paper,#fff)">'+
+      '<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:11px 14px;border-bottom:1px solid var(--line,#e6e1d8);background:var(--surface,#faf8f4)">'+
+        '<b style="font-size:13.5px">'+L("التراكيب التشريحية للموضع المحدد","Anatomical structures of the selected site")+'</b>'+
+        '<span class="tiny muted">'+L("اختر ما أصابَه اللاعب — يُربط بالإصابة ويظهر في التقرير","Tick the injured structures — linked to the injury and shown in the report")+'</span>'+
+        '<div style="flex:1"></div>'+
+        '<span class="qd219-count badge" style="background:#7E0E14;color:#fff">'+sel.length+'</span>'+
+        '<button type="button" class="btn ghost sm qd219-clear">'+L("مسح","Clear")+'</button>'+
+      '</div><div style="padding:12px 14px">';
+    if(!total && !Object.keys(groups).length){
+      h+='<div class="tiny muted">'+L("اختر موضعًا على المجسم أولًا لتظهر تراكيبه.","Select a site on the body map first to see its structures.")+'</div>';
+    }
+    Object.keys(TISSUE).forEach(function(t){
+      var arr=groups[t]; if(!arr||!arr.length) return;
+      total+=arr.length;
+      var T=TISSUE[t];
+      h+='<div style="margin-bottom:10px">'+
+        '<div style="display:flex;align-items:center;gap:7px;margin-bottom:6px">'+
+          '<span style="width:9px;height:9px;border-radius:3px;background:'+T.c+';display:inline-block"></span>'+
+          '<b style="font-size:12px;color:'+T.c+'">'+esc(EN()?T.e:T.a)+'</b>'+
+          '<span class="tiny muted">'+arr.length+'</span></div>'+
+        '<div style="display:flex;gap:6px;flex-wrap:wrap">'+
+        arr.map(function(x){
+          var on=sel.indexOf(x.key)>-1;
+          var lbl=(EN()?x.st.e:x.st.a)+(x.side?(" · "+x.side):"");
+          return '<button type="button" class="qd219-chip'+(on?" on":"")+'" data-k="'+esc(x.key)+'" data-t="'+esc(t)+'" '+
+            'style="border:1px solid '+(on?T.c:"var(--line,#e0dbd4)")+';background:'+(on?T.c:"#fff")+';color:'+(on? "#fff":"var(--ink,#1b1a18)")+';border-radius:20px;padding:5px 11px;font-size:12px;font-weight:700;cursor:pointer">'+
+            esc(lbl)+'</button>';
+        }).join("")+'</div></div>';
+    });
+    h+='<div class="qd219-sum tiny" style="margin-top:6px;padding:8px 10px;border-radius:10px;background:var(--surface,#faf8f4)"></div>';
+    h+='</div></div>';
+    return h;
+  }
+
+  function zoneOf(chip){ return str(chip.getAttribute("data-k")); }
+
+  function refresh(){
+    try{
+      var mc=document.getElementById("modalCard"); if(!mc) return;
+      var bm=mc.querySelector('.bodymap[data-f="bodySites"]'); if(!bm) return;
+      var zones=str(bm.getAttribute("data-val")).split(",").filter(Boolean).map(parseZone)
+        .filter(function(z){ return ANAT[z.base]; });
+      /* إزالة التكرار (نفس الموضع ونفس الجهة) */
+      var seen={}, uz=[];
+      zones.forEach(function(z){ var k=z.base+"|"+z.side; if(!seen[k]){ seen[k]=1; uz.push(z); } });
+      var sig=uz.map(function(z){ return z.base+z.side; }).sort().join(",");
+      var old=mc.querySelector("#qd219panel");
+      if(!uz.length){ if(old) old.remove(); return; }
+      if(old&&old.getAttribute("data-sig")===sig){ paintSummary(old); return; }
+      var host=old||document.createElement("div");
+      host.id="qd219panel"; host.setAttribute("data-sig",sig);
+      host.innerHTML=panelHTML(uz);
+      if(!old){
+        var field=bm.closest(".field")||bm.parentNode;
+        if(field&&field.parentNode) field.parentNode.insertBefore(host,field.nextSibling);
+        else bm.parentNode.appendChild(host);
+      }
+      paintSummary(host);
+    }catch(e){}
+  }
+
+  function paintSummary(host){
+    try{
+      var box=host.querySelector(".qd219-sum"); if(!box) return;
+      var sel=selList();
+      var cnt=host.querySelector(".qd219-count"); if(cnt) cnt.textContent=sel.length;
+      if(!sel.length){ box.innerHTML=L("لم تُحدَّد تراكيب بعد — الموضع وحده كافٍ للحفظ.","No structures selected yet — the site alone is enough to save."); return; }
+      var byT={};
+      sel.forEach(function(k){ var p=k.split("|"); });
+      box.innerHTML='<b>'+L("المُختار: ","Selected: ")+'</b>'+esc(label(sel.join(",")));
+    }catch(e){}
+  }
+
+  /* ---------- الأحداث ---------- */
+  document.addEventListener("click",function(e){
+    var t=e.target; if(!t||!t.closest) return;
+    var chip=t.closest("#qd219panel .qd219-chip");
+    if(chip){
+      e.preventDefault(); e.stopPropagation();
+      var k=chip.getAttribute("data-k");
+      var arr=selList(), i=-1;
+      for(var q=0;q<arr.length;q++){ if(arr[q]===k){ i=q; break; } }
+      if(i>-1) arr.splice(i,1); else arr.push(k);
+      setSel(arr);
+      var T=TISSUE[chip.getAttribute("data-t")]||{c:"#7E0E14"};
+      var on=arr.indexOf(k)>-1;
+      chip.classList.toggle("on",on);
+      chip.style.background=on?T.c:"#fff";
+      chip.style.color=on?"#fff":"var(--ink,#1b1a18)";
+      chip.style.borderColor=on?T.c:"var(--line,#e0dbd4)";
+      var host=chip.closest("#qd219panel"); if(host) paintSummary(host);
+      return;
+    }
+    var clr=t.closest("#qd219panel .qd219-clear");
+    if(clr){
+      e.preventDefault(); e.stopPropagation();
+      setSel([]);
+      var host2=clr.closest("#qd219panel");
+      if(host2){ Array.prototype.forEach.call(host2.querySelectorAll(".qd219-chip"),function(c){
+        var T2=TISSUE[c.getAttribute("data-t")]||{c:"#7E0E14"};
+        c.classList.remove("on"); c.style.background="#fff"; c.style.color="var(--ink,#1b1a18)"; c.style.borderColor="var(--line,#e0dbd4)"; });
+        paintSummary(host2); }
+      return;
+    }
+    /* نقر منطقة على المجسم */
+    var z=t.closest(".bmz");
+    if(z){ setTimeout(refresh,40); setTimeout(refresh,220); }
+  },true);
+
+  document.addEventListener("change",function(e){
+    if(e.target&&e.target.closest&&e.target.closest("#modalCard")) setTimeout(refresh,80);
+  },true);
+
+  /* ---------- وسم مقروء للتقرير والقوائم ---------- */
+  /* "اسم|الجهة|الموضع" → اسم مقروء (للإضافة في التقرير والقوائم) */
+  function keyLabel(k){
+    var p=str(k).split("~");
+    var nm=p[0]||"", side=p[1]||"", zone=p[2]||"";
+    var zn=zone?((EN()?ZONE_EN[zone]:ZONE_AR[zone])||zone):"";
+    return nm+(side?" — "+side:"")+(zn?" ("+zn+")":"");
+  }
+  function label(v){
+    var arr=str(v).split(/[|,]/).map(function(x){ return x.trim(); }).filter(Boolean);
+    if(!arr.length) return "";
+    var out=[], seen={};
+    arr.forEach(function(k){
+      if(k.indexOf("~")<0 && k.indexOf(" · ")>-1){
+        /* قيمة قديمة محفوظة كنص مقروء — تُعرض كما هي */
+        if(!seen[k]){ seen[k]=1; out.push(k); } return;
+      }
+      var t=(str(k).indexOf("~")>-1)?keyLabel(k):k;
+      if(!seen[t]){ seen[t]=1; out.push(t); }
+    });
+    return out.join(" · ");
+  }
+
+  function badge(){
+    try{ var b=document.getElementById("qdrBadge"); if(!b) return;
+      var w="v11-219 · ANATOMY";
+      if(b.textContent!==w+" · BTN-OK") b.textContent=w+" · BTN-OK"; }catch(e){}
+  }
+
+  window.QD219={refresh:refresh,label:label,anat:ANAT,selected:selList};
+  var loop=function(){
+    try{
+      if(document.getElementById("modal")&&document.getElementById("modal").classList.contains("on")) refresh();
+      badge();
+    }catch(e){}
+  };
+  var boot=function(){ loop(); try{ setInterval(loop,1000); }catch(e){}
+    try{ new MutationObserver(function(){ setTimeout(loop,60); }).observe(document.body,{childList:true,subtree:true}); }catch(e){} };
   boot();
   if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",boot,{once:true});
 })();
