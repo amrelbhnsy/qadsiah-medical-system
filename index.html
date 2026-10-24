@@ -411,7 +411,7 @@ html[dir="rtl"] .filters .select{padding-left:34px}
 .rp-path-lbl{font-size:10.5px;font-weight:800;margin-top:3px;color:var(--slate);white-space:nowrap}
 .rp-batt{display:inline-flex;align-items:center;gap:5px}
 .rp-batt b{font-weight:900;line-height:1}
-/* ===== v11-196 · SPLASH-KILL — مسار اللاعب وشريط الإنجاز ===== */
+/* ===== v11-197 · CLEAN-IMPORT — مسار اللاعب وشريط الإنجاز ===== */
 .rp-path2{display:flex;align-items:center;margin:5px 0 6px;min-width:150px}
 .rp-node{width:13px;height:13px;border-radius:50%;flex:0 0 auto;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;background:#fff;border:2px solid #D3D9E1;transition:background .25s,border-color .25s,box-shadow .25s}
 .rp-node.done{background:#15803D;border-color:#15803D}
@@ -15771,7 +15771,7 @@ try{
 }catch(e){}
 
 /* QDBK-END */
-(function(){function mk(){try{var b=document.createElement("div");b.id="qdrBadge";b.textContent="v11-196 · SPLASH-KILL";b.style.cssText="position:fixed;left:8px;bottom:8px;z-index:2147483647;background:#fff;color:#7E0E14;border:1px solid #7E0E14;font:800 11px/1.5 system-ui;padding:3px 9px;border-radius:20px;pointer-events:none;opacity:.97;box-shadow:0 2px 8px rgba(0,0,0,.35)";document.body.appendChild(b);}catch(e){}}if(document.body)mk();else setTimeout(mk,600);})();
+(function(){function mk(){try{var b=document.createElement("div");b.id="qdrBadge";b.textContent="v11-197 · CLEAN-IMPORT";b.style.cssText="position:fixed;left:8px;bottom:8px;z-index:2147483647;background:#fff;color:#7E0E14;border:1px solid #7E0E14;font:800 11px/1.5 system-ui;padding:3px 9px;border-radius:20px;pointer-events:none;opacity:.97;box-shadow:0 2px 8px rgba(0,0,0,.35)";document.body.appendChild(b);}catch(e){}}if(document.body)mk();else setTimeout(mk,600);})();
 /* ---- PWA: install as an app on Android and iPhone / iPad ---- */
 (function(){
   Object.assign(STR.en,{
@@ -24356,7 +24356,7 @@ try{
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous">
 /* =====================================================================
-   v11-196 · SPLASH-KILL — توحيد حالة اليوم (مباراة · تدريب · راحة · إجازة)
+   v11-197 · CLEAN-IMPORT — توحيد حالة اليوم (مباراة · تدريب · راحة · إجازة)
    بين: لوحة التحكم · البرنامج الأسبوعي · التقويم · جدول المباريات
    ===================================================================== */
 (function(){
@@ -24460,7 +24460,7 @@ try{
 
 <script>
 /* =====================================================================
-   v11-196 · SPLASH-KILL
+   v11-197 · CLEAN-IMPORT
    إصلاح التجمد: يُبنى الهيكل مرة واحدة فقط، ويُحدَّث محتواه الداخلي
    (لا إعادة بناء للجذر ⇒ لا يفقد الهوية ولا يعلق)
    ===================================================================== */
@@ -31108,6 +31108,221 @@ tr:hover .qde-ndate{color:#7E0E14}
       try{ console.log(o); }catch(e){} return o; }};
   [500,1200,2200,3500,5000,7000,9000,12000,16000,22000,30000].forEach(function(ms){ setTimeout(force,ms); });
   setInterval(function(){ if((Date.now()-T0)<90000||!active()) force(); },1200);
+})();
+</script>
+<script>
+/* ===== QD197 · استيراد نظيف: لا أحرف غريبة، ولا ملفات صور، وتصحيح الترميز ===== */
+(function(){
+  if(window.__QD197) return; window.__QD197=1;
+  function EN(){ try{ return String(localStorage.getItem("qd_lang")||"ar").indexOf("en")===0; }catch(e){ return false; } }
+  function T(a,e){ return EN()?e:a; }
+  function toast2(m,k){ try{ if(window.toast) toast(m,k||"bad"); }catch(e){} }
+
+  /* ---------- كشف الثنائي/الصور ---------- */
+  function badExt(name){ return /\.(jpe?g|png|gif|bmp|webp|heic|heif|tiff?|svg|ico|mov|mp4|mp3|wav|zip|rar|7z|docx?|pptx?)$/i.test(String(name||"")); }
+  function magic(buf){
+    try{
+      var b=new Uint8Array(buf.slice(0,12));
+      var s=""; for(var i=0;i<b.length;i++) s+=String.fromCharCode(b[i]);
+      if(s.indexOf("JFIF")>-1||b[0]===0xFF&&b[1]===0xD8) return "jpg";
+      if(b[0]===0x89&&b[1]===0x50) return "png";
+      if(s.indexOf("GIF8")===0) return "gif";
+      if(b[0]===0x25&&b[1]===0x50) return "pdf";
+      if(b[0]===0x50&&b[1]===0x4B) return "zip";
+      if(s.indexOf("Exif")>-1) return "jpg";
+      return "";
+    }catch(e){ return ""; }
+  }
+  function looksBinary(txt){
+    if(!txt) return false;
+    var s=String(txt).slice(0,4000);
+    if(/JFIF|Exif\s*M{2}|\x00/.test(s)) return true;
+    var bad=0, len=s.length||1;
+    for(var i=0;i<s.length;i++){ var c=s.charCodeAt(i);
+      if(c===0||c===0xFFFD||(c<9)||(c>13&&c<32&&c!==27)) bad++; }
+    return bad/len>0.06;
+  }
+  /* ---------- جدول windows-1256 يدوي (يعمل بلا TextDecoder) ---------- */
+  var C1256={0xC1:"\u0621",0xC2:"\u0622",0xC3:"\u0623",0xC4:"\u0624",0xC5:"\u0625",0xC6:"\u0626",
+    0xC7:"\u0627",0xC8:"\u0628",0xC9:"\u0629",0xCA:"\u062A",0xCB:"\u062B",0xCC:"\u062C",0xCD:"\u062D",
+    0xCE:"\u062E",0xCF:"\u062F",0xD0:"\u0630",0xD1:"\u0631",0xD2:"\u0632",0xD3:"\u0633",0xD4:"\u0634",
+    0xD5:"\u0635",0xD6:"\u0636",0xD8:"\u0637",0xD9:"\u0638",0xDA:"\u0639",0xDB:"\u063A",0xDC:"\u0640",
+    0xDD:"\u0641",0xDE:"\u0642",0xDF:"\u0643",0xE1:"\u0644",0xE2:"\u0645",0xE3:"\u0646",0xE4:"\u0647",
+    0xE5:"\u0648",0xE6:"\u0649",0xE7:"\u064A",0xE8:"\u064B",0xE9:"\u064C",0xEA:"\u064D",0xEB:"\u064E",
+    0xEC:"\u064F",0xED:"\u0650",0xEE:"\u0651",0xEF:"\u0652",0xF0:"\u0640",0xF1:"\u064B",0xF2:"\u064C",
+    0xF3:"\u064D",0xF4:"\u064E",0xF5:"\u064F",0xF6:"\u0650",0xF7:"\u0651",0xF8:"\u0652",
+    0xA0:" ",0x9F:"\u061F",0xBA:"\u061B",0xAC:"\u060C",0xBB:"\u00BB",0xAB:"\u00AB"};
+  function cp1256(u8){
+    var out="";
+    for(var i=0;i<u8.length;i++){
+      var b=u8[i];
+      if(b<0x80) out+=String.fromCharCode(b);
+      else if(C1256[b]) out+=C1256[b];
+      else out+="\uFFFD";
+    }
+    return out;
+  }
+  /* ---------- تصحيح الترميز العربي (cp1256 مقروء كـ latin1) ---------- */
+  function fixMojibake(t){
+    var s=String(t||"");
+    if(/[\u0600-\u06FF]/.test(s)) return s;
+    var hi=0;
+    for(var q=0;q<s.length&&q<300;q++){ var cc=s.charCodeAt(q); if(cc>=0x80&&cc<=0xFF) hi++; }
+    if(hi<3) return s;
+    try{
+      var out=[];
+      for(var i=0;i<s.length;i++){
+        var c=s.charCodeAt(i);
+        out.push(c<=255?String.fromCharCode(c):s.charAt(i));
+      }
+      var bytes=out.join("");
+      /* latin1 → windows-1256 */
+      var u8=new Uint8Array(bytes.length);
+      for(var j=0;j<bytes.length;j++) u8[j]=bytes.charCodeAt(j)&0xFF;
+      var dec="";
+      try{ dec=new TextDecoder("windows-1256").decode(u8); }catch(e){ dec=""; }
+      if(!/[\u0600-\u06FF]/.test(dec)) dec=cp1256(u8);
+      /* لو النتيجة عربية فعلاً نستخدمها */
+      if(/[\u0600-\u06FF]/.test(dec)){
+        var before=(s.match(/[\u0600-\u06FF]/g)||[]).length;
+        var after=(dec.match(/[\u0600-\u06FF]/g)||[]).length;
+        if(after>before) return dec;
+      }
+    }catch(e){}
+    return s;
+  }
+  function pickText(t){
+    var s=fixMojibake(t);
+    return s.replace(/\u0000/g,"").replace(/\r\n/g,"\n").replace(/\r/g,"\n");
+  }
+
+  /* ---------- حجب ملفات الصور في مستورد البرنامج الأسبوعي ---------- */
+  function isWeeklyModal(){
+    try{ var c=document.getElementById("modalCard"); if(!c) return false;
+      var t=(c.textContent||"");
+      return /استيراد البرنامج الأسبوعي|Import weekly/i.test(t); }catch(e){ return false; }
+  }
+  document.addEventListener("change",function(e){
+    var t=e.target; if(!t||t.type!=="file") return;
+    if(!isWeeklyModal()) return;
+    var f=t.files&&t.files[0]; if(!f) return;
+    var name=String(f.name||""), type=String(f.type||"");
+    var isSheet=/\.(xlsx|xls|xlsm|csv|tsv|txt|pdf)$/i.test(name)||/sheet|csv|pdf|text/i.test(type);
+    if(!isSheet||badExt(name)||/^image\//i.test(type)){
+      try{ e.stopImmediatePropagation(); e.preventDefault(); }catch(x){}
+      t.value="";
+      toast2((T("هذا ملف صورة/غير مدعوم (","This is an image or unsupported file (")+
+        (name||type)+T(") — استخدم ملف Excel أو CSV، أو افتح الجدول وانسخه والصقه كنصّ.","). Use an Excel or CSV file, or copy the table and paste it as text.")));
+      return;
+    }
+    try{
+      var fr=new FileReader();
+      fr.onload=function(){
+        var m=magic(fr.result);
+        if(m){ t.value="";
+          toast2(T("الملف ليس جدولًا — نوعه: ","Not a spreadsheet — detected: ")+m.toUpperCase());
+        }
+      };
+      fr.readAsArrayBuffer(f.slice(0,2048));
+    }catch(x){}
+  },true);
+
+  /* ---------- تنظيف أي نص ملصوق في مربع البرنامج ---------- */
+  function cleanBox(){
+    try{
+      var ta=document.getElementById("imText"); if(!ta||!ta.value) return;
+      var v=ta.value;
+      if(looksBinary(v)){
+        ta.value="";
+        toast2(T("اللصق كان صورة أو ملفًا ثنائيًّا — لا يُقرأ كبرنامج. انسخ الجدول من Excel (خلايا) لا كصورة.","What you pasted was an image or a binary file — not a programme. Copy the table cells from Excel, not a picture."));
+        return;
+      }
+      var fixed=pickText(v);
+      if(fixed!==v){ ta.value=fixed;
+        toast2(T("تم تصحيح ترميز النص العربي.","Arabic text encoding repaired."),"ok"); }
+    }catch(e){}
+  }
+  document.addEventListener("paste",function(e){
+    if(!isWeeklyModal()) return;
+    var t=e.target; if(!t||t.id!=="imText") return;
+    try{
+      var cd=e.clipboardData;
+      if(cd&&cd.items){
+        for(var i=0;i<cd.items.length;i++){
+          var it=cd.items[i];
+          if(it.type&&/^image\//.test(it.type)){
+            e.preventDefault();
+            toast2(T("لا يمكن استيراد صورة — انسخ خلايا الجدول من Excel.","Images cannot be imported — copy the spreadsheet cells from Excel."));
+            return;
+          }
+        }
+      }
+    }catch(x){}
+    setTimeout(cleanBox,60);
+  },true);
+  document.addEventListener("input",function(e){
+    var t=e.target; if(t&&t.id==="imText"&&isWeeklyModal()) cleanBox();
+  },true);
+
+  /* ---------- زر: تصحيح النص الموجود ---------- */
+  function addFixBtn(){
+    try{
+      if(!isWeeklyModal()) return;
+      var ta=document.getElementById("imText"); if(!ta||document.getElementById("qd197fix")) return;
+      var b=document.createElement("button");
+      b.type="button"; b.id="qd197fix"; b.className="btn sm";
+      b.textContent=T("تنظيف النص","Clean text");
+      b.style.cssText="margin:0 0 8px;background:#0E7490;border-color:#0E7490;color:#fff";
+      b.onclick=function(){ cleanBox(); toast2(T("تم التنظيف","Cleaned"),"ok"); };
+      ta.parentNode.insertBefore(b,ta);
+    }catch(e){}
+  }
+  var mo=null;
+  try{ mo=new MutationObserver(function(){ addFixBtn(); }); mo.observe(document.body,{childList:true,subtree:true}); }catch(e){}
+  setInterval(addFixBtn,2500);
+
+  /* ---------- قراءة CSV/TXT بالترميز الصحيح (UTF-8 أو Windows-1256) ---------- */
+  function dec1256(u8){
+    try{ var d=new TextDecoder("windows-1256").decode(u8); if(/[\u0600-\u06FF]/.test(d)) return d; }catch(e){}
+    return cp1256(u8);
+  }
+  function arCount(t){ return (String(t||"").match(/[\u0600-\u06FF]/g)||[]).length; }
+  (function(){
+    try{
+      var P=window.FileReader&&window.FileReader.prototype;
+      if(!P||P.__qd197) return; P.__qd197=1;
+      var orig=P.readAsText;
+      P.readAsText=function(blob,enc){
+        try{
+          var nm=String((blob&&blob.name)||"");
+          var isTxt=/\.(csv|txt|tsv)$/i.test(nm)||/^text\//i.test(String((blob&&blob.type)||""));
+          if(!isTxt) return orig.apply(this,arguments);
+          var self=this, done=self.onload, fail=self.onerror;
+          var fr=new FileReader();
+          fr.onload=function(){
+            var u8=new Uint8Array(fr.result), txt="";
+            try{ txt=new TextDecoder("utf-8").decode(u8); }catch(e){ txt=""; }
+            var bad=(txt.match(/\uFFFD/g)||[]).length;
+            if(!txt||bad>Math.max(2,u8.length*0.002)||arCount(txt)===0){
+              var alt=dec1256(u8);
+              if(arCount(alt)>=arCount(txt)) txt=alt;
+            }
+            txt=fixMojibake(txt).replace(/\u0000/g,"");
+            try{ Object.defineProperty(self,"result",{value:txt,writable:true,configurable:true}); }catch(e){}
+            if(done) try{ done.call(self,{target:self}); }catch(e){}
+          };
+          fr.onerror=function(){ if(fail) try{ fail.call(self,{target:self}); }catch(e){} };
+          fr.readAsArrayBuffer(blob);
+        }catch(e){ return orig.apply(this,arguments); }
+      };
+    }catch(e){}
+  })();
+
+  /* ---------- قراءة نصية آمنة لأي استيراد ---------- */
+  window.QD197={fixMojibake:fixMojibake,looksBinary:looksBinary,pick:pickText,clean:cleanBox,
+    audit:function(){ var o={weeklyOpen:isWeeklyModal(),hasBox:!!document.getElementById("imText"),
+      hasFix:!!document.getElementById("qd197fix")}; try{ console.log(o); }catch(e){} return o; },
+    test:function(t){ return {binary:looksBinary(t),fixed:fixMojibake(t).slice(0,120)}; }};
 })();
 </script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
