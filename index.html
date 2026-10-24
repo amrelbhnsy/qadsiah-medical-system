@@ -15771,7 +15771,7 @@ try{
 }catch(e){}
 
 /* QDBK-END */
-(function(){function mk(){try{var b=document.createElement("div");b.id="qdrBadge";b.textContent="v11-219 · ANATOMY";b.style.cssText="position:fixed;left:8px;bottom:8px;z-index:2147483647;background:#fff;color:#7E0E14;border:1px solid #7E0E14;font:800 11px/1.5 system-ui;padding:3px 9px;border-radius:20px;pointer-events:none;opacity:.97;box-shadow:0 2px 8px rgba(0,0,0,.35)";document.body.appendChild(b);}catch(e){}}if(document.body)mk();else setTimeout(mk,600);})();
+(function(){function mk(){try{var b=document.createElement("div");b.id="qdrBadge";b.textContent="v11-220 · STABLE";b.style.cssText="position:fixed;left:8px;bottom:8px;z-index:2147483647;background:#fff;color:#7E0E14;border:1px solid #7E0E14;font:800 11px/1.5 system-ui;padding:3px 9px;border-radius:20px;pointer-events:none;opacity:.97;box-shadow:0 2px 8px rgba(0,0,0,.35)";document.body.appendChild(b);}catch(e){}}if(document.body)mk();else setTimeout(mk,600);})();
 /* ---- PWA: install as an app on Android and iPhone / iPad ---- */
 (function(){
   Object.assign(STR.en,{
@@ -34650,6 +34650,56 @@ tr:hover .qde-ndate{color:#7E0E14}
     try{ new MutationObserver(function(){ setTimeout(loop,60); }).observe(document.body,{childList:true,subtree:true}); }catch(e){} };
   boot();
   if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",boot,{once:true});
+})();
+
+</script>
+<script>
+/* ===== QD220 · تثبيت شعار الإصدار: مالك واحد فقط — يمنع ارتعاش/تبدّل النص ===== */
+(function(){
+  if(window.__QD220) return; window.__QD220=1;
+  var TEXT="v11-220 · STABLE · BTN-OK";
+  var locked=null;
+
+  function lock(el){
+    try{
+      if(!el||el.__qd220) return false;
+      var val=TEXT;
+      el.__qd220=1;
+      el.__qd220Text=val;
+      /* نمنع أي وحدة أخرى من الكتابة في الشعار */
+      Object.defineProperty(el,"textContent",{
+        configurable:true,
+        get:function(){ return el.__qd220Text; },
+        set:function(v){ /* تُتجاهل كتابات الوحدات القديمة */ }
+      });
+      Object.defineProperty(el,"innerHTML",{
+        configurable:true,
+        get:function(){ return el.__qd220Text; },
+        set:function(v){ }
+      });
+      try{ el.setAttribute("style",
+        "position:fixed;left:8px;bottom:8px;z-index:2147483647;background:#fff;color:#7E0E14;"+
+        "border:1px solid #7E0E14;font:800 11px/1.5 system-ui;padding:3px 9px;border-radius:20px;"+
+        "pointer-events:none;opacity:.97;box-shadow:0 2px 8px rgba(0,0,0,.35);"+
+        "min-width:150px;text-align:center;white-space:nowrap;will-change:auto;transition:none"); }catch(e){}
+      locked=el;
+      return true;
+    }catch(e){ return false; }
+  }
+
+  function tick(){
+    try{
+      var b=document.getElementById("qdrBadge");
+      if(!b) return;
+      if(!b.__qd220) lock(b);
+    }catch(e){}
+  }
+
+  /* تنفيذ فوري + حراسة دورية فقط للحالات التي يُعاد فيها إنشاء الشعار */
+  tick();
+  try{ setInterval(tick,500); }catch(e){}
+  try{ document.addEventListener("DOMContentLoaded",tick,{once:true}); }catch(e){}
+  window.QD220={text:function(){ return TEXT; },lock:tick};
 })();
 
 </script>
