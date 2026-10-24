@@ -15771,7 +15771,7 @@ try{
 }catch(e){}
 
 /* QDBK-END */
-(function(){function mk(){try{var b=document.createElement("div");b.id="qdrBadge";b.textContent="v11-213 · DUAL-EDIT";b.style.cssText="position:fixed;left:8px;bottom:8px;z-index:2147483647;background:#fff;color:#7E0E14;border:1px solid #7E0E14;font:800 11px/1.5 system-ui;padding:3px 9px;border-radius:20px;pointer-events:none;opacity:.97;box-shadow:0 2px 8px rgba(0,0,0,.35)";document.body.appendChild(b);}catch(e){}}if(document.body)mk();else setTimeout(mk,600);})();
+(function(){function mk(){try{var b=document.createElement("div");b.id="qdrBadge";b.textContent="v11-217 · MSG-EDIT";b.style.cssText="position:fixed;left:8px;bottom:8px;z-index:2147483647;background:#fff;color:#7E0E14;border:1px solid #7E0E14;font:800 11px/1.5 system-ui;padding:3px 9px;border-radius:20px;pointer-events:none;opacity:.97;box-shadow:0 2px 8px rgba(0,0,0,.35)";document.body.appendChild(b);}catch(e){}}if(document.body)mk();else setTimeout(mk,600);})();
 /* ---- PWA: install as an app on Android and iPhone / iPad ---- */
 (function(){
   Object.assign(STR.en,{
@@ -33011,6 +33011,901 @@ tr:hover .qde-ndate{color:#7E0E14}
   },true);
 
   window.QD213={ask:ask,sync:syncTherapy,therapyOfOf:therapyOf,clinicOf:clinicOf};
+})();
+
+</script>
+<script>
+/* ===== QD214 · «إضافة جلسة» = جدولة موعد جلسة علاج للاعب (إصابة · جهة · تاريخ الإصابة) + واتساب بالموعد فقط ===== */
+(function(){
+  if(window.__QD214) return; window.__QD214=1;
+
+  function EN(){ try{ return String(localStorage.getItem("qd_lang")||"ar").indexOf("en")===0; }catch(e){ return false; } }
+  function L(a,e){ return EN()?e:a; }
+  function str(v){ return String(v==null?"":v); }
+  function say(m,k){ try{ if(typeof window.toast==="function") window.toast(m,k); }catch(e){} }
+  function esc(v){ return str(v).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+
+  function ST(){
+    try{ if(window.QD_S&&Array.isArray(window.QD_S.sessions)) return window.QD_S; }catch(e){}
+    try{ if(typeof window.QDSIGN_STATE==="function"){ var s=window.QDSIGN_STATE(); if(s) return s; } }catch(e){}
+    try{ return window.QD_S||null; }catch(e){ return null; }
+  }
+  function SESS(){ var s=ST(); return (s&&Array.isArray(s.sessions))?s.sessions:[]; }
+  function THER(){ var s=ST(); if(!s) return []; if(!Array.isArray(s.therapies)) s.therapies=[]; return s.therapies; }
+  function INJS(){ var s=ST(); return (s&&Array.isArray(s.injuries))?s.injuries:[]; }
+  function PLRS(){ var s=ST(); return (s&&Array.isArray(s.players))?s.players:[]; }
+  function CFG(){ var s=ST(); return (s&&s.settings)||{}; }
+  function PERSIST(){
+    try{ if(typeof window.QD_save==="function"){ window.QD_save(); return true; } }catch(e){}
+    try{ if(typeof window.save==="function"){ window.save(); return true; } }catch(e){}
+    return false;
+  }
+  function fullName(p){ return p?((p.first||"")+" "+(p.last||"")).trim():""; }
+  function nameOf(pid){ return fullName(PLRS().filter(function(p){ return str(p.id)===str(pid); })[0]); }
+  function injName(i){ if(!i) return ""; return str(i.name||i.injName||i.title||i.type||""); }
+  function injSite(i){ if(!i) return ""; return str(i.bodySites||i.site||"").split(",").filter(Boolean).map(function(x){ return site(x); }).join(" — "); }
+  function site(x){ try{ if(typeof window.site==="function") return window.site(x); }catch(e){} return x; }
+  function pad(n){ return (n<10?"0":"")+n; }
+  function isoDay(d){ return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate()); }
+  function tomorrow9(){ var d=new Date(); d.setDate(d.getDate()+1); return isoDay(d)+"T09:00"; }
+  function fmtDay(v){ try{ var d=new Date(str(v).replace(" ","T")); if(isNaN(d.getTime())) return str(v);
+      return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate()); }catch(e){ return str(v); } }
+  function fmtTime(v){ var t=str(v).slice(11,16); if(!/^\d\d:\d\d$/.test(t)) return ""; var h=+t.slice(0,2), m=t.slice(3);
+      var ap=h>=12?"م":"ص"; h=h%12; if(!h) h=12; return h+":"+m+" "+ap; }
+  function arDate(v){ try{ var d=new Date(str(v).replace(" ","T")); if(isNaN(d.getTime())) return fmtDay(v);
+      var M=["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"];
+      return d.getDate()+" "+M[d.getMonth()]+" "+d.getFullYear(); }catch(e){ return fmtDay(v); } }
+
+  /* ================= الهاتف ================= */
+  function digits(v){
+    var s=str(v).replace(/[٠-٩]/g,function(c){ return "٠١٢٣٤٥٦٧٨٩".indexOf(c); })
+                 .replace(/[۰-۹]/g,function(c){ return "۰۱۲۳۴۵۶۷۸۹".indexOf(c); })
+                 .replace(/[^\d+]/g,"").replace(/^\+/,"").replace(/^00+/,"");
+    if(s.indexOf("966")===0) return s;
+    if(s.charAt(0)==="0") return "966"+s.slice(1);
+    if(s.length===9&&s.charAt(0)==="5") return "966"+s;
+    return s;
+  }
+  function phoneOf(pid){
+    var p=PLRS().filter(function(x){ return str(x.id)===str(pid); })[0]||{};
+    var n=digits(p.phone);
+    if(n) return {num:n,from:"player"};
+    var g=digits((p.nok&&p.nok.phone)||p.guardianPhone||"");
+    if(g) return {num:g,from:"guardian"};
+    return {num:"",from:""};
+  }
+
+  /* ================= رسالة واتساب: الموعد فقط ================= */
+  function apptMsg(o){
+    var nm=o.name||"player";
+    var d=arDate(o.date), t=fmtTime(o.date)||"—";
+    var dur=Number(o.duration)||30;
+    var clinic=str(o.clinic)||L("عيادة نادي القادسية","Al Qadsiah Club Clinic");
+    if(EN()){
+      return "Hello *"+nm+"* 👋\nYour therapy appointment is confirmed / تم تحديد موعد جلستك العلاجية:\n\n"+
+        "📅 Date: "+d+"\n⏰ Time: "+t+"\n⏱ Duration: "+dur+" min\n📍 Location: "+clinic+
+        "\n\n⚠️ Please arrive 15 minutes before your appointment.\n— Medical Team";
+    }
+    return "مرحباً *"+nm+"* 👋\nتم تحديد موعد جلستك العلاجية / Therapy Appointment:\n\n"+
+      "📅 *التاريخ:* "+d+"\n⏰ *الوقت:* "+t+"\n⏱ *المدة:* "+dur+" دقيقة\n📍 *المكان:* "+clinic+
+      "\n\n⚠️ يرجى الحضور قبل الموعد بـ 15 دقيقة.\n— الجهاز الطبي";
+  }
+  function waLink(o){
+    var ph=phoneOf(o.playerId); if(!ph.num) return "";
+    return "https://wa.me/"+ph.num+"?text="+encodeURIComponent(apptMsg(o));
+  }
+
+  /* ================= واجهة الجدولة ================= */
+  var OV=null, CUR=null;
+  function overlay(){
+    if(OV&&OV.parentNode) return OV;
+    OV=document.createElement("div");
+    OV.id="qd214ov";
+    OV.style.cssText="position:fixed;inset:0;z-index:2147483000;display:none;align-items:flex-start;justify-content:center;padding:22px 14px;background:rgba(20,18,16,.5);overflow:auto;direction:"+(document.documentElement.getAttribute("dir")||"rtl");
+    document.body.appendChild(OV);
+    return OV;
+  }
+  function closeOv(){ if(OV) OV.style.display="none"; CUR=null; }
+
+  function injOptions(pid, sel){
+    var list=INJS().filter(function(i){ return !pid||str(i.playerId)===str(pid); });
+    var h='<option value="">'+L("— لا شيء —","— None —")+'</option>';
+    list.forEach(function(i){
+      var lbl=[injName(i)||L("إصابة","Injury"), i.date?(" · "+fmtDay(i.date)):"", injSite(i)?(" · "+injSite(i)):""].join("");
+      h+='<option value="'+esc(i.id)+'"'+(str(sel)===str(i.id)?" selected":"")+'>'+esc(lbl)+'</option>';
+    });
+    return h;
+  }
+  function playerOptions(sel){
+    var h='<option value="">'+L("— اختر اللاعب —","— Choose player —")+'</option>';
+    PLRS().slice().sort(function(a,b){ return fullName(a).localeCompare(fullName(b)); }).forEach(function(p){
+      var lbl=fullName(p)||str(p.id);
+      h+='<option value="'+esc(p.id)+'"'+(str(sel)===str(p.id)?" selected":"")+'>'+esc(lbl)+'</option>';
+    });
+    return h;
+  }
+
+  function open(rec){
+    /* rec: سجل علاج مجدول للتعديل (اختياري) */
+    var ov=overlay();
+    var th=rec||null, inj=null;
+    if(th&&th.injuryId) inj=INJS().filter(function(i){ return str(i.id)===str(th.injuryId); })[0]||null;
+    var pid=th?th.playerId:"";
+    var dt=th?th.date:tomorrow9();
+    var dur=th?(Number(th.duration)||30):30;
+    var clin=th?str(th.clinician):str(CFG().clinician||"");
+    var notes=th?str(th.notes):"";
+    CUR={th:th};
+
+    ov.innerHTML=
+    '<div style="background:var(--paper,#fff);color:var(--ink,#1b1a18);border-radius:18px;max-width:760px;width:100%;box-shadow:0 24px 70px rgba(0,0,0,.35);overflow:hidden">'+
+      '<div style="padding:15px 20px;border-bottom:1px solid var(--line,#e6e1d8);display:flex;align-items:center;gap:10px">'+
+        '<span style="width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:#FBF3E2;color:#8A6D00">'+
+          '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>'+
+        '<b style="flex:1;font-size:16.5px">'+(th?L("تعديل موعد الجلسة","Edit the session appointment"):L("جدولة موعد جلسة علاج","Schedule a therapy appointment"))+'</b>'+
+        '<button type="button" id="qd214x" aria-label="Close" style="border:1px solid var(--line,#e6e1d8);background:transparent;width:32px;height:32px;border-radius:10px;cursor:pointer;color:inherit">✕</button>'+
+      '</div>'+
+      '<div id="qd214body" style="padding:16px 20px;max-height:64vh;overflow:auto">'+
+        '<div class="frm-grid">'+
+          '<div class="field"><label class="label">'+L("اللاعب","Player")+' <span class="req">*</span></label>'+
+            '<select class="select" id="qd214p">'+playerOptions(pid)+'</select></div>'+
+          '<div class="field"><label class="label">'+L("موعد الجلسة","Appointment")+' <span class="req">*</span></label>'+
+            '<input class="input" type="datetime-local" id="qd214d" value="'+esc(dt)+'"></div>'+
+        '</div>'+
+        '<div class="field"><label class="label">'+L("الإصابة","Injury")+'</label>'+
+          '<select class="select" id="qd214i">'+injOptions(pid, th?th.injuryId:"")+'</select>'+
+          '<div class="tiny muted" id="qd214info" style="margin-top:6px"></div></div>'+
+        '<div class="frm-grid">'+
+          '<div class="field"><label class="label">'+L("جهة / موضع الإصابة","Injury site")+'</label>'+
+            '<input class="input" id="qd214s" value="'+esc(inj?str(inj.bodySites):"")+'" placeholder="'+L("مثال: الركبة اليسرى","e.g. left knee")+'"></div>'+
+          '<div class="field"><label class="label">'+L("تاريخ الإصابة","Injury date")+'</label>'+
+            '<input class="input" type="date" id="qd214id" value="'+esc(inj?fmtDay(inj.date):"")+'"></div>'+
+        '</div>'+
+        '<div class="frm-grid">'+
+          '<div class="field"><label class="label">'+L("مدة الجلسة (دقيقة)","Duration (min)")+'</label>'+
+            '<select class="select" id="qd214du">'+[15,20,30,45,60,90].map(function(x){ return '<option value="'+x+'"'+(x===dur?" selected":"")+'>'+x+' '+L("دقيقة","min")+'</option>'; }).join("")+'</select></div>'+
+          '<div class="field"><label class="label">'+L("المعالج","Clinician")+'</label>'+
+            '<input class="input" id="qd214c" value="'+esc(clin)+'"></div>'+
+        '</div>'+
+        '<div class="field"><label class="label">'+L("ملاحظات (اختياري)","Notes (optional)")+'</label>'+
+          '<textarea class="textarea" id="qd214n" rows="2">'+esc(notes)+'</textarea></div>'+
+        '<div class="tiny" id="qd214ph" style="margin-top:2px"></div>'+
+      '</div>'+
+      '<div style="padding:14px 20px;border-top:1px solid var(--line,#e6e1d8);display:flex;gap:10px;flex-wrap:wrap">'+
+        '<button type="button" id="qd214save" style="flex:1;min-width:190px;background:#0E7490;color:#fff;border:0;border-radius:12px;padding:11px 16px;font-weight:800;font-size:14px;cursor:pointer">'+
+          '✓ '+L("حفظ وإرسال الموعد واتساب","Save & send appointment on WhatsApp")+'</button>'+
+        '<button type="button" id="qd214only" style="background:transparent;color:inherit;border:1px solid var(--line,#e6e1d8);border-radius:12px;padding:11px 16px;font-weight:700;font-size:14px;cursor:pointer">'+
+          L("حفظ بدون إرسال","Save only")+'</button>'+
+        '<button type="button" id="qd214no" style="background:transparent;color:inherit;border:1px solid var(--line,#e6e1d8);border-radius:12px;padding:11px 16px;font-weight:700;font-size:14px;cursor:pointer">'+
+          L("إلغاء","Cancel")+'</button>'+
+      '</div>'+
+    '</div>';
+
+    ov.style.display="flex";
+    var $=function(id){ return ov.querySelector("#"+id); };
+    function info(){
+      var i=INJS().filter(function(x){ return str(x.id)===str($("qd214i").value); })[0];
+      var box=$("qd214info");
+      if(!i){ box.innerHTML=L("يمكن الجدولة بدون إصابة مرتبطة.","You can schedule without a linked injury."); return; }
+      box.innerHTML=L("نوع الإصابة: ","Injury type: ")+esc(str(i.type)||"—")+" · "+
+        L("جهة الإصابة: ","Site: ")+esc(injSite(i)||"—")+" · "+
+        L("تاريخ الإصابة: ","Injury date: ")+esc(fmtDay(i.date)||"—");
+    }
+    function ph(){
+      var p=phoneOf($("qd214p").value), b=$("qd214ph");
+      b.innerHTML=p.num
+        ? '<span style="color:#0E7490;font-weight:800">'+L("واتساب: ","WhatsApp: ")+'</span><span dir="ltr">'+esc("+"+p.num)+'</span>'+(p.from==="guardian"?' <span class="badge grey">'+L("ولي الأمر","Guardian")+'</span>':'')
+        : '<span style="color:#B45309;font-weight:800">'+L("لا يوجد رقم هاتف لهذا اللاعب — سيُحفظ الموعد بدون واتساب.","No phone saved for this player — the appointment is saved without WhatsApp.")+'</span>';
+    }
+    $("qd214i").addEventListener("change",function(){
+      var i=INJS().filter(function(x){ return str(x.id)===str($("qd214i").value); })[0];
+      if(i){ $("qd214s").value=str(i.bodySites||""); $("qd214id").value=fmtDay(i.date||""); }
+      info();
+    });
+    $("qd214p").addEventListener("change",function(){
+      $("qd214i").innerHTML=injOptions($("qd214p").value,"");
+      $("qd214s").value=""; $("qd214id").value=""; info(); ph();
+    });
+    $("qd214x").onclick=closeOv; $("qd214no").onclick=closeOv;
+    ov.addEventListener("click",function(e){ if(e.target===ov) closeOv(); },{once:true});
+    $("qd214save").onclick=function(){ save(true); };
+    $("qd214only").onclick=function(){ save(false); };
+    info(); ph();
+  }
+
+  /* ================= الحفظ في السجلين ================= */
+  function save(sendWa){
+    if(!OV) return;
+    var $=function(id){ return OV.querySelector("#"+id); };
+    var pid=$("qd214p").value, dt=$("qd214d").value;
+    if(!pid){ say(L("اختر اللاعب أولًا","Choose the player first"),"bad"); try{ $("qd214p").focus(); }catch(e){} return; }
+    if(!dt){ say(L("حدّد موعد الجلسة","Set the appointment date & time"),"bad"); try{ $("qd214d").focus(); }catch(e){} return; }
+    var s=ST(); if(!s){ say(L("تعذّر الوصول للبيانات","Could not reach the data"),"bad"); return; }
+    var injId=$("qd214i").value;
+    var inj=INJS().filter(function(x){ return str(x.id)===str(injId); })[0]||null;
+    var ste=$("qd214s").value, idate=$("qd214id").value;
+    var dur=Number($("qd214du").value)||30, clin=$("qd214c").value, notes=$("qd214n").value;
+
+    var thsId="ths_"+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+    var csId="cs_"+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+    var typeName=L("موعد جلسة علاج","Therapy appointment");
+
+    var therapy={ id:thsId, playerId:pid, injuryId:str(injId), date:dt, type:typeName,
+      duration:dur, bodySites:str(ste).split(",").filter(Boolean).join(","),
+      injName:injName(inj)||str(ste), injType:inj?str(inj.type):"", injDate:idate||"",
+      pain:"", painBefore:"", painAfter:"", mods:"", clinician:str(clin),
+      attend:"Scheduled", able:"", notes:str(notes), sched:1, status:"Scheduled",
+      sessionRecId:csId, src:"sched", created:new Date().toISOString() };
+
+    var clinic={ id:csId, date:dt, playerId:pid, injuryId:str(injId),
+      injName:injName(inj)||str(ste), injType:inj?str(inj.type):"",
+      injSites:str(ste).split(",").filter(Boolean).join(","), injDate:idate||"",
+      type:typeName, mods:"", duration:dur, painBefore:"", painAfter:"",
+      clinician:str(clin), attend:"Scheduled", able:"", subj:"", obj:"", assess:"", plan:"",
+      notes:str(notes), sched:1, fromTherapy:thsId, created:new Date().toISOString() };
+
+    try{
+      if(CUR&&CUR.th&&CUR.th.id){                       /* تعديل موعد قائم */
+        var old=CUR.th;
+        therapy.id=old.id; clinic.id=str(old.sessionRecId)||clinic.id; therapy.sessionRecId=clinic.id;
+        s.therapies=(s.therapies||[]).map(function(x){ return str(x.id)===str(old.id)?Object.assign({},x,therapy):x; });
+        var ex=(s.sessions||[]).filter(function(x){ return str(x.id)===str(clinic.id); })[0];
+        if(ex) s.sessions=(s.sessions||[]).map(function(x){ return str(x.id)===str(clinic.id)?Object.assign({},x,clinic):x; });
+        else (s.sessions=s.sessions||[]).push(clinic);
+      }else{
+        s.therapies=THER(); s.therapies.push(therapy);
+        s.sessions=s.sessions||[]; s.sessions.push(clinic);
+      }
+      PERSIST();
+    }catch(e){}
+
+    var link="";
+    if(sendWa){ link=waLink({playerId:pid,date:dt,duration:dur,name:nameOf(pid),clinic:CFG().club||""}); }
+    closeOv();
+    refresh();
+
+    if(sendWa){
+      if(link){ try{ window.open(link,"_blank","noopener"); }catch(e){}
+        say(L("تم حفظ الموعد وإرساله على واتساب","Appointment saved and opened in WhatsApp")); }
+      else { say(L("تم حفظ الموعد — لا يوجد رقم هاتف للاعب","Appointment saved — no phone number for this player"),"warn"); }
+    }else{
+      say(L("تم حفظ موعد الجلسة","Appointment saved"));
+    }
+  }
+
+  function refresh(){
+    try{
+      var act=document.querySelector(".nav-item.active");
+      var v=act?act.getAttribute("data-view"):"therapy";
+      if(v!=="therapy"&&v!=="clinic"&&v!=="dashboard") v="therapy";
+      var item=document.querySelector('.nav-item[data-view="'+v+'"]');
+      if(item) item.click();
+      try{ if(window.qdUnifyPaint) window.qdUnifyPaint(); }catch(e){}
+      try{ if(window.QDTL&&window.QDTL.panel) window.QDTL.panel(); }catch(e){}
+    }catch(e){}
+  }
+
+  /* ================= ربط الأزرار ================= */
+  function intercept(e){
+    try{
+      var b=e.target&&e.target.closest?e.target.closest("button,[data-act]"):null;
+      if(!b) return;
+      var act=b.getAttribute&&b.getAttribute("data-act");
+      var inScope=!!(b.closest("#v-therapy")||b.closest("#v-clinic")||b.closest("#cpDash"));
+      var byAct=(act==="newSessionFromTherapy"||act==="qdajNew");
+      var txt=str(b.textContent).replace(/\s+/g," ").trim();
+      var byTxt=inScope&&/إضافة جلسة|Add session/i.test(txt);
+      if(!byAct&&!byTxt) return;
+      e.preventDefault(); e.stopPropagation();
+      if(e.stopImmediatePropagation) e.stopImmediatePropagation();
+      open(null);
+    }catch(x){}
+  }
+  document.addEventListener("click",intercept,true);
+
+  /* تعديل موعد مجدول من قسم العلاج → نموذج الجدولة نفسه */
+  try{
+    var of=window.qdOpenSessionForm;
+    if(typeof of==="function"){
+      var wf=function(rec){
+        try{
+          if(rec&&rec.sched){
+            var th=THER().filter(function(x){ return str(x.id)===str(rec.fromTherapy)||str(x.sessionRecId)===str(rec.id); })[0];
+            if(th){ open(th); return; }
+          }
+        }catch(e){}
+        return of.apply(this,arguments);
+      };
+      wf.__qd214=1; window.qdOpenSessionForm=wf;
+    }
+  }catch(e){}
+
+  /* نافذة «جلسات الغد»: تبقى قائمة واحدة لكل موعد (لا تكرار علاج + عيادة) */
+  try{
+    if(window.QDTL&&typeof window.QDTL.list==="function"&&!window.QDTL.list.__qd214){
+      var ol=window.QDTL.list;
+      var wl=function(){
+        var arr=ol.apply(this,arguments)||[];
+        try{
+          var live={}; SESS().forEach(function(x){ live[str(x.id)]=1; });
+          arr=arr.filter(function(it){
+            if(!it||it.src!=="therapy") return true;
+            var t=THER().filter(function(x){ return str(x.id)===str(it.id); })[0];
+            return !(t&&t.sessionRecId&&live[str(t.sessionRecId)]);
+          });
+        }catch(e){}
+        return arr;
+      };
+      wl.__qd214=1; window.QDTL.list=wl;
+    }
+  }catch(e){}
+
+
+  /* شعار الإصدار: نمنع الوحدات السابقة من إعادة كتابته */
+  function badge(){
+    try{
+      var b=document.getElementById("qdrBadge"); if(!b) return;
+      var want="v11-214 · SCHEDULE";
+      if(b.textContent.indexOf(want)===-1||b.textContent.indexOf("BTN-OK")===-1) b.textContent=want+" · BTN-OK";
+    }catch(e){}
+  }
+  try{ setInterval(badge,800); badge(); }catch(e){}
+  try{ document.addEventListener("DOMContentLoaded",badge,{once:true}); }catch(e){}
+
+  window.QD214={open:open,save:save,msg:apptMsg,wa:waLink,phone:phoneOf};
+})();
+
+</script>
+<script>
+/* ===== QD215 · «إرسال تذكير واتساب» لكل موعد مجدول في بطاقة جلسات الغد — بنفس رسالة الموعد فقط ===== */
+(function(){
+  if(window.__QD215) return; window.__QD215=1;
+
+  function EN(){ try{ return String(localStorage.getItem("qd_lang")||"ar").indexOf("en")===0; }catch(e){ return false; } }
+  function L(a,e){ return EN()?e:a; }
+  function str(v){ return String(v==null?"":v); }
+  function say(m,k){ try{ if(typeof window.toast==="function") window.toast(m,k); }catch(e){} }
+
+  function ST(){
+    try{ if(window.QD_S&&Array.isArray(window.QD_S.sessions)) return window.QD_S; }catch(e){}
+    try{ if(typeof window.QDSIGN_STATE==="function"){ var s=window.QDSIGN_STATE(); if(s) return s; } }catch(e){}
+    try{ return window.QD_S||null; }catch(e){ return null; }
+  }
+  function SESS(){ var s=ST(); return (s&&Array.isArray(s.sessions))?s.sessions:[]; }
+  function THER(){ var s=ST(); return (s&&Array.isArray(s.therapies))?s.therapies:[]; }
+  function PLRS(){ var s=ST(); return (s&&Array.isArray(s.players))?s.players:[]; }
+  function CLINIC(){ try{ var c=((ST()||{}).settings||{}).club; return str(c)||""; }catch(e){ return ""; } }
+  function nameOf(pid){
+    var p=PLRS().filter(function(x){ return str(x.id)===str(pid); })[0];
+    return p?((p.first||"")+" "+(p.last||"")).trim():"";
+  }
+  function recOf(src,id){
+    if(str(src)==="clinic") return SESS().filter(function(x){ return str(x.id)===str(id); })[0]||null;
+    return THER().filter(function(x){ return str(x.id)===str(id); })[0]||null;
+  }
+  function msgFor(rec){
+    try{
+      if(!rec||!window.QD214) return "";
+      return window.QD214.msg({ playerId:rec.playerId, date:rec.date, duration:rec.duration,
+        name:nameOf(rec.playerId), clinic:CLINIC() });
+    }catch(e){ return ""; }
+  }
+  function waFor(rec){
+    try{
+      if(!rec||!window.QD214) return "";
+      var ph=window.QD214.phone(rec.playerId); if(!ph||!ph.num) return "";
+      return "https://wa.me/"+ph.num+"?text="+encodeURIComponent(msgFor(rec));
+    }catch(e){ return ""; }
+  }
+
+  function btnHTML(rec){
+    var link=waFor(rec);
+    var label=L("إرسال تذكير واتساب","Send WhatsApp reminder");
+    var ico='<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 9 9 0 0 1-3.8-.9L3 20l1.1-4.6A8.4 8.4 0 0 1 12 3.1a8.4 8.4 0 0 1 9 8.4z"/><path d="M8.5 9.5c0 3 2.5 5.5 5.5 5.5"/></svg>';
+    if(!link){
+      return '<span class="qd215-noph tiny" style="color:#B45309;font-weight:800;white-space:nowrap">'+L("لا يوجد رقم هاتف","No phone number")+'</span>';
+    }
+    return '<a class="btn sm qd215-wa" href="'+link+'" target="_blank" rel="noopener" '+
+      'data-act="qd215Remind" data-src="'+esc(rec.fromTherapy?"clinic":(rec.sessionRecId?"therapy":"therapy"))+'" data-id="'+esc(rec.id)+'" '+
+      'style="text-decoration:none;white-space:nowrap;margin-inline-start:6px">'+ico+' '+label+'</a>';
+  }
+  function esc(v){ return str(v).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+
+  /* ---------- بطاقة لوحة التحكم #cpDash ---------- */
+  function paintDash(){
+    try{
+      var card=document.getElementById("cpDash"); if(!card) return 0;
+      var rows=card.querySelectorAll("table tbody tr"); var n=0;
+      Array.prototype.forEach.call(rows,function(tr){
+        var cell=tr.lastElementChild; if(!cell) return;
+        if(cell.querySelector(".qd215-wa,.qd215-noph")) return;
+        var a=cell.querySelector("a[data-id]");
+        var src="therapy", id="";
+        if(a){
+          var bits=str(a.getAttribute("data-id")).split(":");
+          if(bits.length>1){ src=bits[0]; id=bits.slice(1).join(":"); }
+        }
+        if(!id){                                   /* احتياط: مطابقة الاسم من الصف */
+          var nm=str((tr.children[0]||{}).textContent).trim().split("\n")[0].trim();
+          var hit=null;
+          SESS().concat(THER()).forEach(function(r){ if(!hit&&nameOf(r.playerId)&&nm.indexOf(nameOf(r.playerId))===0) hit=r; });
+          if(!hit) return;
+          cell.insertAdjacentHTML("beforeend",btnHTML(hit)); n++; return;
+        }
+        var rec=recOf(src,id); if(!rec) return;
+        /* التوحيد: نُبقي زر التذكير واحدًا فقط برسالة الموعد */
+        Array.prototype.forEach.call(cell.querySelectorAll("a,button"),function(b){
+          var t=str(b.textContent).trim();
+          if(/^(تذكير|Reminder)$/i.test(t)){ try{ b.remove(); }catch(e){} }
+        });
+        cell.insertAdjacentHTML("beforeend",btnHTML(rec)); n++;
+      });
+      return n;
+    }catch(e){ return 0; }
+  }
+
+  /* ---------- بطاقة جلسات الغد داخل سجل العيادة #qdTmrwCard ---------- */
+  function paintClinicCard(){
+    try{
+      var card=document.getElementById("qdTmrwCard"); if(!card) return 0;
+      var rows=card.querySelectorAll("table tbody tr"); var n=0;
+      Array.prototype.forEach.call(rows,function(tr){
+        var cell=tr.lastElementChild; if(!cell) return;
+        if(cell.querySelector(".qd215-wa,.qd215-noph")) return;
+        var h=cell.querySelector("[data-act='qdtlAdd'],[data-act='qdtlEdit'],[data-k]");
+        var id=h?h.getAttribute("data-k"):"";
+        var rec=id?THER().filter(function(x){ return str(x.id)===str(id); })[0]:null;
+        if(!rec){
+          if(id&&recordLink(id)) rec=recordLink(id);
+        }
+        if(!rec) return;
+        cell.insertAdjacentHTML("beforeend",btnHTML(rec)); n++;
+      });
+      return n;
+    }catch(e){ return 0; }
+  }
+  function recordLink(thId){
+    var th=THER().filter(function(x){ return str(x.id)===str(thId); })[0]; if(!th) return null;
+    if(th.sessionRecId){ return SESS().filter(function(x){ return str(x.id)===str(th.sessionRecId); })[0]||th; }
+    return th;
+  }
+
+  function paint(){ var a=paintDash(); var b=paintClinicCard(); return a+b; }
+
+  /* بعد كل رسم: تمريرة قصيرة (بدون إعادة رسم تلقائية للبطاقة) */
+  function watch(){
+    try{
+      var t=document.body; if(!t) return;
+      var p=false;
+      new MutationObserver(function(){
+        if(p) return; p=true;
+        setTimeout(function(){ p=false; paint(); },60);
+      }).observe(t,{childList:true,subtree:true});
+    }catch(e){}
+    try{ setInterval(paint,1200); }catch(e){}
+  }
+
+  /* تعليم الإرسال على السجل (اختياري، لا يغيّر البيانات الطبية) */
+  document.addEventListener("click",function(e){
+    try{
+      var a=e.target&&e.target.closest?e.target.closest(".qd215-wa"):null; if(!a) return;
+      var id=a.getAttribute("data-id"), src=a.getAttribute("data-src");
+      var rec=recOf(src,id); if(!rec) return;
+      rec.reminderSentAt=new Date().toISOString();
+      try{ if(typeof window.QD_save==="function") window.QD_save(); else if(typeof window.save==="function") window.save(); }catch(x){}
+      setTimeout(function(){ say(L("تم فتح واتساب برسالة الموعد","WhatsApp opened with the appointment message")); },120);
+    }catch(x){}
+  },true);
+
+  function badge(){
+    try{ var b=document.getElementById("qdrBadge"); if(!b) return;
+      var w="v11-215 · REMIND-WA";
+      if(b.textContent!==w+" · BTN-OK") b.textContent=w+" · BTN-OK";
+    }catch(e){}
+  }
+
+  window.QD215={paint:paint,wa:waFor,msg:msgFor};
+  var boot=function(){ paint(); watch(); badge(); setTimeout(paint,400); setTimeout(paint,1200); };
+  boot();
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",boot,{once:true});
+  try{ setInterval(badge,900); }catch(e){}
+})();
+
+</script>
+<script>
+/* ===== QD216 · «إرسال تذكير للكل» في بطاقة جلسات الغد — يفتح واتساب لكل موعد مجدول بالترتيب ===== */
+(function(){
+  if(window.__QD216) return; window.__QD216=1;
+
+  function EN(){ try{ return String(localStorage.getItem("qd_lang")||"ar").indexOf("en")===0; }catch(e){ return false; } }
+  function L(a,e){ return EN()?e:a; }
+  function str(v){ return String(v==null?"":v); }
+  function say(m,k){ try{ if(typeof window.toast==="function") window.toast(m,k); }catch(e){} }
+  function esc(v){ return str(v).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+
+  function ST(){
+    try{ if(window.QD_S&&Array.isArray(window.QD_S.sessions)) return window.QD_S; }catch(e){}
+    try{ if(typeof window.QDSIGN_STATE==="function"){ var s=window.QDSIGN_STATE(); if(s) return s; } }catch(e){}
+    try{ return window.QD_S||null; }catch(e){ return null; }
+  }
+  function SESS(){ var s=ST(); return (s&&Array.isArray(s.sessions))?s.sessions:[]; }
+  function THER(){ var s=ST(); return (s&&Array.isArray(s.therapies))?s.therapies:[]; }
+  function PLRS(){ var s=ST(); return (s&&Array.isArray(s.players))?s.players:[]; }
+  function nameOf(pid){
+    var p=PLRS().filter(function(x){ return str(x.id)===str(pid); })[0];
+    return p?((p.first||"")+" "+(p.last||"")).trim():"";
+  }
+  function recOf(src,id){
+    if(str(src)==="clinic") return SESS().filter(function(x){ return str(x.id)===str(id); })[0]||null;
+    return THER().filter(function(x){ return str(x.id)===str(id); })[0]||null;
+  }
+  function hhmm(v){ var t=str(v).slice(11,16); return /^\d\d:\d\d$/.test(t)?t:"--:--"; }
+  function dayOf(v){ return str(v).slice(0,10); }
+
+  /* ---------- جمع المواعيد المجدولة من الأزرار المبنيّة في البطاقتين ---------- */
+  function gather(){
+    var out=[], seen={};
+    function take(sel){
+      Array.prototype.forEach.call(document.querySelectorAll(sel),function(a){
+        var href=a.getAttribute("href")||""; if(!href) return;
+        var id=a.getAttribute("data-id")||"", src=a.getAttribute("data-src")||"therapy";
+        if(!src&&id.indexOf(":")>0) src=id.split(":")[0];
+        if(id.indexOf(":")>0) id=id.split(":").slice(1).join(":");
+        if(!src) src="therapy";
+        var key=src+":"+id;
+        if(seen[key]||seen[href]) return;
+        seen[key]=1; seen[href]=1;
+        var rec=recOf(src,id)||{};
+        out.push({ src:src, id:id, href:href, playerId:rec.playerId,
+          name:nameOf(rec.playerId)||"—", date:rec.date, time:hhmm(rec.date), day:dayOf(rec.date),
+          type:rec.type||"" });
+      });
+    }
+    take("#cpDash .qd215-wa");
+    take("#qdTmrwCard .qd215-wa");
+    out.sort(function(a,b){ return str(a.date).localeCompare(str(b.date)); });
+    return out;
+  }
+
+  /* ---------- نافذة الطابور ---------- */
+  var OV=null, QUEUE=[], DONE={};
+  function overlay(){
+    if(OV&&OV.parentNode) return OV;
+    OV=document.createElement("div");
+    OV.id="qd216ov";
+    OV.style.cssText="position:fixed;inset:0;z-index:2147483001;display:none;align-items:flex-start;justify-content:center;padding:22px 14px;background:rgba(20,18,16,.5);overflow:auto;direction:"+(document.documentElement.getAttribute("dir")||"rtl");
+    document.body.appendChild(OV);
+    return OV;
+  }
+  function closeOv(){ if(OV) OV.style.display="none"; }
+
+  function render(){
+    var ov=overlay();
+    var left=QUEUE.filter(function(q){ return !DONE[q.href]; }).length;
+    var rows=QUEUE.map(function(q,i){
+      var ok=!!DONE[q.href];
+      return '<tr data-i="'+i+'">'+
+        '<td class="qd-mono" style="white-space:nowrap">'+esc(q.time)+'</td>'+
+        '<td><b>'+esc(q.name)+'</b>'+(q.type?'<div class="tiny muted">'+esc(q.type)+'</div>':'')+'</td>'+
+        '<td style="text-align:end;white-space:nowrap">'+
+          (ok
+            ? '<span class="badge green">'+L("تم الفتح ✓","Opened ✓")+'</span>'
+            : '<a class="btn sm qd216-go" href="'+esc(q.href)+'" target="_blank" rel="noopener" style="text-decoration:none">'+L("فتح واتساب","Open WhatsApp")+'</a>')+
+        '</td></tr>';
+    }).join("");
+    ov.innerHTML=
+      '<div style="background:var(--paper,#fff);color:var(--ink,#1b1a18);border-radius:18px;max-width:640px;width:100%;box-shadow:0 24px 70px rgba(0,0,0,.35);overflow:hidden">'+
+        '<div style="padding:15px 20px;border-bottom:1px solid var(--line,#e6e1d8);display:flex;align-items:center;gap:10px">'+
+          '<b style="flex:1;font-size:16px">'+L("إرسال تذكير للكل","Send reminder to all")+'</b>'+
+          '<span class="badge blue">'+left+' / '+QUEUE.length+'</span>'+
+          '<button type="button" id="qd216x" aria-label="Close" style="border:1px solid var(--line,#e6e1d8);background:transparent;width:32px;height:32px;border-radius:10px;cursor:pointer;color:inherit">✕</button>'+
+        '</div>'+
+        '<div style="padding:14px 20px">'+
+          '<div class="tiny muted" style="margin-bottom:10px">'+
+            L("يُفتح واتساب لكل موعد بالترتيب وبرسالة الموعد فقط. إن منع المتصفح فتح أكثر من نافذة، اضغط «فتح التالي» بعد كل إرسال.",
+              "WhatsApp opens for each appointment in order with the appointment message only. If the browser blocks multiple windows, press “Open next” after each send.")+
+          '</div>'+
+          (QUEUE.length
+            ? '<div class="table-wrap"><table><thead><tr><th>'+L("الوقت","Time")+'</th><th>'+L("اللاعب","Player")+'</th><th></th></tr></thead><tbody>'+rows+'</tbody></table></div>'
+            : '<div class="muted tiny" style="padding:8px 0">'+L("لا مواعيد مجدولة برقم هاتف.","No scheduled appointments with a phone number.")+'</div>')+
+        '</div>'+
+        '<div style="padding:14px 20px;border-top:1px solid var(--line,#e6e1d8);display:flex;gap:10px;flex-wrap:wrap">'+
+          (left?'<button type="button" id="qd216next" style="flex:1;min-width:180px;background:#0E7490;color:#fff;border:0;border-radius:12px;padding:11px 16px;font-weight:800;font-size:14px;cursor:pointer">▶ '+L("فتح التالي","Open next")+'</button>':'')+
+          '<button type="button" id="qd216no" style="background:transparent;color:inherit;border:1px solid var(--line,#e6e1d8);border-radius:12px;padding:11px 16px;font-weight:700;font-size:14px;cursor:pointer">'+L("إغلاق","Close")+'</button>'+
+        '</div>'+
+      '</div>';
+    ov.style.display="flex";
+    var $=function(id){ return ov.querySelector("#"+id); };
+    $("qd216x").onclick=closeOv; $("qd216no").onclick=closeOv;
+    ov.addEventListener("click",function(e){ if(e.target===ov) closeOv(); },{once:true});
+    Array.prototype.forEach.call(ov.querySelectorAll(".qd216-go"),function(a){
+      a.addEventListener("click",function(){
+        var tr=a.closest("tr"); var i=tr?tr.getAttribute("data-i"):null;
+        if(i!==null&&QUEUE[+i]) DONE[QUEUE[+i].href]=1;
+        setTimeout(function(){ render(); },250);
+      });
+    });
+    var nx=$("qd216next");
+    if(nx) nx.onclick=openNext;
+  }
+
+  /* يفتح أول موعد لم يُفتح بعد (نقرة مستخدم ⇒ لا يحجبها المتصفح) */
+  function openNext(){
+    var q=QUEUE.filter(function(x){ return !DONE[x.href]; })[0];
+    if(!q){ render(); return false; }
+    var a=OV?OV.querySelector('.qd216-go'):null;
+    if(a){ try{ a.click(); }catch(e){} DONE[q.href]=1; setTimeout(render,250); return true; }
+    try{ window.open(q.href,"_blank","noopener"); DONE[q.href]=1; render(); return true; }catch(e){ return false; }
+  }
+
+  function startAll(){
+    QUEUE=gather(); DONE={};
+    if(!QUEUE.length){
+      say(L("لا مواعيد مجدولة برقم هاتف لإرسال تذكير لها","No scheduled appointments with a phone number"),"warn");
+      return;
+    }
+    render();
+    openNext();               /* أول موعد فورًا (ضمن نقرة المستخدم) */
+  }
+
+  /* ---------- الأزرار ---------- */
+  function addButtons(){
+    var n=0;
+    function add(card,anchor){
+      if(!card) return;
+      if(card.querySelector(".qd216-all")) return;
+      var b=document.createElement("button");
+      b.type="button"; b.className="btn sm qd216-all";
+      b.style.marginInlineStart="6px";
+      b.innerHTML='<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 11.5a8.4 8.4 0 0 1-9 8.4 9 9 0 0 1-3.8-.9L3 20l1.1-4.6A8.4 8.4 0 0 1 12 3.1a8.4 8.4 0 0 1 9 8.4z"/><path d="M8 11h.01M12 11h.01M16 11h.01"/></svg> '+L("إرسال تذكير للكل","Send reminder to all");
+      b.addEventListener("click",function(e){ try{ e.preventDefault(); e.stopPropagation(); }catch(x){} startAll(); },true);
+      if(anchor&&anchor.parentNode) anchor.parentNode.insertBefore(b,anchor.nextSibling);
+      else card.appendChild(b);
+      n++;
+    }
+    /* لوحة التحكم */
+    var dash=document.getElementById("cpDash");
+    if(dash){
+      var head=dash.querySelector(".card-head")||dash;
+      var sp=head.querySelector(".sp")||head.querySelector('[data-act="cpBulk"]');
+      add(head, sp);
+    }
+    /* بطاقة جلسات الغد داخل سجل العيادة */
+    var tc=document.getElementById("qdTmrwCard");
+    if(tc){
+      var bar=tc.querySelector(".card-body > div")||tc;
+      add(bar, bar.querySelector('[data-act="qdtlAddAll"]'));
+    }
+    return n;
+  }
+
+  function badge(){
+    try{ var b=document.getElementById("qdrBadge"); if(!b) return;
+      var w="v11-216 · REMIND-ALL";
+      if(b.textContent!==w+" · BTN-OK") b.textContent=w+" · BTN-OK"; }catch(e){}
+  }
+  function tick(){ addButtons(); badge(); }
+
+  window.QD216={all:startAll,next:openNext,list:gather,add:addButtons};
+  var boot=function(){ tick(); setTimeout(tick,400); setTimeout(tick,1200);
+    try{ new MutationObserver(function(){ if(!tick.__p){ tick.__p=1; setTimeout(function(){ tick.__p=0; tick(); },80); } })
+      .observe(document.body,{childList:true,subtree:true}); }catch(e){}
+    try{ setInterval(tick,1500); }catch(e){}
+  };
+  boot();
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",boot,{once:true});
+})();
+
+</script>
+<script>
+/* ===== QD217 · رسالة تذكير الموعد قابلة للتعديل من الإعدادات (افتراضيًا = رسالة الموعد الحالية) ===== */
+(function(){
+  if(window.__QD217) return; window.__QD217=1;
+
+  var DEF_AR="مرحباً *{name}* 👋\nتم تحديد موعد جلستك العلاجية / Therapy Appointment:\n\n📅 *التاريخ:* {date}\n⏰ *الوقت:* {time}\n⏱ *المدة:* {duration} دقيقة\n📍 *المكان:* {clinic}\n\n⚠️ يرجى الحضور قبل الموعد بـ 15 دقيقة.\n— الجهاز الطبي";
+  var DEF_EN="Hello *{name}* 👋\nYour therapy appointment is confirmed:\n\n📅 *Date:* {date}\n⏰ *Time:* {time}\n⏱ *Duration:* {duration} min\n📍 *Location:* {clinic}\n\n⚠️ Please arrive 15 minutes before your appointment.\n— Medical Team";
+  var TOKENS=[["{name}","اسم اللاعب"],["{date}","التاريخ"],["{time}","الوقت"],["{duration}","المدة"],["{clinic}","المكان"]];
+
+  function EN(){ try{ return String(localStorage.getItem("qd_lang")||"ar").indexOf("en")===0; }catch(e){ return false; } }
+  function L(a,e){ return EN()?e:a; }
+  function str(v){ return String(v==null?"":v); }
+  function esc(v){ return str(v).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+  function say(m,k){ try{ if(typeof window.toast==="function") window.toast(m,k); }catch(e){} }
+
+  function ST(){
+    try{ if(window.QD_S&&Array.isArray(window.QD_S.sessions)) return window.QD_S; }catch(e){}
+    try{ if(typeof window.QDSIGN_STATE==="function"){ var s=window.QDSIGN_STATE(); if(s) return s; } }catch(e){}
+    try{ return window.QD_S||null; }catch(e){ return null; }
+  }
+  function CFG(){ var s=ST(); return (s&&s.settings)||null; }
+  function PERSIST(){
+    try{ if(typeof window.QD_save==="function"){ window.QD_save(); return true; } }catch(e){}
+    try{ if(typeof window.save==="function"){ window.save(); return true; } }catch(e){}
+    return false;
+  }
+  function def(){ return EN()?DEF_EN:DEF_AR; }
+  function tpl(){
+    var st=CFG(); if(!st) return def();
+    var v=st.remindMsg;
+    if(v&&typeof v==="object"){ var t=str(v[EN()?"en":"ar"]||v.ar||v.en||""); return t.trim()?t:def(); }
+    if(typeof v==="string"&&v.trim()) return v;
+    return def();
+  }
+  function setTpl(txt){
+    var st=CFG(); if(!st) return false;
+    if(!st.remindMsg||typeof st.remindMsg!=="object"||Array.isArray(st.remindMsg)) st.remindMsg={};
+    st.remindMsg[EN()?"en":"ar"]=str(txt);
+    return PERSIST();
+  }
+  function resetTpl(){
+    var st=CFG(); if(!st) return false;
+    if(!st.remindMsg||typeof st.remindMsg!=="object") st.remindMsg={};
+    st.remindMsg[EN()?"en":"ar"]=def();
+    return PERSIST();
+  }
+
+  function pad(n){ return (n<10?"0":"")+n; }
+  function arDate(v){
+    try{
+      var d=new Date(str(v).replace(" ","T")); if(isNaN(d.getTime())) return str(v);
+      if(EN()){
+        var ME=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+        return d.getDate()+" "+ME[d.getMonth()]+" "+d.getFullYear();
+      }
+      var M=["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"];
+      return d.getDate()+" "+M[d.getMonth()]+" "+d.getFullYear();
+    }catch(e){ return str(v); }
+  }
+  function fmtTime(v){
+    var t=str(v).slice(11,16); if(!/^\d\d:\d\d$/.test(t)) return "—";
+    var h=+t.slice(0,2), m=t.slice(3), ap=h>=12?(EN()?"PM":"م"):(EN()?"AM":"ص");
+    var hh=h%12; if(!hh) hh=12;
+    return EN()?(pad(hh)+":"+m+" "+ap):(hh+":"+m+" "+ap);
+  }
+  function fill(t,o){
+    var out=str(t);
+    out=out.split("{name}").join(o.name||"");
+    out=out.split("{date}").join(o.date||"");
+    out=out.split("{time}").join(o.time||"");
+    out=out.split("{duration}").join(o.duration||"");
+    out=out.split("{clinic}").join(o.clinic||"");
+    return out;
+  }
+  function build(o){
+    var t=tpl(); if(!str(t).trim()) t=def();
+    if(!/\{(name|date|time|duration|clinic)\}/.test(t)){ t=def(); }   /* رسالة بلا متغيرات = غير صالحة */
+    return fill(t,o);
+  }
+
+  /* ---------- استبدال مولّد رسالة الموعد في الوحدة السابقة ---------- */
+  function hookMsg(){
+    try{
+      if(!window.QD214||typeof window.QD214.msg!=="function"||window.QD214.msg.__qd217) return;
+      var orig=window.QD214.msg;
+      var w=function(o){
+        try{
+          var st=CFG();
+          if(!st||st.remindMsg==null) return orig.apply(this,arguments);   /* لم يُعدّل بعد → الافتراضي */
+          var nm=str(o&&o.name)||str(o&&o.playerId);
+          return build({ name:nm, date:arDate(o&&o.date), time:fmtTime(o&&o.date),
+            duration:str(Number(o&&o.duration)||30), clinic:str(o&&o.clinic)||(EN()?"Al Qadsiah Club Clinic":"عيادة نادي القادسية") });
+        }catch(e){ return orig.apply(this,arguments); }
+      };
+      w.__qd217=1; window.QD214.msg=w;
+    }catch(e){}
+  }
+
+  /* ---------- إعادة بناء أزرار التذكير بعد أي تعديل ---------- */
+  function repaint(){
+    /* تحديث روابط التذكير القائمة بالرسالة الجديدة (دون حذف الأزرار) */
+    try{
+      document.querySelectorAll(".qd215-wa").forEach(function(a){
+        var src=a.getAttribute("data-src")||"therapy", id=a.getAttribute("data-id")||"";
+        var s=ST(); if(!s) return;
+        var arr=(src==="clinic")?s.sessions:s.therapies;
+        var rec=(arr||[]).filter(function(x){ return str(x.id)===str(id); })[0];
+        if(!rec) return;
+        var link=(window.QD215&&window.QD215.wa)?window.QD215.wa(rec):"";
+        if(link) a.setAttribute("href",link);
+      });
+    }catch(e){}
+    try{ if(window.QD215&&window.QD215.paint) window.QD215.paint(); }catch(e){}
+  }
+
+  /* ---------- بطاقة الإعدادات ---------- */
+  function card(){
+    var body=
+      '<div class="card" id="qd217card" style="margin-top:18px"><div class="card-head">'+
+        '<h3>'+L("رسالة تذكير الموعد (واتساب)","Appointment reminder message (WhatsApp)")+'</h3>'+
+        '<div class="sp"></div>'+
+        '<button class="btn sm" id="qd217Reset">'+L("استعادة الافتراضي","Restore default")+'</button>'+
+        '<button class="btn primary sm" id="qd217Save" style="margin-inline-start:6px">'+L("حفظ الرسالة","Save message")+'</button>'+
+      '</div><div class="card-body">'+
+        '<p class="tiny muted" style="margin-bottom:10px">'+
+          L("تُستخدم هذه الرسالة في التذكير الفردي و«إرسال تذكير للكل». اضغط أي متغيّر لإدراجه — وعند الإرسال يُستبدل تلقائيًا ببيانات الموعد.",
+            "Used by the single reminder and “Send reminder to all”. Press a variable to insert it — it is replaced automatically with the appointment data when sending.")+
+        '</p>'+
+        '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">'+
+          TOKENS.map(function(t){ return '<button type="button" class="btn ghost sm qd217-tok" data-tok="'+esc(t[0])+'" style="font-family:ui-monospace,monospace">'+esc(t[0])+'</button>'; }).join("")+
+        '</div>'+
+        '<textarea class="textarea" id="qd217txt" rows="9" spellcheck="false" style="font-size:13.5px;line-height:1.85;width:100%"></textarea>'+
+        '<div class="tiny muted" style="margin:10px 0 6px;font-weight:800">'+L("معاينة","Preview")+'</div>'+
+        '<div id="qd217prev" style="white-space:pre-wrap;border:1px dashed var(--line,#e6e1d8);border-radius:12px;padding:12px 14px;font-size:13px;line-height:1.9;background:var(--surface,#faf8f4)"></div>'+
+        '<div class="tiny" id="qd217msg" style="margin-top:8px"></div>'+
+      '</div></div>';
+    return body;
+  }
+  function sample(){
+    var st=ST(), p=((st&&st.players)||[])[0]||{};
+    var nm=((p.first||"")+" "+(p.last||"")).trim()||L("اسم اللاعب","Player name");
+    var d=new Date(); d.setDate(d.getDate()+1); d.setHours(9,0,0,0);
+    var iso=d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate())+"T09:00";
+    return { name:nm, date:arDate(iso), time:fmtTime(iso), duration:"30",
+      clinic:str((CFG()||{}).club)||L("عيادة نادي القادسية","Al Qadsiah Club Clinic") };
+  }
+  function wire(root){
+    var ta=root.querySelector("#qd217txt"); if(!ta) return;
+    var pv=root.querySelector("#qd217prev"), ms=root.querySelector("#qd217msg");
+    ta.value=tpl();
+    function prev(){
+      var t=str(ta.value);
+      var nm=/\{(name|date|time|duration|clinic)\}/.test(t);
+      pv.textContent=nm?fill(t,sample()):L("أضف متغيّرًا واحدًا على الأقل مثل {name}","Add at least one variable such as {name}");
+      if(ms) ms.textContent="";
+    }
+    ta.addEventListener("input",prev); prev();
+    root.querySelectorAll(".qd217-tok").forEach(function(b){
+      b.addEventListener("click",function(){
+        var tok=b.getAttribute("data-tok"); var s=ta.selectionStart||ta.value.length;
+        ta.value=ta.value.slice(0,s)+tok+ta.value.slice(ta.selectionEnd||s);
+        ta.focus(); try{ ta.selectionStart=ta.selectionEnd=s+tok.length; }catch(e){}
+        prev();
+      });
+    });
+    var sv=root.querySelector("#qd217Save");
+    if(sv) sv.addEventListener("click",function(){
+      if(!/\{(name|date|time|duration|clinic)\}/.test(str(ta.value))){ say(L("الرسالة يجب أن تحتوي متغيّرًا واحدًا على الأقل ({name} مثلًا)","The message needs at least one variable (e.g. {name})"),"bad"); return; }
+      setTpl(ta.value); hookMsg(); repaint();
+      say(L("تم حفظ رسالة التذكير — تُستخدم الآن في التذكير الفردي وللجميع","Reminder message saved — now used for single and bulk reminders"));
+    });
+    var rs=root.querySelector("#qd217Reset");
+    if(rs) rs.addEventListener("click",function(){
+      ta.value=def(); resetTpl(); hookMsg(); repaint(); prev();
+      say(L("تمت استعادة الرسالة الافتراضية","Default message restored"));
+    });
+  }
+
+  function inject(){
+    try{
+      var host=document.getElementById("v-settings"); if(!host||!host.firstElementChild) return false;
+      if(host.querySelector("#qd217card")) return true;
+      hookMsg();
+      var wrap=document.createElement("div");
+      wrap.innerHTML=card();
+      var c=wrap.firstElementChild; if(!c) return false;
+      host.appendChild(c);
+      wire(host);
+      return true;
+    }catch(e){ return false; }
+  }
+
+  function badge(){
+    try{ var b=document.getElementById("qdrBadge"); if(!b) return;
+      var w="v11-217 · MSG-EDIT";
+      if(b.textContent!==w+" · BTN-OK") b.textContent=w+" · BTN-OK"; }catch(e){}
+  }
+
+  window.QD217={tpl:tpl,set:setTpl,reset:resetTpl,build:build,inject:inject,repaint:repaint,def:def};
+  var boot=function(){
+    hookMsg(); inject(); badge();
+    try{
+      new MutationObserver(function(){ if(!boot.__p){ boot.__p=1; setTimeout(function(){ boot.__p=0; inject(); badge(); hookMsg(); },60); } })
+        .observe(document.body,{childList:true,subtree:true});
+    }catch(e){}
+    try{ setInterval(function(){ inject(); badge(); hookMsg(); },1500); }catch(e){}
+  };
+  boot();
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",boot,{once:true});
 })();
 
 </script>
