@@ -411,7 +411,7 @@ html[dir="rtl"] .filters .select{padding-left:34px}
 .rp-path-lbl{font-size:10.5px;font-weight:800;margin-top:3px;color:var(--slate);white-space:nowrap}
 .rp-batt{display:inline-flex;align-items:center;gap:5px}
 .rp-batt b{font-weight:900;line-height:1}
-/* ===== v11-203 · MATCH-AUDIT — مسار اللاعب وشريط الإنجاز ===== */
+/* ===== v11-207 · LAYOUT-FIX — مسار اللاعب وشريط الإنجاز ===== */
 .rp-path2{display:flex;align-items:center;margin:5px 0 6px;min-width:150px}
 .rp-node{width:13px;height:13px;border-radius:50%;flex:0 0 auto;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;background:#fff;border:2px solid #D3D9E1;transition:background .25s,border-color .25s,box-shadow .25s}
 .rp-node.done{background:#15803D;border-color:#15803D}
@@ -15771,7 +15771,7 @@ try{
 }catch(e){}
 
 /* QDBK-END */
-(function(){function mk(){try{var b=document.createElement("div");b.id="qdrBadge";b.textContent="v11-203 · MATCH-AUDIT";b.style.cssText="position:fixed;left:8px;bottom:8px;z-index:2147483647;background:#fff;color:#7E0E14;border:1px solid #7E0E14;font:800 11px/1.5 system-ui;padding:3px 9px;border-radius:20px;pointer-events:none;opacity:.97;box-shadow:0 2px 8px rgba(0,0,0,.35)";document.body.appendChild(b);}catch(e){}}if(document.body)mk();else setTimeout(mk,600);})();
+(function(){function mk(){try{var b=document.createElement("div");b.id="qdrBadge";b.textContent="v11-207 · LAYOUT-FIX";b.style.cssText="position:fixed;left:8px;bottom:8px;z-index:2147483647;background:#fff;color:#7E0E14;border:1px solid #7E0E14;font:800 11px/1.5 system-ui;padding:3px 9px;border-radius:20px;pointer-events:none;opacity:.97;box-shadow:0 2px 8px rgba(0,0,0,.35)";document.body.appendChild(b);}catch(e){}}if(document.body)mk();else setTimeout(mk,600);})();
 /* ---- PWA: install as an app on Android and iPhone / iPad ---- */
 (function(){
   Object.assign(STR.en,{
@@ -24356,7 +24356,7 @@ try{
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous">
 /* =====================================================================
-   v11-203 · MATCH-AUDIT — توحيد حالة اليوم (مباراة · تدريب · راحة · إجازة)
+   v11-207 · LAYOUT-FIX — توحيد حالة اليوم (مباراة · تدريب · راحة · إجازة)
    بين: لوحة التحكم · البرنامج الأسبوعي · التقويم · جدول المباريات
    ===================================================================== */
 (function(){
@@ -24460,7 +24460,7 @@ try{
 
 <script>
 /* =====================================================================
-   v11-203 · MATCH-AUDIT
+   v11-207 · LAYOUT-FIX
    إصلاح التجمد: يُبنى الهيكل مرة واحدة فقط، ويُحدَّث محتواه الداخلي
    (لا إعادة بناء للجذر ⇒ لا يفقد الهوية ولا يعلق)
    ===================================================================== */
@@ -32294,6 +32294,89 @@ tr:hover .qde-ndate{color:#7E0E14}
     diag:function(){ var a=audit();
       var t=a.rounds.map(function(x){ return "ج"+x.round+":"+x.count+(x.records>1?"("+x.records+"سجلات)":""); }).join(" · ");
       try{ console.log("QD203",a); }catch(e){} return t; }};
+})();
+</script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
+<script>
+/* ===== QD207 · إصلاح تفكّك صف المباراة: أزرار مكرّرة ومحتوى مضغوط ===== */
+(function(){
+  if(window.__QD207) return; window.__QD207=1;
+
+  var CSS=document.createElement("style");
+  CSS.id="qd207css";
+  CSS.textContent=[
+    /* الصف نفسه: يسمح بالالتفاف ولا يقصّ المحتوى */
+    ".qd-fxrow{flex-wrap:wrap!important;align-items:flex-start!important;overflow:visible!important;row-gap:6px}",
+    /* العمود النصي لا يُضغط إلى صفر (سبب النص العمودي) */
+    ".qd-fxrow .fx-meta{min-width:0!important;flex:1 1 240px!important}",
+    ".qd-fxrow .fx-h,.qd-fxrow .fx-sub{overflow-wrap:anywhere}",
+    /* شريط الأزرار في سطر مستقل بعرض كامل */
+    ".fx-act{flex:1 1 100%!important;width:100%!important;justify-content:flex-start!important;flex-wrap:wrap!important;gap:6px!important;padding-top:7px;margin-top:2px;border-top:1px dashed #E7E2DA}",
+    ".fx-act .btn,.fx-act button,.p9-act .btn,.p9-act button{font-size:11.5px!important;padding:5px 10px!important;white-space:nowrap!important;border-radius:8px!important}",
+    ".p9-act{display:flex!important;flex-wrap:wrap!important;gap:6px!important;margin:0!important;width:auto!important;max-width:100%}",
+    "@media(max-width:900px){.qd-fxrow{flex-direction:column!important}.fx-act{margin-top:4px}}"
+  ].join("\n");
+  try{ document.head.appendChild(CSS); }catch(e){}
+
+  /* إزالة الأزرار/المجموعات المكرّرة داخل صف المباراة */
+  function key(el){
+    var t=String(el.textContent||"").replace(/\s+/g," ").trim();
+    var go=el.getAttribute?el.getAttribute("data-go"):"";
+    var r=el.getAttribute?el.getAttribute("data-r"):"";
+    return t+"|"+(go||"")+"|"+(r||"");
+  }
+  function sweep(){
+    try{
+      var acts=document.querySelectorAll(".fx-act");
+      for(var i=0;i<acts.length;i++){
+        var a=acts[i];
+        /* 1) احذف مجموعات p9-act المكرّرة */
+        var boxes=a.querySelectorAll(":scope > .p9-act");
+        var seenBox={};
+        for(var b=0;b<boxes.length;b++){
+          var bx=boxes[b], sig=key(bx);
+          if(seenBox[sig]){ try{ bx.parentNode.removeChild(bx); }catch(e){} continue; }
+          seenBox[sig]=1;
+        }
+        /* 2) احذف الأزرار المكرّرة مباشرة داخل .fx-act */
+        var kids=[].slice.call(a.children);
+        var seen={};
+        for(var k=0;k<kids.length;k++){
+          var el=kids[k];
+          if(!el||el.nodeType!==1) continue;
+          var isBtn=/^(BUTTON|A)$/.test(el.tagName)||el.classList.contains("btn");
+          if(!isBtn) continue;
+          var sig2=key(el);
+          if(seen[sig2]){ try{ el.parentNode.removeChild(el); }catch(e){} continue; }
+          seen[sig2]=1;
+        }
+        /* 3) شريط فارغ لا يُعرض */
+        var live=a.querySelector("button,a.btn");
+        a.style.display=live?"":"none";
+      }
+    }catch(e){}
+  }
+  [0,120,400,1000,2500,5000].forEach(function(ms){ setTimeout(sweep,ms); });
+  setInterval(sweep,1200);
+  try{
+    var mo=new MutationObserver(function(){ sweep(); });
+    var t=setInterval(function(){
+      var v=document.getElementById("v-fixtures")||document.getElementById("v-matches")||document.getElementById("v-calendar");
+      if(v){ clearInterval(t); try{ mo.observe(v,{childList:true,subtree:true}); }catch(e){} }
+    },600);
+  }catch(e){}
+
+  window.QD207={sweep:sweep,
+    audit:function(){
+      var acts=document.querySelectorAll(".fx-act"), out=[];
+      for(var i=0;i<acts.length&&i<6;i++){
+        var a=acts[i], set={}, dup=0, btns=a.querySelectorAll("button,a.btn");
+        for(var j=0;j<btns.length;j++){ var k=key(btns[j]); if(set[k]) dup++; set[k]=1; }
+        out.push({row:i,buttons:btns.length,dupes:dup,boxes:a.querySelectorAll(":scope > .p9-act").length});
+      }
+      try{ console.log("QD207",out); }catch(e){}
+      return out;
+    }};
 })();
 </script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
