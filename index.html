@@ -411,7 +411,7 @@ html[dir="rtl"] .filters .select{padding-left:34px}
 .rp-path-lbl{font-size:10.5px;font-weight:800;margin-top:3px;color:var(--slate);white-space:nowrap}
 .rp-batt{display:inline-flex;align-items:center;gap:5px}
 .rp-batt b{font-weight:900;line-height:1}
-/* ===== v11-202 · LINEUP-TRUTH — مسار اللاعب وشريط الإنجاز ===== */
+/* ===== v11-203 · MATCH-AUDIT — مسار اللاعب وشريط الإنجاز ===== */
 .rp-path2{display:flex;align-items:center;margin:5px 0 6px;min-width:150px}
 .rp-node{width:13px;height:13px;border-radius:50%;flex:0 0 auto;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;background:#fff;border:2px solid #D3D9E1;transition:background .25s,border-color .25s,box-shadow .25s}
 .rp-node.done{background:#15803D;border-color:#15803D}
@@ -15771,7 +15771,7 @@ try{
 }catch(e){}
 
 /* QDBK-END */
-(function(){function mk(){try{var b=document.createElement("div");b.id="qdrBadge";b.textContent="v11-202 · LINEUP-TRUTH";b.style.cssText="position:fixed;left:8px;bottom:8px;z-index:2147483647;background:#fff;color:#7E0E14;border:1px solid #7E0E14;font:800 11px/1.5 system-ui;padding:3px 9px;border-radius:20px;pointer-events:none;opacity:.97;box-shadow:0 2px 8px rgba(0,0,0,.35)";document.body.appendChild(b);}catch(e){}}if(document.body)mk();else setTimeout(mk,600);})();
+(function(){function mk(){try{var b=document.createElement("div");b.id="qdrBadge";b.textContent="v11-203 · MATCH-AUDIT";b.style.cssText="position:fixed;left:8px;bottom:8px;z-index:2147483647;background:#fff;color:#7E0E14;border:1px solid #7E0E14;font:800 11px/1.5 system-ui;padding:3px 9px;border-radius:20px;pointer-events:none;opacity:.97;box-shadow:0 2px 8px rgba(0,0,0,.35)";document.body.appendChild(b);}catch(e){}}if(document.body)mk();else setTimeout(mk,600);})();
 /* ---- PWA: install as an app on Android and iPhone / iPad ---- */
 (function(){
   Object.assign(STR.en,{
@@ -24356,7 +24356,7 @@ try{
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous">
 /* =====================================================================
-   v11-202 · LINEUP-TRUTH — توحيد حالة اليوم (مباراة · تدريب · راحة · إجازة)
+   v11-203 · MATCH-AUDIT — توحيد حالة اليوم (مباراة · تدريب · راحة · إجازة)
    بين: لوحة التحكم · البرنامج الأسبوعي · التقويم · جدول المباريات
    ===================================================================== */
 (function(){
@@ -24460,7 +24460,7 @@ try{
 
 <script>
 /* =====================================================================
-   v11-202 · LINEUP-TRUTH
+   v11-203 · MATCH-AUDIT
    إصلاح التجمد: يُبنى الهيكل مرة واحدة فقط، ويُحدَّث محتواه الداخلي
    (لا إعادة بناء للجذر ⇒ لا يفقد الهوية ولا يعلق)
    ===================================================================== */
@@ -32075,6 +32075,225 @@ tr:hover .qde-ndate{color:#7E0E14}
       }
       try{ console.log("QD202",out); }catch(e){} return out;
     }};
+})();
+</script>
+<script>
+/* ===== QD203 · مدقّق المباريات: مطابقة قطعية بالجولة، صف واحد لكل مباراة، وعدّاد لا يتسرّب ===== */
+(function(){
+  if(window.__QD203) return; window.__QD203=1;
+  var KEY="qd_lineup_v3", LS="qadsiah_u18_v2";
+  function jget(k,d){ try{ var v=localStorage.getItem(k); return v?JSON.parse(v):d; }catch(e){ return d; } }
+  function jset(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); return true; }catch(e){ return false; } }
+  function st(){ try{ if(window.QD_S&&window.QD_S.matches) return window.QD_S; }catch(e){}
+    try{ if(typeof S!=="undefined"&&S&&S.matches) return S; }catch(e){}
+    try{ if(window.S&&window.S.matches) return window.S; }catch(e){}
+    return jget(LS,null)||{}; }
+  function A(x){ return Array.isArray(x)?x:[]; }
+  function U(x){ return A(x).filter(function(v,i){ return v!=null&&A(x).indexOf(v)===i; }); }
+  function n2(x){ return String(x==null?"":x).replace(/\s+/g," ").trim(); }
+  function tot(o){ return o?((A(o.st).length)+(A(o.sb).length)+(A(o.ex).length)):0; }
+  function totM(m){ return m?((A(m.starters).length)+(A(m.subs).length)+(A(m.extraSquad).length)):0; }
+
+  /* ---------- 1) الجولة قطعيًّا ---------- */
+  function fxList(){ try{ return A(window.QD_FX_SEASON); }catch(e){ return []; } }
+  function fxAt(r){ var a=fxList(); for(var i=0;i<a.length;i++){ if(Number(a[i].r)===Number(r)) return a[i]; } return null; }
+  function roundOf(m){
+    if(!m) return null;
+    var c=[m.fx,m.round,m.r,m.fxRound];
+    for(var i=0;i<c.length;i++){ if(c[i]!=null&&c[i]!==""&&!isNaN(Number(c[i]))) return Number(c[i]); }
+    /* بلا رقم: طابق بالتاريخ على جدول الموسم (لا بالخصم — الخصم قد يتكرر) */
+    var d=String(m.date||"").slice(0,10);
+    if(d){ var a=fxList(); for(var j=0;j<a.length;j++){ if(String(a[j].date||"").slice(0,10)===d) return Number(a[j].r); } }
+    return null;
+  }
+  function sameRound(m,r){ var n=roundOf(m); return n!=null&&Number(n)===Number(r); }
+
+  /* ---------- 2) العدّاد القطعي ---------- */
+  function store(){ var s=jget(KEY,null); return (s&&typeof s==="object"&&!Array.isArray(s))?s:{}; }
+  function rowFor(r){
+    var s=jget(LS,null)||{}, ms=A(s.matches), best=null, bc=-1;
+    for(var i=0;i<ms.length;i++){
+      if(!sameRound(ms[i],r)) continue;
+      var c=totM(ms[i]); if(c>bc){ bc=c; best=ms[i]; }
+    }
+    return best;
+  }
+  function srcFor(r){
+    var m=rowFor(r), sk="r"+String(r), s=store()[sk]||null, stt=(st().qdLineup||{})[sk]||null;
+    var cands=[];
+    if(m) cands.push({src:"match",n:totM(m),ts:Number(m.lineupTs||0)});
+    if(s) cands.push({src:"store",n:tot(s),ts:Number(s.ts||0)});
+    if(stt) cands.push({src:"state",n:tot(stt),ts:Number(stt.ts||0)});
+    /* الأحدث يفوز؛ عند تساوي الزمن نأخذ الأكبر */
+    cands.sort(function(a,b){ if(a.ts!==b.ts) return b.ts-a.ts; return b.n-a.n; });
+    return cands[0]||{src:"none",n:0,ts:0};
+  }
+  function count(r){ return srcFor(r).n; }
+
+  /* ---------- 3) الفحص الشامل ---------- */
+  function audit(){
+    var s=jget(LS,null)||{}, ms=A(s.matches), fxs=fxList(), out={rounds:[],dups:[],orphanStore:[],malformed:[],players:0};
+    try{ out.players=A(s.players).length; }catch(e){}
+    var rounds={}, i;
+    for(i=0;i<ms.length;i++){
+      var r=roundOf(ms[i]);
+      if(r==null){ out.malformed.push({id:ms[i].id,date:ms[i].date,opp:ms[i].opponent,count:totM(ms[i])}); continue; }
+      (rounds[r]=rounds[r]||[]).push(ms[i]);
+    }
+    var rl=fxs.length?fxs.map(function(f){ return Number(f.r); }):Object.keys(rounds).map(Number);
+    rl=U(rl).sort(function(a,b){ return a-b; });
+    for(i=0;i<rl.length;i++){
+      var r=rl[i], g=rounds[r]||[], src=srcFor(r);
+      var dupN=g.length>1;
+      if(dupN) out.dups.push({round:r,records:g.length,counts:g.map(totM)});
+      var fx=fxAt(r);
+      out.rounds.push({round:r,opp:fx?fx.opp:(g[0]?g[0].opponent:""),date:fx?fx.date:(g[0]?g[0].date:""),
+        records:g.length,count:src.n,src:src.src,ts:src.ts,dup:dupN});
+    }
+    var sk=store();
+    for(var k in sk){ if(!Object.prototype.hasOwnProperty.call(sk,k)) continue;
+      var m2=/^r(\d+)$/.exec(k); if(!m2) continue;
+      var rr=Number(m2[1]);
+      if(rl.indexOf(rr)<0 && !(s.qdLineup&&s.qdLineup[k])) out.orphanStore.push({key:k,count:tot(sk[k])});
+    }
+    window.__QD203_AUDIT=out;
+    return out;
+  }
+
+  /* ---------- 4) الإصلاح الشامل ---------- */
+  function mergeRound(r){
+    var s=jget(LS,null)||{}, ms=A(s.matches), g=[];
+    for(var i=0;i<ms.length;i++){ if(sameRound(ms[i],r)) g.push(ms[i]); }
+    if(g.length<=1) return {round:r,merged:0};
+    var sk="r"+String(r), sv=store()[sk]||null, qv=(s.qdLineup||{})[sk]||null;
+    /* المصدر الأحدث للاختيار */
+    var cands=[];
+    g.forEach(function(m){ cands.push({ts:Number(m.lineupTs||0),st:A(m.starters),sb:A(m.subs),ex:A(m.extraSquad)}); });
+    if(sv) cands.push({ts:Number(sv.ts||0),st:A(sv.st),sb:A(sv.sb),ex:A(sv.ex)});
+    if(qv) cands.push({ts:Number(qv.ts||0),st:A(qv.st),sb:A(qv.sb),ex:A(qv.ex)});
+    cands.sort(function(a,b){ return b.ts-a.ts; });
+    var win=cands[0]||{st:[],sb:[],ex:[]};
+    /* احتفظ بالسجل الأغنى بالحقول، وادمج فيه */
+    var keep=g[0], score=function(m){ var k=0; for(var q in m){ if(Object.prototype.hasOwnProperty.call(m,q)&&m[q]!==""&&m[q]!=null) k++; } return k; };
+    for(i=1;i<g.length;i++){ if(score(g[i])>score(keep)) keep=g[i]; }
+    keep.starters=U(win.st).slice(); keep.subs=U(win.sb).slice(); keep.extraSquad=A(win.ex).slice();
+    keep.fx=(keep.fx!=null&&keep.fx!=="")?keep.fx:r;
+    keep.lineupTs=Math.max.apply(null,cands.map(function(c){ return c.ts||0; }).concat([Date.now()]));
+    s.matches=ms.filter(function(m){ return m===keep||!sameRound(m,r); });
+    jset(LS,s);
+    if(sv||qv){ var sk2=store();
+      sk2[sk]={st:keep.starters.slice(),sb:keep.subs.slice(),ex:keep.extraSquad.slice(),ts:keep.lineupTs,locked:keep.lineupTs};
+      jset(KEY,sk2);
+      if(!s.qdLineup||typeof s.qdLineup!=="object") s.qdLineup={};
+      s.qdLineup[sk]={st:keep.starters.slice(),sb:keep.subs.slice(),ex:keep.extraSquad.slice(),ts:keep.lineupTs};
+      jset(LS,s); }
+    return {round:r,merged:g.length-1,kept:totM(keep),ts:keep.lineupTs};
+  }
+
+  function repairAll(){
+    var s=jget(LS,null)||{}; if(!s.matches) s.matches=[];
+    var a0=audit(), log={merged:0,rounds:0,removedDup:0,staleStore:0};
+    var seen={};
+    a0.rounds.forEach(function(x){
+      if(x.records>1){ var m1=mergeRound(x.round); log.merged+=m1.merged; log.rounds++; log.removedDup+=m1.merged; }
+    });
+    /* ادمج المتشابهات بلا رقم جولة عبر مطابقة تاريخ الموسم */
+    var ms=A((jget(LS,null)||{}).matches), byRound={};
+    ms.forEach(function(m){ var r=roundOf(m); if(r==null) return; (byRound[r]=byRound[r]||[]).push(m); });
+    Object.keys(byRound).forEach(function(r){
+      if(byRound[r].length>1){ var m2=mergeRound(Number(r)); log.merged+=m2.merged; log.rounds++; log.removedDup+=m2.merged; }
+    });
+    /* نظّف مفاتيح المخزن اليتيمة */
+    var s2=jget(LS,null)||{}, sk=store();
+    var valid={};
+    A(s2.matches).forEach(function(m){ var r=roundOf(m); if(r!=null) valid["r"+r]=1; });
+    Object.keys(sk).forEach(function(k){ if(/^r\d+$/.test(k)&&!valid[k]){ delete sk[k]; log.staleStore++; } });
+    if(log.staleStore) jset(KEY,sk);
+    try{ if(typeof window.save==="function") window.save(); }catch(e){}
+    try{ if(window.QD180&&QD180.paint) QD180.paint(); }catch(e){}
+    try{ if(window.REND&&REND.fixtures) REND.fixtures(); }catch(e){}
+    try{ if(window.toast) toast("تم فحص وإصلاح "+log.rounds+" مباراة — حُذف "+log.removedDup+" سجلًا مكرّرًا ونُظّف "+log.staleStore+" مفتاحًا.","ok"); }catch(e){}
+    return log;
+  }
+
+  /* ---------- 5) اجعل كل القارئين يستخدمون العدّاد القطعي ---------- */
+  function hook(){
+    try{
+      if(window.QD180&&!QD180.__qd203){ QD180.count=count; QD180.__qd203=1; }
+      if(window.QD180&&QD180.paint){ /* paint يستخدم count الداخلي — أعد تعريفه ليقرأ عدّادنا */
+        if(!QD180.__qd203paint){
+          var p=QD180.paint;
+          QD180.paint=function(){
+            try{
+              var bs=document.querySelectorAll('[data-q9][data-go="sq"][data-r]');
+              for(var i=0;i<bs.length;i++){
+                var r=bs[i].getAttribute("data-r");
+                var t=(document.documentElement.lang==="en"?"Squad":"المشاركون")+" ("+count(r)+")";
+                if(bs[i].textContent!==t) bs[i].textContent=t;
+                bs[i].setAttribute("data-qdc",String(count(r)));
+              }
+            }catch(e){} try{ return p&&p.apply(QD180,arguments); }catch(e){ return 0; }
+          };
+          QD180.__qd203paint=1;
+        }
+      }
+      if(window.QD163&&!QD163.__qd203){ var o=QD163.counts; QD163.counts=function(r){ var c=count(r); return c||(o?o(r):0); }; QD163.__qd203=1; }
+    }catch(e){}
+  }
+
+  /* ---------- 6) بطاقة الفحص في شاشة المباريات ---------- */
+  function card(){
+    var d=document.createElement("div");
+    d.id="qd203card"; d.style.cssText="margin:0 0 12px;background:#fff;border:1px solid #E7E2DA;border-radius:14px;overflow:hidden";
+    d.innerHTML='<div style="display:flex;align-items:center;gap:8px;padding:9px 13px;background:#F7F5F1;border-bottom:1px solid #E7E2DA;flex-wrap:wrap">'+
+      '<b style="font-size:12.5px;color:#7E0E14">فحص المباريات والحفظ</b>'+
+      '<span id="qd203pill" style="font-size:10px;font-weight:900;color:#fff;background:#15803D;border-radius:999px;padding:2px 9px">—</span>'+
+      '<span style="flex:1"></span>'+
+      '<button type="button" id="qd203scan" style="cursor:pointer;border:1px solid #D9D3C7;background:#fff;border-radius:8px;padding:4px 10px;font-family:inherit;font-size:11px;font-weight:800">فحص</button>'+
+      '<button type="button" id="qd203fix" style="cursor:pointer;border:none;background:#7E0E14;color:#fff;border-radius:8px;padding:4px 10px;font-family:inherit;font-size:11px;font-weight:800">إصلاح الكل</button></div>'+
+      '<div id="qd203body" style="padding:10px 12px"></div>';
+    d.querySelector("#qd203scan").onclick=paint;
+    d.querySelector("#qd203fix").onclick=function(){ repairAll(); paint(); };
+    return d;
+  }
+  var node=null;
+  function paint(){
+    try{
+      var b=document.getElementById("qd203body"); if(!b) return;
+      var a=audit();
+      var bad=a.dups.length+a.malformed.length+a.orphanStore.length;
+      var pill=document.getElementById("qd203pill");
+      if(pill){ pill.textContent=bad?(bad+" خلل"):"سليم"; pill.style.background=bad?"#B5121B":"#15803D"; }
+      var h='<div class="table-wrap" style="max-height:34vh;overflow:auto"><table class="qd-pr-tbl"><thead><tr>'+
+        '<th>الجولة</th><th>الخصم</th><th>التاريخ</th><th>سجلات</th><th>المشاركون</th><th>المصدر</th></tr></thead><tbody>';
+      a.rounds.forEach(function(x){
+        var dup=x.records>1;
+        h+='<tr'+(dup?' style="background:#FEF2F2"':'')+'><td style="font-weight:900">'+x.round+'</td><td>'+String(x.opp||"—")+'</td>'+
+          '<td style="font-size:10.5px;color:#64748B">'+String(x.date||"—").slice(0,10)+'</td>'+
+          '<td style="font-weight:900;color:'+(dup?"#B5121B":"#14181F")+'">'+x.records+'</td>'+
+          '<td style="font-weight:900">'+x.count+'</td><td style="font-size:10px;color:#64748B">'+x.src+'</td></tr>';
+      });
+      h+='</tbody></table></div>';
+      if(a.malformed.length) h+='<div style="margin-top:8px;font-size:11px;color:#B5121B">سجلات بلا رقم جولة: '+a.malformed.length+'</div>';
+      if(a.orphanStore.length) h+='<div style="margin-top:4px;font-size:11px;color:#B45309">مفاتيح تشكيلة يتيمة: '+a.orphanStore.length+'</div>';
+      b.innerHTML=h;
+    }catch(e){}
+  }
+  function place(){
+    try{
+      var v=document.getElementById("v-fixtures")||document.getElementById("v-matches"); if(!v) return;
+      if(!node) node=card();
+      if(node.parentNode!==v) v.insertBefore(node,v.firstChild); else if(v.firstChild!==node) v.insertBefore(node,v.firstChild);
+      paint();
+    }catch(e){}
+  }
+  [0,500,1500,4000,8000].forEach(function(ms){ setTimeout(function(){ hook(); place(); },ms); });
+  setInterval(function(){ hook(); if(document.getElementById("v-fixtures")||document.getElementById("v-matches")) place(); },4000);
+
+  window.QD203={audit:audit,count:count,fix:repairAll,src:srcFor,roundOf:roundOf,
+    diag:function(){ var a=audit();
+      var t=a.rounds.map(function(x){ return "ج"+x.round+":"+x.count+(x.records>1?"("+x.records+"سجلات)":""); }).join(" · ");
+      try{ console.log("QD203",a); }catch(e){} return t; }};
 })();
 </script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
