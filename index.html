@@ -411,7 +411,7 @@ html[dir="rtl"] .filters .select{padding-left:34px}
 .rp-path-lbl{font-size:10.5px;font-weight:800;margin-top:3px;color:var(--slate);white-space:nowrap}
 .rp-batt{display:inline-flex;align-items:center;gap:5px}
 .rp-batt b{font-weight:900;line-height:1}
-/* ===== v11-203 · MATCH-AUDIT — مسار اللاعب وشريط الإنجاز ===== */
+/* ===== v11-204 · SAFF-LINK — مسار اللاعب وشريط الإنجاز ===== */
 .rp-path2{display:flex;align-items:center;margin:5px 0 6px;min-width:150px}
 .rp-node{width:13px;height:13px;border-radius:50%;flex:0 0 auto;box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;background:#fff;border:2px solid #D3D9E1;transition:background .25s,border-color .25s,box-shadow .25s}
 .rp-node.done{background:#15803D;border-color:#15803D}
@@ -15771,7 +15771,7 @@ try{
 }catch(e){}
 
 /* QDBK-END */
-(function(){function mk(){try{var b=document.createElement("div");b.id="qdrBadge";b.textContent="v11-203 · MATCH-AUDIT";b.style.cssText="position:fixed;left:8px;bottom:8px;z-index:2147483647;background:#fff;color:#7E0E14;border:1px solid #7E0E14;font:800 11px/1.5 system-ui;padding:3px 9px;border-radius:20px;pointer-events:none;opacity:.97;box-shadow:0 2px 8px rgba(0,0,0,.35)";document.body.appendChild(b);}catch(e){}}if(document.body)mk();else setTimeout(mk,600);})();
+(function(){function mk(){try{var b=document.createElement("div");b.id="qdrBadge";b.textContent="v11-204 · SAFF-LINK";b.style.cssText="position:fixed;left:8px;bottom:8px;z-index:2147483647;background:#fff;color:#7E0E14;border:1px solid #7E0E14;font:800 11px/1.5 system-ui;padding:3px 9px;border-radius:20px;pointer-events:none;opacity:.97;box-shadow:0 2px 8px rgba(0,0,0,.35)";document.body.appendChild(b);}catch(e){}}if(document.body)mk();else setTimeout(mk,600);})();
 /* ---- PWA: install as an app on Android and iPhone / iPad ---- */
 (function(){
   Object.assign(STR.en,{
@@ -24356,7 +24356,7 @@ try{
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous">
 /* =====================================================================
-   v11-203 · MATCH-AUDIT — توحيد حالة اليوم (مباراة · تدريب · راحة · إجازة)
+   v11-204 · SAFF-LINK — توحيد حالة اليوم (مباراة · تدريب · راحة · إجازة)
    بين: لوحة التحكم · البرنامج الأسبوعي · التقويم · جدول المباريات
    ===================================================================== */
 (function(){
@@ -24460,7 +24460,7 @@ try{
 
 <script>
 /* =====================================================================
-   v11-203 · MATCH-AUDIT
+   v11-204 · SAFF-LINK
    إصلاح التجمد: يُبنى الهيكل مرة واحدة فقط، ويُحدَّث محتواه الداخلي
    (لا إعادة بناء للجذر ⇒ لا يفقد الهوية ولا يعلق)
    ===================================================================== */
@@ -32294,6 +32294,214 @@ tr:hover .qde-ndate{color:#7E0E14}
     diag:function(){ var a=audit();
       var t=a.rounds.map(function(x){ return "ج"+x.round+":"+x.count+(x.records>1?"("+x.records+"سجلات)":""); }).join(" · ");
       try{ console.log("QD203",a); }catch(e){} return t; }};
+})();
+</script>
+<script>
+/* ===== QD204 · ربط SAFF+: النتيجة والفائز والدقائق من صفحة المباراة ===== */
+(function(){
+  if(window.__QD204) return; window.__QD204=1;
+  var LS="qadsiah_u18_v2";
+  function EN(){ try{ return String(localStorage.getItem("qd_lang")||"ar").indexOf("en")===0; }catch(e){ return false; } }
+  function T(a,e){ return EN()?e:a; }
+  function E(v){ return String(v==null?"":v).replace(/[&<>"]/g,function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
+  function toast2(m,k){ try{ if(window.toast) toast(m,k||"ok"); }catch(e){} }
+  function jget(k,d){ try{ var v=localStorage.getItem(k); return v?JSON.parse(v):d; }catch(e){ return d; } }
+  function jset(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} }
+  function stt(){ try{ if(window.QD_S&&window.QD_S.matches) return window.QD_S; }catch(e){}
+    try{ if(window.S&&window.S.matches) return window.S; }catch(e){} return jget(LS,null)||{}; }
+  function A(x){ return Array.isArray(x)?x:[]; }
+  function strip(s){ return String(s==null?"":s).replace(/[\u200e\u200f\u202a-\u202e]/g,"").replace(/\s+/g," ").trim(); }
+
+  var MON={يناير:1,فبراير:2,مارس:3,أبريل:4,ابريل:4,مايو:5,يونيو:6,يوليو:7,أغسطس:8,اغسطس:8,سبتمبر:9,أكتوبر:10,اكتوبر:10,نوفمبر:11,ديسمبر:12};
+  function pad(n){ return (n<10?"0":"")+n; }
+
+  function parse(md){
+    var t=String(md||"").replace(/\r/g,"");
+    var out={ok:false,home:"",away:"",hs:null,as:null,date:"",events:[],url:""};
+    var mu=/URL Source:\s*(https?:\/\/\S+)/.exec(t); if(mu) out.url=mu[1];
+    var mt=/^Title:\s*(.+?)\s+vs\s+(.+)$/m.exec(t);
+    if(mt){ out.home=strip(mt[1]); out.away=strip(mt[2]); }
+    var r1=/\[([^\[\]!\n]{2,40}?)!\[Image \d+\]\([^)]*\)\s*(\d{1,2})\s*\]\(https:\/\/saffplus\.sa\/ar\/entity\/club\//;
+    var r2=/\[(\d{1,2})\s*!\[Image \d+\]\([^)]*\)([^\[\]\n]{2,40}?)\]\(https:\/\/saffplus\.sa\/ar\/entity\/club\//;
+    var m1=r1.exec(t), m2=r2.exec(t);
+    if(m1){ out.home=out.home||strip(m1[1]); out.hs=Number(m1[2]); }
+    if(m2){ out.away=out.away||strip(m2[2]); out.as=Number(m2[1]); }
+    var d1=/(\d{1,2})\u200f?\/(\d{1,2})\u200f?\/(\d{4})/.exec(t.replace(/[\u200e\u200f]/g,""));
+    if(d1){ out.date=d1[3]+"-"+pad(Number(d1[2]))+"-"+pad(Number(d1[1])); }
+    if(!out.date){
+      var d2=/(\d{1,2})\s+([\u0600-\u06FF]{3,10})\s+(\d{4})/.exec(t);
+      if(d2&&MON[strip(d2[2])]) out.date=d2[3]+"-"+pad(MON[strip(d2[2])])+"-"+pad(Number(d2[1]));
+    }
+    var ev=/(\d{1,3})'\s*([^\n\[]{2,40})\n+\[([^\]]+)\]\(https:\/\/saffplus\.sa\/ar\/entity\/player\/([A-Za-z0-9_\-]+)\)(?:\[([^\]]+)\]\(https:\/\/saffplus\.sa\/ar\/entity\/player\/([A-Za-z0-9_\-]+)\))?/g;
+    var m;
+    while((m=ev.exec(t))){
+      var kind=strip(m[2]);
+      out.events.push({min:Number(m[1]),kind:kind,p1:strip(m[3]),p2:strip(m[5]||"")});
+    }
+    out.ok=!!(out.home&&out.away&&out.hs!=null&&out.as!=null);
+    if(out.ok){
+      out.winner=(out.hs>out.as)?out.home:((out.as>out.hs)?out.away:"تعادل");
+      out.score=out.hs+" - "+out.as;
+    }
+    return out;
+  }
+
+  /* مطابقة الأسماء العربية */
+  function nrm(s){
+    return String(s||"").replace(/[\u064B-\u0652\u0640]/g,"").replace(/[أإآٱ]/g,"ا").replace(/ى/g,"ي").replace(/ة/g,"ه")
+      .replace(/[^\u0600-\u06FF\s]/g," ").replace(/\s+/g," ").trim();
+  }
+  function toks(s){ return nrm(s).split(" ").filter(function(x){ return x.length>1; }); }
+  function sameName(a,b){
+    var A1=toks(a), B1=toks(b); if(!A1.length||!B1.length) return false;
+    var hit=0; for(var i=0;i<A1.length;i++) for(var j=0;j<B1.length;j++) if(A1[i]===B1[j]) hit++;
+    return hit>=2||(A1.length===1&&hit===1&&A1[0]===B1[0]);
+  }
+  function findPlayer(s,name){
+    var ps=A(s.players);
+    for(var i=0;i<ps.length;i++){ var full=((ps[i].first||"")+" "+(ps[i].last||"")).trim(); if(sameName(full,name)||sameName(ps[i].first+" "+ps[i].last+" "+String(ps[i].name||""),name)) return ps[i]; }
+    return null;
+  }
+
+  /* تطبيق على الجولة */
+  function fxOfDate(date){
+    try{
+      var fxs=A(window.QD_FX_SEASON);
+      for(var i=0;i<fxs.length;i++){ if(String(fxs[i].date||"").slice(0,10)===date) return fxs[i]; }
+    }catch(e){}
+    return null;
+  }
+  function apply(p,opt){
+    opt=opt||{};
+    var s=stt(), fxs=A(window.QD_FX_SEASON), fi=fxOfDate(p.date), round=fi?Number(fi.r):null;
+    var sObj={scope:"match",saffUrl:p.url||"",home:p.home,away:p.away,hs:p.hs,as:p.as,score:p.score,winner:p.winner,date:p.date,events:p.events,ts:Date.now()};
+    s.saff=s.saff||{};
+    var key=p.date||(round!=null?"r"+round:("u"+Date.now()));
+    s.saff[key]=sObj;
+    var updated=null, mins=0, subsN=0;
+    var ms=A(s.matches);
+    for(var i=0;i<ms.length;i++){
+      var m=ms[i], same=false;
+      if(round!=null&&Number(m.fx)===round) same=true;
+      if(!same&&String(m.date||"").slice(0,10)===p.date) same=true;
+      if(!same) continue;
+      m.score=p.score; m.result=p.score;
+      m.winner=p.winner; m.saff=sObj; m.saffTs=Date.now();
+      if(opt.writeMinutes!==false){
+        m.minutes=m.minutes||{};
+        p.events.forEach(function(e){
+          if(/تبديل/.test(e.kind)&&e.p2){
+            var inP=findPlayer(s,e.p1), outP=findPlayer(s,e.p2);
+            var wentOff=/خرج|بدل/.test("")?null:null;
+            /* المتعارف: الأول داخل والثاني خارج — نتحقق بالمطابقة */
+            if(inP){ m.minutes[inP.id]=Math.max(0,90-e.min); mins++; }
+            if(outP){ m.minutes[outP.id]=e.min; mins++; }
+            if(inP||outP) subsN++;
+          }
+        });
+      }
+      updated=m;
+    }
+    jset(LS,s);
+    try{ if(typeof window.save==="function") window.save(); }catch(e){}
+    try{ if(window.REND&&REND.fixtures) REND.fixtures(); }catch(e){}
+    return {round:round,match:!!updated,mins:mins,subs:subsN,saved:true};
+  }
+
+  /* جلب عبر وسائط نصية (قد يرفض المتصفح بسبب CORS — عندها اللصق اليدوي) */
+  function fetchText(url,cb){
+    var enc=encodeURIComponent(url), tries=[
+      "https://r.jina.ai/"+url,
+      "https://api.allorigins.win/raw?url="+enc,
+      "https://corsproxy.io/?"+enc
+    ], i=0;
+    function next(){
+      if(i>=tries.length){ cb(null); return; }
+      var u=tries[i++];
+      try{
+        var ctl=window.AbortController?new AbortController():null;
+        var tm=setTimeout(function(){ try{ ctl&&ctl.abort(); }catch(e){} },25000);
+        fetch(u,{signal:ctl?ctl.signal:undefined}).then(function(r){ clearTimeout(tm); if(!r.ok) throw 0; return r.text(); })
+          .then(function(tx){
+            if(/saffplus|القادسية|vs/.test(tx)) cb(tx, u);
+            else next();
+          }).catch(function(){ clearTimeout(tm); next(); });
+      }catch(e){ next(); }
+    }
+    next();
+  }
+
+  /* ---------- واجهة ---------- */
+  function card(){
+    var d=document.createElement("div");
+    d.id="qd204card";
+    d.style.cssText="margin:0 0 12px;background:#fff;border:1px solid #E7E2DA;border-radius:14px;overflow:hidden";
+    d.innerHTML='<div style="display:flex;align-items:center;gap:8px;padding:9px 13px;background:#F7F5F1;border-bottom:1px solid #E7E2DA;flex-wrap:wrap">'+
+      '<b style="font-size:12.5px;color:#7E0E14">'+T("ربط SAFF+","SAFF+ link")+'</b>'+
+      '<span style="font-size:10px;color:#64748B">'+T("النتيجة · الفائز · دقائق التبديلات","score · winner · sub minutes")+'</span>'+
+      '<span style="flex:1"></span>'+
+      '<button type="button" id="qd204panel" style="cursor:pointer;border:none;background:#7E0E14;color:#fff;border-radius:8px;padding:4px 10px;font-family:inherit;font-size:11px;font-weight:800">'+T("فتح","Open")+'</button></div>'+
+      '<div id="qd204body" style="padding:10px 12px;display:none">'+
+      '<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">'+
+      '<input id="qd204url" placeholder="https://saffplus.sa/ar/event/match/…" style="flex:1;min-width:220px;font:12px inherit;padding:7px 9px;border:1px solid #D9D3C7;border-radius:8px">'+
+      '<button type="button" id="qd204go" class="btn sm">'+T("جلب","Fetch")+'</button></div>'+
+      '<div style="margin-top:7px;font-size:11px;color:#64748B">'+T("أو افتح صفحة المباراة ثم انسخ كامل النص والصقه هنا:","Or open the match page, copy all its text and paste it here:")+'</div>'+
+      '<textarea id="qd204txt" rows="4" style="width:100%;margin-top:5px;font:12px/1.6 inherit;padding:8px;border:1px solid #D9D3C7;border-radius:8px" placeholder="Title: … vs …"></textarea>'+
+      '<div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap">'+
+      '<button type="button" id="qd204parse" class="btn sm" style="background:#0E7490;border-color:#0E7490;color:#fff">'+T("تحليل النص","Parse text")+'</button>'+
+      '<a id="qd204open" href="https://saffplus.sa/ar/entity/season/YtmhZ80irNDfn68KwCdKI" target="_blank" rel="noopener" class="btn ghost sm" style="text-decoration:none">'+T("صفحة القادسية 18 في SAFF+","Al Qadsiah U18 on SAFF+")+'</a></div>'+
+      '<div id="qd204prev" style="margin-top:9px"></div></div>';
+    var b=d.querySelector("#qd204panel");
+    b.onclick=function(){ var x=d.querySelector("#qd204body"); x.style.display=(x.style.display==="none")?"block":"none"; };
+    var go=d.querySelector("#qd204go");
+    go.onclick=function(){
+      var u=String((d.querySelector("#qd204url").value||"").trim());
+      if(!/^https?:\/\//.test(u)){ toast2(T("أدخل رابط مباراة صالحًا","Enter a valid match URL"),"bad"); return; }
+      toast2(T("جارٍ الجلب…","Fetching…"),"ok");
+      fetchText(u,function(tx,via){
+        if(!tx){ toast2(T("المتصفح منع الجلب المباشر (CORS). افتح الصفحة وانسخ نصّها في المربع.","Browser blocked the fetch (CORS). Open the page and paste its text."),"bad"); return; }
+        d.querySelector("#qd204txt").value=tx; preview(d,parse(tx),via);
+      });
+    };
+    d.querySelector("#qd204parse").onclick=function(){ preview(d,parse(d.querySelector("#qd204txt").value||"")); };
+    return d;
+  }
+  var lastP=null;
+  function preview(d,p,via){
+    var box=d.querySelector("#qd204prev"); if(!box) return;
+    lastP=p;
+    if(!p.ok){ box.innerHTML='<div style="font-size:11.5px;color:#B5121B">'+T("لم أتعرّف على النتيجة — تأكد من نسخ رأس الصفحة (Title + النتيجة).","Could not read the score — make sure the page header is included.")+'</div>'; return; }
+    var evs=p.events.map(function(e){ return "<div>"+e.min+"' "+E(e.kind)+" — "+E(e.p1)+(e.p2?" ← "+E(e.p2):"")+"</div>"; }).join("");
+    box.innerHTML='<div style="border:1px solid #E7E2DA;border-radius:10px;padding:9px 11px;background:#FCFBF9">'+
+      '<div style="font-weight:900;font-size:13px">'+E(p.home)+" "+p.hs+" — "+p.as+" "+E(p.away)+'</div>'+
+      '<div style="font-size:11px;color:#475569;margin-top:3px">'+E(T("التاريخ","Date"))+': '+E(p.date||"—")+' · '+E(T("الفائز","Winner"))+': <b>'+E(p.winner||"—")+'</b>'+
+      (via?' · <span style="color:#94A3B8">'+E(via.replace("https://","").slice(0,22))+'</span>':'')+'</div>'+
+      (evs?'<div style="margin-top:6px;font-size:11px;color:#334155;max-height:120px;overflow:auto">'+evs+'</div>':'')+
+      '<div style="margin-top:8px"><button type="button" id="qd204apply" class="btn sm" style="background:#15803D;border-color:#15803D;color:#fff">'+
+      T("اعتماد النتيجة والدقائق","Apply score & minutes")+'</button></div></div>';
+    var ap=box.querySelector("#qd204apply");
+    ap.onclick=function(){
+      var r=apply(p);
+      toast2(r.match?("تم الاعتماد — جولة "+r.round+" · "+p.score+" · "+T("دقائق","minutes")+": "+r.mins):"اعتُمدت النتيجة (لا سجل مباراة مطابق)",r.match?"ok":"warn");
+      box.insertAdjacentHTML("beforeend",'<div style="margin-top:6px;font-size:11px;color:#15803D">'+
+        E("جولة "+(r.round==null?"—":r.round)+" · سجل: "+(r.match?"نعم":"لا")+" · دقائق محدّثة: "+r.mins+" · تبديلات: "+r.subs)+'</div>');
+    };
+  }
+  function place(){
+    try{
+      var v=document.getElementById("v-fixtures")||document.getElementById("v-matches"); if(!v) return;
+      if(!document.getElementById("qd204card")){
+        var c=card(); var ref=document.getElementById("qd203card");
+        if(ref&&ref.nextSibling) v.insertBefore(c,ref.nextSibling); else v.insertBefore(c,v.firstChild);
+      }
+    }catch(e){}
+  }
+  [0,600,1800,4500].forEach(function(ms){ setTimeout(place,ms); });
+  setInterval(function(){ if(document.getElementById("v-fixtures")||document.getElementById("v-matches")) place(); },5000);
+
+  window.QD204={parse:parse,apply:apply,fetch:fetchText,place:place,
+    audit:function(){ var s=stt(); var o={saff:Object.keys(s.saff||{}).length,
+      matches:A(s.matches).filter(function(m){ return m&&m.score; }).length}; try{ console.log("QD204",o); }catch(e){} return o; }};
 })();
 </script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
