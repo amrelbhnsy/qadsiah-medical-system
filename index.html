@@ -15771,7 +15771,7 @@ try{
 }catch(e){}
 
 /* QDBK-END */
-(function(){function mk(){try{var b=document.createElement("div");b.id="qdrBadge";b.textContent="v11-209 · THERAPY-ADD";b.style.cssText="position:fixed;left:8px;bottom:8px;z-index:2147483647;background:#fff;color:#7E0E14;border:1px solid #7E0E14;font:800 11px/1.5 system-ui;padding:3px 9px;border-radius:20px;pointer-events:none;opacity:.97;box-shadow:0 2px 8px rgba(0,0,0,.35)";document.body.appendChild(b);}catch(e){}}if(document.body)mk();else setTimeout(mk,600);})();
+(function(){function mk(){try{var b=document.createElement("div");b.id="qdrBadge";b.textContent="v11-210 · THERAPY-ADD";b.style.cssText="position:fixed;left:8px;bottom:8px;z-index:2147483647;background:#fff;color:#7E0E14;border:1px solid #7E0E14;font:800 11px/1.5 system-ui;padding:3px 9px;border-radius:20px;pointer-events:none;opacity:.97;box-shadow:0 2px 8px rgba(0,0,0,.35)";document.body.appendChild(b);}catch(e){}}if(document.body)mk();else setTimeout(mk,600);})();
 /* ---- PWA: install as an app on Android and iPhone / iPad ---- */
 (function(){
   Object.assign(STR.en,{
@@ -32478,42 +32478,41 @@ tr:hover .qde-ndate{color:#7E0E14}
 })();
 </script>
 <script>
-/* ===== QD209 · زر «إضافة جلسة» داخل قسم العلاج الرياضي — بنموذج جلسة العيادة الكامل ===== */
+/* ===== QD210 · زر «إضافة جلسة» داخل قسم العلاج الرياضي — إدراج مضمون عبر مراقبة الواجهة ===== */
 (function(){
-  if(window.__QD209) return; window.__QD209=1;
-  var FROM=false;
+  if(window.__QD210) return; window.__QD210=1;
+  var FROM=false, BTNACT="newSessionFromTherapy", T0=Date.now();
 
   function EN(){ try{ return String(localStorage.getItem("qd_lang")||"ar").indexOf("en")===0; }catch(e){ return false; } }
-  function lbl(){ return EN()?"Add session":"إضافة جلسة"; }
-  function ttl(){ return EN()?"Add session — full clinic form (saved to the therapy log and the clinic log)"
-                             :"إضافة جلسة — نموذج جلسة العيادة الكامل (تُحفظ في سجل العلاج وسجل العيادة)"; }
-  function db(){ try{ return S; }catch(e){ return null; } }
-  function therapyArr(){ var s=db(); if(!s) return []; if(!Array.isArray(s.therapies)) s.therapies=[]; return s.therapies; }
-  function sessArr(){ var s=db(); if(!s) return []; if(!Array.isArray(s.sessions)) s.sessions=[]; return s.sessions; }
-  function str(v){ return String(v==null?"":v); }
+  function ST(){ try{ if(typeof window.QD_S!=="undefined"&&window.QD_S) return window.QD_S; }catch(e){}
+    try{ if(typeof S!=="undefined"&&S) return S; }catch(e){}
+    return window.__QD_STATE||null; }
+  function DB(){ return ST(); }
+  function arrTherapy(){ var s=DB(); if(!s) return []; if(!Array.isArray(s.therapies)) s.therapies=[]; return s.therapies; }
+  function arrSess(){ var s=DB(); if(!s) return []; if(!Array.isArray(s.sessions)) s.sessions=[]; return s.sessions; }
+  function S_(v){ return String(v==null?"":v); }
+  function say(t,k){ try{ if(typeof toast==="function") toast(t,k); }catch(e){} }
+  function persist(){ try{ if(typeof save==="function") save(); }catch(e){} }
 
-  /* ---------- 1) إنشاء/تحديث سجل العلاج الرياضي المرتبط بجلسة العيادة ---------- */
+  /* ---------- ربط سجل العلاج بسجل العيادة ---------- */
   function mirror(rec){
     try{
       if(!rec||!rec.id) return null;
-      var arr=therapyArr(), thId="thc_"+rec.id, th=null, i;
+      var arr=arrTherapy(), thId="thc_"+rec.id, th=null, i;
       for(i=0;i<arr.length;i++){
-        if(str(arr[i].id)===thId||str(arr[i].sessionRecId)===str(rec.id)){ th=arr[i]; break; }
+        if(S_(arr[i].id)===thId||S_(arr[i].sessionRecId)===S_(rec.id)){ th=arr[i]; break; }
       }
-      var body=str(rec.injSites).split(",").filter(Boolean).join(",");
-      if(!body){
-        var inj=((db()||{}).injuries||[]).filter(function(x){ return str(x.id)===str(rec.injuryId); })[0];
-        if(inj) body=str(inj.bodySites);
-      }
+      var body=S_(rec.injSites).split(",").filter(Boolean).join(",");
+      if(!body){ var inj=((DB()||{}).injuries||[]).filter(function(x){ return S_(x.id)===S_(rec.injuryId); })[0]; if(inj) body=S_(inj.bodySites); }
       var soap=[rec.subj,rec.obj,rec.assess,rec.plan].filter(Boolean).join(" · ");
-      var pain=(rec.painAfter!==null&&rec.painAfter!==undefined&&str(rec.painAfter)!=="")?str(rec.painAfter):str(rec.painBefore);
-      var data={ id:thId, playerId:rec.playerId, injuryId:str(rec.injuryId), date:rec.date,
-        type:str(rec.type)||(EN()?"Therapy session":"جلسة علاج"), duration:Number(rec.duration)||0,
-        bodySites:body, pain:pain, painBefore:str(rec.painBefore), painAfter:str(rec.painAfter),
-        injName:str(rec.injName), injType:str(rec.injType), mods:str(rec.mods),
-        clinician:str(rec.clinician), attend:str(rec.attend), able:str(rec.able),
-        subj:str(rec.subj), obj:str(rec.obj), assess:str(rec.assess), plan:str(rec.plan),
-        notes:str(rec.notes)||soap, sessionRecId:rec.id, src:"clinic",
+      var pain=(S_(rec.painAfter)!=="")?S_(rec.painAfter):S_(rec.painBefore);
+      var data={ id:thId, playerId:rec.playerId, injuryId:S_(rec.injuryId), date:rec.date,
+        type:S_(rec.type)||(EN()?"Therapy session":"جلسة علاج"), duration:Number(rec.duration)||0,
+        bodySites:body, pain:pain, painBefore:S_(rec.painBefore), painAfter:S_(rec.painAfter),
+        injName:S_(rec.injName), injType:S_(rec.injType), mods:S_(rec.mods),
+        clinician:S_(rec.clinician), attend:S_(rec.attend), able:S_(rec.able),
+        subj:S_(rec.subj), obj:S_(rec.obj), assess:S_(rec.assess), plan:S_(rec.plan),
+        notes:S_(rec.notes)||soap, sessionRecId:rec.id, src:"clinic",
         created:(th&&th.created)||(typeof nowLocal==="function"?nowLocal():new Date().toISOString()) };
       if(th) Object.assign(th,data); else arr.push(data);
       rec.fromTherapy=thId;
@@ -32521,156 +32520,167 @@ tr:hover .qde-ndate{color:#7E0E14}
     }catch(e){ return null; }
   }
 
-  /* ---------- 2) الزر بجوار «جلسة علاج رياضي» ---------- */
-  function ensureBtn(){
-    try{
-      var host=document.getElementById("v-therapy"); if(!host) return;
-      var bar=host.querySelector(".filters"); if(!bar) return;
-      if(bar.querySelector('[data-act="newSessionFromTherapy"]')) return;
-      var b=document.createElement("button");
-      b.type="button";
-      b.className="btn";
+  /* ---------- الزر ---------- */
+  function label(){ return EN()?"Add session":"إضافة جلسة"; }
+  function tip(){ return EN()?"Full clinic session form — saved to the therapy log and the clinic log"
+                            :"نموذج جلسة العيادة الكامل — تُحفظ في سجل العلاج وسجل العيادة"; }
+
+  function makeBtn(prim){
+    var b;
+    if(prim&&prim.cloneNode){
+      b=prim.cloneNode(true);
+      b.className="btn qd-add-sess";
       b.style.marginInlineStart="8px";
-      b.setAttribute("data-act","newSessionFromTherapy");
-      b.setAttribute("title",ttl());
-      b.innerHTML='<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg> <span>'+lbl()+'</span>';
+      /* استبدال النص داخل الزر المنسوخ */
+      var kids=b.childNodes; for(var i=kids.length-1;i>=0;i--){
+        if(kids[i]&&kids[i].nodeType===3&&String(kids[i].nodeValue||"").trim()){ kids[i].nodeValue=" "+label(); break; }
+      }
+      if(b.textContent.indexOf(label())===-1){ b.textContent=""; b.appendChild(document.createTextNode(label())); }
+    }else{
+      b=document.createElement("button");
+      b.type="button"; b.className="btn qd-add-sess"; b.style.marginInlineStart="8px";
+      b.textContent=label();
+    }
+    b.setAttribute("data-act",BTNACT);
+    b.setAttribute("title",tip());
+    b.setAttribute("aria-label",label());
+    return b;
+  }
+
+  function ensure(){
+    try{
+      var host=document.getElementById("v-therapy"); if(!host) return false;
+      if(!host.firstElementChild) return false;
+      if(host.querySelector('[data-act="'+BTNACT+'"]')){ mark(true); return true; }
+      var bar=host.querySelector(".filters")||host.querySelector(".qd-bar")||host.querySelector(".card-body")||host;
       var prim=bar.querySelector('[data-act="newTherapy"]');
-      if(prim&&prim.insertAdjacentElement) prim.insertAdjacentElement("afterend",b); else bar.appendChild(b);
+      var b=makeBtn(prim);
+      if(prim&&prim.parentNode) prim.parentNode.insertBefore(b,prim.nextSibling);
+      else bar.appendChild(b);
+      mark(true);
+      return !!(b.parentNode);
+    }catch(e){ return false; }
+  }
+
+  function mark(ok){
+    try{
+      var b=document.getElementById("qdrBadge");
+      if(b) b.textContent="v11-210 · THERAPY-ADD"+(ok?" · BTN-OK":"");
+      document.documentElement.setAttribute("data-qd210",ok?"btn":"none");
     }catch(e){}
   }
 
+
+  /* ---------- التقاط الرسم نفسه: إدراج فوري بعد كل رسم للقسم ---------- */
   function wrapRender(){
     try{
-      if(typeof REND==="undefined"||!REND||typeof REND.therapy!=="function"||REND.therapy.__qd209) return;
+      if(typeof REND==="undefined"||!REND||typeof REND.therapy!=="function"||REND.therapy.__qd210) return;
       var orig=REND.therapy;
-      var w=function(){ var r=orig.apply(this,arguments); try{ ensureBtn(); }catch(e){} return r; };
-      w.__qd209=1; REND.therapy=w;
+      var w=function(){ var r=orig.apply(this,arguments); try{ ensure(); }catch(e){} return r; };
+      w.__qd210=1; REND.therapy=w;
     }catch(e){}
   }
 
-  /* ---------- 3) فتح نموذج جلسة العيادة الكامل + الحفظ في السجلين ---------- */
+  /* ---------- فتح نموذج جلسة العيادة الكامل ---------- */
   function opener(s){
     var f=null;
     try{ if(typeof window.qdOpenSessionForm==="function") f=window.qdOpenSessionForm; }catch(e){}
     if(!f){ try{ if(typeof sessionForm==="function") f=sessionForm; }catch(e){} }
-    if(!f) return false;
-    FROM=true; f(s||null); return true;
+    if(!f){ try{ f=window.sessionForm; }catch(e){} }
+    if(typeof f!=="function") return false;
+    FROM=true;
+    try{ f(s||null); return true; }catch(e){ FROM=false; return false; }
   }
-  function openFromTherapy(){ if(!opener(null)){ FROM=false; try{ toast(EN()?"Could not open the session form":"تعذّر فتح نموذج الجلسة","bad"); }catch(e){} } }
+  function openIt(){
+    if(!opener(null)){ FROM=false;
+      say(EN()?"Could not open the session form — reload the page and try again":"تعذّر فتح نموذج الجلسة — أعد تحميل الصفحة وحاول مرة أخرى","bad"); }
+  }
 
-  function wrapSave(){
+  /* ---------- حفظ: يبني سجل العلاج المقابل ---------- */
+  function hookSave(){
     try{
-      if(typeof ACT==="undefined"||!ACT||typeof ACT.saveSession!=="function"||ACT.saveSession.__qd209) return;
+      if(typeof ACT==="undefined"||!ACT||typeof ACT.saveSession!=="function"||ACT.saveSession.__qd210) return;
       var orig=ACT.saveSession;
       var w=function(d){
         var ours=FROM; FROM=false;
-        var before=sessArr().length;
+        var before=arrSess().length;
         orig.apply(this,arguments);
         if(!ours) return;
         try{
-          var arr=sessArr();
-          var rec=(d&&d.id)?arr.filter(function(x){ return str(x.id)===str(d.id); })[0]:arr[arr.length-1];
-          var okNew=!!(d&&d.id)||arr.length>before;
-          if(rec&&okNew){
-            mirror(rec);
-            try{ save(); }catch(e){}
-            try{ REND.therapy(); }catch(e){}
+          var arr=arrSess();
+          var rec=(d&&d.id)?arr.filter(function(x){ return S_(x.id)===S_(d.id); })[0]:arr[arr.length-1];
+          if(rec&&((d&&d.id)||arr.length>before)){
+            mirror(rec); persist();
+            try{ if(typeof REND!=="undefined"&&REND.therapy) REND.therapy(); }catch(e){}
             try{ if(window.qdUnifyPaint) window.qdUnifyPaint(); }catch(e){}
+            ensure();
           }
         }catch(e){}
       };
-      w.__qd209=1; ACT.saveSession=w;
+      w.__qd210=1; ACT.saveSession=w;
     }catch(e){}
   }
-
-  function wrapEdit(){
+  function hookEdit(){
     try{
-      if(typeof ACT==="undefined"||!ACT||typeof ACT.editTherapy!=="function"||ACT.editTherapy.__qd209) return;
+      if(typeof ACT==="undefined"||!ACT) return;
       var orig=ACT.editTherapy;
-      var w=function(d){
-        try{
-          var rec=therapyArr().filter(function(x){ return str(x.id)===str(d&&d.id); })[0];
-          if(rec&&rec.sessionRecId){
-            var cs=sessArr().filter(function(x){ return str(x.id)===str(rec.sessionRecId); })[0];
-            if(cs&&opener(cs)) return;
-            FROM=false;
-          }
-        }catch(e){ FROM=false; }
-        return orig.apply(this,arguments);
-      };
-      w.__qd209=1; ACT.editTherapy=w;
+      if(typeof orig==="function"&&!orig.__qd210){
+        var w=function(d){
+          try{
+            var rec=arrTherapy().filter(function(x){ return S_(x.id)===S_(d&&d.id); })[0];
+            if(rec&&rec.sessionRecId){
+              var cs=arrSess().filter(function(x){ return S_(x.id)===S_(rec.sessionRecId); })[0];
+              if(cs&&opener(cs)) return;
+              FROM=false;
+            }
+          }catch(e){ FROM=false; }
+          return orig.apply(this,arguments);
+        };
+        w.__qd210=1; ACT.editTherapy=w;
+      }
+      var od=ACT.delTherapy;
+      if(typeof od==="function"&&!od.__qd210){
+        var wd=function(d){
+          try{
+            var rec=arrTherapy().filter(function(x){ return S_(x.id)===S_(d&&d.id); })[0];
+            var s=DB();
+            if(rec&&rec.sessionRecId&&s) s.sessions=(s.sessions||[]).filter(function(x){ return S_(x.id)!==S_(rec.sessionRecId); });
+          }catch(e){}
+          return od.apply(this,arguments);
+        };
+        wd.__qd210=1; ACT.delTherapy=wd;
+      }
     }catch(e){}
   }
 
-  function wrapDel(){
+  /* ---------- مراقبة الواجهة: الزر يظهر مع أي رسم للقسم ---------- */
+  function watch(){
     try{
-      if(typeof ACT==="undefined"||!ACT||typeof ACT.delTherapy!=="function"||ACT.delTherapy.__qd209) return;
-      var orig=ACT.delTherapy;
-      var w=function(d){
-        try{
-          var rec=therapyArr().filter(function(x){ return str(x.id)===str(d&&d.id); })[0];
-          if(rec&&rec.sessionRecId){
-            var s=db();
-            if(s) s.sessions=(s.sessions||[]).filter(function(x){ return str(x.id)!==str(rec.sessionRecId); });
-          }
-        }catch(e){}
-        return orig.apply(this,arguments);
-      };
-      w.__qd209=1; ACT.delTherapy=w;
-    }catch(e){}
-  }
-
-  function wrapEditById(){
-    try{
-      var o=window.qdEditTherapyById;
-      if(typeof o!=="function"||o.__qd209) return;
-      var w=function(id){
-        try{
-          var rec=therapyArr().filter(function(x){ return str(x.id)===str(id); })[0];
-          if(rec&&rec.sessionRecId){
-            var cs=sessArr().filter(function(x){ return str(x.id)===str(rec.sessionRecId); })[0];
-            if(cs&&opener(cs)) return;
-            FROM=false;
-          }
-        }catch(e){ FROM=false; }
-        return o.apply(this,arguments);
-      };
-      w.__qd209=1; window.qdEditTherapyById=w;
-    }catch(e){}
-  }
-
-  /* ---------- 4) لا تكرار في القوائم المدمجة (عيادة + علاج) ---------- */
-  function wrapDedupe(){
-    try{
-      var cp=window.cpSessionsOnKey;
-      if(typeof cp!=="function"||cp.__qd209) return;
-      var w=function(k){
-        var arr=cp.apply(this,arguments)||[];
-        var live={};
-        sessArr().forEach(function(s){ if(str(s.date).slice(0,10)===str(k)) live[str(s.id)]=1; });
-        return arr.filter(function(x){
-          if(!x||x.src!=="therapy") return true;
-          var th=therapyArr().filter(function(t){ return str(t.id)===str(x.id); })[0];
-          return !(th&&th.sessionRecId&&live[str(th.sessionRecId)]);
+      if(window.MutationObserver){
+        var pend=false;
+        var mo=new MutationObserver(function(){
+          if(pend) return; pend=true;
+          var run=function(){ pend=false; ensure(); };
+          try{ (window.requestAnimationFrame||setTimeout)(run,16); }catch(e){ run(); }
         });
-      };
-      w.__qd209=1; window.cpSessionsOnKey=w;
+        mo.observe(document.documentElement,{childList:true,subtree:true});
+      }
+    }catch(e){}
+    try{
+      var iv=setInterval(function(){
+        wrapRender(); hookSave(); hookEdit(); ensure();
+        if(Date.now()-T0>600000) clearInterval(iv);
+      },700);
     }catch(e){}
   }
 
-  function install(){
-    wrapRender(); wrapSave(); wrapEdit(); wrapDel(); wrapEditById(); wrapDedupe(); ensureBtn();
-  }
+  try{ if(typeof ACT!=="undefined"&&ACT) ACT[BTNACT]=openIt; }catch(e){}
+  try{ window[BTNACT]=openIt; }catch(e){}
+  window.QD210={open:openIt,mirror:mirror,ensure:ensure,hook:function(){ wrapRender(); hookSave(); hookEdit(); ensure(); }};
 
-  try{
-    if(typeof ACT!=="undefined"&&ACT){ ACT.newSessionFromTherapy=openFromTherapy; }
-  }catch(e){}
-
-  if(document.readyState==="loading"){
-    document.addEventListener("DOMContentLoaded",function(){ install(); setTimeout(install,800); },{once:true});
-  }else{ install(); setTimeout(install,800); }
-
-  window.QD209={open:openFromTherapy, mirror:mirror, install:install};
+  var boot=function(){ wrapRender(); hookSave(); hookEdit(); watch(); ensure(); setTimeout(ensure,600); setTimeout(ensure,1600); };
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",boot,{once:true});
+  else boot();
 })();
 
 </script>
