@@ -8507,9 +8507,11 @@ REND.therapy=function(){
         '<td class="muted tiny">'+esc((t.bodySites||"—").split(",").slice(0,2).map(site).join(", "))+'</td>'+
         '<td>'+num(t.duration)+' '+T("dur_d")+'</td>'+
         '<td>'+esc(t.pain||"—")+'/10</td>'+
-        '<td style="white-space:nowrap"><button class="btn ghost sm" data-act="thWa" data-id="'+t.id+'" title="'+T("cp_wa_send")+'">'+svg(I.phone,2)+'</button> <button class="btn ghost sm" data-act="editTherapy" data-id="'+t.id+'">'+(LANG==="en"?"Edit":"تعديل")+'</button> <button class="btn ghost sm" data-act="delTherapy" data-id="'+t.id+'">'+svg(I.trash,2)+'</button></td></tr>';
+        '<td style="white-space:nowrap">'+(sch?'<button class="btn ghost sm qd253b" data-qd253="done" data-id="'+t.id+'" data-kind="therapy" title="'+LL("تعليمها كمكتملة","Mark as completed")+'">✓ '+LL("تم","Done")+'</button> ':'')+'<button class="btn ghost sm" data-act="thWa" data-id="'+t.id+'" title="'+T("cp_wa_send")+'">'+svg(I.phone,2)+'</button> <button class="btn ghost sm" data-act="editTherapy" data-id="'+t.id+'">'+(LANG==="en"?"Edit":"تعديل")+'</button> <button class="btn ghost sm" data-act="delTherapy" data-id="'+t.id+'">'+svg(I.trash,2)+'</button></td></tr>';
     });
   });
+  var dueSched=0;
+  list.forEach(function(t){ if(isSched(t)) dueSched++; });
   var note="";
   if(upcoming&&!showUp) note='<div class="qd251note">🗓 '+LL("موعدان قادمة مخفية حتى يحين وقتها (","upcoming appointments hidden until due (")+upcoming+') — '+LL("اضغط «إظهار المواعيد القادمة» لعرضها.","press “Show upcoming” to view.”")+'</div>';
   else if(superseded) note='<div class="qd251note">✓ '+LL("أُخفيت مواعيد مُنفَّذة مسبقًا حتى لا تظهر مرتين: ","scheduled placeholders hidden to avoid duplicates: ")+superseded+'</div>';
@@ -8528,6 +8530,7 @@ REND.therapy=function(){
    '#v-therapy .qd251tag{display:inline-block;margin-inline-start:6px;font:900 9px system-ui;color:#8A6B1F;background:#F6EDD6;border:1px solid #E4D3A8;border-radius:99px;padding:1px 6px;vertical-align:middle}'+
    '#v-therapy .qd251note{background:#FBF8F1;border:1px solid #EFE2C4;border-radius:10px;padding:8px 12px;margin:0 0 10px;font:800 11.5px system-ui;color:#5A6472}</style>'+
    '<div class="filters"><h3 style="flex:1">'+T("th_title")+'</h3>'+
+     (dueSched?'<button class="btn ghost sm qd254b" id="qd254all" data-qd254="all">✓ '+LL("تم تنفيذ المواعيد المستحقة","Mark due as done")+' <span style="opacity:.6">('+dueSched+')</span></button> ':'')+
      '<button class="btn ghost sm" id="qd251tg">'+ (showUp?LL("إخفاء المواعيد القادمة","Hide upcoming"):LL("إظهار المواعيد القادمة","Show upcoming")) + (upcoming?' <span style="opacity:.6">('+upcoming+')</span>':'') +'</button> '+
      '<button class="btn primary" data-act="newTherapy">'+svg(I.plus,2.2)+' '+T("btn_new_therapy")+'</button></div>'+
    note+
@@ -35117,7 +35120,7 @@ tr:hover .qde-ndate{color:#7E0E14}
 
   function badge(){
     try{ var b=document.getElementById("qdrBadge"); if(!b) return;
-      var w="v11-252 · FLOW-ON-DUE";
+      var w="v11-254 · BULK-DONE";
       if(b.textContent!==w+" · BTN-OK") b.textContent=w+" · BTN-OK"; }catch(e){}
   }
 
@@ -35327,7 +35330,7 @@ tr:hover .qde-ndate{color:#7E0E14}
               '<td><span class="qd249-nm"><b>'+esc(nameOf(r.playerId)||"—")+'</b>'+(r.sch?'<span class="qd251tag">'+L("موعد","Sched")+'</span>':'')+
               '<button class="qd249-edit" data-qd249="edit" data-id="'+esc(str(r.id))+'" data-src="'+_src+'" title="'+L("تعديل الجلسة","Edit session")+'" aria-label="'+L("تعديل الجلسة","Edit session")+'">✏</button></span></td>'+
               '<td>'+esc(str(r.type)||"—")+'</td><td>'+esc(num(r.duration)||"—")+'</td>'+
-              '<td style="text-align:end"><button class="md3-btn g" data-md3="openPlayer" data-p="'+esc(r.playerId)+'">'+L("الملف","Profile")+'</button></td></tr>';
+              '<td style="text-align:end;white-space:nowrap">'+(r.sch?'<button class="md3-btn qd253m" data-qd253="done" data-id="'+esc(str(r.id))+'" data-kind="'+_src+'" title="'+L("تعليمها كمكتملة","Mark as completed")+'">✓ '+L("تم","Done")+'</button> ':'')+'<button class="md3-btn g" data-md3="openPlayer" data-p="'+esc(r.playerId)+'">'+L("الملف","Profile")+'</button></td></tr>';
           }).join("")+'</tbody></table>'
           :'<div class="md3-empty">'+L("لا جلسات مسجّلة اليوم — ابدأ بتسجيل دخول علاج أو جدولة موعد.","No sessions today — start with a check-in or an appointment.")+'</div>')+
       '</div>'+
@@ -41088,6 +41091,161 @@ tr:hover .qde-ndate{color:#7E0E14}
 })();
 
 </script>
+<script>
+/*!
+ * QD253 · تعليم الموعد المجدول كمنفَّذ (تم)
+ * يحوّل سجل الموعد إلى جلسة مكتملة ويحدّث السجل المرتبط في الجانب الآخر.
+ */
+(function(){
+  if(window.__qd253) return; window.__qd253=1;
+  function EN(){ try{ return String(localStorage.getItem("qd_lang")||"ar").indexOf("en")===0; }catch(e){ return false; } }
+  function L(a,e){ return EN()?e:a; }
+  function say(m,k){ try{ if(typeof window.toast==="function") window.toast(m,k); }catch(e){} }
+  function ST(){
+    try{ if(window.QD_S&&Array.isArray(window.QD_S.sessions)) return window.QD_S; }catch(e){}
+    try{ if(typeof window.QDSIGN_STATE==="function"){ var x=window.QDSIGN_STATE(); if(x) return x; } }catch(e){}
+    try{ var A=window.__QDAPP; if(A&&A.S&&Array.isArray(A.S.sessions)) return A.S; }catch(e){}
+    try{ return window.QD_S||null; }catch(e){ return null; }
+  }
+  function persist(){
+    try{ if(typeof window.QD_save==="function"){ window.QD_save(); return; } }catch(e){}
+    try{ if(typeof window.save==="function"){ window.save(); return; } }catch(e){}
+  }
+  function pad(n){ return (n<10?"0":"")+n; }
+  function stamp(){ var d=new Date(); return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate())+"T"+pad(d.getHours())+":"+pad(d.getMinutes()); }
+
+  function markDone(kind,id){
+    var s=ST(); if(!s) return false;
+    var ths=Array.isArray(s.therapies)?s.therapies:[], ses=Array.isArray(s.sessions)?s.sessions:[];
+    var th=null, se=null, i;
+    if(kind==="therapy"){
+      for(i=0;i<ths.length;i++){ if(String(ths[i].id)===String(id)){ th=ths[i]; break; } }
+      if(!th) return false;
+      for(i=0;i<ses.length;i++){
+        var x=ses[i];
+        if((th.sessionRecId&&String(x.id)===String(th.sessionRecId))||String(x.fromTherapy)===String(th.id)){ se=x; break; }
+      }
+    }else{
+      for(i=0;i<ses.length;i++){ if(String(ses[i].id)===String(id)){ se=ses[i]; break; } }
+      if(!se) return false;
+      for(i=0;i<ths.length;i++){
+        var t=ths[i];
+        if((se.fromTherapy&&String(t.id)===String(se.fromTherapy))||(t.sessionRecId&&String(t.sessionRecId)===String(se.id))){ th=t; break; }
+      }
+    }
+    var now=stamp();
+    if(th){
+      th.sched=0; th.status="Completed"; th.attend="Attended";
+      th.completedAt=now; th.completedManually=1;
+      if(!th.pain) th.pain="";
+    }
+    if(se){
+      se.sched=0; se.status="Completed"; se.attend="Attended";
+      se.completedAt=now; se.completedManually=1;
+    }else if(th){
+      var nid="cs_"+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+      (s.sessions=s.sessions||[]).push({ id:nid, date:th.date, playerId:th.playerId, injuryId:th.injuryId||"",
+        injName:th.injName||"", injType:th.injType||"", injSites:th.bodySites||"", injDate:th.injDate||"",
+        type:th.type||"", mods:th.mods||"", duration:th.duration||0, painBefore:th.painBefore||"", painAfter:th.painAfter||"",
+        clinician:th.clinician||"", attend:"Attended", able:"", subj:"", obj:"", assess:"", plan:"",
+        notes:th.notes||"", fromTherapy:th.id, completedAt:now, completedManually:1, created:now });
+      th.sessionRecId=nid; th.fromTherapy=undefined;
+    }
+    if(se&&!th){
+      var tid="th_"+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+      (s.therapies=s.therapies||[]).push({ id:tid, playerId:se.playerId, injuryId:se.injuryId||"", date:se.date,
+        type:se.type||"", duration:se.duration||0, bodySites:se.injSites||"", injName:se.injName||"", injType:se.injType||"",
+        injDate:se.injDate||"", pain:"", notes:se.notes||"", attend:"Attended", status:"Completed",
+        sessionRecId:se.id, completedAt:now, completedManually:1, created:now });
+      se.fromTherapy=tid;
+    }
+    persist();
+    return true;
+  }
+
+  function repaint(kind,inClinic){
+    var done=false;
+    try{ if(window.REND&&window.REND.therapy){ window.REND.therapy(); done=true; } }catch(e){}
+    if(!done){ try{ var A=window.__QDAPP; if(A&&A.REND&&A.REND.therapy){ A.REND.therapy(); done=true; } }catch(e){} }
+    try{ if(window.QD221&&window.QD221.render) window.QD221.render(); }catch(e){}
+    if(!done){ try{ var n=document.querySelector('.nav-item[data-view="therapy"]'); if(n) n.click(); }catch(e){} }
+    try{ if(window.qdUnifyPaint) window.qdUnifyPaint(); }catch(e){}
+    try{ var h=document.querySelector("#v-therapy .qc-cnt"); if(h) h.textContent=((document.querySelectorAll("#v-therapy tr.qd250r")||[]).length)+" "+L("صفًا","rows"); }catch(e){}
+  }
+
+  document.addEventListener("click",function(e){
+    var b=e.target&&e.target.closest?e.target.closest('[data-qd253="done"]'):null;
+    if(!b) return;
+    e.preventDefault(); e.stopPropagation(); if(e.stopImmediatePropagation) e.stopImmediatePropagation();
+    var kind=b.getAttribute("data-kind")||"therapy", id=b.getAttribute("data-id");
+    var inClinic=!!b.closest(".md3-tbl");
+    b.disabled=true; b.textContent="…";
+    var ok=false;
+    try{ ok=markDone(kind,id); }catch(x){ ok=false; }
+    if(!ok){ say(L("تعذّر التحديث — حدّث الصفحة وأعد المحاولة","Could not update — refresh and retry"),"bad"); b.disabled=false; return; }
+    say(L("تم تعليم الجلسة كمكتملة ✓","Marked as completed ✓"));
+    repaint(kind,inClinic);
+  },true);
+
+  window.QD253={done:markDone,repaint:repaint};
+})();
+
+</script>
+<script>
+/*!
+ * QD254 · تعليم كل المواعيد المستحقة كمنفَّذة دفعة واحدة (بتأكيد)
+ */
+(function(){
+  if(window.__qd254) return; window.__qd254=1;
+  function EN(){ try{ return String(localStorage.getItem("qd_lang")||"ar").indexOf("en")===0; }catch(e){ return false; } }
+  function L(a,e){ return EN()?e:a; }
+  function say(m,k){ try{ if(typeof window.toast==="function") window.toast(m,k); }catch(e){} }
+  function ST(){
+    try{ if(window.QD_S&&Array.isArray(window.QD_S.sessions)) return window.QD_S; }catch(e){}
+    try{ var A=window.__QDAPP; if(A&&A.S&&Array.isArray(A.S.sessions)) return A.S; }catch(e){}
+    try{ return window.QD_S||null; }catch(e){ return null; }
+  }
+  function isSch(x){ return !!(x&&(x.sched===1||String(x.status)==="Scheduled"||String(x.attend)==="Scheduled")); }
+  function tsOf(x){ var d=new Date(String(x.date||"").replace(" ","T")); return isNaN(d.getTime())?0:d.getTime(); }
+  function dueList(){
+    var s=ST(); if(!s) return [];
+    var out=[], ths=Array.isArray(s.therapies)?s.therapies:[], ses=Array.isArray(s.sessions)?s.sessions:[];
+    var now=Date.now();
+    var real={};
+    ses.concat(ths).forEach(function(x){ if(x&&x.playerId&&!isSch(x)) real[String(x.playerId)+"|"+String(x.date||"").slice(0,10)]=1; });
+    ths.forEach(function(t){
+      if(!isSch(t)) return;
+      var k=String(t.playerId)+"|"+String(t.date||"").slice(0,10);
+      if(real[k]) return;
+      if(tsOf(t)>now) return;
+      out.push({kind:"therapy",id:t.id});
+    });
+    return out;
+  }
+  document.addEventListener("click",function(e){
+    var b=e.target&&e.target.closest?e.target.closest('[data-qd254="all"]'):null;
+    if(!b) return;
+    e.preventDefault(); e.stopPropagation();
+    var due=dueList();
+    if(!due.length){ say(L("لا مواعيد مستحقة الآن","No due appointments now"),"warn"); return; }
+    var q=L("تعليم "+due.length+" موعدًا كمكتملة؟ لا يمكن التراجع إلا بالتعديل اليدوي.","Mark "+due.length+" appointment(s) as completed? This can only be undone manually.");
+    var ok=true;
+    try{ ok=window.confirm(q); }catch(x){ ok=true; }
+    if(!ok) return;
+    var n=0;
+    due.forEach(function(d){
+      try{ if(window.QD253&&window.QD253.done){ if(window.QD253.done(d.kind,d.id)) n++; } }catch(x){}
+    });
+    say(L("تم تعليم "+n+" جلسة كمكتملة ✓","Marked "+n+" session(s) as completed ✓"),"ok");
+    try{ if(window.QD253&&window.QD253.repaint) window.QD253.repaint("therapy",false); }catch(x){}
+    try{ var h=document.querySelector("#v-therapy .qc-cnt"); if(h) h.textContent=document.querySelectorAll("#v-therapy tr.qd250r").length+" "+L("صفًا","rows"); }catch(x){}
+  },true);
+  window.QD254={due:dueList};
+})();
+
+</script>
+
+
 
 
 
