@@ -39469,6 +39469,74 @@ tr:hover .qde-ndate{color:#7E0E14}
 })();
 
 </script>
+<script>
+/*!
+ * QD233 · ثبات أقسام القائمة — يمنع اختفاء «المزامنة السحابية» بعد إعادة بناء القائمة
+ * السبب: بعض مسارات الترقية تعيد بناء NAV من القائمة الأساسية (NAV.length=0) فتضيع
+ * العناصر التي تُضاف وقت التشغيل (المزامنة السحابية / الاستبيان اليومي / القيادة الطبية).
+ */
+(function(){
+  if(window.__qd233) return; window.__qd233=1;
+
+  var WANT=[
+    {id:"cloud",   label:"المزامنة السحابية", icon:"docs",     sub:"sub_cloud",    grp:"grp_admin"},
+    {id:"wellness",label:"الاستبيان اليومي",  icon:"activity", sub:"sub_wellness", grp:"grp_follow"},
+    {id:"clinical",label:"القيادة الطبية",    icon:"reports",  sub:"sub_clinical", grp:"grp_medical"}
+  ];
+  var REQ={cloud:1};          /* العنصر الذي لا يجوز أن يغيب أبدًا */
+  function A(){ try{ return window.__QDAPP; }catch(e){ return null; } }
+  function has(a,id){ try{ return a.NAV.some(function(n){ return n&&n.id===id; }); }catch(e){ return false; } }
+
+  /* يعيد العناصر الناقصة — يعمل حتى لو أُفرغت NAV بالكامل */
+  function ensure(){
+    var a=A(); if(!a||!a.NAV) return false;
+    var changed=false;
+    WANT.forEach(function(w){
+      if(!has(a,w.id)){ a.NAV.push({id:w.id,label:w.label,icon:w.icon,sub:w.sub,grp:w.grp}); changed=true; }
+    });
+    return changed;
+  }
+  function ensureAndRender(){
+    if(ensure()){ try{ A().renderNav(); }catch(e){} return true; }
+    return false;
+  }
+
+  /* التفاف حول renderNav: العناصر موجودة قبل كل رسم */
+  function wrap(){
+    var a=A(); if(!a||typeof a.renderNav!=="function") return false;
+    if(a.renderNav.__qd233) return true;
+    var orig=a.renderNav;
+    var w=function(){ try{ ensure(); }catch(e){} return orig.apply(this,arguments); };
+    w.__qd233=1;
+    try{ a.renderNav=w; }catch(e){ return false; }
+    try{ if(typeof window.renderNav==="function" && !window.renderNav.__qd233) window.renderNav=w; }catch(e){}
+    return true;
+  }
+
+  /* حارس: يتحقق كل ١.٢ ثانية في أول دقيقتين، ثم كل ١٥ ثانية على مدار الجلسة */
+  var ticks=0;
+  function watch(){
+    wrap(); ensureAndRender();
+    ticks++;
+    var gap = ticks<100 ? 1200 : 15000;
+    setTimeout(watch, gap);
+  }
+
+  /* عند العودة إلى التبويب أو تغيير القسم: تحقق فوري */
+  document.addEventListener("visibilitychange",function(){ if(!document.hidden){ wrap(); ensureAndRender(); } });
+  document.addEventListener("click",function(e){
+    try{ if(e.target&&e.target.closest&&e.target.closest("#nav,[data-view]")) setTimeout(ensureAndRender,60); }catch(x){}
+  },true);
+  window.addEventListener("hashchange",function(){ setTimeout(ensureAndRender,80); });
+
+  function boot(){ setTimeout(function(){ wrap(); ensureAndRender(); watch(); },700); }
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",boot); else boot();
+
+  window.QD233={ensure:ensure,ensureAndRender:ensureAndRender,want:WANT};
+})();
+
+</script>
+
 
 
 
