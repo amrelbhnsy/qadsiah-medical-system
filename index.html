@@ -1,6 +1,67 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head><script>/*!
+ * QD235 · مانع الرعشة الحقيقي
+ * يعمل على المستوى الأدنى: يمنع إعادة كتابة نفس HTML في عناصر ثابتة (القائمة/الشارات)
+ * ويعزل الطبقات الضبابية ويوقف كل حركة دورية. لا يعتمد على أسماء دوال معيّنة.
+ */
+(function(){
+  if(window.__qd235) return; window.__qd235=1;
+  var STATS={writes:0,skipped:0};
+
+  /* ١) كاش كتابة innerHTML على العناصر الثابتة: تخطّي الكتابة إن كان المحتوى مطابقًا */
+  function guard(el){
+    if(!el||el.__qd235g) return;
+    var d=Object.getOwnPropertyDescriptor(Element.prototype,"innerHTML");
+    if(!d||!d.set) return;
+    var last=null, writing=false;
+    Object.defineProperty(el,"innerHTML",{
+      configurable:true,
+      get:function(){ return d.get.call(el); },
+      set:function(v){
+        if(writing) return d.set.call(el,v);
+        var s=String(v==null?"":v);
+        if(last!==null && s===last){ STATS.skipped++; return; }
+        last=s; STATS.writes++;
+        var top=el.scrollTop;
+        writing=true;
+        try{ d.set.call(el,s); }finally{ writing=false; }
+        try{ if(top) el.scrollTop=top; }catch(e){}
+      }
+    });
+    el.__qd235g=1;
+  }
+  function guardAll(){
+    ["nav","pgTitle","pgSub","svDot","cl231badge"].forEach(function(id){ guard(document.getElementById(id)); });
+    guard(document.querySelector("#nav .navlist")||null);
+  }
+
+  /* ٢) طبقة CSS: إيقاف الضبابية وكل حركة */
+  function css(){
+    if(document.getElementById("qd235css")) return;
+    var s=document.createElement("style"); s.id="qd235css";
+    s.textContent=[
+      "*{animation:none!important;animation-iteration-count:1!important;transition-duration:.01ms!important}",
+      "*{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}",
+      "#nav,#topbar,header,.topbar,#app,.view{contain:paint layout style}",
+      "#topbar,header,.topbar{position:relative!important;transform:none!important}",
+      "#nav{overflow-anchor:none}",
+      ".sv-dot:before{animation:none!important}"
+    ].join("\n");
+    (document.head||document.documentElement).appendChild(s);
+  }
+
+  /* ٣) حقن مبكر + إعادة الحقن بعد أي إعادة بناء للواجهة */
+  function tick(){ guardAll(); }
+  css();
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",function(){css();tick();});
+  else tick();
+  var n=0;
+  var iv=setInterval(function(){ n++; tick(); if(n>80) clearInterval(iv); },400);
+  document.addEventListener("click",function(){ setTimeout(tick,50); },true);
+  window.QD235={stats:function(){ return {writes:STATS.writes,skipped:STATS.skipped}; },tick:tick};
+})();
+</script><script>/*!
  * QD234 · وضع الهدوء البصري — يوقف «الرجفة/الرعشة» في الواجهة
  * الأساب: (١) نبضة لا نهائية qdPulse، (٢) إعادة رسم كامل للشاشات كل ١–١.٢ ثانية
  *         (٣) هيدر مثبّت بخلفية ضبابية يُعاد رسمه مع كل تغيّر أسفله.
