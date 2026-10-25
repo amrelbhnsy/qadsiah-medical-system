@@ -8453,6 +8453,7 @@ REND.therapy=function(){
   const PAL=[{c:"#C8A24A",b:"#FCF7E7"},{c:"#2E6CA4",b:"#EEF4FA"},{c:"#2E7D5B",b:"#EDF6F1"},
              {c:"#7A4C9E",b:"#F6F0FA"},{c:"#B9652E",b:"#FCF2EC"},{c:"#4A5568",b:"#F1F3F5"}];
   function LL(a,e){ return (typeof LANG!=="undefined"&&LANG==="en")?e:a; }
+  function str0(v){ return String(v==null?"":v).trim(); }
   function dkk(v){ return String(v||"").slice(0,10); }
   function isSched(t){ return t.sched===1||String(t.status||"")==="Scheduled"||String(t.attend||"")==="Scheduled"; }
   function tsOf(t){ var d=new Date(String(t.date||"").replace(" ","T")); return isNaN(d.getTime())?0:d.getTime(); }
@@ -8503,10 +8504,10 @@ REND.therapy=function(){
       rowsHtml+='<tr class="qd250r'+(sch?' qd251sch':'')+'" data-qd250-day="'+esc(k)+'" style="--qdc:'+P.c+';--qdbg:'+P.b+'">'+
         '<td><div class="pname">'+avatar(player(t.playerId),"sm")+'<span>'+esc(pname(t.playerId))+'</span>'+(sch?'<span class="qd251tag">'+LL("موعد","Sched")+'</span>':'')+'</div></td>'+
         '<td>'+fmtDate(t.date,1)+'</td>'+
-        '<td>'+esc((window.qdTypeTxt||tr)(t.type))+'</td>'+
-        '<td class="muted tiny">'+esc((t.bodySites||"—").split(",").slice(0,2).map(site).join(", "))+'</td>'+
+        '<td>'+esc((window.qdTypeTxt||tr)(window.qd260clean?window.qd260clean(t.type):t.type))+'</td>'+
+        '<td class="muted tiny">'+esc((str0(t.bodySites)?String(t.bodySites).split(",").slice(0,2).map(site).join(", "):"—"))+'</td>'+
         '<td>'+num(t.duration)+' '+T("dur_d")+'</td>'+
-        '<td>'+esc(t.pain||"—")+'/10</td>'+
+        '<td>'+(str0(t.pain)!==""?esc(t.pain)+'/10':'<span style="opacity:.4">—</span>')+'</td>'+
         '<td style="white-space:nowrap">'+(sch?'<button class="btn ghost sm qd253b" data-qd253="done" data-id="'+t.id+'" data-kind="therapy" title="'+LL("تعليمها كمكتملة","Mark as completed")+'">✓ '+LL("تم","Done")+'</button> ':'')+'<button class="btn ghost sm" data-act="thWa" data-id="'+t.id+'" title="'+T("cp_wa_send")+'">'+svg(I.phone,2)+'</button> <button class="btn ghost sm" data-act="editTherapy" data-id="'+t.id+'">'+(LANG==="en"?"Edit":"تعديل")+'</button> <button class="btn ghost sm" data-act="delTherapy" data-id="'+t.id+'">'+svg(I.trash,2)+'</button></td></tr>';
     });
   });
@@ -35120,7 +35121,7 @@ tr:hover .qde-ndate{color:#7E0E14}
 
   function badge(){
     try{ var b=document.getElementById("qdrBadge"); if(!b) return;
-      var w="v11-259 · NO-RESTORE-UNDO";
+      var w="v11-260 · UNIFIED-FIELDS";
       if(b.textContent!==w+" · BTN-OK") b.textContent=w+" · BTN-OK"; }catch(e){}
   }
 
@@ -41529,6 +41530,242 @@ tr:hover .qde-ndate{color:#7E0E14}
 })();
 
 </script>
+<script>
+/*!
+ * QD260 · توحيد حقول تسجيل الجلسة/الإصابة + نموذج واحد لكل أيام الأسبوع
+ * - ينظّف السجلات القديمة (إزالة الوقت الملتصق بنوع العلاج، توحيد الأرقام، تعبئة الناقص من ملف الإصابة)
+ * - يستبدل نموذج «جلسة علاج رياضي» و«تعديل علاج» بنموذج واحد كامل الحقول دائمًا
+ * - يفتح نفس النموذج من جدول سجل العلاج، ومن مسار اليوم، ومن زر ＋ في الأعلى
+ */
+(function(){
+  if(window.__qd260) return; window.__qd260=1;
+  function EN(){ try{ return String(localStorage.getItem("qd_lang")||"ar").indexOf("en")===0; }catch(e){ return false; } }
+  function L(a,e){ return EN()?e:a; }
+  function str(v){ return String(v==null?"":v); }
+  function say(m,k){ try{ if(typeof window.toast==="function") window.toast(m,k); }catch(e){} }
+  function esc(v){ return str(v).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+  function pad(n){ return (n<10?"0":"")+n; }
+  function ST(){
+    try{ var A=window.__QDAPP; if(A&&A.S&&Array.isArray(A.S.players)) return A.S; }catch(e){}
+    try{ if(window.QD_S&&Array.isArray(window.QD_S.players)) return window.QD_S; }catch(e){}
+    try{ if(typeof S!=="undefined"&&S&&Array.isArray(S.players)) return S; }catch(e){}
+    return null;
+  }
+  function saveAll(){
+    try{ if(typeof window.QD_save==="function") window.QD_save(); }catch(e){}
+    try{ if(typeof window.save==="function") window.save(); }catch(e){}
+    try{ var A=window.__QDAPP; if(A&&typeof A.save==="function") A.save(); }catch(e){}
+    try{ var s=ST(); if(s) localStorage.setItem("qadsiah_u18_v2",JSON.stringify(s)); }catch(e){}
+    try{ localStorage.setItem("qadsiah_sync_dirty","1"); }catch(e){}
+    try{ if(window.QD257&&window.QD257.backup) window.QD257.backup(); }catch(e){}
+  }
+  function repaint(){
+    try{ if(window.REND&&window.REND.therapy) window.REND.therapy(); }catch(e){}
+    try{ if(window.QD221&&window.QD221.render) window.QD221.render(); }catch(e){}
+  }
+  function nameOf(s,pid){ var p=(s.players||[]).filter(function(x){ return String(x.id)===String(pid); })[0]; return p?((p.first||"")+" "+(p.last||"")).trim():""; }
+
+  /* ---------- تنظيف نوع العلاج من الوقت الملتصق ---------- */
+  function clean(t){
+    var x=str(t).replace(/\s*[·•|]\s*\d{1,2}:\d{2}\s*(ص|م|AM|PM|am|pm)?\s*$/,"").trim();
+    x=x.replace(/\s*[·•|]\s*$/,"").trim();
+    return x||"—";
+  }
+  window.qd260clean=clean;
+
+  /* ---------- توحيد السجلات القائمة ---------- */
+  var SITES=["knee","thigh","hamstring","calf","ankle","foot","shoulder","elbow","wrist","hand","hip","groin","back","neck","head"];
+  function normalize(){
+    var s=ST(); if(!s) return 0;
+    var n=0;
+    (s.therapies||[]).forEach(function(t){
+      var c=clean(t.type); if(c!==t.type){ t.type=c; n++; }
+      if(t.pain==null) t.pain="";
+      if(t.duration==null||t.duration==="") t.duration="";
+      if(t.bodySites==null) t.bodySites="";
+      if(!str(t.bodySites).trim()&&t.injuryId){
+        var inj=(s.injuries||[]).filter(function(x){ return String(x.id)===String(t.injuryId); })[0];
+        if(inj&&str(inj.bodySites).trim()){ t.bodySites=inj.bodySites; n++; }
+      }
+      if(!str(t.type).trim()){ t.type=L("جلسة علاج","Therapy session"); n++; }
+      ["clinician","mods","notes","injuryId","painBefore","painAfter"].forEach(function(k){ if(t[k]==null){ t[k]=""; n++; } });
+    });
+    if(n) saveAll();
+    return n;
+  }
+
+  /* ---------- النموذج الموحّد ---------- */
+  var OV=null, CUR=null;
+  function overlay(){
+    if(OV&&OV.parentNode) return OV;
+    OV=document.createElement("div"); OV.id="qd260ov";
+    OV.style.cssText="position:fixed;inset:0;z-index:2147483100;display:none;align-items:flex-start;justify-content:center;padding:20px 12px;background:rgba(18,16,14,.5);overflow:auto;direction:"+(document.documentElement.getAttribute("dir")||"rtl");
+    document.body.appendChild(OV); return OV;
+  }
+  function close(){ if(OV){ OV.style.display="none"; OV.innerHTML=""; } CUR=null; }
+  function css(){
+    if(document.getElementById("qd260css")) return;
+    var st=document.createElement("style"); st.id="qd260css";
+    st.textContent=[
+      "#qd260card{background:#fff;border-radius:16px;max-width:720px;width:100%;box-shadow:0 24px 60px rgba(0,0,0,.32);overflow:hidden;font-family:system-ui,-apple-system,'Segoe UI',sans-serif}",
+      "#qd260card .hd{background:#0C1118;color:#fff;padding:14px 18px;display:flex;align-items:center;gap:10px}",
+      "#qd260card .hd b{font-size:14px;font-weight:900}#qd260card .hd span{font-size:11px;opacity:.65;font-weight:700}",
+      "#qd260card .bd{padding:16px 18px;max-height:68vh;overflow:auto}",
+      "#qd260card .sec{font:900 10.5px system-ui;letter-spacing:.4px;color:#8A6B1F;margin:4px 0 9px;display:flex;align-items:center;gap:7px}",
+      "#qd260card .sec:after{content:'';flex:1;height:1px;background:#EFECE5}",
+      "#qd260card .grid{display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:14px}",
+      "#qd260card .f{display:flex;flex-direction:column;gap:5px}#qd260card .f.w{grid-column:1/-1}",
+      "#qd260card label{font:800 11px system-ui;color:#3A434F}",
+      "#qd260card input,#qd260card select,#qd260card textarea{border:1px solid #E3DED3;border-radius:9px;padding:8px 10px;font:600 12.5px system-ui;color:#0C1118;background:#fff;width:100%;box-sizing:border-box}",
+      "#qd260card input:focus,#qd260card select:focus,#qd260card textarea:focus{outline:none;border-color:#C8A24A;box-shadow:0 0 0 3px rgba(200,162,74,.16)}",
+      "#qd260card textarea{min-height:62px;resize:vertical;font-weight:500}",
+      "#qd260card .chips{display:flex;flex-wrap:wrap;gap:5px;margin-top:2px}",
+      "#qd260card .chips b{font:800 10px system-ui;border:1px solid #E3DED3;background:#FBF8F1;color:#5A6472;border-radius:99px;padding:3px 9px;cursor:pointer;font-weight:800}",
+      "#qd260card .chips b.on{background:#C8A24A;border-color:#C8A24A;color:#0C1118}",
+      "#qd260card .ft{display:flex;gap:8px;justify-content:flex-start;padding:12px 18px;border-top:1px solid #F1EEE7;background:#FCFBF8}",
+      "#qd260card button{border:0;border-radius:9px;padding:9px 16px;font:900 11.5px system-ui;cursor:pointer}",
+      "#qd260card .p{background:#C8A24A;color:#0C1118}#qd260card .g{background:#fff;border:1px solid #E3DED3;color:#3A434F}",
+      "#qd260card .dg{background:#FBEFEE;border:1px solid #EFD3D0;color:#A8161C;margin-inline-start:auto}",
+      "#qd260hint{font:800 10.5px system-ui;color:#8A6B1F;background:#FBF8F1;border:1px solid #EFE2C4;border-radius:9px;padding:7px 10px;margin-bottom:12px}"
+    ].join("\n");
+    (document.head||document.documentElement).appendChild(st);
+  }
+  function siteLbl(x){
+    try{ if(window.site) return window.site(x); }catch(e){}
+    return String(x).replace(/^([a-z])/,function(m){ return m.toUpperCase(); });
+  }
+  function onlyTime(v){ return /^\d{4}-\d\d-\d\dT\d\d:\d\d$/.test(str(v))?str(v):(str(v).length>=16?str(v).slice(0,16):""); }
+  function open(rec){
+    css();
+    var s=ST(); if(!s){ say(L("تعذّر الوصول للبيانات","Could not reach the data"),"bad"); return; }
+    CUR=rec&&rec.id?rec:null;
+    var r=CUR||{};
+    var pid=r.playerId||(s.players[0]||{}).id;
+    var dt=onlyTime(r.date)|| (new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,16));
+    var ths=(s.therapies||[]).map(function(t){ return clean(t.type); }).filter(function(x){ return x&&x!=="—"; });
+    var types=[]; ths.forEach(function(x){ if(types.indexOf(x)<0) types.push(x); });
+    ["Manual Therapy","Myofascial Release","موعد جلسة علاج","Strapping","Taping","Rehab session","Massage"].forEach(function(x){ if(types.indexOf(x)<0) types.push(x); });
+    var sites=String(r.bodySites||"").split(",").filter(Boolean);
+    var inj=(s.injuries||[]).filter(function(i){ return String(i.playerId)===String(pid)&&str(i.status)!=="cleared"; });
+
+    var ov=overlay();
+    ov.innerHTML='<div id="qd260card" role="dialog" aria-modal="true">'+
+      '<div class="hd"><b>'+(CUR?L("تعديل جلسة علاج","Edit therapy session"):L("جلسة علاج جديدة","New therapy session"))+'</b>'+
+        '<span>'+L("نموذج موحّد · كل الحقول","Unified form · all fields")+'</span></div>'+
+      '<div class="bd">'+
+        '<div id="qd260hint">'+L("هذه الحقول ثابتة لكل الأيام — لا يختلف النموذج حسب اليوم أو طريقة الإدخال.","These fields are identical for every day — the form no longer varies by day or entry point.")+'</div>'+
+        '<div class="sec">'+L("الأساسيات","Basics")+'</div>'+
+        '<div class="grid">'+
+          '<div class="f"><label>'+L("اللاعب","Player")+' *</label><select id="q260p">'+s.players.map(function(p){
+            return '<option value="'+esc(p.id)+'"'+(String(p.id)===String(pid)?" selected":"")+'>'+esc(((p.first||"")+" "+(p.last||"")).trim()+(p.number?(" · #"+p.number):""))+'</option>';
+          }).join("")+'</select></div>'+
+          '<div class="f"><label>'+L("التاريخ والوقت","Date & time")+' *</label><input type="datetime-local" id="q260d" value="'+esc(dt)+'"></div>'+
+          '<div class="f"><label>'+L("نوع العلاج","Treatment type")+' *</label><input id="q260t" list="q260tl" value="'+esc(clean(r.type||""))+'"><datalist id="q260tl">'+types.map(function(x){ return '<option value="'+esc(x)+'">'; }).join("")+'</datalist></div>'+
+          '<div class="f"><label>'+L("المدة (دقائق)","Duration (min)")+' *</label><input type="number" min="0" max="240" step="5" id="q260du" value="'+esc(str(r.duration||"30"))+'"></div>'+
+        '</div>'+
+        '<div class="sec">'+L("التفاصيل السريرية","Clinical details")+'</div>'+
+        '<div class="grid">'+
+          '<div class="f"><label>'+L("مواضع الجسم","Body sites")+'</label><input id="q260s" value="'+esc(sites.join(", "))+'" placeholder="knee, ankle">'+
+            '<div class="chips" id="q260ch">'+SITES.map(function(x){ return '<b data-v="'+x+'" class="'+(sites.indexOf(x)>-1?"on":"")+'">'+esc(siteLbl(x))+'</b>'; }).join("")+'</div></div>'+
+          '<div class="f"><label>'+L("شدة الألم (0-10)","Pain (0-10)")+'</label><input type="number" min="0" max="10" step="1" id="q260pa" value="'+esc(str(r.pain===""||r.pain==null?"":r.pain))+'"></div>'+
+          '<div class="f"><label>'+L("الأخصائي","Clinician")+'</label><input id="q260c" value="'+esc(str(r.clinician||""))+'"></div>'+
+          '<div class="f"><label>'+L("ربط بإصابة (اختياري)","Link to injury (optional)")+'</label><select id="q260i"><option value="">'+L("بدون","None")+'</option>'+inj.map(function(i){
+            return '<option value="'+esc(i.id)+'"'+(String(i.id)===String(r.injuryId||"")?" selected":"")+'>'+esc(str(i.type)||"")+(i.date?(" · "+String(i.date).slice(0,10)):"")+'</option>';
+          }).join("")+'</select></div>'+
+          '<div class="f w"><label>'+L("ملاحظات","Notes")+'</label><textarea id="q260n">'+esc(str(r.notes||""))+'</textarea></div>'+
+        '</div>'+
+      '</div>'+
+      '<div class="ft">'+
+        '<button class="p" id="q260ok">'+L("حفظ الجلسة","Save session")+'</button>'+
+        '<button class="g" id="q260no">'+L("إلغاء","Cancel")+'</button>'+
+        (CUR?'<button class="dg" id="q260del">'+L("حذف الجلسة","Delete session")+'</button>':'')+
+      '</div></div>';
+    ov.style.display="flex";
+    ov.querySelector("#q260ch").addEventListener("click",function(e){
+      var b=e.target.closest("b[data-v]"); if(!b) return;
+      b.classList.toggle("on");
+      var inp=ov.querySelector("#q260s");
+      var cur=String(inp.value).split(",").map(function(x){ return x.trim(); }).filter(Boolean);
+      var v=b.getAttribute("data-v"), k=cur.indexOf(v);
+      if(k>-1) cur.splice(k,1); else cur.push(v);
+      inp.value=cur.join(", ");
+    });
+    ov.querySelector("#q260s").addEventListener("input",function(){
+      var cur=String(this.value).split(",").map(function(x){ return x.trim(); }).filter(Boolean);
+      ov.querySelectorAll("#q260ch b").forEach(function(b2){ b2.classList.toggle("on",cur.indexOf(b2.getAttribute("data-v"))>-1); });
+    });
+    ov.querySelector("#q260no").onclick=close;
+    ov.addEventListener("click",function(e){ if(e.target===ov) close(); });
+    ov.querySelector("#q260ok").onclick=function(){ commit(false); };
+    var de=ov.querySelector("#q260del"); if(de) de.onclick=function(){ commit(true); };
+  }
+
+  function commit(isDel){
+    var ov=OV, s=ST(); if(!ov||!s) return;
+    var g=function(id){ var e=ov.querySelector("#"+id); return e?e.value:""; };
+    var id=CUR?CUR.id:null;
+    if(isDel){
+      if(!confirm(L("حذف هذه الجلسة نهائيًا؟","Delete this session permanently?"))) return;
+      s.therapies=(s.therapies||[]).filter(function(x){ return String(x.id)!==String(id); });
+      saveAll(); close(); repaint(); say(L("حُذفت الجلسة","Session deleted"),"ok"); return;
+    }
+    var pid=g("q260p"), dt=g("q260d"), ty=clean(g("q260t")), du=g("q260du"), sites=[], pain=g("q260pa"), cl=g("q260c"), injId=g("q260i"), notes=g("q260n");
+    if(!pid||!dt){ say(L("اختر اللاعب والتاريخ","Pick the player and date"),"bad"); return; }
+    if(!ty||ty==="—"){ say(L("أدخل نوع العلاج","Enter the treatment type"),"bad"); return; }
+    if(String(du)===""||Number(du)<0){ say(L("أدخل المدة","Enter the duration"),"bad"); return; }
+    var arr=String(g("q260s")).split(",").map(function(x){ return x.trim(); }).filter(Boolean); sites=arr;
+    var rec={ id:id||("th_"+Date.now().toString(36)+Math.random().toString(36).slice(2,5)),
+      playerId:pid, date:dt, type:ty, duration:String(du),
+      bodySites:sites.join(","), pain:pain===""?"":String(pain),
+      clinician:cl||"", notes:notes||"", injuryId:injId||"",
+      sched:0, status:"Completed", attend:"Attended",
+      created:(CUR&&CUR.created)||new Date().toISOString(), updated:new Date().toISOString() };
+    if(CUR){ s.therapies=(s.therapies||[]).map(function(x){ return String(x.id)===String(rec.id)?Object.assign({},x,rec):x; }); }
+    else { s.therapies=s.therapies||[]; s.therapies.push(rec); }
+    if(injId){
+      var inj=(s.injuries||[]).filter(function(x){ return String(x.id)===String(injId); })[0];
+      if(inj){
+        inj.treatments=inj.treatments||[];
+        var tr=inj.treatments.filter(function(t){ return String(t.id)===String(rec.id); })[0];
+        var payload={id:rec.id,date:dt,pain:rec.pain,notes:notes||"",plan:"",assessment:"",subjective:""};
+        if(tr) Object.assign(tr,payload); else inj.treatments.push(payload);
+      }
+    }
+    saveAll(); close(); repaint();
+    say(CUR?L("حُفظت التعديلات ✓","Changes saved ✓"):L("أُضيفت الجلسة ✓","Session added ✓"),"ok");
+  }
+
+  /* ---------- ربط كل الأزرار بالنموذج الموحّد ---------- */
+  function findTherapy(id){
+    var s=ST(); if(!s) return null;
+    var l=(s.therapies||[]);
+    for(var i=0;i<l.length;i++){ if(String(l[i].id)===String(id)) return l[i]; }
+    return null;
+  }
+  document.addEventListener("click",function(e){
+    var b=e.target&&e.target.closest?e.target.closest('button,a'):null;
+    if(!b) return;
+    var act=b.getAttribute&&b.getAttribute("data-act");
+    if(act==="newTherapy"){
+      e.preventDefault(); e.stopPropagation(); if(e.stopImmediatePropagation) e.stopImmediatePropagation();
+      open(null); return;
+    }
+    if(act==="editTherapy"){
+      e.preventDefault(); e.stopPropagation(); if(e.stopImmediatePropagation) e.stopImmediatePropagation();
+      var id=b.getAttribute("data-id"); var rec=findTherapy(id);
+      if(!rec){ say(L("لم يُعثر على الجلسة","Session not found"),"warn"); return; }
+      open(rec); return;
+    }
+  },true);
+
+  function boot(){ css(); try{ normalize(); }catch(e){} setTimeout(function(){ try{ normalize(); repaint(); }catch(e){} },1500); }
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",boot);
+  else boot();
+  window.QD260={open:open,normalize:normalize,clean:clean};
+})();
+
+</script>
+
 
 
 
