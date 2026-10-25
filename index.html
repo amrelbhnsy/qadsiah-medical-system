@@ -8449,11 +8449,25 @@ on("saveTreatment",()=>{
 on("delTreatment",d=>{ const inj=S.injuries.find(x=>x.id===d.inj); if(inj){ inj.treatments=inj.treatments.filter(t=>t.id!==d.id); S.therapies=(S.therapies||[]).filter(t=>String(t.id)!=="thm_"+String(d.id)); save(); toast(T("ok_session_deleted"),"warn"); openInjuryDetail(inj.id); } });
 /* ================= SPORTS THERAPY ================= */
 REND.therapy=function(){
-  const list=[...S.therapies].sort((a,b)=>(b.date||"").localeCompare(a.date||""));
+  const all0=[...S.therapies].sort((a,b)=>(b.date||"").localeCompare(a.date||""));
   const PAL=[{c:"#C8A24A",b:"#FCF7E7"},{c:"#2E6CA4",b:"#EEF4FA"},{c:"#2E7D5B",b:"#EDF6F1"},
              {c:"#7A4C9E",b:"#F6F0FA"},{c:"#B9652E",b:"#FCF2EC"},{c:"#4A5568",b:"#F1F3F5"}];
   function LL(a,e){ return (typeof LANG!=="undefined"&&LANG==="en")?e:a; }
   function dkk(v){ return String(v||"").slice(0,10); }
+  function isSched(t){ return t.sched===1||String(t.status||"")==="Scheduled"||String(t.attend||"")==="Scheduled"; }
+  function tsOf(t){ var d=new Date(String(t.date||"").replace(" ","T")); return isNaN(d.getTime())?0:d.getTime(); }
+  var NOW=Date.now();
+  var showUp=false;
+  try{ showUp=localStorage.getItem("qd251_show")==="1"; }catch(e){}
+  var realKey={};
+  all0.forEach(function(t){ if(!isSched(t)) realKey[String(t.playerId)+"|"+dkk(t.date)]=1; });
+  var upcoming=0, superseded=0;
+  const list=all0.filter(function(t){
+    if(!isSched(t)) return true;
+    if(tsOf(t)>NOW){ upcoming++; return showUp; }
+    if(realKey[String(t.playerId)+"|"+dkk(t.date)]){ superseded++; return false; }
+    return true;
+  });
   function dayLab(v){
     var dt=new Date(dkk(v)+"T00:00:00"); if(isNaN(dt.getTime())) return dkk(v)||"—";
     var en=(typeof LANG!=="undefined"&&LANG==="en");
@@ -8468,6 +8482,7 @@ REND.therapy=function(){
     var n=Math.round((t-d)/86400000);
     if(n===0) return en?"Today":"اليوم";
     if(n===1) return en?"Yesterday":"أمس";
+    if(n===-1) return en?"Tomorrow":"غدًا";
     if(n===2) return en?"2 days ago":"قبل يومين";
     if(n>2&&n<11) return en?(n+" days ago"):("قبل "+n+" أيام");
     return "";
@@ -8484,8 +8499,9 @@ REND.therapy=function(){
       (dayRel(k)?'<span class="qd250rel">'+esc(dayRel(k))+'</span>':'')+
       '<span class="qd250meta">'+g.length+' '+esc(LL("جلسة","sessions"))+' · '+Object.keys(who).length+' '+esc(LL("لاعب","players"))+' · '+num(mins)+' '+esc(T("dur_d"))+'</span></td></tr>';
     g.forEach(function(t){
-      rowsHtml+='<tr class="qd250r" data-qd250-day="'+esc(k)+'" style="--qdc:'+P.c+';--qdbg:'+P.b+'">'+
-        '<td><div class="pname">'+avatar(player(t.playerId),"sm")+'<span>'+esc(pname(t.playerId))+'</span></div></td>'+
+      var sch=isSched(t)?1:0;
+      rowsHtml+='<tr class="qd250r'+(sch?' qd251sch':'')+'" data-qd250-day="'+esc(k)+'" style="--qdc:'+P.c+';--qdbg:'+P.b+'">'+
+        '<td><div class="pname">'+avatar(player(t.playerId),"sm")+'<span>'+esc(pname(t.playerId))+'</span>'+(sch?'<span class="qd251tag">'+LL("موعد","Sched")+'</span>':'')+'</div></td>'+
         '<td>'+fmtDate(t.date,1)+'</td>'+
         '<td>'+esc((window.qdTypeTxt||tr)(t.type))+'</td>'+
         '<td class="muted tiny">'+esc((t.bodySites||"—").split(",").slice(0,2).map(site).join(", "))+'</td>'+
@@ -8494,6 +8510,9 @@ REND.therapy=function(){
         '<td style="white-space:nowrap"><button class="btn ghost sm" data-act="thWa" data-id="'+t.id+'" title="'+T("cp_wa_send")+'">'+svg(I.phone,2)+'</button> <button class="btn ghost sm" data-act="editTherapy" data-id="'+t.id+'">'+(LANG==="en"?"Edit":"تعديل")+'</button> <button class="btn ghost sm" data-act="delTherapy" data-id="'+t.id+'">'+svg(I.trash,2)+'</button></td></tr>';
     });
   });
+  var note="";
+  if(upcoming&&!showUp) note='<div class="qd251note">🗓 '+LL("موعدان قادمة مخفية حتى يحين وقتها (","upcoming appointments hidden until due (")+upcoming+') — '+LL("اضغط «إظهار المواعيد القادمة» لعرضها.","press “Show upcoming” to view.”")+'</div>';
+  else if(superseded) note='<div class="qd251note">✓ '+LL("أُخفيت مواعيد مُنفَّذة مسبقًا حتى لا تظهر مرتين: ","scheduled placeholders hidden to avoid duplicates: ")+superseded+'</div>';
   $("#v-therapy").innerHTML=
    '<style>#v-therapy .qd250sep td{background:var(--qdbg);border-top:1px solid #E6E3DC;border-bottom:1px solid #EFECE5;border-inline-start:4px solid var(--qdc);padding:10px 12px;white-space:nowrap}'+
    '#v-therapy .qd250sep:first-child td{border-top:0}'+
@@ -8501,14 +8520,25 @@ REND.therapy=function(){
    '#v-therapy .qd250sep b{font-size:12.5px;font-weight:900;color:#0C1118;vertical-align:middle}'+
    '#v-therapy .qd250rel{display:inline-block;margin-inline-start:8px;font:900 9.5px system-ui;color:var(--qdc);border:1px solid var(--qdc);border-radius:99px;padding:1px 7px;vertical-align:middle}'+
    '#v-therapy .qd250meta{float:left;font:800 10.5px system-ui;color:#5A6472;padding-top:2px}'+
-   'html[dir=rtl] #v-therapy .qd250meta{float:left}'+
    '#v-therapy .qd250r>td{background:var(--qdbg)}'+
    '#v-therapy .qd250r>td:first-child{border-inline-start:4px solid var(--qdc)}'+
    '#v-therapy .qd250r:hover>td{filter:brightness(.98)}'+
-   '#v-therapy table tbody tr.qd250r+tr.qd250r>td{border-top:1px solid rgba(0,0,0,.04)}</style>'+
-   '<div class="filters"><h3 style="flex:1">'+T("th_title")+'</h3><button class="btn primary" data-act="newTherapy">'+svg(I.plus,2.2)+' '+T("btn_new_therapy")+'</button></div>'+
+   '#v-therapy table tbody tr.qd250r+tr.qd250r>td{border-top:1px solid rgba(0,0,0,.04)}'+
+   '#v-therapy .qd251sch>td{background:repeating-linear-gradient(135deg,#FFFFFF 0 8px,var(--qdbg) 8px 16px)!important}'+
+   '#v-therapy .qd251tag{display:inline-block;margin-inline-start:6px;font:900 9px system-ui;color:#8A6B1F;background:#F6EDD6;border:1px solid #E4D3A8;border-radius:99px;padding:1px 6px;vertical-align:middle}'+
+   '#v-therapy .qd251note{background:#FBF8F1;border:1px solid #EFE2C4;border-radius:10px;padding:8px 12px;margin:0 0 10px;font:800 11.5px system-ui;color:#5A6472}</style>'+
+   '<div class="filters"><h3 style="flex:1">'+T("th_title")+'</h3>'+
+     '<button class="btn ghost sm" id="qd251tg">'+ (showUp?LL("إخفاء المواعيد القادمة","Hide upcoming"):LL("إظهار المواعيد القادمة","Show upcoming")) + (upcoming?' <span style="opacity:.6">('+upcoming+')</span>':'') +'</button> '+
+     '<button class="btn primary" data-act="newTherapy">'+svg(I.plus,2.2)+' '+T("btn_new_therapy")+'</button></div>'+
+   note+
    (list.length?'<div class="card"><div class="card-body tight"><div class="table-wrap"><table><thead><tr><th>'+T("f_player")+'</th><th>'+T("f_datetime")+'</th><th>'+T("th_type")+'</th><th>'+T("th_sites")+'</th><th>'+T("th_duration")+'</th><th>'+T("th_pain")+'</th><th></th></tr></thead><tbody>'+rowsHtml+'</tbody></table></div></div></div>'
    :emptyState(I.therapy,T("th_none"),T("th_none_sub")));
+  setTimeout(function(){
+    try{
+      var cnt=document.querySelector("#v-therapy .qc-cnt");
+      if(cnt) cnt.textContent=list.length+" "+LL("صفًا","rows");
+    }catch(e){}
+  },120);
 };
 function openTherapyForm(s){
   s=s||{};
@@ -35087,7 +35117,7 @@ tr:hover .qde-ndate{color:#7E0E14}
 
   function badge(){
     try{ var b=document.getElementById("qdrBadge"); if(!b) return;
-      var w="v11-250 · DAY-COLORS";
+      var w="v11-252 · FLOW-ON-DUE";
       if(b.textContent!==w+" · BTN-OK") b.textContent=w+" · BTN-OK"; }catch(e){}
   }
 
@@ -35246,11 +35276,25 @@ tr:hover .qde-ndate{color:#7E0E14}
 
   /* ================= 1) غرفة العلاج اليومية ================= */
   function clinicScreen(){
-    var day=WDAY, sess=SS().filter(function(s){ return dkey(s.date)===day; });
-    var ths=TH().filter(function(t){ return dkey(t.date)===day; });
+    var day=WDAY, NOWTS=Date.now();
+    function isSch(x){ return !!(x&&(x.sched===1||str(x.status)==="Scheduled"||str(x.attend)==="Scheduled")); }
+    function tsOf(x){ var d=new Date(str(x.date).replace(" ","T")); return isNaN(d.getTime())?0:d.getTime(); }
+    var sessA=SS().filter(function(s){ return dkey(s.date)===day; });
+    var thsA=TH().filter(function(t){ return dkey(t.date)===day; });
     var injToday=I().filter(function(i){ return dkey(i.date)===day; });
+    var realK={};
+    sessA.concat(thsA).forEach(function(x){ if(x.playerId&&!isSch(x)) realK[str(x.playerId)+"|"+day]=1; });
+    var hiddenSch=0;
+    function keep(x){
+      if(!isSch(x)) return true;
+      if(tsOf(x)>NOWTS){ hiddenSch++; return false; }
+      if(realK[str(x.playerId)+"|"+day]){ hiddenSch++; return false; }
+      return true;
+    }
+    var sess=sessA.filter(keep), ths=thsA.filter(keep);
     var uniq={}; sess.concat(ths).forEach(function(x){ if(x.playerId) uniq[x.playerId]=1; });
-    var rows=sess.concat(ths.map(function(t){ return {id:t.id,playerId:t.playerId,date:t.date,type:t.type,duration:t.duration,src:"therapy"}; }))
+    var rows=sess.map(function(s0){ return {id:s0.id,playerId:s0.playerId,date:s0.date,type:s0.type,duration:s0.duration,src:"session",sch:isSch(s0)?1:0}; })
+      .concat(ths.map(function(t){ return {id:t.id,playerId:t.playerId,date:t.date,type:t.type,duration:t.duration,src:"therapy",sch:isSch(t)?1:0}; }))
       .sort(function(a,b){ return str(a.date).localeCompare(str(b.date)); });
     var acts=activeInj();
 
@@ -35273,13 +35317,14 @@ tr:hover .qde-ndate{color:#7E0E14}
       '</div>'+
 
       '<div class="md3-sec"><h3>'+L("مسار اليوم","Today’s flow")+'</h3><div class="ln"></div>'+
-        '<span class="md3-chip">'+esc(day)+'</span></div>'+
+        '<span class="md3-chip">'+esc(day)+'</span>'+
+        (hiddenSch?'<span class="md3-chip" title="'+L("المواعيد القادمة تظهر عند حلول وقتها","Upcoming appointments appear when due")+'">⏱ '+L("مواعيد مؤجلة: ","pending: ")+hiddenSch+'</span>':'')+'</div>'+
       '<div class="md3-card" style="margin-bottom:14px"><h4>🩺 '+L("دخول / خروج العيادة","Clinic check-in / out")+'</h4>'+
         (rows.length?'<table class="md3-tbl"><thead><tr><th>'+L("الوقت","Time")+'</th><th>'+L("اللاعب","Player")+'</th><th>'+L("النوع","Type")+'</th><th>'+L("المدة","Duration")+'</th><th></th></tr></thead><tbody>'+
           rows.map(function(r){
             var _src=(r.src==="therapy")?"therapy":"session";
             return '<tr data-qd249-row="'+_src+':'+esc(str(r.id))+'"><td>'+esc(str(r.date).slice(11,16))+'</td>'+
-              '<td><span class="qd249-nm"><b>'+esc(nameOf(r.playerId)||"—")+'</b>'+
+              '<td><span class="qd249-nm"><b>'+esc(nameOf(r.playerId)||"—")+'</b>'+(r.sch?'<span class="qd251tag">'+L("موعد","Sched")+'</span>':'')+
               '<button class="qd249-edit" data-qd249="edit" data-id="'+esc(str(r.id))+'" data-src="'+_src+'" title="'+L("تعديل الجلسة","Edit session")+'" aria-label="'+L("تعديل الجلسة","Edit session")+'">✏</button></span></td>'+
               '<td>'+esc(str(r.type)||"—")+'</td><td>'+esc(num(r.duration)||"—")+'</td>'+
               '<td style="text-align:end"><button class="md3-btn g" data-md3="openPlayer" data-p="'+esc(r.playerId)+'">'+L("الملف","Profile")+'</button></td></tr>';
@@ -41025,6 +41070,25 @@ tr:hover .qde-ndate{color:#7E0E14}
 })();
 
 </script>
+<script>
+
+/* QD251 · إظهار/إخفاء المواعيد القادمة في سجل العلاج الرياضي */
+(function(){
+  if(window.__qd251) return; window.__qd251=1;
+  document.addEventListener("click",function(e){
+    var b=e.target&&e.target.closest?e.target.closest("#qd251tg"):null;
+    if(!b) return;
+    e.preventDefault(); e.stopPropagation();
+    try{ var v=localStorage.getItem("qd251_show")==="1"; localStorage.setItem("qd251_show",v?"0":"1"); }catch(x){}
+    var done=false;
+    try{ if(window.REND&&window.REND.therapy){ window.REND.therapy(); done=true; } }catch(x){}
+    if(!done){ try{ if(window.__QDAPP&&window.__QDAPP.REND&&window.__QDAPP.REND.therapy){ window.__QDAPP.REND.therapy(); done=true; } }catch(x){} }
+    if(!done){ try{ var b2=document.querySelector('.nav-item[data-view="therapy"]'); if(b2) b2.click(); }catch(x){} }
+  },true);
+})();
+
+</script>
+
 
 
 
