@@ -34889,7 +34889,7 @@ tr:hover .qde-ndate{color:#7E0E14}
 
   function badge(){
     try{ var b=document.getElementById("qdrBadge"); if(!b) return;
-      var w="v11-240 · CLINIC-DIGEST";
+      var w="v11-242 · COACH-DIGEST";
       if(b.textContent!==w+" · BTN-OK") b.textContent=w+" · BTN-OK"; }catch(e){}
   }
 
@@ -39800,8 +39800,8 @@ tr:hover .qde-ndate{color:#7E0E14}
 
   var CKEY="qd239_cfg", LKEY="qd239_log", OKEY="qd239_out";
   var DEF={
-    on:true,
-    auto:true,
+    on:false,
+    auto:false,
     copy:false,
     specialist:"",
     tpl:"مرحباً {player} 👋\nتم تسجيل دخولك للعيادة الطبية اليوم.\n🕒 الوقت: {time}\n🩺 الإجراء: {type}\n📍 المكان: {clinic}\n\nشكراً — القادسية تحت 18"
@@ -39970,7 +39970,7 @@ tr:hover .qde-ndate{color:#7E0E14}
 
   function card(){
     var c=cfg();
-    var h='<div id="qd239card"><h4>🔔 '+L("رسالة الدخول للعيادة (واتساب)","Clinic entry message (WhatsApp)")+
+    var h='<div id="qd239card"><h4>🔔 '+L("رسالة دخول فردية للاعب (اختياري)","Per-player entry message (optional)")+
       '<span style="margin-inline-start:auto;font-size:10px;font-weight:900;color:'+(c.on?"#1B6E4E":"#8A6A1E")+'">'+(c.on?"● "+L("مفعّلة","ON"):"○ "+L("موقوفة","OFF"))+'</span></h4>'+
       '<div class="b">'+
         '<label class="f"><input type="checkbox" id="qd239on" '+(c.on?"checked":"")+'> '+L("أرسل رسالة عند تسجيل دخول أي لاعب","Send a message when any player checks in")+'</label>'+
@@ -40094,15 +40094,22 @@ tr:hover .qde-ndate{color:#7E0E14}
     trainEnd:"18:00",
     dailyTime:"18:00",
     toWho:"coach",              /* coach | coachDoctor | players */
-    coach:"",
+    coach:"966547715650",
+    coachName:"Miguel Grau",
     autoOpen:true,
-    header:"Clinic check-ins — {date}\nPlayers seen: {count}",
+    header:"Hi {coachFirst},\n\nClinic check-ins — {date}\nPlayers seen: {count}",
     line:"• {player} — {type}{mins}",
     footer:"\n\nAl Qadsiah U18 — Medical Team"
   };
 
   function esc(v){ return String(v==null?"":v).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
-  function cfg(){ try{ return Object.assign({},DEF,JSON.parse(localStorage.getItem(CK)||"{}")||{}); }catch(e){ return Object.assign({},DEF); } }
+  function cfg(){
+    var o;
+    try{ o=Object.assign({},DEF,JSON.parse(localStorage.getItem(CK)||"{}")||{}); }catch(e){ o=Object.assign({},DEF); }
+    if(!String(o.coach||"").replace(/[^\d]/g,"")) o.coach=DEF.coach;      /* لا يبقى بلا رقم */
+    if(!String(o.coachName||"").trim()) o.coachName=DEF.coachName;
+    return o;
+  }
   function setCfg(o){ try{ localStorage.setItem(CK,JSON.stringify(Object.assign(cfg(),o||{}))); }catch(e){} }
   function toast(m,k){ try{ if(typeof window.toast==="function") window.toast(m,k); }catch(e){} }
   function pad(n){ return (n<10?"0":"")+n; }
@@ -40178,7 +40185,9 @@ tr:hover .qde-ndate{color:#7E0E14}
         "{note}":e.notes||""
       });
     });
-    var head=fillTpl(c.header,{"{date}":st.date,"{count}":String(st.entries.length),"{clinic}":clinic()});
+    var head=fillTpl(c.header,{"{date}":st.date,"{count}":String(st.entries.length),"{clinic}":clinic(),
+      "{coach}":c.coachName||DEF.coachName,"{coachName}":c.coachName||DEF.coachName,
+      "{coachFirst}":String(c.coachName||DEF.coachName).trim().split(/\s+/)[0]});
     return head+"\n\n"+lines.join("\n")+String(c.footer||"");
   }
 
@@ -40267,8 +40276,9 @@ tr:hover .qde-ndate{color:#7E0E14}
              : '<span class="pill">Waiting · '+esc(s.hm)+'</span>');
     return '<div id="qd240"><h4>🗂️ Daily clinic digest → coach'+
       '<span style="margin-inline-start:auto">'+status+'</span></h4><div class="b">'+
-      '<div class="row"><label class="f" style="min-width:150px">Coach WhatsApp</label><input class="i" id="qd240coach" value="'+esc(c.coach)+'" placeholder="05xxxxxxxx" style="max-width:170px">'+
-      '<span style="font-size:10px;color:#6B7482">sent to the coach only</span></div>'+
+      '<div class="row"><label class="f" style="min-width:90px">Coach</label><input class="i" id="qd240cname" value="'+esc(c.coachName)+'" placeholder="Miguel Grau" style="max-width:150px;direction:ltr">'+
+      '<input class="i" id="qd240coach" value="'+esc(c.coach)+'" placeholder="05xxxxxxxx" style="max-width:150px">'+
+      '<span style="font-size:10px;color:#6B7482">↳ digest goes to this number only</span></div>'+
       '<div class="row"><label class="f">'+L2("الوضع","Mode")+'</label>'+
       '<label class="f"><input type="radio" name="qd240mode" value="afterTraining" '+(c.mode==="afterTraining"?"checked":"")+'> After training</label>'+
       '<label class="f"><input type="radio" name="qd240mode" value="daily" '+(c.mode==="daily"?"checked":"")+'> Daily at</label>'+
@@ -40341,6 +40351,7 @@ tr:hover .qde-ndate{color:#7E0E14}
       setCfg({
         mode:mo?mo.value:cfg().mode,
         coach:String(g("qd240coach")&&g("qd240coach").value||"").trim(),
+        coachName:String(g("qd240cname")&&g("qd240cname").value||"").trim(),
         trainEnd:String(g("qd240end")&&g("qd240end").value||cfg().trainEnd),
         dailyTime:String(g("qd240tm")&&g("qd240tm").value||cfg().dailyTime),
         toWho:String(g("qd240to")&&g("qd240to").value||cfg().toWho),
@@ -40409,6 +40420,12 @@ tr:hover .qde-ndate{color:#7E0E14}
 })();
 
 </script>
+
+
+
+
+
+
 
 
 
