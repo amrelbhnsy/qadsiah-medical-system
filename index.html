@@ -8504,8 +8504,9 @@ REND.therapy=function(){
       '<span class="qd250meta">'+vis.length+' '+esc(LL("جلسة","sessions"))+' · '+Object.keys(who).length+' '+esc(LL("لاعب","players"))+' · '+num(mins)+' '+esc(T("dur_d"))+'</span></td></tr>';
     g.forEach(function(t){
       var sch=isSched(t)?1:0;
-      var isHid=hidOf(t)&&!showUp;
-      rowsHtml+='<tr class="qd250r'+(sch?' qd251sch':'')+'" data-qd250-day="'+esc(k)+'"'+(isHid?' data-qd262h="1"':'')+' style="--qdc:'+P.c+';--qdbg:'+P.b+(isHid?';display:none':'')+'">'+
+      var hidKind=hidOf(t);
+      var isHid=hidKind&&!showUp;
+      rowsHtml+='<tr class="qd250r'+(sch?' qd251sch':'')+'" data-qd250-day="'+esc(k)+'"'+(hidKind?' data-qd262h="'+hidKind+'"':'')+' style="--qdc:'+P.c+';--qdbg:'+P.b+(isHid?';display:none':'')+'">'+
         '<td><div class="pname">'+avatar(player(t.playerId),"sm")+'<span>'+esc(pname(t.playerId))+'</span>'+(sch?'<span class="qd251tag">'+LL("موعد","Sched")+'</span>':'')+'</div></td>'+
         '<td>'+fmtDate(t.date,1)+'</td>'+
         '<td>'+esc((window.qdTypeTxt||tr)(window.qd260clean?window.qd260clean(t.type):t.type))+'</td>'+
@@ -35125,7 +35126,7 @@ tr:hover .qde-ndate{color:#7E0E14}
 
   function badge(){
     try{ var b=document.getElementById("qdrBadge"); if(!b) return;
-      var w="v11-270 · ADVANCED-LAB";
+      var w="v11-271 · TOGGLE-FIX2";
       if(b.textContent!==w+" · BTN-OK") b.textContent=w+" · BTN-OK"; }catch(e){}
   }
 
@@ -41801,6 +41802,8 @@ tr:hover .qde-ndate{color:#7E0E14}
     if(host){
       var rows=host.querySelectorAll("tr[data-qd262h]");
       for(var i=0;i<rows.length;i++){ rows[i].style.display=show?"":"none"; }
+      var all=host.querySelectorAll("tr.qd250r");
+      for(var q=0;q<all.length;q++){ if(!all[q].getAttribute("data-qd262h")) continue; all[q].style.display=show?"":"none"; }
       var hdrs=host.querySelectorAll('tr[data-qd262hdr]');
       for(var j=0;j<hdrs.length;j++){
         var k=hdrs[j].getAttribute("data-qd262hdr");
@@ -41869,12 +41872,23 @@ tr:hover .qde-ndate{color:#7E0E14}
     try{ var tg=document.getElementById("v-therapy")&&document.getElementById("v-therapy").querySelector("#qd251tg"); if(tg) tg.innerHTML=x.txt; }catch(e){}
     try{ applyDom(); }catch(e){}
   }
+  var LAST=0;
+  function setState(v){
+    try{ localStorage.setItem("qd251_show",v?"1":"0"); }catch(e){}
+    var prefNow=false; try{ prefNow=localStorage.getItem("qd251_show")==="1"; }catch(e){}
+    if(prefNow!==!!v){ try{ localStorage.setItem("qd251_show",v?"1":"0"); }catch(e){} }
+  }
   document.addEventListener("click",function(e){
     var b=e.target&&e.target.closest?e.target.closest('[data-qd262],[data-qd261],#qd251tg,.md3-chip'):null;
     if(!b) return;
     if(b.classList&&b.classList.contains("md3-chip")&&!/المخفية|hidden/i.test(String(b.textContent||""))) return;
     e.preventDefault(); e.stopPropagation(); if(e.stopImmediatePropagation) e.stopImmediatePropagation();
-    flip(); applyDom(); decorate();
+    var nowT=Date.now();
+    if(nowT-LAST<250) return;          /* نقرة واحدة فقط حتى لو تكرّر المستمع */
+    LAST=nowT;
+    var target=!pref();                /* القيمة المطلوبة صريحة */
+    setState(target);
+    applyDom(); decorate();
     setTimeout(function(){ applyDom(); decorate(); },60);
   },true);
   function boot(){ css(); decorate(); setInterval(function(){ css(); decorate(); },800); }
