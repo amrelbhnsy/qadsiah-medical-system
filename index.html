@@ -10,7 +10,7 @@
 (function(){
   if(window.__qd246) return; window.__qd246=1;
   var FK="qd246_freeze";
-  var on=(function(){ try{ return localStorage.getItem(FK)==="1"; }catch(e){ return false; } })();
+  var on=(function(){ try{ var v=localStorage.getItem(FK); return v===null?true:(v==="1"); }catch(e){ return true; } })();
   var SKIP=/fetch|pullWellness|push\(|submitWell|sendBeacon|XMLHttp|supabase/i;
   var BLOCKED=0;
 
@@ -69,7 +69,25 @@
       el.__qd246t=1;
     }catch(e){}
   }
+  var lastNav=0;
+  function throttleNav(){
+    try{
+      var a=window.__QDAPP; if(!a||typeof a.renderNav!=="function"||a.renderNav.__qd246) return false;
+      var orig=a.renderNav;
+      var w=function(){
+        var t=Date.now();
+        if(t-lastNav<1200) return;      /* طلب رسم متكرر: تجاهل */
+        lastNav=t;
+        try{ return orig.apply(this,arguments); }catch(e){}
+      };
+      w.__qd246=1; a.renderNav=w;
+      try{ if(typeof window.renderNav==="function") window.renderNav=w; }catch(e){}
+      return true;
+    }catch(e){ return false; }
+  }
+
   function seal(){
+    throttleNav();
     ["sidebar","nav","pgTitle","pgSub","svDot"].forEach(function(id){ guard(document.getElementById(id)); });
     var list=document.querySelector("#sidebar .navlist, #nav .navlist");
     if(list) guard(list);
@@ -84,7 +102,9 @@
       "html{overflow-y:scroll!important;scrollbar-gutter:auto!important}",
       "#sidebar,#sidebar *,.nav,#nav{scrollbar-width:none!important;-ms-overflow-style:none!important}",
       "#sidebar::-webkit-scrollbar,.nav::-webkit-scrollbar,#nav::-webkit-scrollbar{width:0!important;height:0!important;display:none!important}",
-      "#sidebar,.nav{overflow-y:auto!important;overflow-x:hidden!important}",
+      "#sidebar,.nav{overflow-y:auto!important;overflow-x:hidden!important;scrollbar-gutter:auto!important}",
+      "#sidebar{contain:layout style!important}",
+      "#sidebar .nav-item,#sidebar .grp{pointer-events:auto}",
       "#sidebar *,.nav *{animation:none!important;transition:none!important}",
       "#qd246btn{position:fixed;bottom:10px;inset-inline-start:10px;z-index:99998;display:flex;align-items:center;gap:6px;",
       "background:#0C1118;color:#E3C67F;border:1px solid #C8A24A55;border-radius:999px;padding:5px 11px;font:900 10.5px/1 system-ui;cursor:pointer;opacity:.92;box-shadow:0 4px 14px rgba(0,0,0,.28)}",
@@ -35013,7 +35033,7 @@ tr:hover .qde-ndate{color:#7E0E14}
 
   function badge(){
     try{ var b=document.getElementById("qdrBadge"); if(!b) return;
-      var w="v11-246 · STEADY";
+      var w="v11-248 · ABSENT-10D";
       if(b.textContent!==w+" · BTN-OK") b.textContent=w+" · BTN-OK"; }catch(e){}
   }
 
@@ -40628,6 +40648,209 @@ tr:hover .qde-ndate{color:#7E0E14}
 })();
 
 </script>
+<script>
+/*!
+ * QD248 · فلتر الغياب قبل إرسال واتساب للاعبين غير المشاركين
+ * الافتراضي: لا يُرسل إلا لمن غيابهم أقل من ١٠ أيام (قابل للتعديل).
+ */
+(function(){
+  if(window.__qd248) return; window.__qd248=1;
+  var CK="qd248_cfg", QK="qd248_q";
+  function L(a,e){ try{ return String(localStorage.getItem("qd_lang")||"ar").indexOf("en")===0?e:a; }catch(x){ return a; } }
+  function cfg(){ var d={limit:10,on:true}; try{ return Object.assign(d,JSON.parse(localStorage.getItem(CK)||"{}")||{}); }catch(e){ return d; } }
+  function setCfg(o){ try{ localStorage.setItem(CK,JSON.stringify(Object.assign(cfg(),o||{}))); }catch(e){} }
+  function toast(m,k){ try{ if(typeof window.toast==="function") window.toast(m,k); }catch(e){} }
+  function S(){ try{ return window.__QDAPP&&window.__QDAPP.S; }catch(e){ return null; } }
+  function arr(k){ var s=S(),v=s&&s[k]; return Array.isArray(v)?v:[]; }
+  function pad(n){ return (n<10?"0":"")+n; }
+  function today(){ var d=new Date(); return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate()); }
+  function days(a){ if(!a) return 0; var d=new Date(String(a).slice(0,10)); if(isNaN(d)) return 0; return Math.max(0,Math.round((new Date()-d)/864e5)); }
+  function nameOf(id){ var p=arr("players").filter(function(x){ return String(x.id)===String(id); })[0]; return p?((p.first||"")+" "+(p.last||"")).trim():"—"; }
+  function phoneOf(id){
+    var p=arr("players").filter(function(x){ return String(x.id)===String(id); })[0]; if(!p) return "";
+    var ks=["phone","mobile","whatsapp","wa","tel","mob","phone1","contact"];
+    for(var i=0;i<ks.length;i++){ var v=String(p[ks[i]]||"").replace(/[^\d]/g,""); if(v.length>=7) return v; }
+    return "";
+  }
+  function toWa(n){
+    var x=String(n||"").replace(/[^\d]/g,""); if(!x) return "";
+    if(x.indexOf("00")===0) x=x.slice(2);
+    if(/^(966|971|20|44|965|974|973|968|962|961|964)$/.test(x.slice(0,3))) return x;
+    if(x.indexOf("0")===0) x="966"+x.slice(1); else if(x.length===9) x="966"+x;
+    return x;
+  }
+  var REASON={inj:L("إصابة","Injury"),ill:L("مرض","Illness"),team:L("ملتحق بفريق آخر","With another team"),nt:L("استدعاء المنتخب","National call-up")};
+  function absentList(){
+    var t=today(), out=[], map={};
+    function add(pid,reason,day,detail){
+      if(!pid) return;
+      var k=String(pid);
+      if(!map[k]){ map[k]={pid:pid,name:nameOf(pid),phone:phoneOf(pid),days:day,reasons:[],detail:detail}; out.push(map[k]); }
+      if(map[k].reasons.indexOf(reason)<0) map[k].reasons.push(reason);
+      if(day>map[k].days) map[k].days=day;
+    }
+    arr("injuries").forEach(function(i){
+      var st=String(i.status||"").toLowerCase();
+      if(st==="cleared"||st==="recovered"||st==="متعافٍ"||st==="شفاء") return;
+      var d=days(i.date); if(!d&&!i.date) return;
+      add(i.playerId,"inj",d,(i.injName||i.type||"")+(i.bodySites?" · "+i.bodySites:""));
+    });
+    arr("illnesses").forEach(function(i){
+      var st=String(i.status||"").toLowerCase();
+      if(st==="cleared"||st==="recovered") return;
+      add(i.playerId,"ill",days(i.date),i.diagnosis||i.type||"");
+    });
+    arr("callups").forEach(function(c){
+      var s=String(c.start||c.date||c.from||"").slice(0,10), e=String(c.end||c.to||"").slice(0,10);
+      if(!s) return;
+      if(s>t) return;
+      if(e&&e<t) return;
+      var who=[].concat(c.players||c.playerIds||[], c.playerId?[c.playerId]:[]);
+      who.forEach(function(pid){ add(pid,"team",days(s),c.category||c.team||""); });
+    });
+    arr("activities").forEach(function(a){
+      var s=String(a.start||a.date||"").slice(0,10), e=String(a.end||"").slice(0,10);
+      if(!s||s>t) return; if(e&&e<t) return;
+      if(String(a.type||"").indexOf("nt")<0&&String(a.kind||"").indexOf("nt")<0&&!/منتخب/.test(String(a.title||""))) return;
+      add(a.playerId,"nt",days(s),a.title||"");
+    });
+    arr("promo").forEach(function(p){
+      if(p.active===false) return;
+      var s=String(p.date||p.start||"").slice(0,10); if(!s||s>t) return;
+      add(p.playerId,"team",days(s),p.category||"");
+    });
+    out.sort(function(a,b){ return a.days-b.days; });
+    return out;
+  }
+  function split(){
+    var lim=Number(cfg().limit)||10, all=absentList(), ok=[], ex=[];
+    all.forEach(function(p){ (p.days<lim?ok:ex).push(p); });
+    return {ok:ok,ex:ex,limit:lim};
+  }
+
+  /* ---------- الرسالة ---------- */
+  function msgFor(p){
+    var s=cfg();
+    var why=p.reasons.map(function(r){ return REASON[r]||r; }).join(" + ");
+    return L(
+      "مرحباً "+p.name+" 👋\nتم تسجيل غيابك عن تدريب اليوم ("+why+") لمدّة "+p.days+" يوم.\n"+
+      "يرجى الالتزام بتعليمات الطاقم الطبي، والتواصل معنا لأي استفسار.\n\n— القادسية تحت 18 · الطاقم الطبي",
+      "Hi "+p.name+",\nYou are recorded as not training today ("+why+") — day "+p.days+".\nPlease follow the medical team's instructions and contact us if needed.\n\n— Al Qadsiah U18 · Medical Team"
+    );
+  }
+  var IDX=0, QUEUE=[];
+  function startQueue(){
+    var sp=split();
+    QUEUE=sp.ok.filter(function(p){ return p.phone; });
+    IDX=0;
+    if(!sp.ok.length){ toast(L("لا لاعبين مؤهلين تحت الحد","No eligible players"),"warn"); return; }
+    if(!QUEUE.length){ toast(L("لا أرقام واتساب للمؤهلين","No WhatsApp numbers for eligible players"),"warn"); return; }
+    toast(L("مؤهلون: ","Eligible: ")+QUEUE.length+" · "+L("مستبعدون: ","excluded: ")+sp.ex.length,"ok");
+    next();
+  }
+  function next(){
+    if(IDX>=QUEUE.length){ toast(L("انتهت القائمة","Queue finished"),"ok"); IDX=0; return; }
+    var p=QUEUE[IDX]; IDX++;
+    var url="https://wa.me/"+toWa(p.phone)+"?text="+encodeURIComponent(msgFor(p));
+    try{ var w=window.open(url,"_blank","noopener"); if(!w) location.href=url; }catch(e){ try{ location.href=url; }catch(x){} }
+    if(IDX<QUEUE.length) toast(L("أُرسل ","Sent ")+IDX+" / "+QUEUE.length+" — "+L("اضغط «التالي»","press Next"),"ok");
+    paint();
+  }
+  function copyList(){
+    var sp=split();
+    var txt=L("غياب أقل من ","Absent under ")+sp.limit+L(" أيام: "," days: ")+"\n"+sp.ok.map(function(p){ return "• "+p.name+" — "+p.days+L(" يوم"," d"); }).join("\n")+
+      "\n\n"+L("مستبعدون (","Excluded (")+sp.limit+L("+ أيام): ","+ days): ")+"\n"+sp.ex.map(function(p){ return "• "+p.name+" — "+p.days+L(" يوم"," d"); }).join("\n");
+    try{ if(navigator.clipboard) navigator.clipboard.writeText(txt); }catch(e){}
+    toast(L("نُسخت القائمتان","Lists copied"),"ok");
+  }
+
+  /* ---------- واجهة صغيرة داخل لوحة الغائبين ---------- */
+  function css(){
+    if(document.getElementById("qd248css")) return;
+    var s=document.createElement("style"); s.id="qd248css";
+    s.textContent=[
+      "#qd248{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:#FBF8F1;border:1px solid #EFE2C4;border-radius:10px;padding:8px 11px;margin:0 0 9px;font:800 11px system-ui}",
+      "#qd248 b{font-weight:900;color:#0C1118}",
+      "#qd248 input{width:56px;border:1px solid #E6E3DC;border-radius:7px;padding:4px 6px;font:inherit;direction:ltr;text-align:center}",
+      "#qd248 button{border:0;border-radius:8px;padding:6px 11px;font:900 10.5px system-ui;cursor:pointer}",
+      "#qd248 .g{background:#C8A24A;color:#0C1118}#qd248 .n{background:#0C1118;color:#fff}#qd248 .l{background:#fff;border:1px solid #E6E3DC;color:#3A434F}",
+      "#qd248 .ok{color:#1B6E4E}#qd248 .ex{color:#8C1D1D}"
+    ].join("\n");
+    (document.head||document.documentElement).appendChild(s);
+  }
+  function panel(){
+    var sp=split();
+    return '<div id="qd248"><span>⏱ '+L("حد الغياب","Absence limit")+'</span><input id="qd248lim" type="number" min="1" max="365" value="'+sp.limit+'"><span>'+L("يوم","days")+'</span>'+
+      '<span class="ok">✔ '+sp.ok.length+' '+L("مؤهل للإرسال","eligible")+'</span>'+
+      '<span class="ex">✖ '+sp.ex.length+' '+L("مستبعد","excluded")+'</span>'+
+      '<button class="g" data-qd248="send">📤 '+L("إرسال للمؤهلين","Send to eligible")+'</button>'+
+      '<button class="n" data-qd248="next">'+L("التالي","Next")+'</button>'+
+      '<button class="l" data-qd248="copy">'+L("نسخ القوائم","Copy lists")+'</button></div>';
+  }
+  function findCard(){
+    try{
+      var all=document.querySelectorAll("div,section,article");
+      for(var i=0;i<all.length;i++){
+        var el=all[i];
+        if(el.children.length>25) continue;
+        var t=(el.textContent||"");
+        if(t.indexOf("غير المشاركين")>-1 && t.length<4000 && !el.querySelector("#qd248")) return el;
+      }
+    }catch(e){}
+    return null;
+  }
+  function inject(){
+    css();
+    if(document.getElementById("qd248")) return;
+    var c=findCard(); if(!c) return;
+    c.insertAdjacentHTML("afterbegin",panel());
+  }
+  function paint(){
+    var el=document.getElementById("qd248"); if(!el) return;
+    var sp=split();
+    var ok=el.querySelector(".ok"), ex=el.querySelector(".ex");
+    if(ok) ok.textContent="✔ "+sp.ok.length+" "+L("مؤهل للإرسال","eligible");
+    if(ex) ex.textContent="✖ "+sp.ex.length+" "+L("مستبعد","excluded");
+  }
+
+  /* اعتراض أي زر واتساب داخل لوحة الغائبين → يمرّ عبر الفلتر */
+  document.addEventListener("click",function(e){
+    var b=e.target&&e.target.closest?e.target.closest("[data-qd248]"):null;
+    if(b){
+      var k=b.getAttribute("data-qd248");
+      if(k==="send"){ startQueue(); }
+      if(k==="next"){ next(); }
+      if(k==="copy"){ copyList(); }
+      e.preventDefault(); return;
+    }
+    var t=e.target&&e.target.closest?e.target.closest("button,a"):null;
+    if(!t) return;
+    var txt=(t.textContent||"");
+    if(txt.indexOf("واتساب")<0&&!/WhatsApp/i.test(txt)) return;
+    var card=t.closest("#qd248")?null:t;
+    var host=t.parentElement; var inCard=false;
+    for(var i=0;i<6&&host;i++){ if((host.textContent||"").indexOf("غير المشاركين")>-1){ inCard=true; break; } host=host.parentElement; }
+    if(!inCard) return;
+    if(t.getAttribute("data-qd248")) return;
+    /* استبدل السلوك الأصلي بالفلتر */
+    e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
+    startQueue();
+  },true);
+
+  document.addEventListener("change",function(e){
+    if(e.target&&e.target.id==="qd248lim"){ setCfg({limit:Math.max(1,Number(e.target.value)||10)}); paint(); }
+  },true);
+
+  function boot(){ inject(); var n=0, iv=setInterval(function(){ n++; inject(); if(n>40) clearInterval(iv); },700);
+    setInterval(function(){ try{ inject(); paint(); }catch(e){} },8000); }
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",function(){ setTimeout(boot,900); });
+  else setTimeout(boot,900);
+
+  window.QD248={absentList:absentList,split:split,startQueue:startQueue,next:next,cfg:cfg,setCfg:setCfg,msgFor:msgFor};
+})();
+
+</script>
+
 
 
 
