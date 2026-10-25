@@ -1,6 +1,46 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
-<head>
+<head><script>/*!
+ * QD234 · وضع الهدوء البصري — يوقف «الرجفة/الرعشة» في الواجهة
+ * الأساب: (١) نبضة لا نهائية qdPulse، (٢) إعادة رسم كامل للشاشات كل ١–١.٢ ثانية
+ *         (٣) هيدر مثبّت بخلفية ضبابية يُعاد رسمه مع كل تغيّر أسفله.
+ */
+(function(){
+  if(window.__qd234) return; window.__qd234=1;
+  var MIN=4500;                                   /* أدنى فترة لإعادة رسم دورية */
+  var RX=/paint|refreshRows|hookCounts|paintBadges|paintLinked|reconcile/;
+
+  /* ١) تهدئة المؤقتات التي تعيد رسم الشاشة بلا داعٍ */
+  try{
+    var _si=window.setInterval;
+    window.setInterval=function(fn,ms){
+      try{
+        if(typeof fn==="function"){
+          var src=String(fn).slice(0,500);
+          if(RX.test(src) && !/pullWellness|push\(|save\(/.test(src)) ms=Math.max(Number(ms)||0,MIN);
+        }
+      }catch(e){}
+      return _si.apply(window,[fn,ms].concat([].slice.call(arguments,2)));
+    };
+    window.__qd234Timer=1;
+  }catch(e){}
+
+  /* ٢) إيقاف النبضة اللانهائية + عزل طبقة الهيدر */
+  function css(){
+    if(document.getElementById("qd234calm")) return;
+    var s=document.createElement("style"); s.id="qd234calm";
+    s.textContent=
+      "*{animation-iteration-count:1!important}"+
+      ".qd-pulse,[data-pulse]{animation:none!important}"+
+      "header,#topbar,#top,.topbar,.topbar-wrap{transform:translateZ(0);backface-visibility:hidden}"+
+      "@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}";
+    (document.head||document.documentElement).appendChild(s);
+  }
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",css); else css();
+
+  window.QD234={calm:true,minPeriod:MIN};
+})();
+</script>
 <script>
 /* ---- v11-106: بدء فوري — لا انتظار للشبكة عند الإقلاع ---- */
 (function(){
