@@ -34889,7 +34889,7 @@ tr:hover .qde-ndate{color:#7E0E14}
 
   function badge(){
     try{ var b=document.getElementById("qdrBadge"); if(!b) return;
-      var w="v11-244 · COACH-IN-CLINIC";
+      var w="v11-245 · LIVE-ENTRIES";
       if(b.textContent!==w+" · BTN-OK") b.textContent=w+" · BTN-OK"; }catch(e){}
   }
 
@@ -40145,9 +40145,12 @@ tr:hover .qde-ndate{color:#7E0E14}
     return x;
   }
   /* أسماء إنجليزية ثابتة — الرسالة للمدرّب بالإنجليزية دائمًا */
+  var AR2EN={"موعد جلسة علاج":"Treatment session","جلسة علاج":"Treatment session","علاج":"Treatment","تربيط":"Strapping","دعم":"Strapping","تقييم":"Assessment","تأهيل":"Rehab","تدليك":"Massage","ثلج":"Recovery","استشفاء":"Recovery","حقنة":"Injection","علاج طبيعي":"Physio","فحص":"Screening","اختبار":"Testing","زيارة":"Clinic visit"};
   var TY={treatment:"Treatment",strapping:"Strapping",assessment:"Assessment",rehab:"Rehab",rehabilitation:"Rehab",massage:"Massage",ice:"Recovery",recovery:"Recovery",injection:"Injection",other:"Clinic visit",checkin:"Clinic visit",therapy:"Treatment",physio:"Physio",test:"Testing",screening:"Screening"};
   function tlabel(t){
-    var k=String(t||"").toLowerCase().trim();
+    var raw=String(t||"").trim();
+    if(AR2EN[raw]) return AR2EN[raw];
+    var k=raw.toLowerCase();
     if(TY[k]) return TY[k];
     if(!k) return "Clinic visit";
     var clean=k.replace(/[_-]+/g," ");
@@ -40155,6 +40158,37 @@ tr:hover .qde-ndate{color:#7E0E14}
   }
   function clinic(){ try{ var st=(window.__QDAPP&&window.__QDAPP.S&&window.__QDAPP.S.settings)||{}; return st.clinicName||"Club Clinic"; }catch(e){ return "Club Clinic"; } }
   function save(){ try{ if(typeof window.QD_save==="function") return window.QD_save(); }catch(e){} try{ if(typeof window.save==="function") return window.save(); }catch(e){} }
+
+  /* يقرأ الجلسات الحقيقية من بيانات البرنامج (S.sessions + S.therapies) لليوم */
+  function srcEntries(){
+    var out=[], t0=today();
+    function add(rec,src){
+      if(!rec) return;
+      var pid=rec.playerId||rec.pid||rec.player; if(!pid) return;
+      var d=String(rec.date||rec.day||rec.sessionDate||"").slice(0,10);
+      if(d&&d!==t0) return;
+      var time=String(rec.time||"").slice(0,5);
+      if(!time && /T\d\d:/.test(String(rec.date||rec.sessionDate||""))) time=String(rec.date||rec.sessionDate).slice(11,16);
+      out.push({
+        key:String(pid)+"|"+(time||"")+"|"+String(rec.type||""),
+        pid:pid, name:pname(pid), phone:phoneOf(pid),
+        time:time||"—", type:rec.type||"", typeLabel:tlabel(rec.type),
+        duration:Number(rec.duration||rec.mins||0)||0, notes:rec.notes||"", src:src
+      });
+    }
+    A("sessions").forEach(function(r){ add(r,"sessions"); });
+    A("therapies").forEach(function(r){ add(r,"therapies"); });
+    return out;
+  }
+
+  function entries(){
+    var st=store();
+    var all=srcEntries().concat(st.entries||[]);
+    var seen={}, out=[];
+    all.forEach(function(e){ if(!e||!e.pid) return; if(seen[e.key]) return; seen[e.key]=1; out.push(e); });
+    out.sort(function(a,b){ return String(a.time).localeCompare(String(b.time)); });
+    return out;
+  }
 
   function record(rec){
     if(!rec||!rec.playerId) return false;
@@ -40173,9 +40207,9 @@ tr:hover .qde-ndate{color:#7E0E14}
   function fillTpl(tpl,map){ var o=String(tpl||""); Object.keys(map).forEach(function(k){ o=o.split(k).join(map[k]); }); return o; }
 
   function digest(){
-    var c=cfg(), st=store();
-    if(!st.entries.length) return "";
-    var lines=st.entries.map(function(e){
+    var c=cfg(), st=store(), L=entries();
+    if(!L.length) return "";
+    var lines=L.map(function(e){
       return fillTpl(c.line,{
         "{player}":e.name,
         "{type}":e.typeLabel,
@@ -40185,7 +40219,7 @@ tr:hover .qde-ndate{color:#7E0E14}
         "{note}":e.notes||""
       });
     });
-    var head=fillTpl(c.header,{"{date}":st.date,"{count}":String(st.entries.length),"{clinic}":clinic(),
+    var head=fillTpl(c.header,{"{date}":st.date,"{count}":String(L.length),"{clinic}":clinic(),
       "{coach}":c.coachName||DEF.coachName,"{coachName}":c.coachName||DEF.coachName,
       "{coachFirst}":String(c.coachName||DEF.coachName).trim().split(/\s+/)[0]});
     return head+"\n\n"+lines.join("\n")+String(c.footer||"");
@@ -40203,8 +40237,8 @@ tr:hover .qde-ndate{color:#7E0E14}
   function markSent(n,how){ var st=store(); st.sentAt=new Date().toISOString(); st.sentCount=n; st.how=how||"digest"; saveStore(st); paint(); }
 
   function sendDigest(){
-    var c=cfg(), st=store();
-    if(!st.entries.length){ toast("No clinic entries today","warn"); return false; }
+    var c=cfg(), st=store(), L=entries();
+    if(!L.length){ toast("No clinic entries today","warn"); return false; }
     var text=digest();
     var targets=[];
     if(c.toWho==="coach"||c.toWho==="coachDoctor"){ if(toWa(c.coach)) targets.push(toWa(c.coach)); }
@@ -40213,7 +40247,7 @@ tr:hover .qde-ndate{color:#7E0E14}
     var ok=openWa(wa(targets[0],text));
     if(ok){
       if(targets[1]) setTimeout(function(){ try{ openWa(wa(targets[1],text)); }catch(e){} },700);
-      markSent(st.entries.length,"digest");
+      markSent(L.length,"digest");
     }
     return ok;
   }
@@ -40240,8 +40274,9 @@ tr:hover .qde-ndate{color:#7E0E14}
     var c=cfg(), st=store();
     var target=mins(scheduleHM()), d=new Date(), cur=d.getHours()*60+d.getMinutes();
     var due=false,late=0;
-    if(c.on&&c.mode!=="instant"&&st.entries.length&&!st.sentAt&&cur>=target){ due=true; late=cur-target; }
-    return {due:due,lateMin:late,target:target,sent:!!st.sentAt,count:st.entries.length,hm:scheduleHM(),mode:c.mode};
+    var n=entries().length;
+    if(c.on&&c.mode!=="instant"&&n&&!st.sentAt&&cur>=target){ due=true; late=cur-target; }
+    return {due:due,lateMin:late,target:target,sent:!!st.sentAt,count:n,hm:scheduleHM(),mode:c.mode};
   }
 
   var autoTried=false;
@@ -40304,6 +40339,7 @@ tr:hover .qde-ndate{color:#7E0E14}
 
   function paint(){
     var host=document.getElementById("qd240"); if(!host) return;
+    try{ var ae=document.activeElement; if(ae&&host.contains(ae)&&/INPUT|SELECT|TEXTAREA/.test(ae.tagName||"")) return; }catch(e){}
     var tmp=document.createElement("div"); tmp.innerHTML=card();
     var fresh=tmp.firstChild; if(!fresh) return;
     host.parentNode.replaceChild(fresh,host);
@@ -40380,6 +40416,19 @@ tr:hover .qde-ndate{color:#7E0E14}
     }
   },true);
 
+  ["input","change"].forEach(function(ev){
+    document.addEventListener(ev,function(e){
+      try{
+        var t=e.target; if(!t||!t.id) return;
+        if(t.id==="qd240coach"||t.id==="qd240cname"){
+          var o={}; o[t.id==="qd240coach"?"coach":"coachName"]=String(t.value||"").trim();
+          setCfg(o);
+          try{ save(); }catch(x){}
+        }
+      }catch(x){}
+    },true);
+  });
+
   function watchSaves(){
     document.addEventListener("click",function(e){
       try{
@@ -40455,6 +40504,8 @@ tr:hover .qde-ndate{color:#7E0E14}
 })();
 
 </script>
+
+
 
 
 
