@@ -1,6 +1,46 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head><script>/*!
+ * QD237 · تثبيت التخطيط — يوقف اهتزاز القوائم
+ * السبب: .nav عنده overflow-y:auto، فحين يتغيّر ارتفاع محتواه يظهر/يختفي شريط التمرير
+ * فيتغيّر عرض العمود عدة بكسلات → ينزاح التخطيط كله → اهتزاز مرئي.
+ * كذلك contain:paint على #app يكسر position:sticky فيُهتزّ الشريط العلوي.
+ */
+(function(){
+  if(window.__qd237) return; window.__qd237=1;
+  function css(){
+    if(document.getElementById("qd237css")) return;
+    var s=document.createElement("style"); s.id="qd237css";
+    s.textContent=[
+      /* ١) حجز مكان شريط التمرير دائمًا — لا يظهر ويختفي فيتغيّر العرض */
+      "html{scrollbar-gutter:stable both-edges!important}",
+      ".nav,#nav,nav.side,.sidebar{scrollbar-gutter:stable!important;overflow-y:scroll!important;overflow-x:hidden!important}",
+      /* ٢) إلغاء contain الذي يكسر sticky ويفرض إعادة تخطيط */
+      "#app,.view,#nav,#topbar,header,.topbar{contain:none!important}",
+      /* ٣) منع أي إزاحة أو تحوّل في عناصر القائمة (hover/active) */
+      ".nav-item,.nav-item:hover,.nav-item.active,.nav-item *{transform:none!important;margin-left:0!important;margin-right:0!important}",
+      "#nav *,.nav *{transition-property:background-color,color,border-color,opacity!important}",
+      /* ٤) منع تثبيت التمرير التلقائي من تحريك الصفحة */
+      "html,body{overflow-anchor:none!important}",
+      /* ٥) الشريط العلوي: طبقة ثابتة بلا إعادة حساب */
+      "#topbar,header,.topbar{position:sticky!important;top:0!important;backface-visibility:hidden}"
+    ].join("\n");
+    (document.head||document.documentElement).appendChild(s);
+  }
+  css();
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",css);
+  /* إن أُعيد بناء القائمة، أعِد تثبيت العرض المقاس عليها (احتياط) */
+  function pin(){
+    try{
+      var n=document.getElementById("nav"); if(!n||n.__qd237pin) return;
+      var w=Math.round(n.getBoundingClientRect().width);
+      if(w>120){ n.style.minWidth=w+"px"; n.style.maxWidth=w+"px"; n.__qd237pin=w; }
+    }catch(e){}
+  }
+  setTimeout(pin,1200); setTimeout(pin,3500);
+  window.QD237={on:true,pin:pin};
+})();
+</script><script>/*!
  * QD236 · تجميد الرسم وقت الخمول — يُنهي الرعشة نهائيًا
  * الفكرة: المؤقتات لا تلمس الشاشة إلا إذا كان المستخدم يتفاعل أو حصل حفظ/تغيير بيانات.
  * أي إطار زمني بعد ~٤ ثوانٍ من آخر تفاعل = صفر كتابة DOM.
