@@ -8466,7 +8466,7 @@ REND.therapy=function(){
   const list=all0.filter(function(t){
     if(!isSched(t)) return true;
     if(tsOf(t)>NOW){ upcoming++; return showUp; }
-    if(realKey[String(t.playerId)+"|"+dkk(t.date)]){ superseded++; return false; }
+    if(realKey[String(t.playerId)+"|"+dkk(t.date)]){ superseded++; return showUp; }
     return true;
   });
   function dayLab(v){
@@ -35121,7 +35121,7 @@ tr:hover .qde-ndate{color:#7E0E14}
 
   function badge(){
     try{ var b=document.getElementById("qdrBadge"); if(!b) return;
-      var w="v11-261 · SHOW-HIDDEN";
+      var w="v11-262 · TOGGLE-BOTH-WAYS";
       if(b.textContent!==w+" · BTN-OK") b.textContent=w+" · BTN-OK"; }catch(e){}
   }
 
@@ -35292,7 +35292,7 @@ tr:hover .qde-ndate{color:#7E0E14}
     function keep(x){
       if(!isSch(x)) return true;
       if(tsOf(x)>NOWTS){ try{ if(localStorage.getItem("qd251_show")==="1") return true; }catch(e){} hiddenSch++; return false; }
-      if(realK[str(x.playerId)+"|"+day]){ hiddenSch++; return false; }
+      if(realK[str(x.playerId)+"|"+day]){ if(showSch) return true; hiddenSch++; return false; }
       return true;
     }
     var sess=sessA.filter(keep), ths=thsA.filter(keep);
@@ -41766,16 +41766,35 @@ tr:hover .qde-ndate{color:#7E0E14}
 
 </script>
 <script>
-/*!
- * QD261 · زر إظهار/إخفاء الجلسات المخفية (المواعيد القادمة)
- * يعمل في سجل العلاج الرياضي وفي مسار اليوم بنفس التبديل المحفوظ.
- */
+/* QD261b · زر إظهار/إخفاء الجلسات المخفية — يتبدّل في كل مرة */
 (function(){
-  if(window.__qd261) return; window.__qd261=1;
+  if(window.__qd261b) return; window.__qd261b=1;
   function EN(){ try{ return String(localStorage.getItem("qd_lang")||"ar").indexOf("en")===0; }catch(e){ return false; } }
   function L(a,e){ return EN()?e:a; }
   function pref(){ try{ return localStorage.getItem("qd251_show")==="1"; }catch(e){ return false; } }
   function flip(){ try{ var v=pref(); localStorage.setItem("qd251_show",v?"0":"1"); return !v; }catch(e){ return false; } }
+  function ST(){
+    try{ var A=window.__QDAPP; if(A&&A.S&&Array.isArray(A.S.therapies)) return A.S; }catch(e){}
+    try{ if(window.QD_S&&Array.isArray(window.QD_S.therapies)) return window.QD_S; }catch(e){}
+    return null;
+  }
+  function isSch(x){ return !!(x&&(x.sched===1||String(x.status)==="Scheduled"||String(x.attend)==="Scheduled")); }
+  function tsOf(x){ var d=new Date(String(x.date||"").replace(" ","T")); return isNaN(d.getTime())?0:d.getTime(); }
+  function dk(v){ return String(v||"").slice(0,10); }
+  function counts(){
+    var s=ST(); if(!s) return {up:0,dp:0,total:0};
+    var now=Date.now(), ths=(s.therapies||[]), ses=(s.sessions||[]);
+    var real={};
+    ths.concat(ses).forEach(function(x){ if(x&&x.playerId&&!isSch(x)) real[String(x.playerId)+"|"+dk(x.date)]=1; });
+    var up=0,dp=0;
+    ths.forEach(function(t){
+      if(!isSch(t)) return;
+      var k=String(t.playerId)+"|"+dk(t.date);
+      if(real[k]){ dp++; return; }
+      if(tsOf(t)>now) up++;
+    });
+    return {up:up,dp:dp,total:up+dp};
+  }
   function repaint(){
     var done=false;
     try{ if(window.REND&&window.REND.therapy){ window.REND.therapy(); done=true; } }catch(e){}
@@ -41784,81 +41803,88 @@ tr:hover .qde-ndate{color:#7E0E14}
     try{ if(window.qdUnifyPaint) window.qdUnifyPaint(); }catch(e){}
   }
   function css(){
-    if(document.getElementById("qd261css")) return;
-    var st=document.createElement("style"); st.id="qd261css";
+    if(document.getElementById("qd261bcss")) return;
+    var st=document.createElement("style"); st.id="qd261bcss";
     st.textContent=[
-      ".qd261btn{margin-inline-start:auto;border:0;border-radius:8px;background:#0C1118;color:#fff;font:900 10.5px system-ui;padding:6px 11px;cursor:pointer;display:inline-flex;align-items:center;gap:5px}",
+      ".qd261btn{margin-inline-start:auto;border:0;border-radius:8px;background:#0C1118;color:#fff;font:900 10.5px system-ui;padding:6px 11px;cursor:pointer;white-space:nowrap}",
       ".qd261btn:hover{background:#C8A24A;color:#0C1118}",
       ".qd261chip{cursor:pointer;border:1px solid #D9C89B!important;background:#FBF8F1!important;color:#8A6B1F!important;font-weight:900!important}",
       ".qd261chip:hover{background:#C8A24A!important;color:#0C1118!important;border-color:#C8A24A!important}",
-      "#qd261css .qd261note{display:flex;align-items:center;gap:10px;flex-wrap:wrap}"
+      ".qd251note.qd261made{margin:0 0 10px}"
     ].join("\n");
     (document.head||document.documentElement).appendChild(st);
   }
-  function numFrom(el,fallback){
-    var m=String(el.textContent||"").match(/\((\d+)\)|(\d+)/);
-    var v=m?(m[1]||m[2]):"";
-    return v||fallback||"";
+  function expr(show){
+    var c=counts(), n=c.total;
+    var showTxt=L("إظهار الجلسات المخفية","Show hidden sessions");
+    var hideTxt=L("إخفاء الجلسات المخفية","Hide hidden sessions");
+    var head = show
+      ? '👁 '+L("الجلسات المخفية معروضة الآن","Hidden sessions are shown now")+(n?(' ('+n+')'):'')
+      : '🗓 '+L("جلسات مخفية","hidden sessions")+(n?(' ('+n+')'):'')+' — '+L("مواعيد قادمة أو مكرّرة","upcoming or duplicate appointments");
+    return {head:head,btn:(show?'🙈 '+hideTxt:'👁 '+showTxt)+(n?(' ('+n+')'):'')};
   }
-  /* سجل العلاج: أضف زر داخل شريط التنبيه + أعد تسمية زر شريط الأدوات */
   function decorate(){
     try{
       var host=document.getElementById("v-therapy"); if(!host) return;
-      var note=host.querySelector(".qd251note");
-      if(note&&!note.querySelector(".qd261btn")){
-        var n=numFrom(note,"");
-        var b=document.createElement("button");
-        b.className="qd261btn"; b.setAttribute("data-qd261","1");
-        b.innerHTML=(pref()?"🙈 ":"👁 ")+L(pref()?"إخفاء الجلسات المخفية":"إظهار الجلسات المخفية",pref()?"Hide hidden sessions":"Show hidden sessions")+(n?" ("+n+")":"");
-        note.appendChild(b);
+      var show=pref(), e=expr(show);
+      var notes=host.querySelectorAll(".qd251note");
+      for(var i=0;i<notes.length;i++){
+        var nn=notes[i];
+        if(nn.classList.contains("qd251sub")){ nn.remove(); continue; }
+        if(nn.getAttribute("data-qd261b")) continue;
+        nn.setAttribute("data-qd261b","1");
+        nn.innerHTML='<span>'+e.head+'</span><button class="qd261btn" data-qd261="1">'+e.btn+'</button>';
+      }
+      var table=host.querySelector(".table-wrap");
+      if(!host.querySelector(".qd251note")&&table&&(show||counts().total)){
+        var d=document.createElement("div");
+        d.className="qd251note qd261made"; d.setAttribute("data-qd261b","1");
+        d.innerHTML='<span>'+e.head+'</span><button class="qd261btn" data-qd261="1">'+e.btn+'</button>';
+        table.parentNode.insertBefore(d,table);
       }
       var tg=host.querySelector("#qd251tg");
-      if(tg){
-        var m=numFrom(tg,"");
-        tg.innerHTML=(pref()?"🙈 ":"👁 ")+L(pref()?"إخفاء الجلسات المخفية":"إظهار الجلسات المخفية",pref()?"Hide hidden sessions":"Show hidden sessions")+(m?" <span style=\"opacity:.6\">("+m+")</span>":"");
+      if(tg&&tg.getAttribute("data-qd261b2")!==(show?"1":"0")){
+        tg.setAttribute("data-qd261b2",show?"1":"0");
+        tg.innerHTML=(show?'🙈 '+L("إخفاء الجلسات المخفية","Hide hidden sessions"):'👁 '+L("إظهار الجلسات المخفية","Show hidden sessions"))+(counts().total?(' <span style="opacity:.6">('+counts().total+')</span>'):'');
       }
-      /* مسار اليوم: شريحة «مواعيد مؤجلة» → زر واضح */
-      if(window.QD221&&window.QD221.render){}
+      try{ var h=host.querySelector(".qc-cnt"); if(h) h.textContent=host.querySelectorAll("tr.qd250r").length+" "+L("صفًا","rows"); }catch(x){}
     }catch(e){}
   }
   function decorateClinic(){
     try{
+      var show=pref();
       var chips=document.querySelectorAll(".md3-chip");
       for(var i=0;i<chips.length;i++){
         var c=chips[i], t=String(c.textContent||"");
-        if(c.getAttribute("data-qd261")) continue;
-        if(t.indexOf("مواعيد مؤجلة")>-1||t.indexOf("pending:")>-1){
-          var n=(t.match(/(\d+)/)||[])[1]||"";
-          c.setAttribute("data-qd261","chip");
-          c.classList.add("qd261chip");
-          c.textContent=(pref()?"🙈 ":"👁 ")+L(pref()?"إخفاء المخفية":"إظهار المخفية",pref()?"Hide hidden":"Show hidden")+(n?" · "+n:"");
-          c.setAttribute("title",L("إظهار أو إخفاء المواعيد القادمة","Show or hide upcoming appointments"));
-        }
+        var isTog=/إظهار المواعيد المخفية|إخفاء المواعيد المخفية|إظهار المخفية|إخفاء المخفية/.test(t)||c.getAttribute("data-qd261")==="chip";
+        if(!isTog) continue;
+        c.setAttribute("data-qd261","chip");
+        c.classList.add("qd261chip");
+        var key=show?"1":"0";
+        if(c.getAttribute("data-qd261b2")===key) continue;
+        var n=(t.match(/·\s*(\d+)/)||[])[1]||(t.match(/\((\d+)\)/)||[])[1]||"";
+        c.setAttribute("data-qd261b2",key);
+        c.textContent=show?('🙈 '+L("إخفاء المخفية","Hide hidden")):('👁 '+L("إظهار المخفية","Show hidden"))+(n?(' · '+n):'');
+        c.setAttribute("title",L("إظهار أو إخفاء المواعيد القادمة والمكرّرة","Show or hide upcoming and duplicate appointments"));
       }
     }catch(e){}
   }
+  function all(){ css(); decorate(); decorateClinic(); }
   document.addEventListener("click",function(e){
-    var b=e.target&&e.target.closest?e.target.closest('[data-qd261]'):null;
+    var b=e.target&&e.target.closest?e.target.closest('[data-qd261],#qd251tg'):null;
     if(!b) return;
     e.preventDefault(); e.stopPropagation(); if(e.stopImmediatePropagation) e.stopImmediatePropagation();
     flip(); repaint();
-    setTimeout(function(){ try{ css(); decorate(); decorateClinic(); }catch(x){} },120);
+    setTimeout(all,90); setTimeout(all,400);
   },true);
-
   function boot(){
-    css(); decorate(); decorateClinic();
-    setInterval(function(){ try{ css(); decorate(); decorateClinic(); }catch(e){} },500);
-    try{
-      var host=document.getElementById("v-therapy")||document.body;
-      new MutationObserver(function(){
-        if(boot.__p) return; boot.__p=1;
-        setTimeout(function(){ boot.__p=0; try{ decorate(); decorateClinic(); }catch(e){} },80);
-      }).observe(document.body,{childList:true,subtree:true});
-    }catch(e){}
+    all();
+    setInterval(all,500);
+    try{ new MutationObserver(function(){ if(boot.__p) return; boot.__p=1; setTimeout(function(){ boot.__p=0; all(); },70); }).observe(document.body,{childList:true,subtree:true}); }catch(e){}
   }
   if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",boot);
   else setTimeout(boot,900);
-  window.QD261={flip:flip,pref:pref,repaint:repaint};
+  window.QD261={flip:flip,pref:pref,repaint:repaint,counts:counts};
 })();
 
 </script>
