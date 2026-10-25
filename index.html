@@ -35120,7 +35120,7 @@ tr:hover .qde-ndate{color:#7E0E14}
 
   function badge(){
     try{ var b=document.getElementById("qdrBadge"); if(!b) return;
-      var w="v11-255 · WIPE-INJURIES";
+      var w="v11-256 · DELETE-ONE-INJURY";
       if(b.textContent!==w+" · BTN-OK") b.textContent=w+" · BTN-OK"; }catch(e){}
   }
 
@@ -36359,7 +36359,7 @@ tr:hover .qde-ndate{color:#7E0E14}
       (rows.length?'<table class="md3-tbl"><thead><tr><th>'+L("اللاعب","Player")+'</th><th>'+L("التاريخ","Date")+'</th><th>'+L("النوع","Type")+'</th><th>'+L("الموضع","Site")+'</th><th>'+L("يوم","Day")+'</th><th>'+L("الحالة","Status")+'</th><th></th></tr></thead><tbody>'+
         rows.slice(0,80).map(function(i){
           return '<tr><td><span class="qd255nm"><b>'+esc(nameOf(i.playerId)||"—")+'</b>'+
-            '<button class="qd255del" data-qd255="wipe" data-p="'+esc(i.playerId)+'" data-n="'+esc(nameOf(i.playerId)||"")+'" title="'+L("مسح كل إصابات هذا اللاعب","Clear all injuries for this player")+'" aria-label="'+L("مسح إصابات اللاعب","Clear player injuries")+'">🗑</button></span></td><td>'+esc(dk(i.date))+'</td>'+
+            '<button class="qd255del" data-qd255="one" data-i="'+esc(i.id)+'" data-p="'+esc(i.playerId)+'" data-n="'+esc(nameOf(i.playerId)||"")+'" data-t="'+esc(str(i.type)||"")+'" data-d="'+esc(dk(i.date))+'" title="'+L("مسح هذه الإصابة فقط","Delete this injury only")+'" aria-label="'+L("مسح هذه الإصابة فقط","Delete this injury only")+'">🗑</button></span></td><td>'+esc(dk(i.date))+'</td>'+
             '<td>'+esc(str(i.type)||"—")+'</td><td>'+esc(str(i.bodySites).split(",").filter(Boolean).slice(0,2).map(siteLbl).join(" · ")||"—")+'</td>'+
             '<td>'+days(i.date)+'</td><td><span class="md3-chip '+(str(i.status)==="cleared"?"ok":"warn")+'">'+esc(str(i.status)||"—")+'</span></td>'+
             '<td style="text-align:end;white-space:nowrap">'+
@@ -41305,12 +41305,51 @@ tr:hover .qde-ndate{color:#7E0E14}
     persist();
     return c;
   }
+  function countOne(s,iid){
+    var inj=(s.injuries||[]).filter(function(x){ return String(x.id)===String(iid); })[0];
+    if(!inj) return {inj:0,tr:0,th:0,rec:null};
+    var tr=(inj.treatments||[]).length;
+    var th=(s.therapies||[]).filter(function(t){
+      return String(t.injuryId)===String(iid)||(t.__mirrorOf&&String(t.injuryId)===String(iid));
+    }).length;
+    return {inj:1,tr:tr,th:th,rec:inj};
+  }
+  function wipeOne(iid){
+    var s=ST(); if(!s) return null;
+    var c=countOne(s,iid);
+    if(!c.inj) return {n:0};
+    s.injuries=(s.injuries||[]).filter(function(x){ return String(x.id)!==String(iid); });
+    s.therapies=(s.therapies||[]).filter(function(t){
+      if(String(t.injuryId)===String(iid)) return false;
+      if(t.__mirrorOf&&String(t.injuryId)===String(iid)) return false;
+      return true;
+    });
+    (s.sessions||[]).forEach(function(x){ if(String(x.injuryId)===String(iid)) x.injuryId=""; });
+    persist();
+    return c;
+  }
   function repaint(){
     try{ if(window.QD221&&window.QD221.render) window.QD221.render(); }catch(e){}
     try{ if(window.REND&&window.REND.therapy) window.REND.therapy(); }catch(e){}
     try{ if(window.qdUnifyPaint) window.qdUnifyPaint(); }catch(e){}
   }
   document.addEventListener("click",function(e){
+    var o=e.target&&e.target.closest?e.target.closest('[data-qd255="one"]'):null;
+    if(o){
+      e.preventDefault(); e.stopPropagation(); if(e.stopImmediatePropagation) e.stopImmediatePropagation();
+      var iid=o.getAttribute("data-i"), nm1=o.getAttribute("data-n")||"", ty=o.getAttribute("data-t")||"", dd=o.getAttribute("data-d")||"";
+      var s1=ST(), c1=s1?countOne(s1,iid):{inj:0,tr:0,th:0};
+      if(!c1.inj){ say(L("لم يُعثر على الإصابة — حدّث الصفحة","Injury not found — refresh the page"),"warn"); return; }
+      var q1=L("مسح هذه الإصابة فقط؟\n\n• اللاعب: "+nm1+"\n• الإصابة: "+ty+"\n• التاريخ: "+dd+"\n• جلساتها العلاجية: "+c1.tr+"\n\nبقية إصابات اللاعب تبقى كما هي. لا يمكن التراجع.",
+               "Delete this injury only?\n\n• Player: "+nm1+"\n• Injury: "+ty+"\n• Date: "+dd+"\n• Its treatments: "+c1.tr+"\n\nThe player's other injuries stay untouched. This cannot be undone.");
+      var ok1=true; try{ ok1=window.confirm(q1); }catch(x){ ok1=true; }
+      if(!ok1) return;
+      var r1=null; try{ r1=wipeOne(iid); }catch(x){ r1=null; }
+      if(!r1){ say(L("تعذّر المسح — حدّث الصفحة","Could not delete — refresh the page"),"bad"); return; }
+      say(L("مُسحت الإصابة ✓","Injury deleted ✓"),"ok");
+      repaint();
+      return;
+    }
     var b=e.target&&e.target.closest?e.target.closest('[data-qd255="wipe"]'):null;
     if(!b) return;
     e.preventDefault(); e.stopPropagation(); if(e.stopImmediatePropagation) e.stopImmediatePropagation();
@@ -41330,7 +41369,7 @@ tr:hover .qde-ndate{color:#7E0E14}
   function boot(){ css(); setInterval(function(){ try{ css(); }catch(e){} },10000); }
   if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",boot);
   else boot();
-  window.QD255={wipe:wipe,count:countFor};
+  window.QD255={wipe:wipe,wipeOne:wipeOne,count:countFor,countOne:countOne};
 })();
 
 </script>
