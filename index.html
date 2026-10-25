@@ -1,6 +1,130 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head><script>/*!
+ * QD246 · وضع الثبات — إيقاف كل تحديث دوري للواجهة (سبب الرعشة)
+ * ١) يلفّ كل setInterval: لا يُنفّذ أي مؤقت يلمس الشاشة عندما يكون الثبات مفعّلًا.
+ * ٢) يمنع إعادة كتابة نفس HTML في القائمة الجانبية (#sidebar و #nav) والشارات.
+ * ٣) يخفي شريط تمرير القائمة ويثبّت مقاس الشريط الصفحي → لا تغيّر عرض ولا إزاحة.
+ * زر صغير أسفل الشاشة للتبديل.
+ */
+(function(){
+  if(window.__qd246) return; window.__qd246=1;
+  var FK="qd246_freeze";
+  var on=(function(){ try{ return localStorage.getItem(FK)==="1"; }catch(e){ return false; } })();
+  var SKIP=/fetch|pullWellness|push\(|submitWell|sendBeacon|XMLHttp|supabase/i;
+  var BLOCKED=0;
+
+  /* ١) حجب المؤقتات التي ترسم */
+  try{
+    var _si=window.setInterval;
+    window.setInterval=function(fn,ms){
+      if(typeof fn!=="function") return _si.apply(window,arguments);
+      var src=""; try{ src=String(fn).slice(0,900); }catch(e){}
+      var net=SKIP.test(src);
+      var wrapped=function(){
+        if(window.__qd246on && !net){ BLOCKED++; return; }
+        try{ return fn.apply(this,arguments); }catch(e){}
+      };
+      wrapped.__qd246=net?"net":"ui";
+      return _si.call(window,wrapped,ms);
+    };
+    /* لا نحجب setTimeout: المؤقتات المؤجلة لمرة واحدة لا تسبب رعشة، وحجبها يمنع بناء البطاقات */
+    window.__qd246on=on;
+  }catch(e){ window.__qd246on=false; }
+
+  /* ٢) منع كتابة نفس المحتوى في عناصر ثابتة */
+  function guard(el){
+    if(!el||el.__qd246g) return;
+    try{
+      var d=Object.getOwnPropertyDescriptor(Element.prototype,"innerHTML");
+      if(!d||!d.set) return;
+      var last=null,w=false;
+      Object.defineProperty(el,"innerHTML",{
+        configurable:true,
+        get:function(){ return d.get.call(el); },
+        set:function(v){
+          var s=String(v==null?"":v);
+          if(last===s) return;          /* مطابق: لا لمس للشاشة */
+          last=s; w=true;
+          var top=0; try{ top=el.scrollTop; }catch(e){}
+          try{ d.set.call(el,s); }finally{ w=false; }
+          try{ if(top&&el.scrollTop!==top) el.scrollTop=top; }catch(e){}
+        }
+      });
+      el.__qd246g=1;
+    }catch(e){}
+  }
+  function guardText(el){
+    if(!el||el.__qd246t) return;
+    try{
+      var proto=Object.getPrototypeOf(el), d=null;
+      while(proto&&!d){ d=Object.getOwnPropertyDescriptor(proto,"textContent"); proto=Object.getPrototypeOf(proto); }
+      if(!d||!d.set) return;
+      var cache=null;
+      Object.defineProperty(el,"textContent",{
+        configurable:true,
+        get:function(){ return d.get.call(el); },
+        set:function(v){ var s=String(v==null?"":v); if(s===cache) return; cache=s; d.set.call(el,s); }
+      });
+      el.__qd246t=1;
+    }catch(e){}
+  }
+  function seal(){
+    ["sidebar","nav","pgTitle","pgSub","svDot"].forEach(function(id){ guard(document.getElementById(id)); });
+    var list=document.querySelector("#sidebar .navlist, #nav .navlist");
+    if(list) guard(list);
+    ["svDot","pgTitle","pgSub"].forEach(function(id){ guardText(document.getElementById(id)); });
+  }
+
+  /* ٣) CSS: شريط تمرير مخفي في القائمة + عرض صفحة ثابت */
+  function css(){
+    if(document.getElementById("qd246css")) return;
+    var s=document.createElement("style"); s.id="qd246css";
+    s.textContent=[
+      "html{overflow-y:scroll!important;scrollbar-gutter:auto!important}",
+      "#sidebar,#sidebar *,.nav,#nav{scrollbar-width:none!important;-ms-overflow-style:none!important}",
+      "#sidebar::-webkit-scrollbar,.nav::-webkit-scrollbar,#nav::-webkit-scrollbar{width:0!important;height:0!important;display:none!important}",
+      "#sidebar,.nav{overflow-y:auto!important;overflow-x:hidden!important}",
+      "#sidebar *,.nav *{animation:none!important;transition:none!important}",
+      "#qd246btn{position:fixed;bottom:10px;inset-inline-start:10px;z-index:99998;display:flex;align-items:center;gap:6px;",
+      "background:#0C1118;color:#E3C67F;border:1px solid #C8A24A55;border-radius:999px;padding:5px 11px;font:900 10.5px/1 system-ui;cursor:pointer;opacity:.92;box-shadow:0 4px 14px rgba(0,0,0,.28)}",
+      "#qd246btn.off{color:#8A93A1;border-color:#ffffff22}",
+      "#qd246btn b{font-weight:900;color:#fff}"
+    ].join("\n");
+    (document.head||document.documentElement).appendChild(s);
+  }
+
+  function btn(){
+    if(document.getElementById("qd246btn")){ paintBtn(); return; }
+    if(!document.body) return;
+    var b=document.createElement("button"); b.id="qd246btn"; b.type="button";
+    b.addEventListener("click",function(){
+      try{
+        var v=!window.__qd246on;
+        localStorage.setItem(FK,v?"1":"0");
+        window.__qd246on=v;
+        paintBtn();
+        if(v){ try{ if(window.toast) toast("وضع الثبات: مفعّل — توقّفت كل التحديثات الدورية","ok"); }catch(e){} }
+        else { location.reload(); }
+      }catch(e){}
+    });
+    document.body.appendChild(b); paintBtn();
+  }
+  function paintBtn(){
+    var b=document.getElementById("qd246btn"); if(!b) return;
+    b.className=window.__qd246on?"":"off";
+    b.innerHTML=(window.__qd246on?"🛡 <b>ثبات</b> · موقوفة دوريًا":"⚡ <b>ثبات</b> · مباشر");
+  }
+
+  css();
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",function(){ css(); seal(); btn(); });
+  else { seal(); btn(); }
+  var n=0, iv=setInterval(function(){ n++; seal(); btn(); if(n>40) clearInterval(iv); },700);
+  document.addEventListener("click",function(){ setTimeout(function(){ seal(); btn(); },80); },true);
+
+  window.QD246={on:function(){ return !!window.__qd246on; },blocked:function(){ return BLOCKED; },seal:seal,set:function(v){ window.__qd246on=!!v; try{ localStorage.setItem(FK,v?"1":"0"); }catch(e){} paintBtn(); }};
+})();
+</script><script>/*!
  * QD238 · تثبيت الجوال — يوقف رعشة/انزلاق الواجهة على الهاتف
  * الأساب الثلاثة: (١) scrollIntoView من مؤقتات داخلية يزحف بالصفحة بلا توقّف
  *  (٢) 100vh مع شريط عنوان المتصفح المتحرك → قفزات تخطيط مع كل تمرير
@@ -34889,7 +35013,7 @@ tr:hover .qde-ndate{color:#7E0E14}
 
   function badge(){
     try{ var b=document.getElementById("qdrBadge"); if(!b) return;
-      var w="v11-245 · LIVE-ENTRIES";
+      var w="v11-246 · STEADY";
       if(b.textContent!==w+" · BTN-OK") b.textContent=w+" · BTN-OK"; }catch(e){}
   }
 
