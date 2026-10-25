@@ -35121,7 +35121,7 @@ tr:hover .qde-ndate{color:#7E0E14}
 
   function badge(){
     try{ var b=document.getElementById("qdrBadge"); if(!b) return;
-      var w="v11-260 · UNIFIED-FIELDS";
+      var w="v11-261 · SHOW-HIDDEN";
       if(b.textContent!==w+" · BTN-OK") b.textContent=w+" · BTN-OK"; }catch(e){}
   }
 
@@ -35291,7 +35291,7 @@ tr:hover .qde-ndate{color:#7E0E14}
     var hiddenSch=0;
     function keep(x){
       if(!isSch(x)) return true;
-      if(tsOf(x)>NOWTS){ hiddenSch++; return false; }
+      if(tsOf(x)>NOWTS){ try{ if(localStorage.getItem("qd251_show")==="1") return true; }catch(e){} hiddenSch++; return false; }
       if(realK[str(x.playerId)+"|"+day]){ hiddenSch++; return false; }
       return true;
     }
@@ -41765,6 +41765,104 @@ tr:hover .qde-ndate{color:#7E0E14}
 })();
 
 </script>
+<script>
+/*!
+ * QD261 · زر إظهار/إخفاء الجلسات المخفية (المواعيد القادمة)
+ * يعمل في سجل العلاج الرياضي وفي مسار اليوم بنفس التبديل المحفوظ.
+ */
+(function(){
+  if(window.__qd261) return; window.__qd261=1;
+  function EN(){ try{ return String(localStorage.getItem("qd_lang")||"ar").indexOf("en")===0; }catch(e){ return false; } }
+  function L(a,e){ return EN()?e:a; }
+  function pref(){ try{ return localStorage.getItem("qd251_show")==="1"; }catch(e){ return false; } }
+  function flip(){ try{ var v=pref(); localStorage.setItem("qd251_show",v?"0":"1"); return !v; }catch(e){ return false; } }
+  function repaint(){
+    var done=false;
+    try{ if(window.REND&&window.REND.therapy){ window.REND.therapy(); done=true; } }catch(e){}
+    if(!done){ try{ var A=window.__QDAPP; if(A&&A.REND&&A.REND.therapy) A.REND.therapy(); }catch(e){} }
+    try{ if(window.QD221&&window.QD221.render) window.QD221.render(); }catch(e){}
+    try{ if(window.qdUnifyPaint) window.qdUnifyPaint(); }catch(e){}
+  }
+  function css(){
+    if(document.getElementById("qd261css")) return;
+    var st=document.createElement("style"); st.id="qd261css";
+    st.textContent=[
+      ".qd261btn{margin-inline-start:auto;border:0;border-radius:8px;background:#0C1118;color:#fff;font:900 10.5px system-ui;padding:6px 11px;cursor:pointer;display:inline-flex;align-items:center;gap:5px}",
+      ".qd261btn:hover{background:#C8A24A;color:#0C1118}",
+      ".qd261chip{cursor:pointer;border:1px solid #D9C89B!important;background:#FBF8F1!important;color:#8A6B1F!important;font-weight:900!important}",
+      ".qd261chip:hover{background:#C8A24A!important;color:#0C1118!important;border-color:#C8A24A!important}",
+      "#qd261css .qd261note{display:flex;align-items:center;gap:10px;flex-wrap:wrap}"
+    ].join("\n");
+    (document.head||document.documentElement).appendChild(st);
+  }
+  function numFrom(el,fallback){
+    var m=String(el.textContent||"").match(/\((\d+)\)|(\d+)/);
+    var v=m?(m[1]||m[2]):"";
+    return v||fallback||"";
+  }
+  /* سجل العلاج: أضف زر داخل شريط التنبيه + أعد تسمية زر شريط الأدوات */
+  function decorate(){
+    try{
+      var host=document.getElementById("v-therapy"); if(!host) return;
+      var note=host.querySelector(".qd251note");
+      if(note&&!note.querySelector(".qd261btn")){
+        var n=numFrom(note,"");
+        var b=document.createElement("button");
+        b.className="qd261btn"; b.setAttribute("data-qd261","1");
+        b.innerHTML=(pref()?"🙈 ":"👁 ")+L(pref()?"إخفاء الجلسات المخفية":"إظهار الجلسات المخفية",pref()?"Hide hidden sessions":"Show hidden sessions")+(n?" ("+n+")":"");
+        note.appendChild(b);
+      }
+      var tg=host.querySelector("#qd251tg");
+      if(tg){
+        var m=numFrom(tg,"");
+        tg.innerHTML=(pref()?"🙈 ":"👁 ")+L(pref()?"إخفاء الجلسات المخفية":"إظهار الجلسات المخفية",pref()?"Hide hidden sessions":"Show hidden sessions")+(m?" <span style=\"opacity:.6\">("+m+")</span>":"");
+      }
+      /* مسار اليوم: شريحة «مواعيد مؤجلة» → زر واضح */
+      if(window.QD221&&window.QD221.render){}
+    }catch(e){}
+  }
+  function decorateClinic(){
+    try{
+      var chips=document.querySelectorAll(".md3-chip");
+      for(var i=0;i<chips.length;i++){
+        var c=chips[i], t=String(c.textContent||"");
+        if(c.getAttribute("data-qd261")) continue;
+        if(t.indexOf("مواعيد مؤجلة")>-1||t.indexOf("pending:")>-1){
+          var n=(t.match(/(\d+)/)||[])[1]||"";
+          c.setAttribute("data-qd261","chip");
+          c.classList.add("qd261chip");
+          c.textContent=(pref()?"🙈 ":"👁 ")+L(pref()?"إخفاء المخفية":"إظهار المخفية",pref()?"Hide hidden":"Show hidden")+(n?" · "+n:"");
+          c.setAttribute("title",L("إظهار أو إخفاء المواعيد القادمة","Show or hide upcoming appointments"));
+        }
+      }
+    }catch(e){}
+  }
+  document.addEventListener("click",function(e){
+    var b=e.target&&e.target.closest?e.target.closest('[data-qd261]'):null;
+    if(!b) return;
+    e.preventDefault(); e.stopPropagation(); if(e.stopImmediatePropagation) e.stopImmediatePropagation();
+    flip(); repaint();
+    setTimeout(function(){ try{ css(); decorate(); decorateClinic(); }catch(x){} },120);
+  },true);
+
+  function boot(){
+    css(); decorate(); decorateClinic();
+    setInterval(function(){ try{ css(); decorate(); decorateClinic(); }catch(e){} },500);
+    try{
+      var host=document.getElementById("v-therapy")||document.body;
+      new MutationObserver(function(){
+        if(boot.__p) return; boot.__p=1;
+        setTimeout(function(){ boot.__p=0; try{ decorate(); decorateClinic(); }catch(e){} },80);
+      }).observe(document.body,{childList:true,subtree:true});
+    }catch(e){}
+  }
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",boot);
+  else setTimeout(boot,900);
+  window.QD261={flip:flip,pref:pref,repaint:repaint};
+})();
+
+</script>
+
 
 
 
