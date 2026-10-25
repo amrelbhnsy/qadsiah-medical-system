@@ -34889,7 +34889,7 @@ tr:hover .qde-ndate{color:#7E0E14}
 
   function badge(){
     try{ var b=document.getElementById("qdrBadge"); if(!b) return;
-      var w="v11-219 · ANATOMY";
+      var w="v11-240 · CLINIC-DIGEST";
       if(b.textContent!==w+" · BTN-OK") b.textContent=w+" · BTN-OK"; }catch(e){}
   }
 
@@ -39789,6 +39789,636 @@ tr:hover .qde-ndate{color:#7E0E14}
 })();
 
 </script>
+<script>
+/*!
+ * QD239 · رسالة الدخول للعيادة — تنبيه واتساب فوري عند تسجيل دخول لاعب
+ * يعمل بلا أي إعداد سيرفر: يفتح واتساب برسالة جاهزة بضغطة واحدة (ضمن نافذة تفعيل المستخدم).
+ * وإن تعذّر الفتح الآلي، تُحفظ الرسالة في «قائمة الانتظار» للإرسال بضغطة لاحقًا.
+ */
+(function(){
+  if(window.__qd239) return; window.__qd239=1;
+
+  var CKEY="qd239_cfg", LKEY="qd239_log", OKEY="qd239_out";
+  var DEF={
+    on:true,
+    auto:true,
+    copy:false,
+    specialist:"",
+    tpl:"مرحباً {player} 👋\nتم تسجيل دخولك للعيادة الطبية اليوم.\n🕒 الوقت: {time}\n🩺 الإجراء: {type}\n📍 المكان: {clinic}\n\nشكراً — القادسية تحت 18"
+  };
+
+  function L(a,e){ try{ return String(localStorage.getItem("qd_lang")||"ar").indexOf("en")===0?e:a; }catch(x){ return a; } }
+  function cfg(){ try{ return Object.assign({},DEF,JSON.parse(localStorage.getItem(CKEY)||"{}")||{}); }catch(e){ return Object.assign({},DEF); } }
+  function setCfg(o){ try{ localStorage.setItem(CKEY,JSON.stringify(Object.assign(cfg(),o||{}))); }catch(e){} }
+  function log(){ try{ return JSON.parse(localStorage.getItem(LKEY)||"[]")||[]; }catch(e){ return []; } }
+  function logAdd(r){ try{ var a=log(); a.unshift(r); localStorage.setItem(LKEY,JSON.stringify(a.slice(0,120))); }catch(e){} }
+  function out(){ try{ return JSON.parse(localStorage.getItem(OKEY)||"[]")||[]; }catch(e){ return []; } }
+  function outSet(a){ try{ localStorage.setItem(OKEY,JSON.stringify((a||[]).slice(0,60))); }catch(e){} paintOut(); }
+
+  function S(){ try{ return window.__QDAPP&&window.__QDAPP.S; }catch(e){ return null; } }
+  function arr(k){ var s=S(); var v=s&&s[k]; return Array.isArray(v)?v:[]; }
+  function esc(v){ return String(v==null?"":v).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+  function toast(m,k){ try{ if(typeof window.toast==="function") window.toast(m,k); }catch(e){} }
+  function save(){ try{ if(typeof window.QD_save==="function") return window.QD_save(); }catch(e){} try{ if(typeof window.save==="function") return window.save(); }catch(e){} }
+
+  function playerOf(id){ return arr("players").filter(function(p){ return String(p.id)===String(id); })[0]||null; }
+  function pname(id){ var p=playerOf(id); return p?((p.first||"")+" "+(p.last||"")).trim()||id:String(id); }
+  function phoneOf(id){
+    var p=playerOf(id); if(!p) return "";
+    var keys=["phone","mobile","whatsapp","wa","tel","mob","phone1","contact","mobileNo","phoneNo"];
+    for(var i=0;i<keys.length;i++){ var v=String(p[keys[i]]||"").replace(/[^\d]/g,""); if(v.length>=7) return v; }
+    return "";
+  }
+  function toWa(n){
+    var x=String(n||"").replace(/[^\d]/g,""); if(!x) return "";
+    if(x.indexOf("00")===0) x=x.slice(2);
+    if(/^(966|971|20|44|965|974|973|968|962|961|964|212|213|216|218|249|967|963)$/.test(x.slice(0,3))) return x;
+    if(x.indexOf("0")===0) x="966"+x.slice(1);
+    else if(x.length===9) x="966"+x;
+    return x;
+  }
+  function tm(d){ d=d||new Date(); var h=d.getHours(),m=d.getMinutes(); return (h<10?"0":"")+h+":"+(m<10?"0":"")+m; }
+  function dt(d){ d=d||new Date(); return d.getFullYear()+"-"+("0"+(d.getMonth()+1)).slice(-2)+"-"+("0"+d.getDate()).slice(-2); }
+
+  var TYPE={treatment:L("جلسة علاج","Treatment session"),strapping:L("تربيط / دعم","Strapping"),assessment:L("تقييم","Assessment"),rehab:L("تأهيل","Rehabilitation"),massage:L("تدليك","Massage"),ice:L("ثلج / استشفاء","Ice / recovery"),injection:L("حقنة","Injection"),other:L("أخرى","Other")};
+  function tlabel(t){
+    var k=String(t||"").toLowerCase();
+    if(TYPE[k]) return TYPE[k];
+    var s=arr("sessions").filter(function(x){ return String(x.type)===String(t); })[0];
+    if(s&&s.typeLabel) return s.typeLabel;
+    return t?String(t):L("زيارة عيادة","Clinic visit");
+  }
+
+  function fill(tpl,rec){
+    var s=cfg();
+    var map={
+      "{player}":pname(rec.playerId),
+      "{time}":rec.time||tm(),
+      "{date}":rec.date||dt(),
+      "{type}":tlabel(rec.type),
+      "{dur}":rec.duration?String(rec.duration)+" "+L("دقيقة","min"):"",
+      "{clinic}":(function(){ try{ var st=S()&&S().settings||{}; return st.clinicName||L("عيادة النادي","Club Clinic"); }catch(e){ return L("عيادة النادي","Club Clinic"); } })(),
+      "{note}":rec.notes||""
+    };
+    var out=String(tpl||"");
+    Object.keys(map).forEach(function(k){ out=out.split(k).join(map[k]); });
+    return out;
+  }
+
+  function waUrl(phone,text){
+    var p=toWa(phone);
+    return "https://wa.me/"+(p||"")+"?text="+encodeURIComponent(text);
+  }
+
+  /* فتح واتساب: يحاول نافذة جديدة ثم 같은 التبويب */
+  function openWa(url){
+    var ok=false;
+    try{ var w=window.open(url,"_blank","noopener"); if(w){ ok=true; } }catch(e){}
+    if(!ok){ try{ location.href=url; ok=true; }catch(e){} }
+    return ok;
+  }
+
+  /* ---------- الاستيقاظ على تسجيل الدخول ---------- */
+  var seen={}, booted=false;
+  function markSeen(){ arr("sessions").forEach(function(s){ if(s&&s.id) seen[String(s.id)]=1; }); }
+
+  function notify(rec,isLive){
+    var s=cfg(); if(!s.on) return false;
+    if(!rec||!rec.playerId) return false;
+    var ph=phoneOf(rec.playerId);
+    var txt=fill(s.tpl,rec);
+    var item={id:"n"+Date.now()+Math.random().toString(36).slice(2,6),pid:rec.playerId,name:pname(rec.playerId),phone:ph,txt:txt,at:new Date().toISOString(),date:dt(),time:tm(),type:rec.type||""};
+
+    if(!ph){
+      outSet([item].concat(out()));
+      toast(L("لا يوجد رقم واتساب لهذا اللاعب — أُضيفت الرسالة إلى قائمة الانتظار","No WhatsApp number for this player — added to the queue"),"warn");
+      logAdd({at:item.at,pid:item.pid,name:item.name,status:"no-phone"});
+      return false;
+    }
+    if(s.auto && isLive){
+      if(openWa(waUrl(ph,txt))){
+        logAdd({at:item.at,pid:item.pid,name:item.name,status:"sent",phone:ph});
+        if(s.copy && s.specialist) setTimeout(function(){ try{ openWa(waUrl(s.specialist,L("دخول عيادة: ","Clinic entry: ")+item.name+" · "+item.time+" · "+tlabel(item.type))); }catch(e){} },400);
+        toast(L("فُتح واتساب برسالة ","WhatsApp opened for ")+item.name,"ok");
+        return true;
+      }
+    }
+    outSet([item].concat(out()));
+    logAdd({at:item.at,pid:item.pid,name:item.name,status:"queued",phone:ph});
+    toast(L("رسالة جاهزة في قائمة الانتظار: ","Message queued: ")+item.name,"warn");
+    return false;
+  }
+
+  function scan(){
+    var list=arr("sessions"); if(!list.length) return;
+    if(!booted){ markSeen(); booted=true; return; }
+    var added=[];
+    list.forEach(function(s){ if(s&&s.id&&!seen[String(s.id)]){ seen[String(s.id)]=1; added.push(s); } });
+    if(!added.length) return;
+    added.slice(-4).forEach(function(s){ notify(s,false); });
+  }
+
+  /* ٢) تحويل مباشر عند حفظ الجلسة (نافذة تفعيل المستخدم تسمح بفتح واتساب) */
+  document.addEventListener("click",function(e){
+    try{
+      var t=e.target&&e.target.closest?e.target.closest('[data-act="saveSession"]'):null;
+      if(!t) return;
+      var before={};
+      arr("sessions").forEach(function(s){ if(s&&s.id) before[String(s.id)]=1; });
+      setTimeout(function(){
+        var list=arr("sessions");
+        for(var i=list.length-1;i>=0;i--){
+          var s=list[i]; if(!s||!s.id) continue;
+          if(!before[String(s.id)]){ seen[String(s.id)]=1; notify(s,true); return; }
+          if(i<list.length-6) break;
+        }
+      },700);
+    }catch(x){}
+  },true);
+
+  /* ---------- الواجهة داخل غرفة العلاج ---------- */
+  function css(){
+    if(document.getElementById("qd239css")) return;
+    var s=document.createElement("style"); s.id="qd239css";
+    s.textContent=[
+      "#qd239card{background:#fff;border:1px solid #E6E3DC;border-radius:14px;margin:0 0 12px;overflow:hidden}",
+      "#qd239card h4{margin:0;padding:11px 14px;font-size:12.5px;font-weight:900;color:#0C1118;background:#FBF8F1;border-bottom:1px solid #EFEAE0;display:flex;align-items:center;gap:8px}",
+      "#qd239card .b{padding:12px 14px;display:grid;gap:9px}",
+      "#qd239card label.f{display:flex;align-items:center;gap:8px;font-size:11.5px;font-weight:800;color:#5A6473}",
+      "#qd239card textarea{width:100%;min-height:78px;border:1px solid #E6E3DC;border-radius:9px;padding:8px 10px;font:inherit;font-size:11.5px;line-height:1.7;resize:vertical}",
+      "#qd239card input.i{flex:1;border:1px solid #E6E3DC;border-radius:9px;padding:7px 10px;font:inherit;font-size:11.5px;direction:ltr}",
+      "#qd239card button{border:0;border-radius:9px;padding:7px 12px;font:inherit;font-size:11px;font-weight:900;cursor:pointer}",
+      "#qd239card .g{background:#C8A24A;color:#0C1118}#qd239card .n{background:#0C1118;color:#fff}#qd239card .l{background:#F2EFE8;color:#3A434F}",
+      "#qd239q{display:grid;gap:6px;margin-top:2px}",
+      "#qd239q .r{display:flex;align-items:center;gap:7px;background:#FCF7EA;border:1px solid #EFE2C4;border-radius:9px;padding:6px 9px;font-size:11px}",
+      "#qd239q .r b{font-weight:900}#qd239q .r span{flex:1;color:#5A6473}",
+      "#qd239hint{font-size:10.5px;color:#6B7482;line-height:1.7}"
+    ].join("\n");
+    (document.head||document.documentElement).appendChild(s);
+  }
+
+  function paintOut(){
+    var host=document.getElementById("qd239q"); if(!host) return;
+    var q=out();
+    if(!q.length){ host.innerHTML='<div id="qd239hint">'+L("لا رسائل معلّقة.","No pending messages.")+'</div>'; return; }
+    host.innerHTML=q.map(function(it){
+      return '<div class="r" data-q239-row="'+esc(it.id)+'"><b>'+esc(it.name)+'</b><span>'+esc(it.time||"")+' · '+esc(tlabel(it.type))+'</span>'+
+        '<button class="g" data-qd239="send" data-id="'+esc(it.id)+'">'+L("إرسال","Send")+'</button>'+
+        '<button class="l" data-qd239="drop" data-id="'+esc(it.id)+'">✕</button></div>';
+    }).join("");
+  }
+
+  function card(){
+    var c=cfg();
+    var h='<div id="qd239card"><h4>🔔 '+L("رسالة الدخول للعيادة (واتساب)","Clinic entry message (WhatsApp)")+
+      '<span style="margin-inline-start:auto;font-size:10px;font-weight:900;color:'+(c.on?"#1B6E4E":"#8A6A1E")+'">'+(c.on?"● "+L("مفعّلة","ON"):"○ "+L("موقوفة","OFF"))+'</span></h4>'+
+      '<div class="b">'+
+        '<label class="f"><input type="checkbox" id="qd239on" '+(c.on?"checked":"")+'> '+L("أرسل رسالة عند تسجيل دخول أي لاعب","Send a message when any player checks in")+'</label>'+
+        '<label class="f"><input type="checkbox" id="qd239auto" '+(c.auto?"checked":"")+'> '+L("افتح واتساب فورًا عند الحفظ (بلا ضغط إضافي)","Open WhatsApp immediately on save")+'</label>'+
+        '<div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap"><label class="f" style="min-width:120px">'+L("رقم نسخة للأخصائي (اختياري)","Specialist copy (optional)")+'</label><input class="i" id="qd239sp" value="'+esc(c.specialist)+'" placeholder="05xxxxxxxx"></div>'+
+        '<label class="f"><input type="checkbox" id="qd239copy" '+(c.copy?"checked":"")+'> '+L("أرسل نسخة لي أيضًا","Also send a copy to me")+'</label>'+
+        '<div><div class="f" style="margin-bottom:4px">'+L("نص الرسالة","Message text")+'</div><textarea id="qd239tpl">'+esc(c.tpl)+'</textarea>'+
+        '<div id="qd239hint">'+L("متاح: ","Available: ")+'{player} · {time} · {date} · {type} · {dur} · {clinic} · {note}</div></div>'+
+        '<div style="display:flex;gap:7px;flex-wrap:wrap"><button class="g" data-qd239="save">'+L("حفظ الإعداد","Save")+'</button>'+
+        '<button class="l" data-qd239="test">'+L("تجربة على رقمي","Test on my number")+'</button>'+
+        '<button class="n" data-qd239="sendall">'+L("إرسال المعلّق كله","Send all pending")+'</button></div>'+
+        '<div id="qd239q"></div>'+
+      '</div></div>';
+    return h;
+  }
+
+  function inject(){
+    css();
+    if(document.getElementById("qd239card")){ paintOut(); return; }
+    var hosts=[];
+    try{
+      ["v-clinic","v-daily","v-therapy","v-dashboard"].forEach(function(id){ var e=document.getElementById(id); if(e) hosts.push(e); });
+      if(!hosts.length){ var act=document.querySelector("main > .view.active, .view.active"); if(act) hosts.push(act); }
+    }catch(e){}
+    for(var i=0;i<hosts.length;i++){
+      var h=hosts[i]; if(!h) continue;
+      if(h.classList && !h.classList.contains("active") && h.offsetParent===null && i<hosts.length-1) continue;
+      try{ h.insertAdjacentHTML("afterbegin",card()); paintOut(); return; }catch(e){}
+    }
+    /* ملاذ أخير: أعلى الصفحة الرئيسية */
+    try{ var main=document.querySelector("main")||document.body; main.insertAdjacentHTML("afterbegin",card()); paintOut(); }catch(e){}
+  }
+
+  function readForm(){
+    var g=function(id){ return document.getElementById(id); };
+    setCfg({
+      on:!!(g("qd239on")&&g("qd239on").checked),
+      auto:!!(g("qd239auto")&&g("qd239auto").checked),
+      copy:!!(g("qd239copy")&&g("qd239copy").checked),
+      specialist:String(g("qd239sp")&&g("qd239sp").value||"").trim(),
+      tpl:String(g("qd239tpl")&&g("qd239tpl").value||DEF.tpl)
+    });
+    try{ if(typeof window.save==="function") window.save(); }catch(e){}
+  }
+
+  document.addEventListener("click",function(e){
+    var b=e.target&&e.target.closest?e.target.closest("[data-qd239]"):null; if(!b) return;
+    var k=b.getAttribute("data-qd239");
+    if(k==="save"){ readForm(); toast(L("حُفظ إعداد رسالة الدخول","Clinic message settings saved"),"ok"); inject(); e.preventDefault(); return; }
+    if(k==="test"){
+      readForm();
+      var c=cfg(); var ph=toWa(c.specialist);
+      if(!ph){ toast(L("اكتب رقمك أولًا في خانة الأخصائي","Enter your number first"),"warn"); e.preventDefault(); return; }
+      var demo={playerId:(arr("players")[0]||{}).id,time:tm(),date:dt(),type:"treatment",duration:45,notes:""};
+      openWa(waUrl(ph,fill(c.tpl,demo)));
+      e.preventDefault(); return;
+    }
+    if(k==="send"||k==="drop"){
+      var id=b.getAttribute("data-id"); var q=out(); var it=q.filter(function(x){ return x.id===id; })[0];
+      if(!it){ e.preventDefault(); return; }
+      if(k==="send"){
+        if(it.phone){ openWa(waUrl(it.phone,it.txt)); logAdd({at:new Date().toISOString(),pid:it.pid,name:it.name,status:"sent",phone:it.phone}); }
+        else { toast(L("لا رقم لهذا اللاعب — أضفه في ملفه","No number for this player"),"warn"); }
+      }
+      outSet(q.filter(function(x){ return x.id!==id; }));
+      e.preventDefault(); return;
+    }
+    if(k==="sendall"){
+      var all=out().filter(function(x){ return x.phone; });
+      if(!all.length){ toast(L("لا رسائل جاهزة للإرسال","Nothing to send"),"warn"); e.preventDefault(); return; }
+      all.slice(0,1).forEach(function(it){ openWa(waUrl(it.phone,it.txt)); logAdd({at:new Date().toISOString(),pid:it.pid,name:it.name,status:"sent",phone:it.phone}); });
+      if(all.length>1) toast(L("أُرسلت الأولى — أعد الضغط للبقية","First sent — press again for the rest"),"ok");
+      outSet(out().filter(function(x){ return x.id!==all[0].id; }));
+      e.preventDefault(); return;
+    }
+  },true);
+
+  /* إعادة الحقن بعد أي إعادة رسم للشاشة */
+  function watch(){
+    try{
+      var iv=setInterval(function(){ inject(); },2500);
+      var host=document.getElementById("v-clinic");
+      if(host&&!host.__qd239obs){
+        host.__qd239obs=1;
+        try{ new MutationObserver(function(){ if(!document.getElementById("qd239card")) setTimeout(inject,30); }).observe(host,{childList:true}); }catch(e){}
+      }
+    }catch(e){}
+  }
+
+  /* يُحقن البطاقة بعد كل رسم لقسم العيادة (حتمي) */
+  function wrapRender(){
+    try{
+      var a=window.__QDAPP; if(!a||!a.REND||typeof a.REND.clinic!=="function"||a.REND.clinic.__qd239) return false;
+      var orig=a.REND.clinic;
+      var w=function(){ var r; try{ r=orig.apply(this,arguments); }catch(e){ r=orig.apply(this,arguments); } try{ setTimeout(inject,0); }catch(x){} return r; };
+      w.__qd239=1; a.REND.clinic=w; return true;
+    }catch(e){ return false; }
+  }
+
+  function boot(){ markSeen(); booted=true; wrapRender(); inject(); watch(); setInterval(scan,4000); var t=0,iv=setInterval(function(){ t++; wrapRender(); inject(); if(t>12) clearInterval(iv); },500); }
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",function(){ setTimeout(boot,900); });
+  else setTimeout(boot,900);
+
+  window.QD239={cfg:cfg,setCfg:setCfg,notify:notify,fill:fill,queue:out,paintOut:paintOut,inject:inject,waUrl:waUrl,tpl:function(){ return DEF.tpl; }};
+})();
+
+</script>
+<script>
+/*!
+ * QD240 · الإرسال المجمّع — رسالة واحدة للمدرّب بعد التدريب (أو يوميًا في وقت تحدده)
+ * الرسالة: أسماء اللاعبين + ما فعلوه في العيادة، بسيطة وبالإنجليزية.
+ * لا يعتمد على سيرفر: مؤقت داخل الصفحة + إرسال فوري عند فتح البرنامج إن فات الموعد.
+ */
+(function(){
+  if(window.__qd240) return; window.__qd240=1;
+
+  var CK="qd240_cfg", LK="qd240_log";
+  var DEF={
+    on:true,
+    mode:"afterTraining",       /* afterTraining | daily | instant */
+    trainEnd:"18:00",
+    dailyTime:"18:00",
+    toWho:"coach",              /* coach | coachDoctor | players */
+    coach:"",
+    autoOpen:true,
+    header:"Clinic check-ins — {date}\nPlayers seen: {count}",
+    line:"• {player} — {type}{mins}",
+    footer:"\n\nAl Qadsiah U18 — Medical Team"
+  };
+
+  function esc(v){ return String(v==null?"":v).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+  function cfg(){ try{ return Object.assign({},DEF,JSON.parse(localStorage.getItem(CK)||"{}")||{}); }catch(e){ return Object.assign({},DEF); } }
+  function setCfg(o){ try{ localStorage.setItem(CK,JSON.stringify(Object.assign(cfg(),o||{}))); }catch(e){} }
+  function toast(m,k){ try{ if(typeof window.toast==="function") window.toast(m,k); }catch(e){} }
+  function pad(n){ return (n<10?"0":"")+n; }
+  function today(d){ d=d||new Date(); return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate()); }
+  function nowHM(d){ d=d||new Date(); return pad(d.getHours())+":"+pad(d.getMinutes()); }
+  function mins(hm){ var m=String(hm||"").match(/^(\d{1,2}):(\d{2})$/); if(!m) return 18*60; return (+m[1])*60+(+m[2]); }
+
+  function store(){
+    try{
+      var o=JSON.parse(localStorage.getItem(LK)||"{}")||{};
+      if(!o.date||o.date!==today()) o={date:today(),entries:[],sentAt:null};
+      if(!Array.isArray(o.entries)) o.entries=[];
+      return o;
+    }catch(e){ return {date:today(),entries:[],sentAt:null}; }
+  }
+  function saveStore(o){ try{ localStorage.setItem(LK,JSON.stringify(o)); }catch(e){} }
+
+  function A(k){ try{ var s=window.__QDAPP&&window.__QDAPP.S; var v=s&&s[k]; return Array.isArray(v)?v:[]; }catch(e){ return []; } }
+  function playerOf(id){ return A("players").filter(function(p){ return String(p.id)===String(id); })[0]||null; }
+  function pname(id){ var p=playerOf(id); return p?((p.first||"")+" "+(p.last||"")).trim()||String(id):String(id); }
+  function phoneOf(id){
+    var p=playerOf(id); if(!p) return "";
+    var ks=["phone","mobile","whatsapp","wa","tel","mob","phone1","contact","mobileNo","phoneNo"];
+    for(var i=0;i<ks.length;i++){ var v=String(p[ks[i]]||"").replace(/[^\d]/g,""); if(v.length>=7) return v; }
+    return "";
+  }
+  function toWa(n){
+    var x=String(n||"").replace(/[^\d]/g,""); if(!x) return "";
+    if(x.indexOf("00")===0) x=x.slice(2);
+    if(/^(966|971|20|44|965|974|973|968|962|961|964|212|213|216|218|249|967|963)$/.test(x.slice(0,3))) return x;
+    if(x.indexOf("0")===0) x="966"+x.slice(1);
+    else if(x.length===9) x="966"+x;
+    return x;
+  }
+  /* أسماء إنجليزية ثابتة — الرسالة للمدرّب بالإنجليزية دائمًا */
+  var TY={treatment:"Treatment",strapping:"Strapping",assessment:"Assessment",rehab:"Rehab",rehabilitation:"Rehab",massage:"Massage",ice:"Recovery",recovery:"Recovery",injection:"Injection",other:"Clinic visit",checkin:"Clinic visit",therapy:"Treatment",physio:"Physio",test:"Testing",screening:"Screening"};
+  function tlabel(t){
+    var k=String(t||"").toLowerCase().trim();
+    if(TY[k]) return TY[k];
+    if(!k) return "Clinic visit";
+    var clean=k.replace(/[_-]+/g," ");
+    return clean.charAt(0).toUpperCase()+clean.slice(1);
+  }
+  function clinic(){ try{ var st=(window.__QDAPP&&window.__QDAPP.S&&window.__QDAPP.S.settings)||{}; return st.clinicName||"Club Clinic"; }catch(e){ return "Club Clinic"; } }
+  function save(){ try{ if(typeof window.QD_save==="function") return window.QD_save(); }catch(e){} try{ if(typeof window.save==="function") return window.save(); }catch(e){} }
+
+  function record(rec){
+    if(!rec||!rec.playerId) return false;
+    if(!cfg().on) return false;
+    var st=store();
+    var key=String(rec.playerId)+"|"+String(rec.time||nowHM())+"|"+String(rec.type||"");
+    if(st.entries.some(function(e){ return e.key===key; })) return false;
+    st.entries.push({
+      key:key, pid:rec.playerId, name:pname(rec.playerId), phone:phoneOf(rec.playerId),
+      time:rec.time||nowHM(), type:rec.type||"", typeLabel:tlabel(rec.type),
+      duration:Number(rec.duration)||0, notes:rec.notes||""
+    });
+    saveStore(st); paint(); return true;
+  }
+
+  function fillTpl(tpl,map){ var o=String(tpl||""); Object.keys(map).forEach(function(k){ o=o.split(k).join(map[k]); }); return o; }
+
+  function digest(){
+    var c=cfg(), st=store();
+    if(!st.entries.length) return "";
+    var lines=st.entries.map(function(e){
+      return fillTpl(c.line,{
+        "{player}":e.name,
+        "{type}":e.typeLabel,
+        "{time}":e.time,
+        "{mins}":e.duration?" ("+e.duration+" min)":"",
+        "{dur}":e.duration?String(e.duration)+" min":"",
+        "{note}":e.notes||""
+      });
+    });
+    var head=fillTpl(c.header,{"{date}":st.date,"{count}":String(st.entries.length),"{clinic}":clinic()});
+    return head+"\n\n"+lines.join("\n")+String(c.footer||"");
+  }
+
+  function playerMsg(e){
+    return "Hi "+e.name+",\nYour clinic visit today is recorded: "+e.typeLabel+" ("+e.time+").\nRest well.\nAl Qadsiah U18 — Medical";
+  }
+
+  function wa(phone,text){ var p=toWa(phone); return "https://wa.me/"+(p||"")+"?text="+encodeURIComponent(text); }
+  function openWa(url){
+    try{ var w=window.open(url,"_blank","noopener"); if(w) return true; }catch(e){}
+    try{ location.href=url; return true; }catch(e){ return false; }
+  }
+  function markSent(n,how){ var st=store(); st.sentAt=new Date().toISOString(); st.sentCount=n; st.how=how||"digest"; saveStore(st); paint(); }
+
+  function sendDigest(){
+    var c=cfg(), st=store();
+    if(!st.entries.length){ toast("No clinic entries today","warn"); return false; }
+    var text=digest();
+    var targets=[];
+    if(c.toWho==="coach"||c.toWho==="coachDoctor"){ if(toWa(c.coach)) targets.push(toWa(c.coach)); }
+    if(c.toWho==="coachDoctor"){ try{ var s1=JSON.parse(localStorage.getItem("qd239_cfg")||"{}")||{}; if(toWa(s1.specialist)) targets.push(toWa(s1.specialist)); }catch(e){} }
+    if(!targets.length){ toast("Add the coach WhatsApp number first","warn"); return false; }
+    var ok=openWa(wa(targets[0],text));
+    if(ok){
+      if(targets[1]) setTimeout(function(){ try{ openWa(wa(targets[1],text)); }catch(e){} },700);
+      markSent(st.entries.length,"digest");
+    }
+    return ok;
+  }
+
+  var PI=0;
+  function sendPlayers(reset){
+    var st=store();
+    if(!st.entries.length){ toast("No clinic entries today","warn"); return false; }
+    if(reset) PI=0;
+    var list=st.entries.filter(function(e){ return e.phone; });
+    if(!list.length){ toast("No player phone numbers","warn"); return false; }
+    if(PI>=list.length){ toast("Finished — press again to restart","ok"); PI=0; paint(); return false; }
+    var e=list[PI];
+    var ok=openWa(wa(e.phone,playerMsg(e)));
+    PI++;
+    if(PI>=list.length) markSent(list.length,"players");
+    else toast("Sent "+PI+" / "+list.length+" — press Next","ok");
+    paint();
+    return ok;
+  }
+
+  function scheduleHM(){ var c=cfg(); return c.mode==="daily"?c.dailyTime:c.trainEnd; }
+  function state(){
+    var c=cfg(), st=store();
+    var target=mins(scheduleHM()), d=new Date(), cur=d.getHours()*60+d.getMinutes();
+    var due=false,late=0;
+    if(c.on&&c.mode!=="instant"&&st.entries.length&&!st.sentAt&&cur>=target){ due=true; late=cur-target; }
+    return {due:due,lateMin:late,target:target,sent:!!st.sentAt,count:st.entries.length,hm:scheduleHM(),mode:c.mode};
+  }
+
+  var autoTried=false;
+  function check(){ var s=state(); if(s.due){ banner(); if(cfg().autoOpen&&!autoTried){ autoTried=true; try{ sendDigest(); }catch(e){} } } else killBanner(); paint(); }
+
+  function css(){
+    if(document.getElementById("qd240css")) return;
+    var s=document.createElement("style"); s.id="qd240css";
+    s.textContent=[
+      "#qd240{background:#fff;border:1px solid #E6E3DC;border-radius:14px;margin:0 0 12px;overflow:hidden}",
+      "#qd240 h4{margin:0;padding:11px 14px;font-size:12.5px;font-weight:900;background:#0B1220;color:#fff;display:flex;align-items:center;gap:8px}",
+      "#qd240 .b{padding:12px 14px;display:grid;gap:10px}",
+      "#qd240 .row{display:flex;gap:7px;align-items:center;flex-wrap:wrap}",
+      "#qd240 label.f{display:flex;align-items:center;gap:7px;font-size:11.5px;font-weight:800;color:#5A6473}",
+      "#qd240 input[type=time],#qd240 input.i,#qd240 select{border:1px solid #E6E3DC;border-radius:9px;padding:6px 9px;font:inherit;font-size:11.5px;background:#fff}",
+      "#qd240 input[type=time],#qd240 input.i{direction:ltr}",
+      "#qd240 button{border:0;border-radius:9px;padding:7px 12px;font:inherit;font-size:11px;font-weight:900;cursor:pointer}",
+      "#qd240 .g{background:#C8A24A;color:#0C1118}#qd240 .n{background:#0C1118;color:#fff}#qd240 .l{background:#F2EFE8;color:#3A434F}",
+      "#qd240 .pill{font-size:10px;font-weight:900;padding:3px 8px;border-radius:999px;background:#FCF7EA;border:1px solid #EFE2C4;color:#8A6A1E}",
+      "#qd240 .pill.ok{background:#EAF5EF;border-color:#BFE0CC;color:#1B6E4E}",
+      "#qd240pre{background:#FBF8F1;border:1px solid #EFEAE0;border-radius:9px;padding:9px 11px;font-size:11.5px;line-height:1.9;white-space:pre-wrap;max-height:200px;overflow:auto;direction:ltr;text-align:start}",
+      "#qd240banner{position:sticky;top:0;z-index:60;background:#8C1D1D;color:#fff;border-radius:12px;padding:10px 13px;margin:0 0 10px;display:flex;align-items:center;gap:9px;font-size:12px;font-weight:900}",
+      "#qd240banner button{background:#C8A24A;color:#0C1118;border:0;border-radius:8px;padding:7px 12px;font-weight:900;font-size:11px;cursor:pointer}"
+    ].join("\n");
+    (document.head||document.documentElement).appendChild(s);
+  }
+
+  function card(){
+    var c=cfg(), st=store(), s=state();
+    var status = s.sent? '<span class="pill ok">Sent today</span>'
+      : (s.due? '<span class="pill" style="background:#FBE9E9;border-color:#E9BEBE;color:#8C1D1D">Due now</span>'
+             : '<span class="pill">Waiting · '+esc(s.hm)+'</span>');
+    return '<div id="qd240"><h4>🗂️ Daily clinic digest → coach'+
+      '<span style="margin-inline-start:auto">'+status+'</span></h4><div class="b">'+
+      '<div class="row"><label class="f" style="min-width:150px">Coach WhatsApp</label><input class="i" id="qd240coach" value="'+esc(c.coach)+'" placeholder="05xxxxxxxx" style="max-width:170px">'+
+      '<span style="font-size:10px;color:#6B7482">sent to the coach only</span></div>'+
+      '<div class="row"><label class="f">'+L2("الوضع","Mode")+'</label>'+
+      '<label class="f"><input type="radio" name="qd240mode" value="afterTraining" '+(c.mode==="afterTraining"?"checked":"")+'> After training</label>'+
+      '<label class="f"><input type="radio" name="qd240mode" value="daily" '+(c.mode==="daily"?"checked":"")+'> Daily at</label>'+
+      '<label class="f"><input type="radio" name="qd240mode" value="instant" '+(c.mode==="instant"?"checked":"")+'> Instant</label></div>'+
+      '<div class="row"><label class="f">Training end</label><input type="time" id="qd240end" value="'+esc(c.trainEnd)+'">'+
+      '<label class="f">Daily time</label><input type="time" id="qd240tm" value="'+esc(c.dailyTime)+'">'+
+      '<label class="f">Send to</label><select id="qd240to">'+
+        '<option value="coach" '+(c.toWho==="coach"?"selected":"")+'>Coach</option>'+
+        '<option value="coachDoctor" '+(c.toWho==="coachDoctor"?"selected":"")+'>Coach + doctor</option>'+
+        '<option value="players" '+(c.toWho==="players"?"selected":"")+'>Players (one each)</option>'+
+      '</select></div>'+
+      '<div class="row"><label class="f"><input type="checkbox" id="qd240on" '+(c.on?"checked":"")+'> Enabled</label>'+
+      '<label class="f"><input type="checkbox" id="qd240auto" '+(c.autoOpen?"checked":"")+'> Auto-send at due time</label>'+
+      '<span style="font-size:10.5px;color:#6B7482">Today: <b>'+st.entries.length+'</b> entries</span></div>'+
+      '<div class="row"><button class="g" data-qd240="save">Save</button>'+
+      '<button class="n" data-qd240="digest">Send digest now</button>'+
+      '<button class="l" data-qd240="preview">Preview</button>'+
+      '<button class="l" data-qd240="clear">Clear today</button></div>'+
+      '<div id="qd240pre" style="display:none"></div>'+
+      '</div></div>';
+  }
+  function L2(a,e){ return e; }
+
+  function paint(){
+    var host=document.getElementById("qd240"); if(!host) return;
+    var tmp=document.createElement("div"); tmp.innerHTML=card();
+    var fresh=tmp.firstChild; if(!fresh) return;
+    host.parentNode.replaceChild(fresh,host);
+  }
+
+  function host(){
+    var t=document.getElementById("qd239card");
+    if(t&&t.parentNode) return {node:t,mode:"after"};
+    var ids=["v-clinic","v-daily","v-therapy","v-dashboard"];
+    for(var i=0;i<ids.length;i++){ var e=document.getElementById(ids[i]); if(e) return {node:e,mode:"before"}; }
+    var act=document.querySelector("main > .view.active, .view.active");
+    if(act) return {node:act,mode:"before"};
+    return null;
+  }
+  function inject(){
+    css();
+    if(document.getElementById("qd240")) return;
+    var h=host(); if(!h) return;
+    try{
+      if(h.mode==="after") h.node.insertAdjacentHTML("afterend",card());
+      else h.node.insertAdjacentHTML("afterbegin",card());
+    }catch(e){}
+  }
+
+  function banner(){
+    if(document.getElementById("qd240banner")) return;
+    var h=host(); if(!h) return;
+    var s=state();
+    var div=document.createElement("div"); div.id="qd240banner";
+    div.innerHTML='<span>⏰ Digest due — '+s.count+' player(s) seen today</span>'+
+      '<button data-qd240="digest">Send to coach</button>';
+    try{
+      if(h.mode==="after") h.node.insertAdjacentHTML("afterend",div.outerHTML);
+      else h.node.insertAdjacentHTML("beforebegin",div.outerHTML);
+    }catch(e){}
+  }
+  function killBanner(){ var b=document.getElementById("qd240banner"); if(b) b.remove(); }
+
+  document.addEventListener("click",function(e){
+    var b=e.target&&e.target.closest?e.target.closest("[data-qd240]"):null; if(!b) return;
+    var k=b.getAttribute("data-qd240");
+    var g=function(id){ return document.getElementById(id); };
+    if(k==="save"){
+      var mo=document.querySelector('input[name="qd240mode"]:checked');
+      setCfg({
+        mode:mo?mo.value:cfg().mode,
+        coach:String(g("qd240coach")&&g("qd240coach").value||"").trim(),
+        trainEnd:String(g("qd240end")&&g("qd240end").value||cfg().trainEnd),
+        dailyTime:String(g("qd240tm")&&g("qd240tm").value||cfg().dailyTime),
+        toWho:String(g("qd240to")&&g("qd240to").value||cfg().toWho),
+        on:!!(g("qd240on")&&g("qd240on").checked),
+        autoOpen:!!(g("qd240auto")&&g("qd240auto").checked)
+      });
+      try{ save(); }catch(x){}
+      toast("Digest schedule saved","ok");
+      killBanner(); check(); e.preventDefault(); return;
+    }
+    if(k==="digest"){ sendDigest(); e.preventDefault(); return; }
+    if(k==="preview"){
+      var p=document.getElementById("qd240pre"); if(!p) return;
+      if(p.style.display==="none"){ p.textContent=digest()||"No clinic entries today yet."; p.style.display="block"; }
+      else p.style.display="none";
+      e.preventDefault(); return;
+    }
+    if(k==="clear"){
+      var st=store(); st.entries=[]; st.sentAt=null; saveStore(st); killBanner(); paint();
+      toast("Today cleared","warn"); e.preventDefault(); return;
+    }
+  },true);
+
+  function watchSaves(){
+    document.addEventListener("click",function(e){
+      try{
+        var t2=e.target&&e.target.closest?e.target.closest('[data-act="saveSession"]'):null;
+        if(!t2) return;
+        var before={}; A("sessions").forEach(function(s){ if(s&&s.id) before[String(s.id)]=1; });
+        setTimeout(function(){
+          var list=A("sessions");
+          for(var i=list.length-1;i>=0&&i>list.length-8;i--){
+            var s=list[i]; if(!s||!s.id||before[String(s.id)]) continue;
+            record(s);
+          }
+          check();
+        },700);
+      }catch(x){}
+    },true);
+  }
+
+  function wrapInstant(){
+    try{
+      if(!window.QD239||!window.QD239.notify||window.QD239.notify.__qd240) return false;
+      var orig=window.QD239.notify;
+      var w=function(rec,live){
+        if(cfg().on && cfg().mode!=="instant"){ record(rec); return true; }
+        return orig.apply(this,arguments);
+      };
+      w.__qd240=1; window.QD239.notify=w; return true;
+    }catch(e){ return false; }
+  }
+
+  function tick(){ inject(); check(); }
+  function boot(){
+    wrapInstant(); watchSaves(); inject();
+    var n=0, iv=setInterval(function(){ n++; wrapInstant(); tick(); if(n>40) clearInterval(iv); },600);
+    setInterval(function(){ try{ inject(); check(); }catch(e){} },20000);
+  }
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",function(){ setTimeout(boot,1000); });
+  else setTimeout(boot,1000);
+
+  window.QD240={cfg:cfg,setCfg:setCfg,record:record,digest:digest,state:state,sendDigest:sendDigest,
+    sendPlayers:sendPlayers,log:store,check:check,inject:inject,paint:paint,playerMsg:playerMsg,wa:wa,
+    tlabel:tlabel,clear:function(){ var s=store(); s.entries=[]; s.sentAt=null; saveStore(s); paint(); }};
+})();
+
+</script>
+
+
+
+
+
+
+
+
+
+
 
 
 
