@@ -1,6 +1,58 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head><script>/*!
+ * QD238 · تثبيت الجوال — يوقف رعشة/انزلاق الواجهة على الهاتف
+ * الأساب الثلاثة: (١) scrollIntoView من مؤقتات داخلية يزحف بالصفحة بلا توقّف
+ *  (٢) 100vh مع شريط عنوان المتصفح المتحرك → قفزات تخطيط مع كل تمرير
+ *  (٣) شريط سفلي ثابت + مساحة شريط تمرير محجوزة → تغيّر عرض/ارتفاع متكرر
+ */
+(function(){
+  if(window.__qd238) return; window.__qd238=1;
+  var TOUCH=Date.now();
+  ["touchstart","touchend","pointerdown","click","keydown","wheel","scroll"].forEach(function(ev){
+    try{ document.addEventListener(ev,function(){ TOUCH=Date.now(); },{capture:true,passive:true}); }catch(e){}
+  });
+  function recent(ms){ return (Date.now()-TOUCH)<(ms||900); }
+
+  /* ١) منع التمرير البرمجي غير المرتبط بتفاعل حقيقي */
+  try{
+    var _siv=Element.prototype.scrollIntoView;
+    Element.prototype.scrollIntoView=function(){
+      if(!recent(1200)) return;            /* ليس من المستخدم: تجاهل تمامًا */
+      try{ return _siv.apply(this,arguments); }catch(e){}
+    };
+    var _st=window.scrollTo;
+    window.scrollTo=function(){
+      if(!recent(1200)) return;
+      try{ return _st.apply(window,arguments); }catch(e){}
+    };
+  }catch(e){}
+
+  /* ٢) خصائص CSS للجوال */
+  function css(){
+    if(document.getElementById("qd238css")) return;
+    var s=document.createElement("style"); s.id="qd238css";
+    s.textContent=[
+      "-webkit-text-size-adjust:100%;text-size-adjust:100%",
+      "html{height:-webkit-fill-available}",
+      "body{overscroll-behavior-y:contain;-webkit-overflow-scrolling:touch}",
+      "html,body{scroll-behavior:auto!important}",
+      /* ارتفاع ثابت بالـ dvh بدل vh (لا يتأثر باختفاء شريط العنوان) */
+      "@supports(height:100dvh){#app,.app,.shell,body>div:first-child{min-height:100dvh!important}}",
+      /* الجوال: ألغِ حجز شريط التمرير (يسبب إزاحة أفقية) */
+      "@media (max-width:820px){html{scrollbar-gutter:auto!important}.nav,#nav{scrollbar-gutter:auto!important;overflow-y:auto!important}}",
+      /* الأشرطة الثابتة: طبقة مستقلة بلا قفز */
+      "[style*='position:fixed']{backface-visibility:hidden}",
+      /* إلغاء أي حركة على الجوال */
+      "@media (max-width:820px), (hover:none){*{animation:none!important;transition:none!important}}"
+    ].join("\n");
+    (document.head||document.documentElement).appendChild(s);
+  }
+  css();
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",css);
+  window.QD238={on:true};
+})();
+</script><script>/*!
  * QD237 · تثبيت التخطيط — يوقف اهتزاز القوائم
  * السبب: .nav عنده overflow-y:auto، فحين يتغيّر ارتفاع محتواه يظهر/يختفي شريط التمرير
  * فيتغيّر عرض العمود عدة بكسلات → ينزاح التخطيط كله → اهتزاز مرئي.
