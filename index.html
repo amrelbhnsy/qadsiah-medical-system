@@ -1,6 +1,66 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head><script>/*!
+ * QD236 · تجميد الرسم وقت الخمول — يُنهي الرعشة نهائيًا
+ * الفكرة: المؤقتات لا تلمس الشاشة إلا إذا كان المستخدم يتفاعل أو حصل حفظ/تغيير بيانات.
+ * أي إطار زمني بعد ~٤ ثوانٍ من آخر تفاعل = صفر كتابة DOM.
+ */
+(function(){
+  if(window.__qd236) return; window.__qd236=1;
+  var GRACE=4000, last=Date.now(), force=false;
+  function touch(){ last=Date.now(); }
+  ["click","keydown","input","scroll","pointerdown","wheel","hashchange","focus"].forEach(function(ev){
+    try{ document.addEventListener(ev,touch,true); }catch(e){}
+  });
+
+  /* الوظائف المسموح لها العمل وقت الخمول: الشبكة فقط (لا رسم) */
+  var NET=/fetch|pullWellness|push\(|submitWell|XMLHttp|sendBeacon/i;
+
+  var _si=window.setInterval;
+  window.setInterval=function(fn,ms){
+    if(typeof fn!=="function") return _si.apply(window,arguments);
+    var src=""; try{ src=String(fn).slice(0,800); }catch(e){}
+    var net=NET.test(src), id=-1;
+    var wrapped=function(){
+      var idle=(Date.now()-last)>GRACE;
+      if(idle&&!net&&!force) return;              /* خمول: لا رسم إطلاقًا */
+      try{ return fn.apply(this,arguments); }catch(e){}
+    };
+    id=_si.call(window,wrapped,ms);
+    return id;
+  };
+
+  /* حارس نصوص: لا تُكتب قيمة مطابقة (يمنع وميض الشارات/الساعة) */
+  function guardText(el){
+    if(!el||el.__qd236t) return;
+    try{
+      var proto=Object.getPrototypeOf(el), d=null;
+      while(proto&&!d){ d=Object.getOwnPropertyDescriptor(proto,"textContent"); proto=Object.getPrototypeOf(proto); }
+      if(!d||!d.set) return;
+      var cache=null;
+      Object.defineProperty(el,"textContent",{
+        configurable:true,
+        get:function(){ return d.get.call(el); },
+        set:function(v){ var s=String(v==null?"":v); if(s===cache) return; cache=s; d.set.call(el,s); }
+      });
+      el.__qd236t=1;
+    }catch(e){}
+  }
+  function scan(){
+    ["svDot","pgTitle","pgSub","cl231badge","saveChip"].forEach(function(id){ guardText(document.getElementById(id)); });
+    try{
+      var chips=document.querySelectorAll("#topbar .chip,#topbar .badge,#top .chip");
+      for(var i=0;i<chips.length;i++) guardText(chips[i]);
+    }catch(e){}
+  }
+
+  force=true; setTimeout(function(){ force=false; },6000);
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",scan); else scan();
+  var n=0, iv=_si.call(window,function(){ n++; scan(); if(n>60) clearInterval(iv); },500);
+
+  window.QD236={touch:touch,force:function(){ force=true; setTimeout(function(){force=false;},6000); },scan:scan};
+})();
+</script><script>/*!
  * QD235 · مانع الرعشة الحقيقي
  * يعمل على المستوى الأدنى: يمنع إعادة كتابة نفس HTML في عناصر ثابتة (القائمة/الشارات)
  * ويعزل الطبقات الضبابية ويوقف كل حركة دورية. لا يعتمد على أسماء دوال معيّنة.
