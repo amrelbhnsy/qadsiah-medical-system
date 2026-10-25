@@ -8450,10 +8450,64 @@ on("delTreatment",d=>{ const inj=S.injuries.find(x=>x.id===d.inj); if(inj){ inj.
 /* ================= SPORTS THERAPY ================= */
 REND.therapy=function(){
   const list=[...S.therapies].sort((a,b)=>(b.date||"").localeCompare(a.date||""));
+  const PAL=[{c:"#C8A24A",b:"#FCF7E7"},{c:"#2E6CA4",b:"#EEF4FA"},{c:"#2E7D5B",b:"#EDF6F1"},
+             {c:"#7A4C9E",b:"#F6F0FA"},{c:"#B9652E",b:"#FCF2EC"},{c:"#4A5568",b:"#F1F3F5"}];
+  function LL(a,e){ return (typeof LANG!=="undefined"&&LANG==="en")?e:a; }
+  function dkk(v){ return String(v||"").slice(0,10); }
+  function dayLab(v){
+    var dt=new Date(dkk(v)+"T00:00:00"); if(isNaN(dt.getTime())) return dkk(v)||"—";
+    var en=(typeof LANG!=="undefined"&&LANG==="en");
+    var WD=en?["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"]:["الأحد","الاثنين","الثلاثاء","الأربعاء","الخميس","الجمعة","السبت"];
+    var MO=en?["January","February","March","April","May","June","July","August","September","October","November","December"]:["يناير","فبراير","مارس","أبريل","مايو","يونيو","يوليو","أغسطس","سبتمبر","أكتوبر","نوفمبر","ديسمبر"];
+    return WD[dt.getDay()]+" · "+dt.getDate()+" "+MO[dt.getMonth()]+" "+dt.getFullYear();
+  }
+  function dayRel(v){
+    var en=(typeof LANG!=="undefined"&&LANG==="en");
+    var t=new Date(); t.setHours(0,0,0,0);
+    var d=new Date(dkk(v)+"T00:00:00"); if(isNaN(d.getTime())) return "";
+    var n=Math.round((t-d)/86400000);
+    if(n===0) return en?"Today":"اليوم";
+    if(n===1) return en?"Yesterday":"أمس";
+    if(n===2) return en?"2 days ago":"قبل يومين";
+    if(n>2&&n<11) return en?(n+" days ago"):("قبل "+n+" أيام");
+    return "";
+  }
+  var order=[],by={};
+  list.forEach(function(t){ var k=dkk(t.date)||"—"; if(!by[k]){ by[k]=[]; order.push(k); } by[k].push(t); });
+  var rowsHtml="";
+  order.forEach(function(k,i){
+    var P=PAL[i%PAL.length], g=by[k];
+    var mins=g.reduce(function(a,x){ return a+(Number(x.duration)||0); },0);
+    var who={}; g.forEach(function(x){ if(x.playerId) who[x.playerId]=1; });
+    rowsHtml+='<tr class="qd250sep" data-qd250-sep="1" style="--qdc:'+P.c+';--qdbg:'+P.b+'">'+
+      '<td colspan="7"><span class="qd250dot"></span><b>'+esc(dayLab(k))+'</b>'+
+      (dayRel(k)?'<span class="qd250rel">'+esc(dayRel(k))+'</span>':'')+
+      '<span class="qd250meta">'+g.length+' '+esc(LL("جلسة","sessions"))+' · '+Object.keys(who).length+' '+esc(LL("لاعب","players"))+' · '+num(mins)+' '+esc(T("dur_d"))+'</span></td></tr>';
+    g.forEach(function(t){
+      rowsHtml+='<tr class="qd250r" data-qd250-day="'+esc(k)+'" style="--qdc:'+P.c+';--qdbg:'+P.b+'">'+
+        '<td><div class="pname">'+avatar(player(t.playerId),"sm")+'<span>'+esc(pname(t.playerId))+'</span></div></td>'+
+        '<td>'+fmtDate(t.date,1)+'</td>'+
+        '<td>'+esc((window.qdTypeTxt||tr)(t.type))+'</td>'+
+        '<td class="muted tiny">'+esc((t.bodySites||"—").split(",").slice(0,2).map(site).join(", "))+'</td>'+
+        '<td>'+num(t.duration)+' '+T("dur_d")+'</td>'+
+        '<td>'+esc(t.pain||"—")+'/10</td>'+
+        '<td style="white-space:nowrap"><button class="btn ghost sm" data-act="thWa" data-id="'+t.id+'" title="'+T("cp_wa_send")+'">'+svg(I.phone,2)+'</button> <button class="btn ghost sm" data-act="editTherapy" data-id="'+t.id+'">'+(LANG==="en"?"Edit":"تعديل")+'</button> <button class="btn ghost sm" data-act="delTherapy" data-id="'+t.id+'">'+svg(I.trash,2)+'</button></td></tr>';
+    });
+  });
   $("#v-therapy").innerHTML=
+   '<style>#v-therapy .qd250sep td{background:var(--qdbg);border-top:1px solid #E6E3DC;border-bottom:1px solid #EFECE5;border-inline-start:4px solid var(--qdc);padding:10px 12px;white-space:nowrap}'+
+   '#v-therapy .qd250sep:first-child td{border-top:0}'+
+   '#v-therapy .qd250dot{display:inline-block;width:9px;height:9px;border-radius:99px;background:var(--qdc);margin-inline-end:7px;vertical-align:middle}'+
+   '#v-therapy .qd250sep b{font-size:12.5px;font-weight:900;color:#0C1118;vertical-align:middle}'+
+   '#v-therapy .qd250rel{display:inline-block;margin-inline-start:8px;font:900 9.5px system-ui;color:var(--qdc);border:1px solid var(--qdc);border-radius:99px;padding:1px 7px;vertical-align:middle}'+
+   '#v-therapy .qd250meta{float:left;font:800 10.5px system-ui;color:#5A6472;padding-top:2px}'+
+   'html[dir=rtl] #v-therapy .qd250meta{float:left}'+
+   '#v-therapy .qd250r>td{background:var(--qdbg)}'+
+   '#v-therapy .qd250r>td:first-child{border-inline-start:4px solid var(--qdc)}'+
+   '#v-therapy .qd250r:hover>td{filter:brightness(.98)}'+
+   '#v-therapy table tbody tr.qd250r+tr.qd250r>td{border-top:1px solid rgba(0,0,0,.04)}</style>'+
    '<div class="filters"><h3 style="flex:1">'+T("th_title")+'</h3><button class="btn primary" data-act="newTherapy">'+svg(I.plus,2.2)+' '+T("btn_new_therapy")+'</button></div>'+
-   (list.length?'<div class="card"><div class="card-body tight"><div class="table-wrap"><table><thead><tr><th>'+T("f_player")+'</th><th>'+T("f_datetime")+'</th><th>'+T("th_type")+'</th><th>'+T("th_sites")+'</th><th>'+T("th_duration")+'</th><th>'+T("th_pain")+'</th><th></th></tr></thead><tbody>'+
-     list.map(t=>'<tr><td><div class="pname">'+avatar(player(t.playerId),"sm")+'<span>'+esc(pname(t.playerId))+'</span></div></td><td>'+fmtDate(t.date,1)+'</td><td>'+esc((window.qdTypeTxt||tr)(t.type))+'</td><td class="muted tiny">'+esc((t.bodySites||"—").split(",").slice(0,2).map(site).join(", "))+'</td><td>'+num(t.duration)+' '+T("dur_d")+'</td><td>'+esc(t.pain||"—")+'/10</td><td style="white-space:nowrap"><button class="btn ghost sm" data-act="thWa" data-id="'+t.id+'" title="'+T("cp_wa_send")+'">'+svg(I.phone,2)+'</button> <button class="btn ghost sm" data-act="editTherapy" data-id="'+t.id+'">'+(LANG==="en"?"Edit":"\u062a\u0639\u062f\u064a\u0644")+'</button> <button class="btn ghost sm" data-act="delTherapy" data-id="'+t.id+'">'+svg(I.trash,2)+'</button></td></tr>').join("")+'</tbody></table></div></div></div>'
+   (list.length?'<div class="card"><div class="card-body tight"><div class="table-wrap"><table><thead><tr><th>'+T("f_player")+'</th><th>'+T("f_datetime")+'</th><th>'+T("th_type")+'</th><th>'+T("th_sites")+'</th><th>'+T("th_duration")+'</th><th>'+T("th_pain")+'</th><th></th></tr></thead><tbody>'+rowsHtml+'</tbody></table></div></div></div>'
    :emptyState(I.therapy,T("th_none"),T("th_none_sub")));
 };
 function openTherapyForm(s){
@@ -35033,7 +35087,7 @@ tr:hover .qde-ndate{color:#7E0E14}
 
   function badge(){
     try{ var b=document.getElementById("qdrBadge"); if(!b) return;
-      var w="v11-249 · EDIT-SESSION";
+      var w="v11-250 · DAY-COLORS";
       if(b.textContent!==w+" · BTN-OK") b.textContent=w+" · BTN-OK"; }catch(e){}
   }
 
