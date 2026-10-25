@@ -35120,7 +35120,7 @@ tr:hover .qde-ndate{color:#7E0E14}
 
   function badge(){
     try{ var b=document.getElementById("qdrBadge"); if(!b) return;
-      var w="v11-258 · PURGE-SAVED";
+      var w="v11-259 · NO-RESTORE-UNDO";
       if(b.textContent!==w+" · BTN-OK") b.textContent=w+" · BTN-OK"; }catch(e){}
   }
 
@@ -41401,8 +41401,19 @@ tr:hover .qde-ndate{color:#7E0E14}
     if(st){
       try{ localStorage.setItem(LSK,JSON.stringify(st)); done++; }catch(e){}
       try{ localStorage.setItem(DIRTY,"1"); }catch(e){}
+      try{ localStorage.setItem("qd_purge_at",String(Date.now())); }catch(e){}
     }
+    freshBackup();
     return done;
+  }
+  /* يكتب لقطة جديدة (بعد الحذف) فوق أحدث نسخة احتياطية → تمنع «الاستعادة» من إرجاع المحذوف */
+  function freshBackup(){
+    try{
+      var st=live();
+      if(!st||!Array.isArray(st.players)||!st.players.length) return false;
+      if(typeof window.__qdBackup==="function"){ window.__qdBackup(true); return true; }
+    }catch(e){}
+    return false;
   }
 
   /* حذف عميق: أي مصفوفة داخل الحالة تحمل هذه الإصابة تُنقّى، وأي حقل injuryId يُفرَّغ */
@@ -41508,11 +41519,13 @@ tr:hover .qde-ndate{color:#7E0E14}
   function boot(){
     try{ cleanStored(); }catch(e){}
     try{ sweep(); }catch(e){}
-    setInterval(function(){ try{ var n=sweep(); if(n) repaint(); }catch(e){} },5000);
+    setTimeout(function(){ try{ freshBackup(); }catch(e){} },1400);
+    setTimeout(function(){ try{ freshBackup(); }catch(e){} },4200);
+    setInterval(function(){ try{ var n=sweep(); if(n){ repaint(); freshBackup(); } }catch(e){} },5000);
   }
   if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",boot);
   else boot();
-  window.QD257={remove:remove,sweep:sweep,tombs:tombs,states:states};
+  window.QD257={remove:remove,sweep:sweep,tombs:tombs,states:states,backup:freshBackup};
 })();
 
 </script>
