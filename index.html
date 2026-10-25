@@ -35120,7 +35120,7 @@ tr:hover .qde-ndate{color:#7E0E14}
 
   function badge(){
     try{ var b=document.getElementById("qdrBadge"); if(!b) return;
-      var w="v11-254 · BULK-DONE";
+      var w="v11-255 · WIPE-INJURIES";
       if(b.textContent!==w+" · BTN-OK") b.textContent=w+" · BTN-OK"; }catch(e){}
   }
 
@@ -36358,7 +36358,8 @@ tr:hover .qde-ndate{color:#7E0E14}
       '<div class="md3-card"><h4>📋 '+L("سجل الإصابات","Injury register")+' <span style="font-size:10.5px;color:#6E6A63;font-weight:800">'+rows.length+' '+L("سجل","records")+'</span></h4>'+
       (rows.length?'<table class="md3-tbl"><thead><tr><th>'+L("اللاعب","Player")+'</th><th>'+L("التاريخ","Date")+'</th><th>'+L("النوع","Type")+'</th><th>'+L("الموضع","Site")+'</th><th>'+L("يوم","Day")+'</th><th>'+L("الحالة","Status")+'</th><th></th></tr></thead><tbody>'+
         rows.slice(0,80).map(function(i){
-          return '<tr><td><b>'+esc(nameOf(i.playerId)||"—")+'</b></td><td>'+esc(dk(i.date))+'</td>'+
+          return '<tr><td><span class="qd255nm"><b>'+esc(nameOf(i.playerId)||"—")+'</b>'+
+            '<button class="qd255del" data-qd255="wipe" data-p="'+esc(i.playerId)+'" data-n="'+esc(nameOf(i.playerId)||"")+'" title="'+L("مسح كل إصابات هذا اللاعب","Clear all injuries for this player")+'" aria-label="'+L("مسح إصابات اللاعب","Clear player injuries")+'">🗑</button></span></td><td>'+esc(dk(i.date))+'</td>'+
             '<td>'+esc(str(i.type)||"—")+'</td><td>'+esc(str(i.bodySites).split(",").filter(Boolean).slice(0,2).map(siteLbl).join(" · ")||"—")+'</td>'+
             '<td>'+days(i.date)+'</td><td><span class="md3-chip '+(str(i.status)==="cleared"?"ok":"warn")+'">'+esc(str(i.status)||"—")+'</span></td>'+
             '<td style="text-align:end;white-space:nowrap">'+
@@ -41244,6 +41245,96 @@ tr:hover .qde-ndate{color:#7E0E14}
 })();
 
 </script>
+<script>
+/*!
+ * QD255 · مسح كل سجلات الإصابات للاعب بضغطة واحدة (مع تأكيد)
+ * يحذف: سجل الإصابات كاملًا + علاجه المرتبط + نسخه المرآة في سجل العلاج.
+ * ويُفرّغ ربط الجلسات بالإصابة (بلا حذف الجلسات نفسها). اللاعب يبقى في الكشف.
+ */
+(function(){
+  if(window.__qd255) return; window.__qd255=1;
+  function EN(){ try{ return String(localStorage.getItem("qd_lang")||"ar").indexOf("en")===0; }catch(e){ return false; } }
+  function L(a,e){ return EN()?e:a; }
+  function say(m,k){ try{ if(typeof window.toast==="function") window.toast(m,k); }catch(e){} }
+  function ST(){
+    try{ if(window.QD_S&&Array.isArray(window.QD_S.injuries)) return window.QD_S; }catch(e){}
+    try{ var A=window.__QDAPP; if(A&&A.S&&Array.isArray(A.S.injuries)) return A.S; }catch(e){}
+    try{ return window.QD_S||null; }catch(e){ return null; }
+  }
+  function persist(){
+    try{ if(typeof window.QD_save==="function"){ window.QD_save(); return true; } }catch(e){}
+    try{ if(typeof window.save==="function"){ window.save(); return true; } }catch(e){}
+    try{ var A=window.__QDAPP; if(A&&typeof A.save==="function"){ A.save(); return true; } }catch(e){}
+    return false;
+  }
+  function css(){
+    if(document.getElementById("qd255css")) return;
+    var st=document.createElement("style"); st.id="qd255css";
+    st.textContent=[
+      ".qd255nm{display:inline-flex;align-items:center;gap:6px}",
+      ".qd255del{width:22px;height:22px;border-radius:7px;border:1px solid #EEDCD9;background:#FDF6F5;color:#A8161C;",
+      "font:700 11px/1 system-ui;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;padding:0;filter:none}",
+      ".qd255del:hover{background:#A8161C;border-color:#A8161C;color:#fff}",
+      ".qd255del:disabled{opacity:.5;cursor:default}"
+    ].join("\n");
+    (document.head||document.documentElement).appendChild(st);
+  }
+  function countFor(s,pid){
+    var inj=(s.injuries||[]).filter(function(x){ return String(x.playerId)===String(pid); });
+    var ids={}; inj.forEach(function(x){ ids[String(x.id)]=1; });
+    var tr=0; inj.forEach(function(x){ tr+=(x.treatments||[]).length; });
+    var th=(s.therapies||[]).filter(function(t){
+      return ids[String(t.injuryId)]||(t.__mirrorOf&&ids[String(t.injuryId)])||(String(t.playerId)===String(pid)&&String(t.src)==="injury");
+    }).length;
+    return {inj:inj.length,tr:tr,th:th,ids:ids};
+  }
+  function wipe(pid){
+    var s=ST(); if(!s) return null;
+    var c=countFor(s,pid);
+    if(!c.inj) return {n:0};
+    s.injuries=(s.injuries||[]).filter(function(x){ return String(x.playerId)!==String(pid); });
+    var ids={}; Object.keys(c.ids).forEach(function(k){ ids[k]=1; });
+    s.therapies=(s.therapies||[]).filter(function(t){
+      if(ids[String(t.injuryId)]) return false;
+      if(t.__mirrorOf&&ids[String(t.injuryId)]) return false;
+      if(String(t.playerId)===String(pid)&&String(t.src)==="injury") return false;
+      if(t.injuryId&&String(t.injuryId).indexOf("inj_")===0&&ids[String(t.injuryId)]) return false;
+      return true;
+    });
+    (s.sessions||[]).forEach(function(x){ if(ids[String(x.injuryId)]) x.injuryId=""; });
+    persist();
+    return c;
+  }
+  function repaint(){
+    try{ if(window.QD221&&window.QD221.render) window.QD221.render(); }catch(e){}
+    try{ if(window.REND&&window.REND.therapy) window.REND.therapy(); }catch(e){}
+    try{ if(window.qdUnifyPaint) window.qdUnifyPaint(); }catch(e){}
+  }
+  document.addEventListener("click",function(e){
+    var b=e.target&&e.target.closest?e.target.closest('[data-qd255="wipe"]'):null;
+    if(!b) return;
+    e.preventDefault(); e.stopPropagation(); if(e.stopImmediatePropagation) e.stopImmediatePropagation();
+    var pid=b.getAttribute("data-p"), nm=b.getAttribute("data-n")||"";
+    var s=ST(), c=s?countFor(s,pid):{inj:0,tr:0,th:0};
+    if(!c.inj){ say(L("لا إصابات مسجّلة لهذا اللاعب","No injuries recorded for this player"),"warn"); return; }
+    var q=L("مسح كل سجلات إصابات «"+nm+"»؟\n\n• "+c.inj+" إصابة\n• "+c.tr+" جلسة علاج مرتبطة\n• "+c.th+" سجل مرآة في سجل العلاج\n\nلا يمكن التراجع.",
+             "Clear all injury records for “"+nm+"”?\n\n• "+c.inj+" injury record(s)\n• "+c.tr+" linked treatment(s)\n• "+c.th+" mirrored therapy record(s)\n\nThis cannot be undone.");
+    var ok=true; try{ ok=window.confirm(q); }catch(x){ ok=true; }
+    if(!ok) return;
+    var r=null; try{ r=wipe(pid); }catch(x){ r=null; }
+    if(!r){ say(L("تعذّر المسح — حدّث الصفحة","Could not clear — refresh the page"),"bad"); return; }
+    say(L("مُسحت "+c.inj+" إصابة و"+c.tr+" جلسة علاج ✓","Cleared "+c.inj+" injury record(s) and "+c.tr+" treatment(s) ✓"),"ok");
+    repaint();
+  },true);
+
+  function boot(){ css(); setInterval(function(){ try{ css(); }catch(e){} },10000); }
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",boot);
+  else boot();
+  window.QD255={wipe:wipe,count:countFor};
+})();
+
+</script>
+
 
 
 
