@@ -35120,7 +35120,7 @@ tr:hover .qde-ndate{color:#7E0E14}
 
   function badge(){
     try{ var b=document.getElementById("qdrBadge"); if(!b) return;
-      var w="v11-257 · PURGE-ALL-RECORDS";
+      var w="v11-258 · PURGE-SAVED";
       if(b.textContent!==w+" · BTN-OK") b.textContent=w+" · BTN-OK"; }catch(e){}
   }
 
@@ -41334,22 +41334,6 @@ tr:hover .qde-ndate{color:#7E0E14}
     try{ if(window.qdUnifyPaint) window.qdUnifyPaint(); }catch(e){}
   }
   document.addEventListener("click",function(e){
-    var o=e.target&&e.target.closest?e.target.closest('[data-qd255="one"]'):null;
-    if(o){
-      e.preventDefault(); e.stopPropagation(); if(e.stopImmediatePropagation) e.stopImmediatePropagation();
-      var iid=o.getAttribute("data-i"), nm1=o.getAttribute("data-n")||"", ty=o.getAttribute("data-t")||"", dd=o.getAttribute("data-d")||"";
-      var s1=ST(), c1=s1?countOne(s1,iid):{inj:0,tr:0,th:0};
-      if(!c1.inj){ say(L("لم يُعثر على الإصابة — حدّث الصفحة","Injury not found — refresh the page"),"warn"); return; }
-      var q1=L("مسح هذه الإصابة فقط؟\n\n• اللاعب: "+nm1+"\n• الإصابة: "+ty+"\n• التاريخ: "+dd+"\n• جلساتها العلاجية: "+c1.tr+"\n\nبقية إصابات اللاعب تبقى كما هي. لا يمكن التراجع.",
-               "Delete this injury only?\n\n• Player: "+nm1+"\n• Injury: "+ty+"\n• Date: "+dd+"\n• Its treatments: "+c1.tr+"\n\nThe player's other injuries stay untouched. This cannot be undone.");
-      var ok1=true; try{ ok1=window.confirm(q1); }catch(x){ ok1=true; }
-      if(!ok1) return;
-      var r1=null; try{ r1=wipeOne(iid); }catch(x){ r1=null; }
-      if(!r1){ say(L("تعذّر المسح — حدّث الصفحة","Could not delete — refresh the page"),"bad"); return; }
-      say(L("مُسحت الإصابة ✓","Injury deleted ✓"),"ok");
-      repaint();
-      return;
-    }
     var b=e.target&&e.target.closest?e.target.closest('[data-qd255="wipe"]'):null;
     if(!b) return;
     e.preventDefault(); e.stopPropagation(); if(e.stopImmediatePropagation) e.stopImmediatePropagation();
@@ -41401,11 +41385,23 @@ tr:hover .qde-ndate{color:#7E0E14}
     try{ push(window.S); }catch(e){}
     return out.filter(function(o){ return o&&Array.isArray(o.injuries); });
   }
+  var LSK="qadsiah_u18_v2", DIRTY="qadsiah_sync_dirty";
+  function live(){
+    try{ var A=window.__QDAPP; if(A&&A.S&&Array.isArray(A.S.injuries)) return A.S; }catch(e){}
+    try{ if(window.QD_S&&Array.isArray(window.QD_S.injuries)) return window.QD_S; }catch(e){}
+    try{ if(typeof window.S!=="undefined"&&window.S&&Array.isArray(window.S.injuries)) return window.S; }catch(e){}
+    return null;
+  }
   function persistAll(){
     var done=0;
     try{ if(typeof window.QD_save==="function"){ window.QD_save(); done++; } }catch(e){}
     try{ if(typeof window.save==="function"){ window.save(); done++; } }catch(e){}
     try{ var A=window.__QDAPP; if(A&&typeof A.save==="function"){ A.save(); done++; } }catch(e){}
+    var st=live();
+    if(st){
+      try{ localStorage.setItem(LSK,JSON.stringify(st)); done++; }catch(e){}
+      try{ localStorage.setItem(DIRTY,"1"); }catch(e){}
+    }
     return done;
   }
 
@@ -41478,7 +41474,7 @@ tr:hover .qde-ndate{color:#7E0E14}
     try{ if(window.qdUnifyPaint) window.qdUnifyPaint(); }catch(e){}
   }
 
-  document.addEventListener("click",function(e){
+  (window.addEventListener?window:document).addEventListener("click",function(e){
     var o=e.target&&e.target.closest?e.target.closest('[data-qd255="one"]'):null;
     if(!o) return;
     e.preventDefault(); e.stopPropagation(); if(e.stopImmediatePropagation) e.stopImmediatePropagation();
@@ -41494,7 +41490,23 @@ tr:hover .qde-ndate{color:#7E0E14}
     setTimeout(function(){ try{ sweep(); repaint(); }catch(x){} },400);
   },true);
 
+  function cleanStored(){
+    try{
+      var raw=localStorage.getItem(LSK); if(!raw) return;
+      var list=tombs(); if(!list.length) return;
+      var st=JSON.parse(raw), ch=0;
+      list.forEach(function(iid){
+        var before=(st.injuries||[]).length;
+        st.injuries=(st.injuries||[]).filter(function(x){ return String(x.id)!==iid; });
+        st.therapies=(st.therapies||[]).filter(function(t){ return String(t.injuryId)!==iid&&!(t.__mirrorOf&&String(t.injuryId)===iid); });
+        (st.sessions||[]).forEach(function(x){ if(String(x.injuryId)===iid) x.injuryId=""; });
+        ch+=(before-(st.injuries||[]).length);
+      });
+      if(ch) localStorage.setItem(LSK,JSON.stringify(st));
+    }catch(e){}
+  }
   function boot(){
+    try{ cleanStored(); }catch(e){}
     try{ sweep(); }catch(e){}
     setInterval(function(){ try{ var n=sweep(); if(n) repaint(); }catch(e){} },5000);
   }
