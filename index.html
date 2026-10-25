@@ -36988,6 +36988,18 @@ tr:hover .qde-ndate{color:#7E0E14}
     '@media print{#sidebar,#topbar,.cl-tabs,.cl-btn,#rm226skin{display:none!important}.cl-hero{background:#fff!important;color:#000!important;border:1px solid #ccc}}'
   ].join("");
 
+  function ensureSection(){
+    var host=document.getElementById("v-clinical");
+    if(!host){
+      host=document.createElement("section");
+      host.className="view";
+      host.id="v-clinical";
+      (document.querySelector("main")||document.body).appendChild(host);
+    }
+    var act=document.querySelector('#nav .nav-item.active');
+    if(act&&act.getAttribute("data-view")==="clinical") host.classList.add("active");
+    return host;
+  }
   function css(){ try{ if(document.getElementById("cl227css")) return; var s=document.createElement("style"); s.id="cl227css"; s.textContent=CSS; document.head.appendChild(s); }catch(e){} }
 
   /* ---------------- الحالة ---------------- */
@@ -37307,7 +37319,7 @@ tr:hover .qde-ndate{color:#7E0E14}
   }
   function render(){
     try{ css(); }catch(e){}
-    var host=document.getElementById("v-clinical"); if(!host) return;
+    var host=ensureSection(); if(!host) return;
     var body = TAB==="board"?board():TAB==="rtp"?rtp():TAB==="proto"?protocols():TAB==="dq"?quality():TAB==="clear"?consents():audit();
     host.innerHTML='<div class="cl-wrap">'+head()+tabs()+body+'</div>';
   }
@@ -37905,6 +37917,1561 @@ tr:hover .qde-ndate{color:#7E0E14}
 })();
 
 </script>
+<script>
+/* ============================================================================
+   QD229 · استبيان الجاهزية عبر واتساب — إرسال جماعي بمحدّدين · ردّ اللاعب · تخزين يومي
+   المسار: الطاقم يحدّد اللاعبين → زر واحد → واتساب لكل لاعب برابط استبيانه
+           اللاعب يفتح الرابط ويجيب ١–٥ → يرسل الردّ → الطاقم يلصق الردّ فيُخزَّن تلقائيًا
+   ============================================================================ */
+(function(){
+  "use strict";
+
+  function isEN(){ try{ if(/^en/i.test(document.documentElement.getAttribute("lang")||"")) return true; var l=localStorage.getItem("qd_lang"); return !!(l&&/^en/i.test(l)); }catch(e){ return false; } }
+  function L(a,e){ return isEN()?e:a; }
+  function E(s){ return String(s==null?"":s).replace(/[&<>"']/g,function(c){ return ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[c]; }); }
+  function A(){ return window.__QDAPP||null; }
+  function ST(){ try{ var a=A(); if(a&&a.S) return a.S; }catch(e){} try{ return window.QD_S||null; }catch(e){ return null; } }
+  function S0(){ var s=ST(); if(!s) return null; if(!Array.isArray(s.wellness)) s.wellness=[]; if(!s.settings) s.settings={}; return s; }
+  function ARR(k){ var s=ST(); return (s&&Array.isArray(s[k]))?s[k]:[]; }
+  function SAVE(){ try{ var a=A(); if(a&&a.save) return a.save(); }catch(e){} try{ if(window.QD_save) window.QD_save(); }catch(e){} }
+  function TODAY(){ var d=new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+  function uid(){ return "wl"+Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
+  function PN(pid){
+    try{ if(typeof pname==="function"){ var v=pname(pid); if(v&&v!=="—") return v; } }catch(e){}
+    var p=ARR("players").filter(function(x){ return String(x.id)===String(pid); })[0];
+    return p?(((p.first||"")+" "+(p.last||"")).trim()||"—"):"—";
+  }
+  function PL(pid){ return ARR("players").filter(function(x){ return String(x.id)===String(pid); })[0]||null; }
+  function phoneOf(p){ return String((p&&(p.phone||p.mobile||p.wa))||"").replace(/[^\d+]/g,""); }
+  function toWa(num){
+    var n=String(num||"").replace(/[^\d]/g,"");
+    if(!n) return "";
+    if(n.indexOf("00")===0) n=n.slice(2);
+    if(n.indexOf("966")===0||n.indexOf("971")===0||n.indexOf("20")===0||n.indexOf("44")===0) return n;
+    if(n.indexOf("0")===0) n="966"+n.slice(1);   /* السعودية افتراضيًا */
+    else if(n.length===9) n="966"+n;
+    return n;
+  }
+  function clinicianPhone(){
+    var s=S0(); if(!s) return "";
+    var set=s.settings||{};
+    return toWa(set.waReply||set.clinicianPhone||set.phone||set.clinicPhone||"");
+  }
+  function clubName(){ try{ var s=S0(); return (s&&s.settings&&s.settings.club)||L("النادي","Club"); }catch(e){ return "—"; } }
+  function toastit(m,k){ try{ if(typeof toast==="function") return toast(m,k||"ok"); }catch(e){} }
+
+  /* ---------------- بنود الاستبيان ---------------- */
+  var ITEMS=[
+    {k:"sleep", ar:"جودة النوم", en:"Sleep quality"},
+    {k:"fatigue", ar:"الإجهاد", en:"Fatigue"},
+    {k:"soreness", ar:"ألم العضلات", en:"Muscle soreness"},
+    {k:"stress", ar:"التوتر", en:"Stress"},
+    {k:"mood", ar:"المزاج", en:"Mood"}
+  ];
+  function total(w){ var t=0; ITEMS.forEach(function(i){ t+=Number(w[i.k])||0; }); return t; }
+  function zoneOf(t){ return t>=20?{k:"ok",ar:"جاهز",en:"Ready"}:t>=15?{k:"warn",ar:"متوسط",en:"Moderate"}:{k:"bad",ar:"منخفض",en:"Low"}; }
+
+  /* ---------------- السجل اليومي ---------------- */
+  function wellOf(pid,day){
+    var hits=ARR("wellness").filter(function(w){ return w&&String(w.playerId)===String(pid)&&String(w.date||"").slice(0,10)===String(day); });
+    if(!hits.length) return null;
+    hits.sort(function(a,b){ return String(b.created||"").localeCompare(String(a.created||"")); });
+    return hits[0];
+  }
+  function saveWell(pid,day,vals,src){
+    var s=S0(); if(!s) return null;
+    var ex=wellOf(pid,day);
+    var rec={id:uid(),playerId:String(pid),date:String(day),
+      sleep:Number(vals.sleep)||0,fatigue:Number(vals.fatigue)||0,soreness:Number(vals.soreness)||0,
+      stress:Number(vals.stress)||0,mood:Number(vals.mood)||0,
+      notes:"",created:new Date().toISOString(),source:src||"whatsapp"};
+    s.wellness.push(rec);
+    SAVE();
+    return rec;
+  }
+
+  /* ---------------- الحِمل (payload) ---------------- */
+  var PFX="QDWL1";
+  function encode(pid,day,w){ return PFX+"|"+String(pid)+"|"+String(day)+"|"+
+    [w.sleep,w.fatigue,w.soreness,w.stress,w.mood].map(function(n){ return Number(n)||0; }).join(","); }
+  function decodeAll(text){
+    var out=[], re=/QDWL1\s*\|\s*([A-Za-z0-9_\-]+)\s*\|\s*(\d{4}-\d{2}-\d{2})\s*\|\s*([0-9](?:\s*[,.;\-]\s*[0-9]){4})/g, m;
+    var t=String(text||"");
+    while((m=re.exec(t))){
+      var nums=m[3].split(/[,.;\-]/).map(function(x){ return Number(String(x).trim())||0; });
+      if(nums.length!==5||nums.some(function(n){ return n<0||n>5; })) continue;
+      out.push({pid:m[1],date:m[2],vals:{sleep:nums[0],fatigue:nums[1],soreness:nums[2],stress:nums[3],mood:nums[4]},raw:m[0]});
+    }
+    return out;
+  }
+
+  /* ---------------- رابط اللاعب ---------------- */
+  function appBase(){
+    try{
+      var u=location.origin&&location.origin!=="null"?location.origin+location.pathname:location.href.split("#")[0];
+      return u.split("#")[0].split("?")[0];
+    }catch(e){ return ""; }
+  }
+  function playerLink(pid,day){
+    var extra="";
+    try{ if(window.QD231&&window.QD231.cfgToken){ var t=window.QD231.cfgToken(); if(t) extra="&c="+t; } }catch(e){}
+    return appBase()+"#well="+encodeURIComponent(String(pid)+"~"+String(day))+extra;
+  }
+  function readWellHash(){
+    try{
+      var h=String(location.hash||"").replace(/^#/,"");
+      if(h.indexOf("well=")!==0) return null;
+      var body=h.slice(5).split("&")[0];
+      var v=decodeURIComponent(body).split("~");
+      if(v.length<2) return null;
+      return {pid:v[0],day:v[1]||TODAY()};
+    }catch(e){ return null; }
+  }
+
+  /* ---------------- الرسالة ---------------- */
+  function tpl(){
+    var s=S0(), t=(s&&s.settings&&s.settings.wellTpl)||"";
+    if(t&&t.trim()) return t;
+    return L(
+      "السلام عليكم {name} 🌙\nاستبيان الجاهزية الصباحي — {club}\nالتاريخ: {date}\n\nافتح الرابط وأجب ١–٥ لكل بند ثم اضغط إرسال:\n{link}\n\n— الجهاز الطبي",
+      "Hello {name} 🌙\nMorning readiness check-in — {club}\nDate: {date}\n\nOpen the link, answer 1–5 for each item, then submit:\n{link}\n\n— Medical staff");
+  }
+  function msgFor(p,day){
+    var link=playerLink(p.id,day);
+    return tpl().replace(/\{name\}/g,((p.first||"")+" "+(p.last||"")).trim())
+      .replace(/\{club\}/g,clubName()).replace(/\{date\}/g,day).replace(/\{link\}/g,link);
+  }
+  function waFor(p,day){
+    var ph=toWa(phoneOf(p));
+    var txt=encodeURIComponent(msgFor(p,day));
+    return ph?("https://wa.me/"+ph+"?text="+txt):("https://wa.me/?text="+txt);
+  }
+
+  /* ---------------- CSS ---------------- */
+  var CSS=[
+    '.wl-wrap{display:flex;flex-direction:column;gap:12px}',
+    '.wl-hero{border-radius:16px;padding:16px 18px;background:linear-gradient(135deg,#0A1322,#12233D 60%,#0A1322);color:#EFF2F6;'+
+      'border:1px solid rgba(200,162,74,.28);position:relative;overflow:hidden}'+
+    '.wl-hero:before{content:"";position:absolute;inset:0;background:radial-gradient(520px 180px at 92% -30%,rgba(200,162,74,.22),transparent 70%);pointer-events:none}'+
+    '.wl-hero .eb{font-size:9px;font-weight:900;letter-spacing:.22em;text-transform:uppercase;color:#D9BC72}'+
+    '.wl-hero h2{margin:5px 0 0;font-size:19px;font-weight:900;color:#fff}'+
+    '.wl-hero h2 small{font-size:11px;color:#9FAABD;font-weight:800;margin-inline-start:8px}'+
+    '.wl-hero .meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:11px;position:relative}'+
+    '.wl-hero .meta span{display:inline-flex;align-items:center;gap:6px;border:1px solid rgba(255,255,255,.14);'+
+      'background:rgba(255,255,255,.05);border-radius:999px;padding:4px 11px;font-size:10.5px;font-weight:800;color:#C9D2E0}'+
+    '.wl-hero .meta b{color:#fff;font-size:13px}',
+    '.wl-bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;background:#fff;border:1px solid var(--line);border-radius:13px;padding:10px 12px}'+
+    '.wl-bar .sp{flex:1}',
+    '.wl-btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:#fff;border-radius:9px;'+
+      'padding:7px 12px;font-size:11.5px;font-weight:900;color:#151C26;cursor:pointer;font-family:inherit}'+
+    '.wl-btn:hover{border-color:#CFC7B4;background:#FCFBF7}'+
+    '.wl-btn.gold{background:linear-gradient(180deg,#D2AC55,#BE9740);border-color:#B08B36;color:#0A1322}'+
+    '.wl-btn.wa{background:#1FA855;border-color:#178C46;color:#fff}'+
+    '.wl-btn.wa:hover{background:#25B95E}'+
+    '.wl-btn.navy{background:#0A1322;border-color:#0A1322;color:#fff}'+
+    '.wl-btn.sm{padding:4px 9px;font-size:10px}'+
+    '.wl-inp{border:1px solid var(--line);background:#fff;border-radius:9px;padding:7px 11px;font-size:11.5px;'+
+      'font-weight:800;font-family:inherit;color:#151C26;outline:0}'+
+    '.wl-inp:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(200,162,74,.14)}',
+    '.wl-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:9px}'+
+    '.wl-kpi{background:#fff;border:1px solid var(--line);border-radius:12px;padding:11px 13px;position:relative;overflow:hidden}'+
+    '.wl-kpi:before{content:"";position:absolute;inset-block:0;inset-inline-start:0;width:2px;background:linear-gradient(180deg,var(--gold),rgba(200,162,74,.04))}'+
+    '.wl-kpi b{display:block;font-size:20px;font-weight:900;color:#0C1118;line-height:1.15}'+
+    '.wl-kpi span{display:block;font-size:9px;font-weight:900;color:#8B93A0;letter-spacing:.11em;text-transform:uppercase;margin-top:5px}'+
+    '.wl-kpi i{display:block;font-style:normal;font-size:10px;font-weight:800;color:#5A6473;margin-top:3px}',
+    '.wl-card{background:#fff;border:1px solid var(--line);border-radius:13px;overflow:hidden}'+
+    '.wl-card>h4{margin:0;padding:11px 14px;border-bottom:1px solid var(--line-2);font-size:10px;font-weight:900;'+
+      'letter-spacing:.14em;text-transform:uppercase;color:#8B93A0;display:flex;align-items:center;gap:8px;flex-wrap:wrap}'+
+    '.wl-card>h4 b{flex:1;color:#151C26;font-size:11.5px;letter-spacing:.01em;text-transform:none}',
+    '.wl-list{max-height:430px;overflow:auto}'+
+    '.wl-row{display:flex;align-items:center;gap:9px;padding:8px 13px;border-bottom:1px solid #F4F2EC;font-size:12px;cursor:pointer}'+
+    '.wl-row:last-child{border-bottom:0}'+
+    '.wl-row:hover{background:#FCFBF7}'+
+    '.wl-row.done{background:#F7FBF8}'+
+    '.wl-row input[type=checkbox]{width:15px;height:15px;accent-color:#BE9740;cursor:pointer;flex:none}'+
+    '.wl-row .nm{flex:1;font-weight:900;color:#151C26;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}'+
+    '.wl-row .ph{font-size:9.5px;font-weight:800;color:#98A0AC;font-family:ui-monospace,Menlo,monospace}'+
+    '.wl-row .no{font-size:9px;font-weight:900;color:#A81E28;background:#FDF3F3;border:1px solid #F1D3D5;border-radius:5px;padding:1px 6px}'+
+    '.wl-pill{display:inline-flex;align-items:center;gap:4px;border-radius:999px;padding:1px 8px;font-size:9px;font-weight:900;border:1px solid transparent;white-space:nowrap}'+
+    '.wl-pill:before{content:"";width:5px;height:5px;border-radius:50%;background:currentColor}'+
+    '.wl-pill.ok{background:#F1F8F4;color:#1B6E4E;border-color:#D4E8DE}'+
+    '.wl-pill.warn{background:#FDF7E9;color:#8A6A1E;border-color:#EFE2C4}'+
+    '.wl-pill.bad{background:#FDF3F3;color:#A81E28;border-color:#F1D3D5}'+
+    '.wl-pill.grey{background:#F4F2EC;color:#8B93A0;border-color:#E6E3DC}'+
+    '.wl-tbl{width:100%;border-collapse:collapse;font-size:11px}'+
+    '.wl-tbl th{text-align:start;padding:7px 10px;font-size:8.5px;font-weight:900;letter-spacing:.09em;text-transform:uppercase;'+
+      'color:#98A0AC;background:#FCFBF7;border-bottom:1px solid var(--line-2);white-space:nowrap}'+
+    '.wl-tbl td{padding:7px 10px;border-bottom:1px solid #F4F2EC}'+
+    '.wl-tbl tbody tr:hover{background:#FCFBF7}'+
+    '.wl-tbl .nm{font-weight:900;color:#151C26;cursor:pointer}'+
+    '.wl-tbl .nm:hover{color:#8A6A1E;text-decoration:underline}'+
+    '.wl-sc{display:inline-flex;align-items:center;justify-content:center;min-width:18px;height:18px;border-radius:5px;'+
+      'font-size:10px;font-weight:900;background:#F4F2EC;color:#5A6473;margin-inline-end:2px}'+
+    '.wl-sc.hi{background:#F1F8F4;color:#1B6E4E}.wl-sc.lo{background:#FDF3F3;color:#A81E28}'+
+    '.wl-tot{font-weight:900;color:#151C26}'+
+    '.wl-empty{padding:26px 16px;text-align:center;color:#8B93A0;font-size:11.5px;font-weight:800}'+
+    '.wl-note{margin-top:10px;font-size:10.5px;font-weight:800;color:#6B6250;background:#FBF6E9;border:1px solid #EADFC0;border-radius:9px;padding:8px 11px}'+
+    '.wl-note b{color:#8A6A1E}',
+    '.wl-tabs{display:inline-flex;gap:2px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:3px;flex-wrap:wrap}'+
+    '.wl-tabs button{border:0;background:none;border-radius:8px;padding:7px 13px;font-size:11.5px;font-weight:900;'+
+      'color:#5A6473;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:6px}'+
+    '.wl-tabs button.on{background:#0A1322;color:#fff}'+
+    '.wl-tabs button b{font-size:9.5px;background:rgba(200,162,74,.22);color:#8A6A1E;border-radius:999px;padding:1px 6px}'+
+    '.wl-tabs button.on b{background:rgba(200,162,74,.3);color:#F0D79A}'+
+    '.wl-paste{width:100%;min-height:96px;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:11.5px;'+
+      'font-weight:700;font-family:ui-monospace,Menlo,monospace;outline:0;resize:vertical;direction:ltr;text-align:start}'+
+    '.wl-paste:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(200,162,74,.14)}'+
+    '.wl-msg{background:#0A1322;color:#E7EDF5;border-radius:10px;padding:11px 13px;font-size:11px;font-weight:700;'+
+      'white-space:pre-wrap;line-height:1.75;direction:ltr;text-align:start}'+
+    '.wl-q{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:8px}',
+
+    /* ===== شاشة اللاعب ===== */
+    '.wlp{position:fixed;inset:0;z-index:2147483600;background:#F7F7F5;display:none;overflow:auto;direction:rtl}'+
+    '.wlp.on{display:block}'+
+    '.wlp-hd{background:linear-gradient(135deg,#0A1322,#12233D);color:#fff;padding:16px 18px 18px;position:relative;overflow:hidden}'+
+    '.wlp-hd:before{content:"";position:absolute;inset:0;background:radial-gradient(420px 140px at 90% -20%,rgba(200,162,74,.24),transparent 70%)}'+
+    '.wlp-hd .eb{font-size:8.5px;font-weight:900;letter-spacing:.2em;text-transform:uppercase;color:#D9BC72;position:relative}'+
+    '.wlp-hd h2{margin:5px 0 2px;font-size:18px;font-weight:900;position:relative}'+
+    '.wlp-hd .sub{font-size:11px;font-weight:800;color:#9FAABD;position:relative}'+
+    '.wlp-bd{padding:16px 15px 120px;max-width:560px;margin:0 auto}'+
+    '.wlp-lbl{font-size:10px;font-weight:900;letter-spacing:.14em;text-transform:uppercase;color:#8B93A0;margin:0 0 8px}'+
+    '.wlp-item{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:9px}'+
+    '.wlp-item .t{display:flex;align-items:center;gap:7px;font-size:13px;font-weight:900;color:#151C26;margin-bottom:10px}'+
+    '.wlp-item .t i{font-style:normal;font-size:9.5px;font-weight:900;color:#98A0AC;margin-inline-start:auto}'+
+    '.wlp-scale{display:grid;grid-template-columns:repeat(5,1fr);gap:7px}'+
+    '.wlp-scale button{border:1px solid var(--line);background:#FCFBF7;border-radius:11px;padding:11px 0;font-size:15px;'+
+      'font-weight:900;color:#5A6473;cursor:pointer;font-family:inherit;transition:.12s;line-height:1}'+
+    '.wlp-scale button:hover{border-color:#CFC7B4}'+
+    '.wlp-scale button.on{background:linear-gradient(180deg,#D2AC55,#BE9740);border-color:#B08B36;color:#0A1322;'+
+      'box-shadow:0 4px 12px rgba(200,162,74,.3);transform:translateY(-1px)}'+
+    '.wlp-hint{display:flex;justify-content:space-between;font-size:9px;font-weight:900;color:#B9BFC9;margin-top:6px}'+
+    '.wlp-sum{background:#fff;border:1px solid var(--line);border-radius:13px;padding:11px 14px;display:flex;align-items:center;'+
+      'gap:10px;margin:12px 0}'+
+    '.wlp-sum b{font-size:19px;font-weight:900;color:#0C1118}'+
+    '.wlp-sum span{font-size:10.5px;font-weight:800;color:#8B93A0}'+
+    '.wlp-sum .z{margin-inline-start:auto}'+
+    '.wlp-foot{position:fixed;inset-inline:0;bottom:0;background:rgba(255,255,255,.97);border-top:1px solid var(--line);'+
+      'padding:11px 15px calc(11px + env(safe-area-inset-bottom));backdrop-filter:blur(8px)}'+
+    '.wlp-foot .in{max-width:560px;margin:0 auto}'+
+    '.wlp-send{width:100%;border:0;border-radius:12px;padding:14px;font-size:14px;font-weight:900;font-family:inherit;'+
+      'background:#1FA855;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px}'+
+    '.wlp-send:disabled{background:#C9CECB;cursor:not-allowed}'+
+    '.wlp-send2{width:100%;border:1px solid var(--line);border-radius:12px;padding:11px;font-size:12px;font-weight:900;'+
+      'font-family:inherit;background:#fff;color:#151C26;cursor:pointer;margin-top:7px}'+
+    '.wlp-ok{background:#F1F8F4;border:1px solid #D4E8DE;border-radius:13px;padding:14px;text-align:center;margin:12px 0}'+
+    '.wlp-ok b{display:block;font-size:13.5px;font-weight:900;color:#1B6E4E;margin-bottom:4px}'+
+    '.wlp-ok span{font-size:11px;font-weight:800;color:#5A6473}'
+  ].join("");
+
+  function css(){ try{ if(document.getElementById("wl229css")) return; var s=document.createElement("style"); s.id="wl229css"; s.textContent=CSS; document.head.appendChild(s); }catch(e){} }
+
+  /* ---------------- الحالة ---------------- */
+  var TAB="send", DAY=TODAY(), SEL={};
+
+  function playersAll(){ return ARR("players").slice().sort(function(a,b){ return (((a.first||"")+" "+(a.last||"")).trim()).localeCompare(((b.first||"")+" "+(b.last||"")).trim(),"ar"); }); }
+  function statsFor(day){
+    var pls=playersAll();
+    var done=0, sum=0, low=0;
+    pls.forEach(function(p){ var w=wellOf(p.id,day); if(w){ done++; var t=total(w); sum+=t; if(t<15) low++; } });
+    return {n:pls.length, done:done, pending:pls.length-done, avg:done?Math.round(sum/done*10)/10:0, low:low};
+  }
+
+  /* ---------------- لوحة الإرسال ---------------- */
+  function paneSend(){
+    var pls=playersAll(), st=statsFor(DAY);
+    var selCount=Object.keys(SEL).filter(function(k){ return SEL[k]; }).length;
+    var h='<div class="wl-kpis">'+
+      '<div class="wl-kpi"><b>'+E(st.done)+'/'+E(st.n)+'</b><span>'+L("أرسلوا الاستبيان","Submitted")+'</span><i>'+E(DAY)+'</i></div>'+
+      '<div class="wl-kpi"><b style="color:#8A6A1E">'+E(st.pending)+'</b><span>'+L("بانتظار الردّ","Awaiting")+'</span></div>'+
+      '<div class="wl-kpi"><b>'+E(st.avg||"—")+'</b><span>'+L("متوسط الدرجة","Average score")+'</span><i>'+L("من ٢٥","of 25")+'</i></div>'+
+      '<div class="wl-kpi"><b style="color:#A81E28">'+E(st.low)+'</b><span>'+L("جاهزية منخفضة","Low readiness")+'</span><i>&lt; 15</i></div>'+
+    '</div>';
+
+    h+='<div class="wl-bar">'+
+      '<input type="date" id="wlDay" class="wl-inp" value="'+E(DAY)+'">'+
+      '<button class="wl-btn sm" data-wl="today">'+L("اليوم","Today")+'</button>'+
+      '<div class="sp"></div>'+
+      '<button class="wl-btn sm" data-wl="selall">'+L("تحديد الكل","Select all")+'</button>'+
+      '<button class="wl-btn sm" data-wl="selpend">'+L("غير المرسلين","Not submitted")+'</button>'+
+      '<button class="wl-btn sm" data-wl="selnone">'+L("إلغاء التحديد","Clear")+'</button>'+
+    '</div>';
+
+    h+='<div class="wl-card"><h4><b>'+L("اللاعبون — حدّد من يُرسل له","Players — pick recipients")+'</b>'+
+      '<span class="wl-pill warn" id="wlSelN">'+E(selCount)+' '+L("محدّد","selected")+'</span>'+
+      '<button class="wl-btn wa" data-wl="send">📤 '+L("إرسال واتساب للمحددين","Send WhatsApp to selected")+'</button>'+
+      '</h4><div class="wl-list">'+
+      pls.map(function(p){
+        var w=wellOf(p.id,DAY), ph=phoneOf(p), t=w?total(w):null, z=w?zoneOf(t):null;
+        return '<label class="wl-row'+(w?" done":"")+'">'+
+          '<input type="checkbox" data-wl="pick" data-p="'+E(p.id)+'"'+(SEL[p.id]?" checked":"")+'>'+
+          '<span class="nm">'+E(PN(p.id))+'</span>'+
+          (w?'<span class="wl-pill '+z.k+'">'+E(L(z.ar,z.en))+' '+E(t)+'/25</span>':(ph?'<span class="wl-pill grey">'+L("لم يُرسل","Pending")+'</span>':'<span class="no">'+L("لا رقم","No phone")+'</span>'))+
+          '<span class="ph">'+(ph||"—")+'</span>'+
+          '<button type="button" class="wl-btn sm" data-wl="one" data-p="'+E(p.id)+'">'+L("واحد","Send")+'</button>'+
+        '</label>';
+      }).join("")+
+      '</div></div>';
+
+    if(!clinicianPhone()) h+='<div class="wl-note">⚠ <b>'+L("لم يُحدّد رقم الأخصائي لاستلام الردود","No clinician number for replies")+'</b> — '+
+      L("أضفه من تبويب «الإعداد»، وإلا سيردّ اللاعب برسالة واتساب بدون رقم مسبق.","Add it in the Settings tab; otherwise the player’s reply has no preset recipient.")+'</div>';
+
+    h+='<div class="wl-note">💡 '+L("الطريقة: تحدّد اللاعبين ← «إرسال واتساب» يفتح واتساب برسالة كل لاعب ورابط استبيانه ← اللاعب يجيب ويضغط إرسال فيعود ردّه إليك ← الصق الردّ في تبويب «الردود» ليُخزَّن.","How it works: pick players → WhatsApp opens with each player’s link → he answers and submits → his reply comes back to you → paste it in the Replies tab to store it.")+'</div>';
+    return h;
+  }
+
+  /* ---------------- الردود ---------------- */
+  function paneReplies(){
+    var pls=playersAll();
+    var h='<div class="wl-card"><h4><b>'+L("استلام ردود اللاعبين","Import player replies")+'</b>'+
+      '<span style="font-size:9px;color:#98A0AC">QDWL1|…</span></h4>'+
+      '<div style="padding:12px 14px">'+
+        '<textarea id="wlPaste" class="wl-paste" placeholder="'+E(L("الصق نص رسالة واتساب هنا — يمكن لصق ردود عدة لاعبين مرة واحدة","Paste the WhatsApp message here — multiple replies at once are fine"))+'"></textarea>'+
+        '<div class="wl-q" style="margin-top:9px">'+
+          '<button class="wl-btn gold" data-wl="import">✓ '+L("قراءة وتخزين","Parse & store")+'</button>'+
+          '<span id="wlImpMsg" style="font-size:10.5px;font-weight:900;color:#8B93A0"></span>'+
+        '</div>'+
+      '</div></div>';
+
+    h+='<div class="wl-card"><h4><b>'+L("سجل يوم","Daily log")+'</b>'+
+      '<input type="date" id="wlDay2" class="wl-inp" value="'+E(DAY)+'" style="padding:4px 8px">'+
+      '<button class="wl-btn sm" data-wl="csv">⬇ CSV</button></h4>'+
+      '<table class="wl-tbl"><thead><tr>'+
+        '<th>'+L("اللاعب","Player")+'</th>'+
+        ITEMS.map(function(i){ return '<th>'+E(L(i.ar.slice(0,6),i.en))+'</th>'; }).join("")+
+        '<th>'+L("المجموع","Total")+'</th><th>'+L("الحالة","Zone")+'</th><th>'+L("المصدر","Source")+'</th>'+
+      '</tr></thead><tbody>'+
+      (pls.map(function(p){
+        var w=wellOf(p.id,DAY);
+        if(!w) return '<tr><td class="nm" data-wl="openp" data-p="'+E(p.id)+'">'+E(PN(p.id))+'</td>'+
+          '<td colspan="7" style="color:#B9BFC9;font-weight:800;font-size:10px">'+L("لا ردّ","No reply")+'</td></tr>';
+        var t=total(w), z=zoneOf(t);
+        return '<tr><td class="nm" data-wl="openp" data-p="'+E(p.id)+'">'+E(PN(p.id))+'</td>'+
+          ITEMS.map(function(it){ var v=Number(w[it.k])||0;
+            return '<td><span class="wl-sc '+(v>=4?"hi":v<=2?"lo":"")+'">'+E(v)+'</span></td>'; }).join("")+
+          '<td class="wl-tot">'+E(t)+'</td>'+
+          '<td><span class="wl-pill '+z.k+'">'+E(L(z.ar,z.en))+'</span></td>'+
+          '<td><span class="wl-pill grey">'+E(w.source==="link"?L("رابط","Link"):L("واتساب","WhatsApp"))+'</span></td></tr>';
+      }).join(""))+
+      '</tbody></table></div>';
+    return h;
+  }
+
+  /* ---------------- الإعدادات ---------------- */
+  function paneSetup(){
+    var s=S0(), set=(s&&s.settings)||{};
+    var ph=set.waReply||"";
+    return '<div class="wl-card"><h4><b>'+L("رقم استلام الردود","Reply recipient")+'</b></h4>'+
+      '<div style="padding:12px 14px">'+
+        '<div class="wl-q"><label style="font-size:11px;font-weight:900;color:#5A6473;min-width:120px">'+L("رقم واتساب الأخصائي","Clinician WhatsApp")+'</label>'+
+          '<input id="wlPhone" class="wl-inp" style="flex:1;min-width:170px;direction:ltr" value="'+E(ph)+'" placeholder="05xxxxxxxx">'+
+          '<button class="wl-btn gold" data-wl="savephone">'+L("حفظ","Save")+'</button></div>'+
+        '<div class="wl-note" style="margin-top:9px">'+L("يُستخدم ليصل ردّ اللاعب إليك مباشرة عند ضغطه إرسال في الاستبيان.","Used so the player’s submitted answers come straight back to you.")+'</div>'+
+      '</div></div>'+
+      '<div class="wl-card" style="margin-top:12px"><h4><b>'+L("نص رسالة الإرسال","Message template")+'</b>'+
+        '<button class="wl-btn sm" data-wl="tplreset">'+L("استعادة الافتراضي","Reset")+'</button></h4>'+
+        '<div style="padding:12px 14px">'+
+          '<textarea id="wlTpl" class="wl-paste" style="min-height:120px;direction:rtl;text-align:start">'+E(set.wellTpl||tpl())+'</textarea>'+
+          '<div class="wl-q" style="margin-top:9px"><button class="wl-btn gold" data-wl="savetpl">'+L("حفظ النص","Save")+'</button>'+
+            '<span style="font-size:9.5px;font-weight:800;color:#98A0AC">{name} · {club} · {date} · {link}</span></div>'+
+        '</div></div>'+
+      '<div class="wl-card" style="margin-top:12px"><h4><b>'+L("معاينة الرسالة","Preview")+'</b></h4>'+
+        '<div style="padding:12px 14px"><div class="wl-msg">'+E(msgFor(playersAll()[0]||{id:"p",first:L("لاعب","Player"),last:""},DAY))+'</div></div></div>';
+  }
+
+  /* ---------------- الرابط/الشاشة: تحويل للاعب ---------------- */
+  function paneLink(){
+    var pls=playersAll();
+    var h='<div class="wl-card"><h4><b>'+L("روابط الاستبيان","Questionnaire links")+'</b>'+
+      '<span style="font-size:9px;color:#98A0AC">'+E(appBase())+'</span></h4>'+
+      '<div style="padding:11px 14px;font-size:10.5px;font-weight:800;color:#5A6473">'+
+      L("افتح الرابط على جهاز اللاعب أو أرسله له. بعد الإجابة تظهر الشاشة «تم الإرسال» ويرسل الردّ إليك على واتساب.",
+        "Open on the player’s device or send it to him. After answering, a confirmation shows and the reply is sent to your WhatsApp.")+'</div>'+
+      '<table class="wl-tbl"><thead><tr><th>'+L("اللاعب","Player")+'</th><th>'+L("الرابط","Link")+'</th><th></th></tr></thead><tbody>'+
+      pls.map(function(p){
+        return '<tr><td style="font-weight:900">'+E(PN(p.id))+'</td>'+
+          '<td style="font-family:ui-monospace,Menlo,monospace;font-size:9px;color:#8B93A0;direction:ltr;text-align:start;max-width:270px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+
+            E(playerLink(p.id,DAY))+'</td>'+
+          '<td style="white-space:nowrap"><button class="wl-btn sm" data-wl="copy" data-p="'+E(p.id)+'">'+L("نسخ","Copy")+'</button> '+
+            '<button class="wl-btn sm" data-wl="openlink" data-p="'+E(p.id)+'">'+L("فتح","Open")+'</button></td></tr>';
+      }).join("")+'</tbody></table></div>';
+    return h;
+  }
+
+  /* ---------------- لوحة الطاقم ---------------- */
+  function render(){
+    try{ css(); }catch(e){}
+    var host=document.getElementById("v-wellness");
+    if(!host){
+      host=document.createElement("section");
+      host.className="view"; host.id="v-wellness";
+      (document.querySelector("main")||document.body).appendChild(host);
+    }
+    var act=document.querySelector('#nav .nav-item.active');
+    if(act&&act.getAttribute("data-view")==="wellness") host.classList.add("active");
+    var st=statsFor(DAY);
+    var h='<div class="wl-wrap">'+
+      '<div class="wl-hero"><div class="eb">'+L("الاستبيان اليومي","Daily check-in")+'</div>'+
+      '<h2>🌙 '+L("استبيان الجاهزية عبر واتساب","Readiness check-in via WhatsApp")+'<small>'+E(DAY)+'</small></h2>'+
+      '<div class="meta"><span><b>'+E(st.n)+'</b>'+L("لاعب","players")+'</span>'+
+        '<span><b>'+E(st.done)+'</b>'+L("أرسلوا","submitted")+'</span>'+
+        '<span><b>'+E(st.pending)+'</b>'+L("بانتظار","awaiting")+'</span>'+
+        '<span><b>'+E(st.low)+'</b>'+L("جاهزية منخفضة","low readiness")+'</span></div></div>'+
+      '<div class="wl-tabs">'+
+        [["send",L("الإرسال","Send"),statsFor(DAY).pending],["rep",L("الردود","Replies"),statsFor(DAY).done],
+         ["link",L("الروابط","Links"),0],["set",L("الإعداد","Setup"),0]].map(function(t){
+          return '<button class="'+(TAB===t[0]?"on":"")+'" data-wl="tab" data-t="'+t[0]+'">'+E(t[1])+' <b>'+E(t[2])+'</b></button>';
+        }).join("")+'</div>'+
+      (TAB==="send"?paneSend():TAB==="rep"?paneReplies():TAB==="link"?paneLink():paneSetup())+
+    '</div>';
+    host.innerHTML=h;
+  }
+
+  /* ---------------- الإرسال الجماعي ---------------- */
+  var queue=[], qIdx=0;
+  function startQueue(){
+    var ids=Object.keys(SEL).filter(function(k){ return SEL[k]; });
+    if(!ids.length){ toastit(L("حدّد لاعبًا واحدًا على الأقل","Select at least one player"),"warn"); return; }
+    queue=ids.map(function(id){ return PL(id); }).filter(Boolean);
+    qIdx=0;
+    nextInQueue();
+  }
+  function nextInQueue(){
+    if(qIdx>=queue.length){ toastit(L("انتهى الإرسال — أكمل الردود الواردة","Sending finished — await replies"),"ok"); return; }
+    var p=queue[qIdx++];
+    try{ window.open(waFor(p,DAY),"_blank"); }catch(e){ try{ location.href=waFor(p,DAY); }catch(x){} }
+    if(qIdx<queue.length){
+      toastit(L("تم فتح واتساب: ","WhatsApp opened: ")+PN(p.id)+" — "+L("اضغط «التالي» للمتابعة","press Next to continue"),"ok");
+      showNextBtn();
+    } else toastit(L("تم فتح واتساب: ","WhatsApp opened: ")+PN(p.id)+" ("+queue.length+")","ok");
+  }
+  function showNextBtn(){
+    try{
+      var old=document.getElementById("wlNext"); if(old) old.remove();
+      var d=document.createElement("div"); d.id="wlNext";
+      d.style.cssText="position:fixed;inset-inline:0;bottom:0;z-index:2147483500;background:#0A1322;color:#fff;padding:10px 14px;"+
+        "display:flex;align-items:center;gap:10px;font-family:Tajawal,sans-serif;font-size:12px;font-weight:900";
+      d.innerHTML='<span style="flex:1">'+L("التالي: ","Next: ")+E((queue[qIdx]||{}).first||"")+" "+E((queue[qIdx]||{}).last||"")+
+        ' ('+E(qIdx+1)+'/'+E(queue.length)+')</span>'+
+        '<button id="wlNextGo" style="border:0;background:#D2AC55;color:#0A1322;border-radius:9px;padding:8px 14px;'+
+        'font-weight:900;font-family:inherit;cursor:pointer">'+L("التالي ←","Next →")+'</button>';
+      document.body.appendChild(d);
+      d.querySelector("#wlNextGo").addEventListener("click",function(){ nextInQueue(); if(qIdx>=queue.length) d.remove(); });
+    }catch(e){}
+  }
+
+  /* ---------------- شاشة اللاعب (استبيان حقيقي) ---------------- */
+  var W={}, WSENT=false, CP=null;
+  function openPlayerForm(pid,day){
+    var p=PL(pid);
+    if(!p){ toastit(L("اللاعب غير موجود","Player not found"),"bad"); return; }
+    W={}; WSENT=false; CP=p;
+    var el=document.getElementById("wlp");
+    if(!el){
+      el=document.createElement("div"); el.id="wlp"; el.className="wlp";
+      document.body.appendChild(el);
+    }
+    el.className="wlp on";
+    paintPlayerForm(p,day);
+  }
+  function paintPlayerForm(p,day){
+    var el=document.getElementById("wlp"); if(!el) return;
+    var tot=0; ITEMS.forEach(function(i){ tot+=Number(W[i.k])||0; });
+    var doneCount=ITEMS.filter(function(i){ return W[i.k]; }).length;
+    var full=doneCount===ITEMS.length;
+    el.innerHTML=
+      '<div class="wlp-hd"><div class="eb">'+E(clubName())+'</div>'+
+        '<h2>'+E(((p.first||"")+" "+(p.last||"")).trim())+'</h2>'+
+        '<div class="sub">'+E(day)+' · '+L("استبيان الجاهزية الصباحي","Morning readiness")+'</div></div>'+
+      '<div class="wlp-bd">'+
+        (WSENT?'<div class="wlp-ok"><b>✓ '+L("تم إرسال استبيانك","Your check-in is sent")+'</b>'+
+          '<span>'+L("شكرًا — وصلت إجاباتك للجهاز الطبي.","Thank you — your answers reached the medical staff.")+'</span></div>':'')+
+        '<div class="wlp-lbl">'+L("أجب ١–٥ لكل بند (١ = الأسوأ، ٥ = الأفضل)","Answer 1–5 for each item (1 = worst, 5 = best)")+'</div>'+
+        ITEMS.map(function(it){
+          var v=Number(W[it.k])||0;
+          return '<div class="wlp-item"><div class="t">'+E(L(it.ar,it.en))+'<i>'+(v?v+"/5":"—")+'</i></div>'+
+            '<div class="wlp-scale">'+[1,2,3,4,5].map(function(n){
+              return '<button data-wl="wset" data-k="'+it.k+'" data-v="'+n+'"'+(v===n?' class="on"':'')+'>'+n+'</button>';
+            }).join("")+'</div></div>';
+        }).join("")+
+        '<div class="wlp-hint"><span>'+L("سيئ","Poor")+'</span><span>'+L("ممتاز","Excellent")+'</span></div>'+
+        (full?'<div class="wlp-sum"><div><b>'+tot+'/25</b><br><span>'+L("المجموع","Total")+'</span></div>'+
+          '<div class="z"><span class="wl-pill '+zoneOf(tot).k+'">'+E(L(zoneOf(tot).ar,zoneOf(tot).en))+'</span></div></div>':'')+
+        '<div style="font-size:10px;font-weight:800;color:#98A0AC;margin-top:14px;text-align:center">'+
+          E(clubName())+' · '+L("وثيقة طبية داخلية","Internal medical record")+'</div>'+
+      '</div>'+
+      '<div class="wlp-foot"><div class="in">'+
+        '<button class="wlp-send" id="wlpSend"'+(full?"":" disabled")+'>📤 '+
+          (full?L("إرسال الاستبيان","Submit check-in"):L("أجب كل البنود أولًا","Answer all items first"))+'</button>'+
+        '<button class="wlp-send2" id="wlpClose">'+L("إغلاق","Close")+'</button>'+
+      '</div></div>';
+    var s=document.getElementById("wlpSend");
+    if(s) s.addEventListener("click",function(){ submitPlayer(p,day); });
+    var c=document.getElementById("wlpClose");
+    if(c) c.addEventListener("click",function(){ el.className="wlp"; try{ history.replaceState(null,"",location.pathname+location.search); }catch(e){} });
+  }
+  function submitPlayer(p,day){
+    var tot=0, ok=true;
+    ITEMS.forEach(function(i){ if(!W[i.k]) ok=false; tot+=Number(W[i.k])||0; });
+    if(!ok){ toastit(L("أكمل كل البنود","Complete all items"),"warn"); return; }
+    /* 1) تخزين محلي على جهاز اللاعب */
+    try{ saveWell(p.id,day,W,"link"); }catch(e){}
+    /* 1b) إرسال للسحابة إن كانت مفعّلة */
+    try{ document.dispatchEvent(new CustomEvent("qd:wellsubmit",{detail:{pid:p.id,day:day,vals:JSON.parse(JSON.stringify(W))}})); }catch(e){}
+    /* 2) إرسال الردّ إلى الأخصائي */
+    var code=encode(p.id,day,W);
+    var txt=L("استبيان الجاهزية — ","Readiness check-in — ")+(((p.first||"")+" "+(p.last||"")).trim())+
+      "\n"+L("التاريخ","Date")+": "+day+
+      "\n"+ITEMS.map(function(i){ return L(i.ar,i.en)+": "+W[i.k]+"/5"; }).join("\n")+
+      "\n"+L("المجموع","Total")+": "+tot+"/25 · "+L(zoneOf(tot).ar,zoneOf(tot).en)+
+      "\n\n"+code;
+    WSENT=true;
+    paintPlayerForm(p,day);
+    var ph=clinicianPhone();
+    var url=ph?("https://wa.me/"+ph+"?text="+encodeURIComponent(txt)):("https://wa.me/?text="+encodeURIComponent(txt));
+    setTimeout(function(){
+      try{ window.open(url,"_blank"); }catch(e){ try{ location.href=url; }catch(x){} }
+      try{ if(navigator.clipboard) navigator.clipboard.writeText(code); }catch(e){}
+    },400);
+  }
+
+  /* ---------------- الاستيراد ---------------- */
+  function doImport(){
+    var box=document.getElementById("wlPaste");
+    var msg=document.getElementById("wlImpMsg");
+    var found=decodeAll(box?box.value:"");
+    if(!found.length){ if(msg){ msg.textContent=L("لم أجد ردًّا صالحًا","No valid reply found"); msg.style.color="#A81E28"; } return; }
+    var added=0, dup=0;
+    found.forEach(function(f){
+      var p=PL(f.pid);
+      if(!p){ return; }
+      if(wellOf(f.pid,f.date)){ dup++; return; }
+      saveWell(f.pid,f.date,f.vals,"whatsapp"); added++;
+    });
+    if(msg){ msg.textContent=L("تم التخزين: ","Stored: ")+added+(dup?" · "+L("مكرّر: ","duplicate: ")+dup:"")+
+      (found.length-added-dup?" · "+L("غير معروف: ","unknown: ")+(found.length-added-dup):""); msg.style.color=added?"#1B6E4E":"#8A6A1E"; }
+    toastit(L("تم تحديث الردود","Replies updated"), added?"ok":"warn");
+    render();
+  }
+
+  /* ---------------- CSV ---------------- */
+  function csv(){
+    var rows=[[L("اللاعب","Player"),L("التاريخ","Date")].concat(ITEMS.map(function(i){ return L(i.ar,i.en); })).concat([L("المجموع","Total"),L("الحالة","Zone")]).join(",")];
+    playersAll().forEach(function(p){
+      var w=wellOf(p.id,DAY); if(!w) return;
+      var t=total(w);
+      rows.push([PN(p.id),DAY].concat(ITEMS.map(function(i){ return Number(w[i.k])||0; })).concat([t,L(zoneOf(t).ar,zoneOf(t).en)]).join(","));
+    });
+    try{
+      var blob=new Blob(["\uFEFF"+rows.join("\r\n")],{type:"text/csv;charset=utf-8"});
+      var a=document.createElement("a"); a.href=URL.createObjectURL(blob);
+      a.download="wellness-"+DAY+".csv"; document.body.appendChild(a); a.click();
+      setTimeout(function(){ try{ URL.revokeObjectURL(a.href); a.remove(); }catch(e){} },1200);
+      toastit(L("تم التصدير","Exported"));
+    }catch(e){ toastit(L("تعذّر التصدير","Export failed"),"bad"); }
+  }
+
+  /* ---------------- الأحداث ---------------- */
+  function bind(){
+    document.addEventListener("click",function(e){
+      var t=e.target&&e.target.closest?e.target.closest("[data-wl]"):null;
+      if(!t) return;
+      var k=t.getAttribute("data-wl");
+      if(k==="tab"){ TAB=t.getAttribute("data-t"); render(); e.preventDefault(); return; }
+      if(k==="pick"){ var pid=t.getAttribute("data-p"); SEL[pid]=!!t.checked; var n=document.getElementById("wlSelN");
+        if(n) n.textContent=Object.keys(SEL).filter(function(x){ return SEL[x]; }).length+" "+L("محدّد","selected"); e.stopPropagation(); return; }
+      if(k==="selall"){ playersAll().forEach(function(p){ SEL[p.id]=true; }); render(); e.preventDefault(); return; }
+      if(k==="selpend"){ SEL={}; playersAll().forEach(function(p){ if(!wellOf(p.id,DAY)) SEL[p.id]=true; }); render(); e.preventDefault(); return; }
+      if(k==="selnone"){ SEL={}; render(); e.preventDefault(); return; }
+      if(k==="today"){ DAY=TODAY(); render(); e.preventDefault(); return; }
+      if(k==="send"){ startQueue(); e.preventDefault(); return; }
+      if(k==="one"){ var p1=PL(t.getAttribute("data-p")); if(p1){ try{ window.open(waFor(p1,DAY),"_blank"); }catch(x){} } e.preventDefault(); return; }
+      if(k==="import"){ doImport(); e.preventDefault(); return; }
+      if(k==="csv"){ csv(); e.preventDefault(); return; }
+      if(k==="copy"){ var l=playerLink(t.getAttribute("data-p"),DAY);
+        try{ if(navigator.clipboard) navigator.clipboard.writeText(l); }catch(x){}
+        toastit(L("تم نسخ الرابط","Link copied")); e.preventDefault(); return; }
+      if(k==="openlink"){ openPlayerForm(t.getAttribute("data-p"),DAY); e.preventDefault(); return; }
+      if(k==="openp"){ try{ if(typeof openPlayerProfile==="function") openPlayerProfile(t.getAttribute("data-p")); }catch(x){} e.preventDefault(); return; }
+      if(k==="savephone"){ var s=S0(), inp=document.getElementById("wlPhone");
+        s.settings.waReply=String(inp?inp.value:"").trim(); SAVE(); render();
+        toastit(L("تم حفظ رقم استلام الردود","Reply number saved")); e.preventDefault(); return; }
+      if(k==="savetpl"){ var s2=S0(), ta=document.getElementById("wlTpl");
+        s2.settings.wellTpl=String(ta?ta.value:""); SAVE(); toastit(L("تم حفظ النص","Template saved")); render(); e.preventDefault(); return; }
+      if(k==="tplreset"){ var s3=S0(); s3.settings.wellTpl=""; SAVE(); render(); e.preventDefault(); return; }
+      if(k==="wset"){ var kk=t.getAttribute("data-k"), vv=Number(t.getAttribute("data-v"));
+        W[kk]=vv;
+        paintPlayerForm(CP||{first:"",last:""},DAY);
+        e.preventDefault(); return; }
+    },true);
+
+    document.addEventListener("change",function(e){
+      if(!e.target) return;
+      if(e.target.id==="wlDay"){ DAY=e.target.value||TODAY(); SEL={}; render(); }
+      else if(e.target.id==="wlDay2"){ DAY=e.target.value||TODAY(); render(); }
+    },true);
+  }
+
+  /* ---------------- التركيب ---------------- */
+  function install(){
+    try{
+      var a=A();
+      if(!a||!a.NAV||!a.REND){ setTimeout(install,450); return; }
+      css();
+      if(!a.NAV.some(function(n){ return n.id==="wellness"; })){
+        a.NAV.push({id:"wellness",label:"الاستبيان اليومي",icon:"activity",sub:"sub_wellness",grp:"grp_follow"});
+      }
+      var f=function(){ render(); }; f.__wl229=1;
+      a.REND.wellness=f;
+      if(!window.__wl229bind){ bind(); window.__wl229bind=1; }
+      try{ a.renderNav(); }catch(e){}
+      /* الرابط العميق: #well=pid~date */
+      var deep=function(){ var h=readWellHash(); if(h) openPlayerForm(h.pid,h.day); };
+      var fixLabel=function(){
+        try{
+          var b=document.querySelector('#nav [data-view="wellness"]'); if(!b) return;
+          var sp=b.querySelector("span"); if(sp){ var want=L("الاستبيان اليومي","Daily check-in"); if(sp.textContent!==want) sp.textContent=want; }
+        }catch(e){}
+      };
+      try{
+        var nav=document.getElementById("nav");
+        if(nav&&window.MutationObserver&&!window.__wl229obs){
+          window.__wl229obs=new MutationObserver(fixLabel); window.__wl229obs.observe(nav,{childList:true});
+        }
+      }catch(e){}
+      setTimeout(fixLabel,120); setTimeout(fixLabel,900);
+      setTimeout(deep,700); setTimeout(deep,1600);
+      window.addEventListener("hashchange",deep);
+      a.__wl229=1;
+    }catch(e){ setTimeout(install,800); }
+  }
+
+  window.QD229={render:render,wa:waFor,link:playerLink,encode:encode,decodeAll:decodeAll,
+    importText:function(txt){ return decodeAll(txt); },openForm:openPlayerForm};
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",install,{once:true});
+  install();
+})();
+
+</script>
+<script>
+/* ============================================================================
+   QD230 · الجاهزية اليومية — دمج الاستبيان بلوحة القيادة الطبية · قرار تدريب · استيراد تلقائي
+   ============================================================================ */
+(function(){
+  "use strict";
+
+  function isEN(){ try{ if(/^en/i.test(document.documentElement.getAttribute("lang")||"")) return true; var l=localStorage.getItem("qd_lang"); return !!(l&&/^en/i.test(l)); }catch(e){ return false; } }
+  function L(a,e){ return isEN()?e:a; }
+  function E(s){ return String(s==null?"":s).replace(/[&<>"']/g,function(c){ return ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[c]; }); }
+  function A(){ return window.__QDAPP||null; }
+  function ST(){ try{ var a=A(); if(a&&a.S) return a.S; }catch(e){} try{ return window.QD_S||null; }catch(e){ return null; } }
+  function ARR(k){ var s=ST(); return (s&&Array.isArray(s[k]))?s[k]:[]; }
+  function SAVE(){ try{ var a=A(); if(a&&a.save) return a.save(); }catch(e){} }
+  function TODAY(){ var d=new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+  function dk(d){ return String(d||"").slice(0,10); }
+  function diff(a,b){ try{ var A1=new Date(dk(a)+"T00:00:00"),B1=new Date(dk(b)+"T00:00:00"); if(isNaN(A1)||isNaN(B1)) return 0; return Math.round((B1-A1)/86400000); }catch(e){ return 0; } }
+  function PN(pid){
+    try{ if(typeof pname==="function"){ var v=pname(pid); if(v&&v!=="—") return v; } }catch(e){}
+    var p=ARR("players").filter(function(x){ return String(x.id)===String(pid); })[0];
+    return p?(((p.first||"")+" "+(p.last||"")).trim()||"—"):"—";
+  }
+  function toastit(m,k){ try{ if(typeof toast==="function") return toast(m,k||"ok"); }catch(e){} }
+
+  var ITEMS=["sleep","fatigue","soreness","stress","mood"];
+  function wellOf(pid,day){
+    var hits=ARR("wellness").filter(function(w){ return w&&String(w.playerId)===String(pid)&&dk(w.date)===String(day); });
+    if(!hits.length) return null;
+    hits.sort(function(a,b){ return String(b.created||"").localeCompare(String(a.created||"")); });
+    return hits[0];
+  }
+  function wTotal(w){ if(!w) return null; var t=0; ITEMS.forEach(function(k){ t+=Number(w[k])||0; }); return t; }
+
+  /* ---------------- الحالة الطبية ---------------- */
+  function medState(pid){
+    var inj=ARR("injuries").filter(function(i){ return String(i.playerId)===String(pid)&&String(i.status||"")!=="cleared"; });
+    var ill=ARR("illnesses").filter(function(i){ return String(i.playerId)===String(pid)&&String(i.status||"")!=="cleared"; });
+    if(inj.length){ var o={unable:4,partial:3,full:2};
+      inj.sort(function(a,b){ return (o[b.status]||0)-(o[a.status]||0); });
+      var s=String(inj[0].status||"");
+      return {k:s==="unable"?"out":s==="partial"?"rehab":"modified", inj:inj[0]};
+    }
+    if(ill.length) return {k:"ill", inj:null};
+    return {k:"available", inj:null};
+  }
+
+  /* ---------------- الحمل ---------------- */
+  function loadStats(pid,day){
+    var ls=ARR("loads").filter(function(x){ return x&&String(x.playerId)===String(pid); });
+    function sum(from,to){ var t=0; ls.forEach(function(x){ var d=diff(dk(x.date),from); if(d>=0&&d<to) t+=(Number(x.rpe)||0)*(Number(x.minutes)||0); }); return t; }
+    var acute=sum(day,7), chronic=sum(day,28)/4;
+    var ratio=chronic>0?Math.round(acute/chronic*100)/100:(acute>0?1.3:0);
+    return {acute:Math.round(acute),chronic:Math.round(chronic),ratio:ratio};
+  }
+
+  /* ---------------- محرّك الجاهزية ---------------- */
+  function readiness(pid,day){
+    day=day||TODAY();
+    var w=wellOf(pid,day), t=wTotal(w), med=medState(pid), ld=loadStats(pid,day);
+    var parts=[], score=null, known=0;
+
+    /* 1) الاستبيان ٠–٤٠ */
+    var wScore=null;
+    if(t!=null){ wScore=Math.round(t/25*40); parts.push({k:"well", ar:"الاستبيان", en:"Wellness", v:wScore, max:40, raw:t+"/25"}); known+=40; }
+    else parts.push({k:"well", ar:"الاستبيان", en:"Wellness", v:null, max:40, raw:L("لم يرسل","Not sent")});
+
+    /* 2) الحالة الطبية ٠–٤٠ */
+    var medMap={available:40, modified:26, rehab:14, out:0, ill:10};
+    var mScore=medMap[med.k]!=null?medMap[med.k]:40;
+    parts.push({k:"med", ar:"الحالة الطبية", en:"Medical", v:mScore, max:40,
+      raw:{available:L("متاح","Available"),modified:L("تدريب معدّل","Modified"),rehab:L("تأهيل","Rehab"),out:L("خارج المشاركة","Out"),ill:L("مرض","Illness")}[med.k]});
+    known+=40;
+
+    /* 3) الحمل ٠–٢٠ (كلما زاد الانفجار قلّت الجاهزية) */
+    var lScore=20, lRaw="—";
+    if(ld.ratio>0){
+      lRaw="ACWR "+ld.ratio;
+      if(ld.ratio<=1.3) lScore=20;
+      else if(ld.ratio<=1.5) lScore=13;
+      else lScore=5;
+    } else { lScore=20; lRaw=L("لا حمل مسجّل","No load"); }
+    parts.push({k:"load", ar:"الحمل", en:"Load", v:lScore, max:20, raw:lRaw});
+
+    score=Math.round((wScore==null?(mScore+lScore)/60*100:(wScore+mScore+lScore))/100*100);
+    if(wScore==null) score=Math.round((mScore+lScore)/60*100);
+    score=Math.max(0,Math.min(100,score));
+
+    /* القرار */
+    var dec;
+    if(med.k==="out") dec={k:"stop", ar:"لا تدريب — خارج المشاركة", en:"No training — unavailable", cls:"bad"};
+    else if(med.k==="ill") dec={k:"ref", ar:"إحالة طبية قبل التدريب", en:"Medical review first", cls:"bad"};
+    else if(med.k==="rehab") dec={k:"mod", ar:"تأهيل فقط — لا مشاركة جماعية", en:"Rehab only", cls:"warn"};
+    else if(wScore==null) dec={k:"need", ar:"بانتظار استبيان اللاعب", en:"Awaiting check-in", cls:"grey"};
+    else if(score<50) dec={k:"ref", ar:"إحالة طبية — جاهزية منخفضة", en:"Medical review — low readiness", cls:"bad"};
+    else if(score<70||med.k==="modified") dec={k:"mod", ar:"تدريب معدّل — تخفيف الحمل", en:"Modified training — reduced load", cls:"warn"};
+    else dec={k:"go", ar:"تدريب كامل", en:"Full training", cls:"ok"};
+
+    return {pid:String(pid), day:day, score:score, well:t, parts:parts, med:med, load:ld, dec:dec, sent:!!w};
+  }
+  function zoneOf(s){ if(s>=80) return {k:"ok",ar:"عالي",en:"High"}; if(s>=65) return {k:"warn",ar:"متوسط",en:"Moderate"}; return {k:"bad",ar:"منخفض",en:"Low"}; }
+
+  /* ---------------- CSS ---------------- */
+  var CSS=[
+    '.rd-kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(126px,1fr));gap:9px}'+
+    '.rd-kpi{background:#fff;border:1px solid var(--line);border-radius:12px;padding:11px 13px;position:relative;overflow:hidden}'+
+    '.rd-kpi:before{content:"";position:absolute;inset-block:0;inset-inline-start:0;width:2px;background:linear-gradient(180deg,#C8A24A,rgba(200,162,74,.04))}'+
+    '.rd-kpi b{display:block;font-size:20px;font-weight:900;color:#0C1118;line-height:1.15}'+
+    '.rd-kpi span{display:block;font-size:9px;font-weight:900;color:#8B93A0;letter-spacing:.11em;text-transform:uppercase;margin-top:5px}'+
+    '.rd-kpi i{display:block;font-style:normal;font-size:10px;font-weight:800;color:#5A6473;margin-top:3px}',
+    '.rd-card{background:#fff;border:1px solid var(--line);border-radius:13px;overflow:hidden;margin-top:11px}'+
+    '.rd-card>h4{margin:0;padding:11px 14px;border-bottom:1px solid var(--line-2);font-size:10px;font-weight:900;'+
+      'letter-spacing:.14em;text-transform:uppercase;color:#8B93A0;display:flex;align-items:center;gap:8px;flex-wrap:wrap}'+
+    '.rd-card>h4 b{flex:1;color:#151C26;font-size:11.5px;letter-spacing:.01em;text-transform:none}',
+    '.rd-tbl{width:100%;border-collapse:collapse;font-size:11.5px}'+
+    '.rd-tbl th{text-align:start;padding:7px 10px;font-size:8.5px;font-weight:900;letter-spacing:.09em;text-transform:uppercase;'+
+      'color:#98A0AC;background:#FCFBF7;border-bottom:1px solid var(--line-2);white-space:nowrap}'+
+    '.rd-tbl td{padding:7px 10px;border-bottom:1px solid #F4F2EC;vertical-align:middle}'+
+    '.rd-tbl tbody tr:hover{background:#FCFBF7}'+
+    '.rd-tbl .nm{font-weight:900;color:#151C26;cursor:pointer}'+
+    '.rd-tbl .nm:hover{color:#8A6A1E;text-decoration:underline}'+
+    '.rd-pill{display:inline-flex;align-items:center;gap:4px;border-radius:999px;padding:2px 8px;font-size:9px;'+
+      'font-weight:900;border:1px solid transparent;white-space:nowrap}'+
+    '.rd-pill:before{content:"";width:5px;height:5px;border-radius:50%;background:currentColor}'+
+    '.rd-pill.ok{background:#F1F8F4;color:#1B6E4E;border-color:#D4E8DE}'+
+    '.rd-pill.warn{background:#FDF7E9;color:#8A6A1E;border-color:#EFE2C4}'+
+    '.rd-pill.bad{background:#FDF3F3;color:#A81E28;border-color:#F1D3D5}'+
+    '.rd-pill.grey{background:#F4F2EC;color:#8B93A0;border-color:#E6E3DC}'+
+    '.rd-bar{display:inline-block;width:78px;height:6px;border-radius:99px;background:#F0EEE7;overflow:hidden;vertical-align:middle}'+
+    '.rd-bar i{display:block;height:100%;border-radius:99px}'+
+    '.rd-bar.ok i{background:linear-gradient(90deg,#1B6E4E,#2C9469)}'+
+    '.rd-bar.warn i{background:linear-gradient(90deg,#B4860F,#D8A93B)}'+
+    '.rd-bar.bad i{background:linear-gradient(90deg,#A81E28,#C63B45)}'+
+    '.rd-btn{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--line);background:#fff;border-radius:8px;'+
+      'padding:5px 10px;font-size:10.5px;font-weight:900;color:#151C26;cursor:pointer;font-family:inherit}'+
+    '.rd-btn:hover{border-color:#CFC7B4;background:#FCFBF7}'+
+    '.rd-btn.gold{background:linear-gradient(180deg,#D2AC55,#BE9740);border-color:#B08B36;color:#0A1322}'+
+    '.rd-btn.sm{padding:3px 8px;font-size:9.5px}',
+    '.rd-split{display:flex;gap:7px;flex-wrap:wrap;margin:11px 0}'+
+    '.rd-split button{border:1px solid var(--line);background:#fff;border-radius:999px;padding:6px 12px;font-size:11px;'+
+      'font-weight:900;color:#5A6473;cursor:pointer;font-family:inherit;display:inline-flex;align-items:center;gap:5px}'+
+    '.rd-split button.on{background:#0A1322;border-color:#0A1322;color:#fff}'+
+    '.rd-split button b{font-size:9.5px;background:rgba(200,162,74,.22);color:#8A6A1E;border-radius:999px;padding:1px 6px}'+
+    '.rd-split button.on b{background:rgba(200,162,74,.3);color:#F0D79A}'+
+    '.rd-note{margin-top:10px;font-size:10.5px;font-weight:800;color:#6B6250;background:#FBF6E9;'+
+      'border:1px solid #EADFC0;border-radius:9px;padding:8px 11px}'+
+    '.rd-note.bad{color:#8A2A2A;background:#FDF3F3;border-color:#F1D3D5}',
+    'table.qd-tbl th.rd-col,.rd-hl{background:#FCF7EA!important}'+
+    '.rd-inline{display:inline-flex;align-items:center;gap:5px;font-weight:900;font-size:10.5px}'
+  ].join("");
+  function css(){ try{ if(document.getElementById("rd230css")) return; var s=document.createElement("style"); s.id="rd230css"; s.textContent=CSS; document.head.appendChild(s); }catch(e){} }
+
+  /* ---------------- الحالة ---------------- */
+  var FILTER="all", DAY=TODAY();
+
+  /* ---------------- لوحة الجاهزية ---------------- */
+  function rows(day){
+    var ps=ARR("players").slice().sort(function(a,b){ return PN(a.id).localeCompare(PN(b.id),"ar"); });
+    return ps.map(function(p){ return readiness(p.id,day); });
+  }
+  function paneReady(){
+    var all=rows(DAY);
+    var sent=all.filter(function(r){ return r.sent; }).length;
+    var go=all.filter(function(r){ return r.dec.k==="go"; }).length;
+    var mod=all.filter(function(r){ return r.dec.k==="mod"; }).length;
+    var stop=all.filter(function(r){ return r.dec.k==="stop"||r.dec.k==="ref"; }).length;
+    var need=all.filter(function(r){ return r.dec.k==="need"; }).length;
+    var avg=all.filter(function(r){ return r.sent; });
+    var avgS=avg.length?Math.round(avg.reduce(function(s,r){ return s+r.score; },0)/avg.length):0;
+
+    var list=all.filter(function(r){ return FILTER==="all"||r.dec.k===FILTER; });
+
+    var h='<div class="rd-kpis">'+
+      '<div class="rd-kpi"><b>'+E(sent)+'/'+E(all.length)+'</b><span>'+L("أرسلوا الاستبيان","Check-ins in")+'</span><i>'+E(DAY)+'</i></div>'+
+      '<div class="rd-kpi"><b>'+E(avgS||"—")+'</b><span>'+L("متوسط الجاهزية","Avg readiness")+'</span><i>'+L("من ١٠٠","of 100")+'</i></div>'+
+      '<div class="rd-kpi"><b style="color:#1B6E4E">'+E(go)+'</b><span>'+L("تدريب كامل","Full training")+'</span></div>'+
+      '<div class="rd-kpi"><b style="color:#8A6A1E">'+E(mod)+'</b><span>'+L("تدريب معدّل","Modified")+'</span></div>'+
+      '<div class="rd-kpi"><b style="color:#A81E28">'+E(stop)+'</b><span>'+L("إيقاف/إحالة","Stop / review")+'</span></div>'+
+      '<div class="rd-kpi"><b>'+E(need)+'</b><span>'+L("بانتظار الردّ","Awaiting")+'</span></div>'+
+    '</div>';
+
+    h+='<div class="rd-split">'+
+      [["all",L("الكل","All"),all.length],["go",L("جاهز","Ready"),go],["mod",L("معدّل","Modified"),mod],
+       ["ref",L("إحالة","Review"),all.filter(function(r){ return r.dec.k==="ref"; }).length],
+       ["stop",L("إيقاف","Stop"),all.filter(function(r){ return r.dec.k==="stop"; }).length],
+       ["need",L("بانتظار","Waiting"),need]].map(function(f){
+        return '<button class="'+(FILTER===f[0]?"on":"")+'" data-rd="filter" data-v="'+f[0]+'">'+E(f[1])+' <b>'+E(f[2])+'</b></button>';
+      }).join("")+
+      '<button class="rd-btn gold" data-rd="sendwa">📤 '+L("إرسال استبيان اليوم","Send today\'s check-in")+'</button>'+
+      '<button class="rd-btn" data-rd="csv">⬇ CSV</button>'+
+    '</div>';
+
+    h+='<div class="rd-card"><h4><b>'+L("قرار التدريب اليومي","Daily training decision")+'</b>'+
+      '<input type="date" id="rdDay" class="rd-btn" style="padding:4px 8px" value="'+E(DAY)+'">'+
+      '<span style="font-size:9px;color:#98A0AC">'+L("استبيان + حالة طبية + حمل","Check-in + medical + load")+'</span></h4>'+
+      '<table class="rd-tbl"><thead><tr>'+
+        '<th>'+L("اللاعب","Player")+'</th><th class="rd-hl">'+L("الجاهزية","Readiness")+'</th>'+
+        '<th>'+L("الاستبيان","Check-in")+'</th><th>'+L("الحالة الطبية","Medical")+'</th>'+
+        '<th>'+L("الحمل","Load")+'</th><th>'+L("القرار","Decision")+'</th><th></th>'+
+      '</tr></thead><tbody>'+
+      (list.length?list.map(function(r){
+        var z=zoneOf(r.score);
+        var wTxt=r.well!=null?('<b>'+E(r.well)+'/25</b>'):'<span class="rd-pill grey">'+L("لم يرسل","No")+'</span>';
+        var medTxt={available:L("متاح","Available"),modified:L("معدّل","Modified"),rehab:L("تأهيل","Rehab"),out:L("خارج","Out"),ill:L("مرض","Illness")}[r.med.k];
+        return '<tr>'+
+          '<td><span class="nm" data-rd="openp" data-p="'+E(r.pid)+'">'+E(PN(r.pid))+'</span></td>'+
+          '<td class="rd-hl"><span class="rd-inline"><span class="rd-bar '+z.k+'"><i style="width:'+r.score+'%"></i></span>'+
+            '<b>'+E(r.score)+'</b></span></td>'+
+          '<td>'+wTxt+'</td>'+
+          '<td><span class="rd-pill '+(r.med.k==="available"?"ok":r.med.k==="out"||r.med.k==="ill"?"bad":"warn")+'">'+E(medTxt)+'</span></td>'+
+          '<td style="font-size:10px;font-weight:800;color:#5A6473">'+E(r.parts[2].raw)+'</td>'+
+          '<td><span class="rd-pill '+r.dec.cls+'">'+E(L(r.dec.ar,r.dec.en))+'</span></td>'+
+          '<td style="text-align:end;white-space:nowrap">'+
+            '<button class="rd-btn sm" data-rd="detail" data-p="'+E(r.pid)+'">'+L("تفصيل","Detail")+'</button> '+
+            '<button class="rd-btn sm" data-rd="wa" data-p="'+E(r.pid)+'">'+L("تذكير","Remind")+'</button></td>'+
+        '</tr>';
+      }).join(""):'<tr><td colspan="7" style="padding:16px;text-align:center;color:#8B93A0">'+L("لا لاعبين في هذا التصنيف","No players in this group")+'</td></tr>')+
+      '</tbody></table></div>';
+
+    h+='<div class="rd-note">'+L("المعادلة: الاستبيان ٤٠ + الحالة الطبية ٤٠ + الحمل ٢٠ = ١٠٠. القرار طبي لا آلي: «إحالة» تعني مراجعة الأخصائي قبل أي تدريب.",
+      "Formula: check-in 40 + medical 40 + load 20 = 100. The decision is clinical, not automatic: “Review” means see the clinician before training.")+'</div>';
+    return h;
+  }
+
+  /* ---------------- تفصيل لاعب ---------------- */
+  function detail(pid){
+    var r=readiness(pid,DAY), p=ARR("players").filter(function(x){ return String(x.id)===String(pid); })[0]||{};
+    var body='<div style="direction:'+(isEN()?"ltr":"rtl")+';font-family:Tajawal,Tahoma,sans-serif">'+
+      '<div style="display:flex;align-items:center;gap:12px;border-bottom:1px solid #E6E3DC;padding-bottom:11px;margin-bottom:13px">'+
+        '<div style="width:52px;height:52px;border-radius:50%;display:grid;place-items:center;font-weight:900;font-size:17px;'+
+          'background:'+(r.score>=80?"#F1F8F4":r.score>=65?"#FDF7E9":"#FDF3F3")+';color:'+(r.score>=80?"#1B6E4E":r.score>=65?"#8A6A1E":"#A81E28")+'">'+E(r.score)+'</div>'+
+        '<div style="flex:1"><b style="font-size:15px;font-weight:900">'+E(PN(pid))+'</b>'+
+          '<div style="font-size:11px;font-weight:800;color:#6E6A63">'+E(DAY)+' · '+E(L(r.dec.ar,r.dec.en))+'</div></div>'+
+      '</div>'+
+      r.parts.map(function(x){
+        var pct=x.v==null?0:Math.round(x.v/x.max*100);
+        return '<div style="margin-bottom:9px">'+
+          '<div style="display:flex;align-items:center;gap:7px;font-size:11px;font-weight:900;color:#151C26">'+
+            '<span style="flex:1">'+E(L(x.ar,x.en))+'</span>'+
+            '<span style="color:#8B93A0;font-size:10px">'+E(x.raw)+'</span>'+
+            '<b>'+(x.v==null?"—":E(x.v)+"/"+E(x.max))+'</b></div>'+
+          '<div style="height:6px;border-radius:99px;background:#F0EEE7;overflow:hidden;margin-top:4px">'+
+            '<i style="display:block;height:100%;width:'+pct+'%;background:'+(pct>=70?"#1B6E4E":pct>=40?"#B4860F":"#A81E28")+'"></i></div>'+
+        '</div>';
+      }).join("")+
+      (r.well!=null?'<div style="margin-top:13px;border-top:1px solid #E6E3DC;padding-top:11px">'+
+        '<b style="font-size:11px;font-weight:900">'+L("إجابات اللاعب","Player answers")+'</b>'+
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px;font-size:11px">'+
+        [["sleep",L("النوم","Sleep")],["fatigue",L("الإجهاد","Fatigue")],["soreness",L("ألم العضلات","Soreness")],["stress",L("التوتر","Stress")],["mood",L("المزاج","Mood")]].map(function(it){
+          var v=Number(r.well[it[0]])||0;
+          return '<div style="display:flex;gap:6px;align-items:center"><span style="flex:1;font-weight:800;color:#5A6473">'+E(it[1])+'</span>'+
+            '<b style="color:'+(v>=4?"#1B6E4E":v<=2?"#A81E28":"#8A6A1E")+'">'+E(v)+'/5</b></div>';
+        }).join("")+'</div></div>':'')+
+      '<div style="margin-top:13px;border-top:1px solid #E6E3DC;padding-top:11px;display:flex;gap:7px;flex-wrap:wrap">'+
+        '<button class="rd-btn" data-rd="openp" data-p="'+E(pid)+'">📁 '+L("الملف الطبي","Medical file")+'</button>'+
+        '<button class="rd-btn gold" data-rd="wa" data-p="'+E(pid)+'">📤 '+L("إرسال رابط الاستبيان","Send check-in link")+'</button>'+
+      '</div></div>';
+    try{ if(typeof openModal==="function") openModal({title:L("الجاهزية اليومية","Daily readiness"),body:body}); }catch(e){}
+  }
+
+  /* ---------------- CSV ---------------- */
+  function csv(){
+    try{
+      var rows=[[L("اللاعب","Player"),L("التاريخ","Date"),L("الاستبيان","Check-in"),L("الحالة الطبية","Medical"),
+        L("الحمل","Load"),L("الجاهزية","Readiness"),L("القرار","Decision")].join(",")];
+      rows(DAY).forEach(function(r){
+        rows.push([PN(r.pid),DAY,(r.well==null?"":r.well+"/25"),r.med.k,r.parts[2].raw,r.score,L(r.dec.ar,r.dec.en)].join(","));
+      });
+      var blob=new Blob(["\uFEFF"+rows.join("\r\n")],{type:"text/csv;charset=utf-8"});
+      var a=document.createElement("a"); a.href=URL.createObjectURL(blob);
+      a.download="readiness-"+DAY+".csv"; document.body.appendChild(a); a.click();
+      setTimeout(function(){ try{ URL.revokeObjectURL(a.href); a.remove(); }catch(e){} },1200);
+      toastit(L("تم تصدير الجاهزية","Readiness exported"));
+    }catch(e){ toastit(L("تعذّر التصدير","Export failed"),"bad"); }
+  }
+
+  /* ---------------- ربط بلوحة QD227 (عمود الجاهزية) ---------------- */
+  function enrichClinicalBoard(){
+    try{
+      var host=document.getElementById("v-clinical"); if(!host) return;
+      var tbl=host.querySelector(".cl-tbl"); if(!tbl) return;
+      var head=tbl.querySelector("thead tr"); if(!head||head.querySelector(".rd-th")) return;
+      var th=document.createElement("th"); th.className="rd-th rd-hl"; th.textContent=L("الجاهزية","Readiness");
+      var cells=head.children;
+      if(cells.length>2) head.insertBefore(th,cells[2]); else head.appendChild(th);
+      tbl.querySelectorAll("tbody tr").forEach(function(tr){
+        var a=tr.querySelector("[data-cl='openp']"); if(!a) return;
+        var pid=a.getAttribute("data-p");
+        var r=readiness(pid,TODAY()), z=zoneOf(r.score);
+        var td=document.createElement("td"); td.className="rd-hl rd-td";
+        td.innerHTML='<span class="rd-inline"><span class="rd-bar '+z.k+'"><i style="width:'+r.score+'%"></i></span>'+
+          '<b style="font-size:10.5px">'+E(r.score)+'</b></span>';
+        if(cells.length>2) tr.insertBefore(td,tr.children[2]); else tr.appendChild(td);
+      });
+    }catch(e){}
+  }
+
+  /* ---------------- استيراد تلقائي (حافظة + مراقبة) ---------------- */
+  function decodeAll(text){
+    var out=[], re=/QDWL1\s*\|\s*([A-Za-z0-9_\-]+)\s*\|\s*(\d{4}-\d{2}-\d{2})\s*\|\s*([0-9](?:\s*[,.;\-]\s*[0-9]){4})/g, m;
+    var t=String(text||"");
+    while((m=re.exec(t))){
+      var nums=m[3].split(/[,.;\-]/).map(function(x){ return Number(String(x).trim())||0; });
+      if(nums.length!==5||nums.some(function(n){ return n<0||n>5; })) continue;
+      out.push({pid:m[1],date:m[2],vals:{sleep:nums[0],fatigue:nums[1],soreness:nums[2],stress:nums[3],mood:nums[4]}});
+    }
+    return out;
+  }
+  function storeFound(found){
+    var s=ST(); if(!s) return {added:0,dup:0,unknown:0};
+    if(!Array.isArray(s.wellness)) s.wellness=[];
+    var added=0,dup=0,unknown=0;
+    found.forEach(function(f){
+      if(!ARR("players").some(function(p){ return String(p.id)===String(f.pid); })){ unknown++; return; }
+      if(wellOf(f.pid,f.date)){ dup++; return; }
+      s.wellness.push({id:"wl"+Date.now().toString(36)+Math.random().toString(36).slice(2,6),
+        playerId:String(f.pid),date:f.date,sleep:f.vals.sleep,fatigue:f.vals.fatigue,soreness:f.vals.soreness,
+        stress:f.vals.stress,mood:f.vals.mood,notes:"",created:new Date().toISOString(),source:"whatsapp"});
+      added++;
+    });
+    if(added) SAVE();
+    return {added:added,dup:dup,unknown:unknown};
+  }
+  /* يقرأ الحافظة عند رجوع المستخدم إلى النافذة ويخزّن أي ردود جديدة تلقائيًا */
+  function autoPaste(){
+    try{
+      var last=null;
+      try{ last=localStorage.getItem("qd230_lastclip")||""; }catch(e){}
+      if(!navigator.clipboard||!navigator.clipboard.readText) return;
+      navigator.clipboard.readText().then(function(txt){
+        if(!txt||txt===last) return;
+        var found=decodeAll(txt);
+        if(!found.length) return;
+        try{ localStorage.setItem("qd230_lastclip",txt); }catch(e){}
+        var r=storeFound(found);
+        if(r.added){
+          toastit(L("استُوردت ","Imported ")+r.added+L(" استجابة من الحافظة"," check-in(s) from clipboard"),"ok");
+          try{ if(A().REND.clinical) A().REND.clinical(); }catch(e){}
+          try{ if(A().REND.wellness) A().REND.wellness(); }catch(e){}
+        }
+      }).catch(function(){});
+    }catch(e){}
+  }
+  function watchWindow(){
+    try{
+      if(window.__rd230){ return; }
+      window.__rd230=1;
+      window.addEventListener("focus",function(){ setTimeout(autoPaste,600); });
+      document.addEventListener("paste",function(e){
+        try{
+          var txt=(e.clipboardData||window.clipboardData).getData("text");
+          var found=decodeAll(txt);
+          if(!found.length) return;
+          var r=storeFound(found);
+          if(r.added) toastit(L("استُوردت ","Imported ")+r.added+L(" استجابة"," check-in(s)"),"ok");
+        }catch(x){}
+      },true);
+    }catch(e){}
+  }
+
+  /* ---------------- واتساب سريع ---------------- */
+  function waLink(pid){
+    var p=ARR("players").filter(function(x){ return String(x.id)===String(pid); })[0];
+    if(!p) return "";
+    try{ if(window.QD229&&window.QD229.wa) return window.QD229.wa(p,TODAY()); }catch(e){}
+    return "";
+  }
+
+  /* ---------------- التبويب داخل القيادة الطبية ---------------- */
+  function renderClinicalTab(){
+    var host=document.getElementById("v-clinical"); if(!host) return;
+    var wrap=host.querySelector(".cl-wrap"); if(!wrap) return;
+    var tabsEl=wrap.querySelector(".cl-tabs"); if(!tabsEl) return;
+    if(!tabsEl.querySelector('[data-rdt="ready"]')){
+      var b=document.createElement("button");
+      b.setAttribute("data-rdt","ready");
+      b.textContent=L("الجاهزية اليومية","Daily readiness");
+      var bd=document.createElement("b"); bd.textContent=rows(TODAY()).filter(function(r){ return r.dec.k==="ref"||r.dec.k==="stop"; }).length;
+      b.appendChild(document.createTextNode(" ")); b.appendChild(bd);
+      tabsEl.appendChild(b);
+    }
+    var body=wrap.querySelector(".rd-body");
+    if(!body){ body=document.createElement("div"); body.className="rd-body"; wrap.appendChild(body); }
+    /* أخفِ محتوى التبويب الأصلي عند عرض الجاهزية */
+    var on=tabsEl.querySelector('.cl-tabs button[data-rdt="ready"].on');
+    Array.prototype.forEach.call(wrap.children,function(ch){
+      if(ch===body||ch.classList.contains("cl-hero")||ch.classList.contains("cl-tabs")) return;
+      ch.style.display=on?"none":"";
+    });
+    if(on){ body.innerHTML='<div style="margin:11px 0">'+paneReady()+'</div>'; }
+    else body.innerHTML="";
+  }
+
+  /* ---------------- الأحداث ---------------- */
+  function bind(){
+    document.addEventListener("click",function(e){
+      var t=e.target&&e.target.closest?e.target.closest("[data-rd],[data-rdt]"):null;
+      if(!t) return;
+      var rt=t.getAttribute("data-rdt");
+      if(rt==="ready"){
+        var tabs=t.closest(".cl-tabs");
+        Array.prototype.forEach.call(tabs.querySelectorAll("button"),function(b){ b.classList.remove("on"); });
+        t.classList.add("on");
+        renderClinicalTab(); e.preventDefault(); return;
+      }
+      var k=t.getAttribute("data-rd");
+      if(k==="filter"){ FILTER=t.getAttribute("data-v"); paint(); e.preventDefault(); return; }
+      if(k==="detail"){ detail(t.getAttribute("data-p")); e.preventDefault(); return; }
+      if(k==="openp"){ try{ if(typeof openPlayerProfile==="function") openPlayerProfile(t.getAttribute("data-p")); }catch(x){} e.preventDefault(); return; }
+      if(k==="wa"){ var l=waLink(t.getAttribute("data-p")); if(l){ try{ window.open(l,"_blank"); }catch(x){} } else toastit(L("لا رقم جوال","No phone number"),"warn"); e.preventDefault(); return; }
+      if(k==="sendwa"){ try{ if(A().showView) A().showView("wellness"); }catch(x){} e.preventDefault(); return; }
+      if(k==="csv"){ csv(); e.preventDefault(); return; }
+    },true);
+    document.addEventListener("change",function(e){
+      if(e.target&&e.target.id==="rdDay"){ DAY=e.target.value||TODAY(); paint(); }
+    },true);
+    /* عند الضغط على تبويب أصلي في القيادة الطبية، أعِد إظهار المحتوى */
+    document.addEventListener("click",function(e){
+      var t=e.target&&e.target.closest?e.target.closest('.cl-tabs button[data-cl="tab"]'):null;
+      if(!t) return;
+      setTimeout(function(){
+        var host=document.getElementById("v-clinical"); if(!host) return;
+        var body=host.querySelector(".rd-body"); if(body) body.innerHTML="";
+        var b=host.querySelector('[data-rdt="ready"]'); if(b) b.classList.remove("on");
+        Array.prototype.forEach.call(host.querySelector(".cl-wrap").children,function(ch){
+          if(ch.classList.contains("rd-body")) return;
+          ch.style.display="";
+        });
+      },30);
+    },true);
+  }
+  function paint(){
+    var host=document.getElementById("v-clinical");
+    if(!host) return;
+    var on=host.querySelector('[data-rdt="ready"].on');
+    if(on) renderClinicalTab();
+    else enrichClinicalBoard();
+  }
+
+  /* ---------------- التثبيت ---------------- */
+  function install(){
+    try{
+      var a=A();
+      if(!a||!a.REND||!a.NAV){ setTimeout(install,450); return; }
+      css(); watchWindow();
+      if(!window.__rd230bind){ bind(); window.__rd230bind=1; }
+      var f=function(){ try{ renderClinicalTab(); enrichClinicalBoard(); }catch(e){} };
+      f.__rd230=1;
+      /* نغلّف REND.clinical بعد QD227 */
+      var base=a.REND.clinical;
+      if(base&&!base.__rd230wrapped){
+        var w=function(){ var r=base.apply(this,arguments); try{ renderClinicalTab(); setTimeout(enrichClinicalBoard,60); }catch(e){} return r; };
+        w.__rd230wrapped=1; w.__rd230=1;
+        a.REND.clinical=w;
+      }
+      setTimeout(function(){ try{ f(); }catch(e){} },900);
+      setTimeout(function(){ try{ f(); }catch(e){} },2000);
+      a.__rd230=1;
+    }catch(e){ setTimeout(install,800); }
+  }
+
+  window.QD230={readiness:readiness,rows:rows,detail:detail,csv:csv,decodeAll:decodeAll,storeFound:storeFound,autoPaste:autoPaste};
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",install,{once:true});
+  install();
+})();
+
+</script>
+<script>
+/* ============================================================================
+   QD231 · المزامنة السحابية (Supabase) — رابط واحد ومفتاح واحد
+   • مزامنة حالة البرنامج بين الأجهزة (دفع/سحب تلقائي)
+   • استقبال استبيانات اللاعبين مباشرة من جوالاتهم إلى قاعدة البيانات
+   ============================================================================ */
+(function(){
+  "use strict";
+
+  function isEN(){ try{ if(/^en/i.test(document.documentElement.getAttribute("lang")||"")) return true; var l=localStorage.getItem("qd_lang"); return !!(l&&/^en/i.test(l)); }catch(e){ return false; } }
+  function L(a,e){ return isEN()?e:a; }
+  function E(s){ return String(s==null?"":s).replace(/[&<>"']/g,function(c){ return ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[c]; }); }
+  function A(){ return window.__QDAPP||null; }
+  function ST(){ try{ var a=A(); if(a&&a.S) return a.S; }catch(e){} try{ return window.QD_S||null; }catch(e){ return null; } }
+  function ARR(k){ var s=ST(); return (s&&Array.isArray(s[k]))?s[k]:[]; }
+  function TODAY(){ var d=new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+  function stamp(){ var d=new Date(); return String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0")+":"+String(d.getSeconds()).padStart(2,"0"); }
+  function toastit(m,k){ try{ if(typeof toast==="function") return toast(m,k||"ok"); }catch(e){} }
+
+  /* ---------------- الإعدادات المحلية ---------------- */
+  var KEY="qd231_cfg";
+  function cfg(){
+    try{ return JSON.parse(localStorage.getItem(KEY)||"{}")||{}; }catch(e){ return {}; }
+  }
+  function setCfg(o){ try{ localStorage.setItem(KEY,JSON.stringify(o||{})); }catch(e){} }
+  function ready(){ var c=cfg(); return !!(c.url&&c.key&&c.ws); }
+  function normUrl(u){
+    var s=String(u||"").trim().replace(/\/+$/,"");
+    if(!s) return "";
+    if(!/^https?:\/\//i.test(s)) s="https://"+s;
+    return s;
+  }
+  function token(){
+    var c=cfg(); if(!ready()) return "";
+    var raw={u:normUrl(c.url),k:c.key,w:c.ws};
+    try{ return btoa(unescape(encodeURIComponent(JSON.stringify(raw)))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,""); }catch(e){ return ""; }
+  }
+  function readToken(t){
+    try{
+      var s=String(t||"").replace(/-/g,"+").replace(/_/g,"/");
+      var j=JSON.parse(decodeURIComponent(escape(atob(s))));
+      if(j&&j.u&&j.k&&j.w) return {url:j.u,key:j.k,ws:j.w};
+    }catch(e){}
+    return null;
+  }
+
+  /* ---------------- حارس التشفير (b64 عربي) ---------------- */
+  function b64enc(str){
+    try{ return btoa(unescape(encodeURIComponent(str))); }catch(e){ return ""; }
+  }
+
+  /* ---------------- HTTP ---------------- */
+  var LAST={state:"idle",msg:"",at:null}, LOG=[];
+  function logIt(m,k){
+    LOG.unshift({t:stamp(),m:m,k:k||"ok"});
+    if(LOG.length>8) LOG.pop();
+    try{ var el=document.getElementById("cl231log"); if(el) el.innerHTML=paintLog(); }catch(e){}
+  }
+  function api(path,opts){
+    var c=cfg();
+    var url=normUrl(c.url)+"/rest/v1/"+path;
+    var key=String(c.key||"").trim();
+    var h={"apikey":key,"Content-Type":"application/json"};
+    /* المفاتيح القديمة (JWT تبدأ بـ eyJ) تحتاج Authorization أيضًا.
+       المفاتيح الجديدة sb_publishable_ لا تُرسل في Authorization وإلا رُفض الطلب Invalid JWT */
+    if(/^eyJ/.test(key)) h["Authorization"]="Bearer "+key;
+    h=Object.assign(h,(opts&&opts.headers)||{});
+    return fetch(url,Object.assign({},opts||{},{headers:h}));
+  }
+  function testConn(){
+    if(!ready()){ toastit(L("أدخل الرابط والمفتاح أولًا","Enter the URL and key first"),"warn"); return Promise.resolve(false); }
+    var tbl=cfg().table||"qd_state";
+    return api(tbl+"?select=id&limit=1",{method:"GET"})
+      .then(function(r){
+        if(r.ok){ LAST={state:"ok",msg:L("الاتصال ناجح","Connected"),at:stamp()}; logIt(L("اختبار الاتصال: ناجح","Connection test: OK"),"ok"); return true; }
+        return r.text().then(function(t){
+          LAST={state:"bad",msg:"HTTP "+r.status,at:stamp()};
+          logIt(L("فشل الاتصال: ","Failed: ")+"HTTP "+r.status+" — "+String(t).slice(0,120),"bad");
+          return false;
+        });
+      })
+      .catch(function(e){ LAST={state:"bad",msg:String(e.message||e),at:stamp()}; logIt(L("فشل الاتصال: ","Failed: ")+String(e.message||e).slice(0,120),"bad"); return false; })
+      .then(function(v){ render(); return v; });
+  }
+
+  /* ---------------- الدفع ---------------- */
+  var pushing=false, pushTimer=null, pending=false;
+  function push(silent){
+    if(!ready()||pushing) return Promise.resolve(false);
+    var s=ST(); if(!s) return Promise.resolve(false);
+    pushing=true;
+    var c=cfg(), tbl=c.table||"qd_state";
+    var body=[{id:c.ws,payload:s,updated_at:new Date().toISOString()}];
+    return api(tbl,{method:"POST",headers:{"Prefer":"resolution=merge-duplicates,return=minimal"},body:JSON.stringify(body)})
+      .then(function(r){
+        if(r.ok||r.status===201||r.status===204){
+          LAST={state:"ok",msg:L("مُزامن","Synced"),at:stamp()};
+          if(!silent) toastit(L("تم رفع البيانات للسحابة","Pushed to cloud"));
+          logIt(L("رفع: ناجح","Push: OK"),"ok");
+          return true;
+        }
+        return r.text().then(function(t){ LAST={state:"bad",msg:"HTTP "+r.status,at:stamp()};
+          logIt(L("فشل الرفع: ","Push failed: ")+"HTTP "+r.status+" "+String(t).slice(0,110),"bad"); return false; });
+      })
+      .catch(function(e){ LAST={state:"bad",msg:String(e.message||e),at:stamp()};
+        logIt(L("فشل الرفع: ","Push failed: ")+String(e.message||e).slice(0,110),"bad");
+        pending=true; return false; })
+      .then(function(v){ pushing=false; paintBadge(); return v; });
+  }
+  function schedulePush(){
+    if(!ready()) return;
+    if(pushTimer) clearTimeout(pushTimer);
+    pushTimer=setTimeout(function(){ push(true); },5000);
+  }
+
+  /* ---------------- السحب ---------------- */
+  function pull(silent){
+    if(!ready()) return Promise.resolve(false);
+    var c=cfg(), tbl=c.table||"qd_state";
+    return api(tbl+"?id=eq."+encodeURIComponent(c.ws)+"&select=payload,updated_at",{method:"GET"})
+      .then(function(r){
+        if(!r.ok) return false;
+        return r.json().then(function(rows){
+          if(!rows||!rows.length){ logIt(L("لا نسخة سحابية بعد","No cloud copy yet"),"warn"); if(!silent) toastit(L("لا نسخة سحابية بعد","No cloud copy yet"),"warn"); return false; }
+          var row=rows[0], remote=row.payload||{};
+          var a=A(); if(!a) return false;
+          /* دمج: الاستبيانات تُضمّ بالمعرّف، وباقي الحالة تُستبدل */
+          var localWell=Array.isArray(ARR("wellness"))?ARR("wellness").slice():[];
+          var remoteWell=Array.isArray(remote.wellness)?remote.wellness:[];
+          var seen={}, merged=[];
+          remoteWell.concat(localWell).forEach(function(w){
+            if(!w) return; var k=String(w.playerId)+"|"+String(w.date||"").slice(0,10);
+            if(seen[k]) return; seen[k]=1; merged.push(w);
+          });
+          remote.wellness=merged;
+          a.S=remote;
+          try{ if(a.save) a.save(); }catch(e){}
+          LAST={state:"ok",msg:L("مُستورد","Pulled"),at:stamp()};
+          logIt(L("سحب: ناجح — ","Pull: OK — ")+merged.length+L(" استبيان"," check-ins"),"ok");
+          if(!silent) toastit(L("تم تحميل البيانات من السحابة","Loaded from cloud"));
+          try{ if(a.REND.clinical) a.REND.clinical(); }catch(e){}
+          try{ if(a.REND.wellness) a.REND.wellness(); }catch(e){}
+          try{ if(a.renderNav) a.renderNav(); }catch(e){}
+          render();
+          return true;
+        });
+      })
+      .catch(function(e){ logIt(L("فشل السحب: ","Pull failed: ")+String(e.message||e).slice(0,110),"bad"); return false; });
+  }
+
+  /* ---------------- استبيانات اللاعبين من السحابة ---------------- */
+  function pullWellness(silent){
+    if(!ready()) return Promise.resolve(0);
+    var c=cfg(), tbl=c.wtable||"qd_wellness";
+    return api(tbl+"?workspace=eq."+encodeURIComponent(c.ws)+"&select=*&order=created_at.desc&limit=300",{method:"GET"})
+      .then(function(r){
+        if(!r.ok) return 0;
+        return r.json().then(function(rows){
+          if(!rows||!rows.length) return 0;
+          var s=ST(); if(!s) return 0;
+          if(!Array.isArray(s.wellness)) s.wellness=[];
+          var added=0;
+          rows.forEach(function(w){
+            var pid=String(w.player_id||w.playerId||""), day=String(w.date||"").slice(0,10);
+            if(!pid||!day) return;
+            var has=s.wellness.some(function(x){ return x&&String(x.playerId)===pid&&String(x.date||"").slice(0,10)===day; });
+            if(has) return;
+            s.wellness.push({id:"wl"+String(w.created_at||Date.now()).replace(/\D/g,"").slice(-10)+Math.random().toString(36).slice(2,4),
+              playerId:pid,date:day,sleep:Number(w.sleep)||0,fatigue:Number(w.fatigue)||0,soreness:Number(w.soreness)||0,
+              stress:Number(w.stress)||0,mood:Number(w.mood)||0,notes:"",created:w.created_at||new Date().toISOString(),source:"cloud"});
+            added++;
+          });
+          if(added){
+            try{ var a=A(); if(a&&a.save) a.save(); }catch(e){}
+            if(!silent) toastit(L("وصل ","Incoming ")+added+L(" استبيان جديد"," new check-in(s)"),"ok");
+            logIt(L("استبيانات جديدة: ","New check-ins: ")+added,"ok");
+            try{ var a2=A(); if(a2&&a2.REND.clinical) a2.REND.clinical(); }catch(e){}
+            try{ var a3=A(); if(a3&&a3.REND.wellness) a3.REND.wellness(); }catch(e){}
+          }
+          paintBadge();
+          return added;
+        });
+      })
+      .catch(function(){ return 0; });
+  }
+  function submitWell(pid,day,vals){
+    if(!ready()) return Promise.resolve(false);
+    var c=cfg(), tbl=c.wtable||"qd_wellness";
+    var body=[{workspace:c.ws,player_id:String(pid),date:String(day),
+      sleep:Number(vals.sleep)||0,fatigue:Number(vals.fatigue)||0,soreness:Number(vals.soreness)||0,
+      stress:Number(vals.stress)||0,mood:Number(vals.mood)||0}];
+    return api(tbl,{method:"POST",headers:{"Prefer":"resolution=ignore-duplicates,return=minimal"},body:JSON.stringify(body)})
+      .then(function(r){ logIt(L("استبيان لاعب رُفع للسحابة","Player check-in uploaded"),r.ok?"ok":"bad"); return r.ok; })
+      .catch(function(){ return false; });
+  }
+
+  /* ---------------- شارة الحالة ---------------- */
+  function paintBadge(){
+    try{
+      var el=document.getElementById("cloud231");
+      if(!el){
+        var bar=document.querySelector(".topbar"); if(!bar) return;
+        el=document.createElement("button"); el.id="cloud231"; el.className="cl231-badge";
+        var anchor=document.getElementById("svDot")||document.getElementById("langBtn");
+        if(anchor&&anchor.parentElement) anchor.parentElement.insertBefore(el,anchor); else bar.appendChild(el);
+        el.addEventListener("click",function(){ try{ var a=A(); if(a&&a.showView) a.showView("cloud"); }catch(e){} });
+      }
+      var c=cfg();
+      if(!ready()){ el.className="cl231-badge off"; el.innerHTML="☁ "+L("محلي","Local"); el.title=L("لم تُفعّل المزامنة السحابية","Cloud sync not configured"); return; }
+      var ok=LAST.state==="ok";
+      el.className="cl231-badge"+(ok?" on":" err");
+      el.innerHTML="☁ "+(ok?L("مُزامن","Synced")+" "+(LAST.at||""):LAST.state==="bad"?L("تعذّر","Offline"):L("جاهز","Ready"));
+      el.title=(LAST.msg||"")+(c.url?" · "+normUrl(c.url):"");
+    }catch(e){}
+  }
+
+  /* ---------------- CSS ---------------- */
+  var CSS=[
+    '.cl231-badge{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:4px 10px;font-size:10px;'+
+      'font-weight:900;font-family:inherit;cursor:pointer;border:1px solid var(--line);background:#fff;color:#5A6473;white-space:nowrap}'+
+    '.cl231-badge.on{background:#F1F8F4;color:#1B6E4E;border-color:#D4E8DE}'+
+    '.cl231-badge.err{background:#FDF3F3;color:#A81E28;border-color:#F1D3D5}'+
+    '.cl231-badge.off{background:#F7F7F5;color:#8B93A0}',
+    '.cl231-hero{border-radius:16px;padding:16px 18px;background:linear-gradient(135deg,#0A1322,#12233D 60%,#0A1322);'+
+      'color:#EFF2F6;border:1px solid rgba(200,162,74,.28);position:relative;overflow:hidden}'+
+    '.cl231-hero:before{content:"";position:absolute;inset:0;background:radial-gradient(520px 180px at 92% -30%,rgba(200,162,74,.22),transparent 70%)}'+
+    '.cl231-hero .eb{font-size:9px;font-weight:900;letter-spacing:.22em;text-transform:uppercase;color:#D9BC72;position:relative}'+
+    '.cl231-hero h2{margin:5px 0 0;font-size:19px;font-weight:900;position:relative}'+
+    '.cl231-hero .sub{font-size:11px;color:#9FAABD;font-weight:800;margin-top:5px;position:relative}',
+    '.cl231-card{background:#fff;border:1px solid var(--line);border-radius:13px;overflow:hidden;margin-top:11px}'+
+    '.cl231-card>h4{margin:0;padding:11px 14px;border-bottom:1px solid var(--line-2);font-size:10px;font-weight:900;'+
+      'letter-spacing:.14em;text-transform:uppercase;color:#8B93A0;display:flex;align-items:center;gap:8px;flex-wrap:wrap}'+
+    '.cl231-card>h4 b{flex:1;color:#151C26;font-size:11.5px;letter-spacing:.01em;text-transform:none}'+
+    '.cl231-card .bd{padding:13px 14px}'+
+    '.cl231-inp{width:100%;border:1px solid var(--line);border-radius:9px;padding:9px 12px;font-size:12px;font-weight:800;'+
+      'font-family:inherit;color:#151C26;outline:0;direction:ltr;text-align:start}'+
+    '.cl231-inp:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(200,162,74,.14)}'+
+    '.cl231-lbl{display:block;font-size:10px;font-weight:900;color:#5A6473;margin:0 0 5px;letter-spacing:.03em}'+
+    '.cl231-f{margin-bottom:11px}'+
+    '.cl231-btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:#fff;border-radius:9px;'+
+      'padding:8px 13px;font-size:11.5px;font-weight:900;color:#151C26;cursor:pointer;font-family:inherit}'+
+    '.cl231-btn:hover{border-color:#CFC7B4;background:#FCFBF7}'+
+    '.cl231-btn.gold{background:linear-gradient(180deg,#D2AC55,#BE9740);border-color:#B08B36;color:#0A1322}'+
+    '.cl231-btn.navy{background:#0A1322;border-color:#0A1322;color:#fff}'+
+    '.cl231-btn.sm{padding:5px 10px;font-size:10.5px}'+
+    '.cl231-sql{background:#0A1322;color:#CFE3FF;border-radius:10px;padding:12px 14px;font-family:ui-monospace,Menlo,monospace;'+
+      'font-size:10.5px;line-height:1.75;white-space:pre-wrap;direction:ltr;text-align:start;max-height:260px;overflow:auto}'+
+    '.cl231-log{font-family:ui-monospace,Menlo,monospace;font-size:10.5px;line-height:1.9}'+
+    '.cl231-log .t{color:#98A0AC;margin-inline-end:8px}'+
+    '.cl231-log .ok{color:#1B6E4E}.cl231-log .bad{color:#A81E28}.cl231-log .warn{color:#8A6A1E}'+
+    '.cl231-note{margin-top:10px;font-size:10.5px;font-weight:800;color:#6B6250;background:#FBF6E9;border:1px solid #EADFC0;'+
+      'border-radius:9px;padding:9px 11px;line-height:1.8}'+
+    '.cl231-note.bad{color:#8A2A2A;background:#FDF3F3;border-color:#F1D3D5}'+
+    '.cl231-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}'+
+    '@media(max-width:700px){.cl231-grid{grid-template-columns:1fr}}'
+  ].join("");
+  function css(){ try{ if(document.getElementById("cl231css")) return; var s=document.createElement("style"); s.id="cl231css"; s.textContent=CSS; document.head.appendChild(s); }catch(e){} }
+
+  /* ---------------- الشاشة ---------------- */
+  var SQL=[
+    "-- ① جدول حالة البرنامج (نسخة واحدة لكل مساحة عمل)",
+    "create table if not exists qd_state (",
+    "  id text primary key,",
+    "  payload jsonb not null,",
+    "  updated_at timestamptz default now()",
+    ");",
+    "",
+    "-- ② جدول استبيانات اللاعبين (ردّ واحد لكل لاعب/يوم)",
+    "create table if not exists qd_wellness (",
+    "  workspace text not null,",
+    "  player_id text not null,",
+    "  date date not null,",
+    "  sleep int, fatigue int, soreness int, stress int, mood int,",
+    "  created_at timestamptz default now(),",
+    "  primary key (workspace, player_id, date)",
+    ");",
+    "",
+    "-- ③ تفعيل الوصول",
+    "alter table qd_state enable row level security;",
+    "alter table qd_wellness enable row level security;",
+    "create policy \"qd_state_all\" on qd_state for all using (true) with check (true);",
+    "create policy \"qd_well_all\" on qd_wellness for all using (true) with check (true);"
+  ].join("\n");
+
+  function paintLog(){
+    if(!LOG.length) return '<span style="color:#98A0AC">'+L("لا عمليات بعد","No activity yet")+'</span>';
+    return LOG.map(function(x){ return '<div><span class="t">'+E(x.t)+'</span><span class="'+E(x.k)+'">'+E(x.m)+'</span></div>'; }).join("");
+  }
+
+  function render(){
+    try{ css(); }catch(e){}
+    var host=document.getElementById("v-cloud");
+    if(!host){
+      host=document.createElement("section"); host.className="view"; host.id="v-cloud";
+      (document.querySelector("main")||document.body).appendChild(host);
+    }
+    var act=document.querySelector('#nav .nav-item.active');
+    if(act&&act.getAttribute("data-view")==="cloud") host.classList.add("active");
+    var c=cfg(), on=ready();
+    var h='<div class="cl231-hero"><div class="eb">'+L("المزامنة","Sync")+'</div>'+
+      '<h2>☁ '+L("المزامنة السحابية","Cloud sync")+'</h2>'+
+      '<div class="sub">'+(on?E(normUrl(c.url))+" · "+E(c.ws):L("غير مُعدّة — يعمل البرنامج محليًا فقط","Not configured — working locally only"))+'</div></div>';
+
+    h+='<div class="cl231-card"><h4><b>'+L("الاتصال","Connection")+'</b>'+
+      (on?'<span style="font-size:9.5px;font-weight:900;color:#1B6E4E">● '+L("مُعدّ","Ready")+'</span>':'<span style="font-size:9.5px;font-weight:900;color:#8A6A1E">○ '+L("غير مُعدّ","Not set")+'</span>')+'</h4>'+
+      '<div class="bd">'+
+        '<div class="cl231-f"><label class="cl231-lbl">'+L("رابط المشروع (Project URL)","Project URL")+'</label>'+
+          '<input id="cl231url" class="cl231-inp" placeholder="https://xxxxx.supabase.co" value="'+E(c.url||"")+'"></div>'+
+        '<div class="cl231-f"><label class="cl231-lbl">'+L("المفتاح العام (publishable / anon)","Publishable key")+'</label>'+
+          '<input id="cl231key" class="cl231-inp" placeholder="sb_publishable_... أو eyJ..." value="'+E(c.key||"")+'"></div>'+
+        '<div class="cl231-grid">'+
+          '<div class="cl231-f"><label class="cl231-lbl">'+L("معرّف مساحة العمل (سرّي)","Workspace ID (secret)")+'</label>'+
+            '<input id="cl231ws" class="cl231-inp" placeholder="qadsiah-u18-medical" value="'+E(c.ws||"")+'"></div>'+
+          '<div class="cl231-f"><label class="cl231-lbl">'+L("جدول الحالة / الاستبيانات","State / wellness tables")+'</label>'+
+            '<div style="display:flex;gap:6px"><input id="cl231tbl" class="cl231-inp" placeholder="qd_state" value="'+E(c.table||"qd_state")+'">'+
+            '<input id="cl231wtbl" class="cl231-inp" placeholder="qd_wellness" value="'+E(c.wtable||"qd_wellness")+'"></div></div>'+
+        '</div>'+
+        '<div style="display:flex;gap:7px;flex-wrap:wrap">'+
+          '<button class="cl231-btn gold" data-cl231="save">'+L("حفظ واختبار","Save & test")+'</button>'+
+          '<button class="cl231-btn" data-cl231="push">⬆ '+L("رفع الآن","Push now")+'</button>'+
+          '<button class="cl231-btn" data-cl231="pull">⬇ '+L("سحب الآن","Pull now")+'</button>'+
+          '<button class="cl231-btn navy" data-cl231="auto">'+(c.auto?"⏸ "+L("إيقاف التزامن التلقائي","Stop auto-sync"):"▶ "+L("تفعيل التزامن التلقائي","Enable auto-sync"))+'</button>'+
+        '</div>'+
+      '</div></div>';
+
+    h+='<div class="cl231-card"><h4><b>'+L("سجل العمليات","Activity log")+'</b></h4>'+
+      '<div class="bd cl231-log" id="cl231log">'+paintLog()+'</div></div>';
+
+    h+='<div class="cl231-card"><h4><b>'+L("خطوات التفعيل (٣ دقائق)","Setup (3 minutes)")+'</b>'+
+      '<button class="cl231-btn sm" data-cl231="copysql">'+L("نسخ السكربت","Copy SQL")+'</button></h4>'+
+      '<div class="bd">'+
+        '<div class="cl231-note" style="margin-top:0">'+
+          '١. '+L("أنشئ مشروعًا على supabase.com (الخطة المجانية تكفي)","Create a project at supabase.com (free plan is enough)")+'<br>'+
+          '٢. '+L("من القائمة: SQL Editor ← New query ← الصق السكربت أدناه ← Run","Sidebar: SQL Editor → New query → paste the script below → Run")+'<br>'+
+          '٣. '+L("من Settings ← API Keys انسخ Project URL والمفتاح العام (Publishable) إلى الحقول أعلاه","Settings → API Keys: copy the Project URL and the Publishable key into the fields above")+'</div>'+
+        '<div class="cl231-sql" id="cl231sql">'+E(SQL)+'</div>'+
+      '</div></div>';
+
+    h+='<div class="cl231-card"><h4><b>'+L("كيف يعمل التزامن","How syncing works")+'</b></h4><div class="bd">'+
+      '<div class="cl231-note" style="margin-top:0">'+
+        '• '+L("كل حفظ في البرنامج يُرفع تلقائيًا بعد ٥ ثوانٍ (لا حاجة لزر).","Every save uploads automatically after 5 seconds.")+'<br>'+
+        '• '+L("استبيانات اللاعبين تصل مباشرة من جوالاتهم إلى قاعدة البيانات، ويسحبها البرنامج كل دقيقة.","Player check-ins arrive straight from their phones; the app pulls them every minute.")+'<br>'+
+        '• '+L("عند السحب تُدمج الاستبيانات (لا تُفقد) وتُستبدل بقية البيانات بالنسخة السحابية.","On pull, check-ins are merged (never lost) and other data follows the cloud copy.")+'<br>'+
+        '• '+L("رابط استبيان اللاعب يحمل إعداد الاتصال مشفّرًا، فيعمل على أي جوال بلا إعداد يدوي.","The player link carries the connection settings encoded, so it works on any phone.")+'</div>'+
+      '<div class="cl231-note bad">🔒 '+L("المفتاح العام (anon) مخصّص للاستخدام في المتصفح، لكن سياسة الوصول في السكربت مفتوحة (true) لتسهيل البدء. لمنع أي وصول غريب: اجعل معرّف مساحة العمل طويلًا وسرّيًا، أو خُذ نسخة احتياطية دوريًا.","The anon key is browser-safe, but the policy in the script is open (true) for easy start. To block strangers: keep the workspace ID long and secret, and take backups.")+'</div>'+
+      '</div></div>';
+
+    host.innerHTML=h;
+  }
+
+  /* ---------------- الأحداث ---------------- */
+  function bind(){
+    document.addEventListener("click",function(e){
+      var t=e.target&&e.target.closest?e.target.closest("[data-cl231]"):null;
+      if(!t) return;
+      var k=t.getAttribute("data-cl231");
+      if(k==="save"){
+        var u=document.getElementById("cl231url"), kk=document.getElementById("cl231key"),
+            w=document.getElementById("cl231ws"), tb=document.getElementById("cl231tbl"), wt=document.getElementById("cl231wtbl");
+        var o={url:normUrl(u?u.value:""),key:String(kk?kk.value:"").trim(),ws:String(w?w.value:"").trim(),
+          table:String(tb&&tb.value||"qd_state").trim(),wtable:String(wt&&wt.value||"qd_wellness").trim(),
+          auto:cfg().auto!==false};
+        if(!o.url||!o.key||!o.ws){ toastit(L("أكمل الرابط والمفتاح والمعرّف","Complete URL, key and ID"),"warn"); return; }
+        setCfg(o); paintBadge(); logIt(L("حفظ الإعدادات","Settings saved"),"ok");
+        testConn(); e.preventDefault(); return;
+      }
+      if(k==="push"){ push(false); e.preventDefault(); return; }
+      if(k==="pull"){ pull(false).then(function(){ pullWellness(false).then(function(n){ if(!n) render(); }); }); e.preventDefault(); return; }
+      if(k==="auto"){
+        var c=cfg(); c.auto=!(c.auto!==false); setCfg(c);
+        logIt(c.auto?L("تزامن تلقائي: مفعّل","Auto-sync ON"):L("تزامن تلقائي: متوقف","Auto-sync OFF"),"ok");
+        render(); e.preventDefault(); return;
+      }
+      if(k==="copysql"){
+        try{ if(navigator.clipboard) navigator.clipboard.writeText(SQL); }catch(x){}
+        toastit(L("تم نسخ سكربت SQL","SQL copied")); e.preventDefault(); return;
+      }
+    },true);
+  }
+
+  /* ---------------- الحلقة التلقائية ---------------- */
+  function loopStart(){
+    try{
+      if(window.__cl231loop) return;
+      window.__cl231loop=setInterval(function(){
+        var c=cfg();
+        if(!ready()||c.auto===false) return;
+        if(document.hidden) return;
+        pullWellness(true).then(function(n){ if(n) logIt(L("سحب استبيانات: ","Pulled check-ins: ")+n,"ok"); });
+        if(!(window.__cl231lastPull&&Date.now()-window.__cl231lastPull<60000)){ window.__cl231lastPull=Date.now(); }
+      },60000);
+    }catch(e){}
+  }
+  function wrapSave(){
+    try{
+      var a=A(); if(!a||a.__cl231save) return;
+      var orig=a.save;
+      a.save=function(){ var r; try{ r=orig.apply(this,arguments); }catch(e){ r=orig.apply(this,arguments); }
+        schedulePush(); return r; };
+      a.__cl231save=1;
+    }catch(e){}
+  }
+
+  /* ---------------- الرابط العميق: يقرأ إعداد الاتصال من رابط اللاعب ---------------- */
+  function readCfgFromHash(){
+    try{
+      var h=String(location.hash||"");
+      var m=h.match(/[?&]c=([^&]+)/);
+      if(!m) return;
+      var o=readToken(m[1]);
+      if(!o) return;
+      var cur=cfg();
+      if(cur.url===o.url&&cur.ws===o.ws) return;
+      setCfg(Object.assign({},cur,{url:o.url,key:o.key,ws:o.ws}));
+      logIt(L("تهيئة الاتصال من رابط اللاعب","Connection set from player link"),"ok");
+      paintBadge();
+    }catch(e){}
+  }
+
+  /* ---------------- التثبيت ---------------- */
+  function install(){
+    try{
+      var a=A();
+      if(!a||!a.NAV||!a.REND){ setTimeout(install,450); return; }
+      css();
+      if(!a.NAV.some(function(n){ return n.id==="cloud"; })){
+        a.NAV.push({id:"cloud",label:"المزامنة السحابية",icon:"docs",sub:"sub_cloud",grp:"grp_admin"});
+      }
+      var f=function(){ render(); }; f.__cl231=1;
+      a.REND.cloud=f;
+      if(!window.__cl231bind){ bind(); window.__cl231bind=1; }
+      wrapSave();
+      try{ a.renderNav(); }catch(e){}
+      /* استقبال استبيان اللاعب ورفعه للسحابة */
+      document.addEventListener("qd:wellsubmit",function(e){
+        try{ var d=e.detail||{}; if(d.pid&&d.day&&d.vals) submitWell(d.pid,d.day,d.vals); }catch(x){}
+      });
+      readCfgFromHash();
+      paintBadge(); loopStart();
+      setTimeout(function(){ try{ paintBadge(); var b=document.querySelector('#nav [data-view="cloud"] span'); }catch(e){} },900);
+      a.__cl231=1;
+    }catch(e){ setTimeout(install,800); }
+  }
+
+  window.QD231={cfg:cfg,setCfg:setCfg,ready:ready,push:push,pull:pull,pullWellness:pullWellness,
+    submitWell:submitWell,test:testConn,cfgToken:token,decodeToken:readToken,sql:SQL,render:render};
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",install,{once:true});
+  install();
+})();
+
+</script>
+
+
+
 
 
 
