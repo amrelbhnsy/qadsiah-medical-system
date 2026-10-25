@@ -35120,7 +35120,7 @@ tr:hover .qde-ndate{color:#7E0E14}
 
   function badge(){
     try{ var b=document.getElementById("qdrBadge"); if(!b) return;
-      var w="v11-256 · DELETE-ONE-INJURY";
+      var w="v11-257 · PURGE-ALL-RECORDS";
       if(b.textContent!==w+" · BTN-OK") b.textContent=w+" · BTN-OK"; }catch(e){}
   }
 
@@ -41373,6 +41373,138 @@ tr:hover .qde-ndate{color:#7E0E14}
 })();
 
 </script>
+<script>
+/*!
+ * QD257 · مسح الإصابة من «كل» السجلات — حذف عميق + شواهد قبور (tombstones)
+ * 1) يجمع كل نسخ الحالة الحيّة (__QDAPP.S · QD_S · QDSIGN_STATE · S · state())
+ * 2) يحذف الإصابة بالمعرّف من أي مصفوفة داخل الحالة (إصابات اللاعب، السجلات الطبية،
+ *    العلاج، الجلسات، المرايا) ويُفرّغ روابط injuryId
+ * 3) يسجّل المعرّف في قائمة محذوفات دائمة، ويُعيد تطبيقها عند كل تحميل/رسم
+ *    حتى لا تعود الإصابة من نسخة قديمة أو مزامنة سحابية
+ */
+(function(){
+  if(window.__qd257) return; window.__qd257=1;
+  var TK="qd257_del";
+  function EN(){ try{ return String(localStorage.getItem("qd_lang")||"ar").indexOf("en")===0; }catch(e){ return false; } }
+  function L(a,e){ return EN()?e:a; }
+  function say(m,k){ try{ if(typeof window.toast==="function") window.toast(m,k); }catch(e){} }
+  function tombs(){ try{ var a=JSON.parse(localStorage.getItem(TK)||"[]"); return Array.isArray(a)?a:[]; }catch(e){ return []; } }
+  function addTomb(id){ try{ var a=tombs(); if(a.indexOf(String(id))<0){ a.push(String(id)); localStorage.setItem(TK,JSON.stringify(a.slice(-400))); } }catch(e){} }
+  function isTomb(id){ return tombs().indexOf(String(id))>-1; }
+
+  function states(){
+    var out=[];
+    function push(o){ if(o&&typeof o==="object"&&out.indexOf(o)<0) out.push(o); }
+    try{ var A=window.__QDAPP; if(A){ try{ push(A.S); }catch(e){} try{ if(typeof A.state==="function") push(A.state()); }catch(e){} } }catch(e){}
+    try{ push(window.QD_S); }catch(e){}
+    try{ if(typeof window.QDSIGN_STATE==="function") push(window.QDSIGN_STATE()); }catch(e){}
+    try{ push(window.S); }catch(e){}
+    return out.filter(function(o){ return o&&Array.isArray(o.injuries); });
+  }
+  function persistAll(){
+    var done=0;
+    try{ if(typeof window.QD_save==="function"){ window.QD_save(); done++; } }catch(e){}
+    try{ if(typeof window.save==="function"){ window.save(); done++; } }catch(e){}
+    try{ var A=window.__QDAPP; if(A&&typeof A.save==="function"){ A.save(); done++; } }catch(e){}
+    return done;
+  }
+
+  /* حذف عميق: أي مصفوفة داخل الحالة تحمل هذه الإصابة تُنقّى، وأي حقل injuryId يُفرَّغ */
+  function purgeIn(obj,iid,tids,vis,depth,prot){
+    if(!obj||typeof obj!=="object"||depth>7) return 0;
+    if(vis.has(obj)) return 0; vis.add(obj);
+    var n=0;
+    if(Array.isArray(obj)&&prot&&prot.has(obj)){
+      for(var z=0;z<obj.length;z++){ var it0=obj[z];
+        if(it0&&typeof it0==="object"&&it0.injuryId&&String(it0.injuryId)===iid){ it0.injuryId=""; it0.injName=it0.injName||""; n++; }
+        else n+=purgeIn(it0,iid,tids,vis,depth+1,prot);
+      }
+      return n;
+    }
+    if(Array.isArray(obj)){
+      for(var i=obj.length-1;i>=0;i--){
+        var it=obj[i];
+        if(it&&typeof it==="object"){
+          if(String(it.id)===iid){ obj.splice(i,1); n++; continue; }
+          if(it.injuryId&&String(it.injuryId)===iid){ obj.splice(i,1); n++; continue; }
+          if(it.__mirrorOf&&tids[String(it.__mirrorOf)]){ obj.splice(i,1); n++; continue; }
+        }
+      }
+      for(var j=0;j<obj.length;j++) n+=purgeIn(obj[j],iid,tids,vis,depth+1,prot);
+      return n;
+    }
+    for(var k in obj){
+      if(!Object.prototype.hasOwnProperty.call(obj,k)) continue;
+      var v=obj[k];
+      if(v&&typeof v==="object"){ n+=purgeIn(v,iid,tids,vis,depth+1,prot); }
+      else if(v!=null&&String(v)===iid){ obj[k]=""; n++; }
+    }
+    return n;
+  }
+
+  function remove(id){
+    var iid=String(id), total=0;
+    var S=states();
+    var tids={};
+    S.forEach(function(st){
+      (st.injuries||[]).forEach(function(x){
+        if(String(x.id)===iid) (x.treatments||[]).forEach(function(t){ tids[String(t.id)]=1; });
+      });
+    });
+    S.forEach(function(st){
+      (st.therapies||[]).forEach(function(t){
+        if(String(t.injuryId)===iid) (t.__mirrorOf?tids[String(t.__mirrorOf)]=1:0);
+      });
+    });
+    var prot=new Set();
+    S.forEach(function(st){ if(Array.isArray(st.sessions)) prot.add(st.sessions); });
+    S.forEach(function(st){ total+=purgeIn(st,iid,tids,new Set(),0,prot); });
+    addTomb(iid);
+    persistAll();
+    return {states:S.length,removed:total};
+  }
+
+  /* التخلص من الشواهد: أي نسخة تعود (تحميل/مزامنة/إعادة رسم) تُنقّى فورًا */
+  function sweep(){
+    var list=tombs(); if(!list.length) return 0;
+    var n=0;
+    list.forEach(function(iid){ n+=remove(iid).removed; });
+    return n;
+  }
+
+  function repaint(){
+    try{ if(window.QD221&&window.QD221.render) window.QD221.render(); }catch(e){}
+    try{ if(window.REND){ if(window.REND.clinic) window.REND.clinic(); if(window.REND.therapy) window.REND.therapy(); if(window.REND.injuries) window.REND.injuries(); } }catch(e){}
+    try{ if(window.qdUnifyPaint) window.qdUnifyPaint(); }catch(e){}
+  }
+
+  document.addEventListener("click",function(e){
+    var o=e.target&&e.target.closest?e.target.closest('[data-qd255="one"]'):null;
+    if(!o) return;
+    e.preventDefault(); e.stopPropagation(); if(e.stopImmediatePropagation) e.stopImmediatePropagation();
+    var iid=o.getAttribute("data-i"), nm=o.getAttribute("data-n")||"", ty=o.getAttribute("data-t")||"", dd=o.getAttribute("data-d")||"";
+    var q=L("مسح هذه الإصابة من جميع السجلات؟\n\n• "+nm+"\n• "+ty+"\n• "+dd+"\n\nستُحذف من سجل الإصابات، ومن ملف اللاعب، ومن جلساتها العلاجية، ولن تعود بعد التحديث. لا يمكن التراجع.",
+             "Delete this injury from ALL records?\n\n• "+nm+"\n• "+ty+"\n• "+dd+"\n\nIt will be removed from the injury log, the player file and its treatments, and will not return after refresh. This cannot be undone.");
+    var ok=true; try{ ok=window.confirm(q); }catch(x){ ok=true; }
+    if(!ok) return;
+    var r=null; try{ r=remove(iid); }catch(x){ r=null; }
+    if(!r){ say(L("تعذّر المسح — حدّث الصفحة","Could not delete — refresh the page"),"bad"); return; }
+    say(L("مُسحت الإصابة من كل السجلات ✓","Injury removed from all records ✓"),"ok");
+    repaint();
+    setTimeout(function(){ try{ sweep(); repaint(); }catch(x){} },400);
+  },true);
+
+  function boot(){
+    try{ sweep(); }catch(e){}
+    setInterval(function(){ try{ var n=sweep(); if(n) repaint(); }catch(e){} },5000);
+  }
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",boot);
+  else boot();
+  window.QD257={remove:remove,sweep:sweep,tombs:tombs,states:states};
+})();
+
+</script>
+
 
 
 
