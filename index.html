@@ -34889,7 +34889,7 @@ tr:hover .qde-ndate{color:#7E0E14}
 
   function badge(){
     try{ var b=document.getElementById("qdrBadge"); if(!b) return;
-      var w="v11-243 · COACH-NAV";
+      var w="v11-244 · COACH-IN-CLINIC";
       if(b.textContent!==w+" · BTN-OK") b.textContent=w+" · BTN-OK"; }catch(e){}
   }
 
@@ -40310,6 +40310,11 @@ tr:hover .qde-ndate{color:#7E0E14}
   }
 
   function host(){
+    var md=document.getElementById("v-md3");
+    if(md&&md.classList.contains("active")){
+      var cl=md.querySelector(".md3-kpis");
+      if(cl) return {node:cl,mode:"after",inMd:true};
+    }
     var t=document.getElementById("qd239card");
     if(t&&t.parentNode) return {node:t,mode:"after"};
     var ids=["v-clinic","v-daily","v-therapy","v-dashboard"];
@@ -40406,50 +40411,38 @@ tr:hover .qde-ndate{color:#7E0E14}
   }
 
 
-  /* ---------- قسم مستقل في القائمة: «تقرير المدرب» (مضمون الظهور) ---------- */
-  function ensureSection(){
-    var host=document.getElementById("v-coachrep");
-    if(!host){
-      host=document.createElement("section");
-      host.className="view"; host.id="v-coachrep";
-      (document.querySelector("main")||document.body).appendChild(host);
-    }
-    return host;
-  }
-  function renderSection(){
-    var host=ensureSection();
-    var c=cfg(), st=store(), s=state();
-    var h='<div style="padding:2px 0 10px"><div style="font-size:10.5px;font-weight:900;letter-spacing:.14em;color:#C8A24A;text-transform:uppercase">Coach Report</div>'+
-      '<h2 style="margin:2px 0 4px;font-size:20px;font-weight:900;color:#0C1118">Daily clinic digest → {coach}</h2>'.replace("{coach}",esc(c.coachName||"Coach"))+
-      '<div style="font-size:12px;color:#6B7482">One simple English message with every player seen today and what was done. Sends to the coach only.</div></div>';
-    host.innerHTML=h+card();
-    paintOut2();
-    return host;
-  }
-  function paintOut2(){ /* إبقاء الحالة بعد إعادة الرسم */ }
-
-  function installNav(){
+  /* ---------- الربط بغرفة العلاج اليومية (تبويب «عيادة» في المركز الطبي المنظّم) ---------- */
+  function mountInto(host){
     try{
-      var a=window.__QDAPP; if(!a||!a.NAV||!a.REND) return false;
-      if(!a.NAV.some(function(n){ return n.id==="coachrep"; })){
-        a.NAV.push({id:"coachrep",label:"تقرير المدرب",icon:"reports",sub:"Coach digest",grp:"grp_admin"});
-      }
-      a.REND.coachrep=renderSection;
-      try{ a.renderNav(); }catch(e){}
+      if(!host||host.querySelector("#qd240")) return false;
+      var anchor=host.querySelector(".md3-kpis")||host.querySelector(".md3-bar");
+      var html=card();
+      if(anchor&&anchor.insertAdjacentHTML) anchor.insertAdjacentHTML("afterend",html);
+      else host.insertAdjacentHTML("afterbegin",html);
+      paintOut2(); return true;
+    }catch(e){ return false; }
+  }
+  function paintOut2(){ try{ paint(); }catch(e){} }
+
+  function installHook(){
+    try{
+      if(!window.QD221||typeof window.QD221.extend!=="function") return false;
+      if(window.__qd240hook) return true;
+      window.QD221.extend({ hook:function(tab,host){
+        if(tab!=="clinic") return;
+        /* بعد رسم تبويب العيادة كاملًا: أضف بطاقة تقرير المدرب أعلى المحتوى */
+        setTimeout(function(){ mountInto(host); },0);
+        mountInto(host);
+      }});
+      window.__qd240hook=1;
       return true;
     }catch(e){ return false; }
   }
-  document.addEventListener("click",function(e){
-    try{
-      var n=e.target&&e.target.closest?e.target.closest('[data-view="coachrep"]'):null;
-      if(n) setTimeout(function(){ try{ renderSection(); }catch(x){} },60);
-    }catch(x){}
-  },true);
 
-  function tick(){ inject(); check(); try{ if(document.getElementById('v-coachrep')&&document.getElementById('v-coachrep').classList.contains('active')) renderSection(); }catch(e){} }
+  function tick(){ inject(); check(); try{ var h=document.getElementById('v-md3'); if(h&&h.classList.contains('active')){ var k=h.querySelector('.md3-kpis'); if(k&&!h.querySelector('#qd240')) mountInto(k.parentNode); } }catch(e){} }
   function boot(){
     wrapInstant(); watchSaves(); inject();
-    var tries=0, ivn=setInterval(function(){ tries++; if(installNav()||tries>14) clearInterval(ivn); },500);
+    var tries=0, ivn=setInterval(function(){ tries++; if(installHook()||tries>20) clearInterval(ivn); },400);
     var n=0, iv=setInterval(function(){ n++; wrapInstant(); tick(); if(n>40) clearInterval(iv); },600);
     setInterval(function(){ try{ inject(); check(); }catch(e){} },20000);
   }
@@ -40462,6 +40455,8 @@ tr:hover .qde-ndate{color:#7E0E14}
 })();
 
 </script>
+
+
 
 
 
