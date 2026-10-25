@@ -35033,7 +35033,7 @@ tr:hover .qde-ndate{color:#7E0E14}
 
   function badge(){
     try{ var b=document.getElementById("qdrBadge"); if(!b) return;
-      var w="v11-248 · ABSENT-10D";
+      var w="v11-249 · EDIT-SESSION";
       if(b.textContent!==w+" · BTN-OK") b.textContent=w+" · BTN-OK"; }catch(e){}
   }
 
@@ -35223,7 +35223,10 @@ tr:hover .qde-ndate{color:#7E0E14}
       '<div class="md3-card" style="margin-bottom:14px"><h4>🩺 '+L("دخول / خروج العيادة","Clinic check-in / out")+'</h4>'+
         (rows.length?'<table class="md3-tbl"><thead><tr><th>'+L("الوقت","Time")+'</th><th>'+L("اللاعب","Player")+'</th><th>'+L("النوع","Type")+'</th><th>'+L("المدة","Duration")+'</th><th></th></tr></thead><tbody>'+
           rows.map(function(r){
-            return '<tr><td>'+esc(str(r.date).slice(11,16))+'</td><td><b>'+esc(nameOf(r.playerId)||"—")+'</b></td>'+
+            var _src=(r.src==="therapy")?"therapy":"session";
+            return '<tr data-qd249-row="'+_src+':'+esc(str(r.id))+'"><td>'+esc(str(r.date).slice(11,16))+'</td>'+
+              '<td><span class="qd249-nm"><b>'+esc(nameOf(r.playerId)||"—")+'</b>'+
+              '<button class="qd249-edit" data-qd249="edit" data-id="'+esc(str(r.id))+'" data-src="'+_src+'" title="'+L("تعديل الجلسة","Edit session")+'" aria-label="'+L("تعديل الجلسة","Edit session")+'">✏</button></span></td>'+
               '<td>'+esc(str(r.type)||"—")+'</td><td>'+esc(num(r.duration)||"—")+'</td>'+
               '<td style="text-align:end"><button class="md3-btn g" data-md3="openPlayer" data-p="'+esc(r.playerId)+'">'+L("الملف","Profile")+'</button></td></tr>';
           }).join("")+'</tbody></table>'
@@ -40850,6 +40853,125 @@ tr:hover .qde-ndate{color:#7E0E14}
 })();
 
 </script>
+<script>
+/*!
+ * QD249 · زر تعديل بجوار اسم اللاعب في «مسار اليوم»
+ * يفتح نموذج تعديل الجلسة نفسه (جلسة عيادة أو جلسة علاج) ثم يحدّث مسار اليوم.
+ */
+(function(){
+  if(window.__qd249) return; window.__qd249=1;
+  function L(a,e){ try{ return String(localStorage.getItem("qd_lang")||"ar").indexOf("en")===0?e:a; }catch(x){ return a; } }
+  function say(m,k){ try{ if(typeof window.toast==="function") window.toast(m,k); }catch(e){} }
+  function APP(){ try{ return window.__QDAPP||{}; }catch(e){ return {}; } }
+
+  function css(){
+    if(document.getElementById("qd249css")) return;
+    var s=document.createElement("style"); s.id="qd249css";
+    s.textContent=[
+      ".qd249-nm{display:inline-flex;align-items:center;gap:7px;white-space:nowrap}",
+      ".qd249-edit{width:23px;height:23px;border-radius:7px;border:1px solid #D9C89B;background:#FBF8F1;color:#8A6B1F;",
+      "font:800 11px/1 system-ui;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;padding:0;",
+      "transition:background .12s,border-color .12s;filter:none;transform:none}",
+      ".qd249-edit:hover{background:#C8A24A;border-color:#C8A24A;color:#0C1118}",
+      ".qd249-edit:active{background:#B08F3D}",
+      "html[dir=rtl] .qd249-edit{margin-inline-start:2px}"
+    ].join("\n");
+    (document.head||document.documentElement).appendChild(s);
+  }
+
+  function findRec(src,id){
+    var S=APP().S||{}; var list=(src==="therapy"?S.therapies:S.sessions)||[];
+    for(var i=0;i<list.length;i++){ if(String(list[i].id)===String(id)) return list[i]; }
+    return null;
+  }
+
+  function openForm(src,id){
+    var rec=findRec(src,id);
+    if(!rec){ say(L("لم يُعثر على الجلسة — حدّث الصفحة","Session not found — refresh the page"),"warn"); return false; }
+    var ok=false;
+    try{
+      if(src==="therapy"){
+        if(typeof window.qdEditTherapyById==="function"){ window.qdEditTherapyById(id); ok=true; }
+        else if(typeof window.openTherapyForm==="function"){ window.openTherapyForm(rec); ok=true; }
+        else { var A1=APP().ACT; if(A1&&A1.editTherapy){ A1.editTherapy({id:id}); ok=true; } }
+      }else{
+        if(typeof window.qdEditSessionById==="function"){ window.qdEditSessionById(id); ok=true; }
+        else if(typeof window.qdOpenSessionForm==="function"){ window.qdOpenSessionForm(rec); ok=true; }
+        else { var A2=APP().ACT; if(A2&&A2.editSession){ A2.editSession({id:id}); ok=true; } }
+      }
+    }catch(e){ ok=false; }
+    if(!ok) say(L("تعذّر فتح نموذج التعديل","Could not open the edit form"),"bad");
+    else watchSave(src,id);
+    return ok;
+  }
+
+  /* بعد إغلاق النموذج: أعِد رسم مسار اليوم */
+  function watchSave(src,id){
+    var n=0, iv=setInterval(function(){
+      n++;
+      var mc=document.getElementById("modalCard");
+      var open=!!(mc&&mc.offsetParent!==null);
+      if(!open && n>2){
+        clearInterval(iv);
+        setTimeout(function(){
+          try{ if(window.QD221&&window.QD221.render) window.QD221.render(); }catch(e){}
+          try{ var r=window.__QDAPP&&window.__QDAPP.REND; if(r&&r.therapy) r.therapy(); }catch(e){}
+          patchRow(src,id);
+        },160);
+      }
+      if(n>240) clearInterval(iv);
+    },250);
+  }
+
+  /* شبكة أمان: لو لم يُعَد رسم الجدول، حدّث خلايا الصف من البيانات المحفوظة */
+  function patchRow(src,id){
+    var tr=document.querySelector('[data-qd249-row="'+src+':'+cssEsc(id)+'"]');
+    if(!tr){ return; }
+    var rec=findRec(src,id); if(!rec) return;
+    var tds=tr.querySelectorAll("td");
+    if(tds.length<4) return;
+    var S=APP().S||{}, ps=(S.players||[]);
+    var p=null; for(var i=0;i<ps.length;i++){ if(String(ps[i].id)===String(rec.playerId)){ p=ps[i]; break; } }
+    var nm=p?((p.first||"")+" "+(p.last||"")).trim():"—";
+    var b=tr.querySelector(".qd249-nm b"); if(b&&nm) b.textContent=nm;
+    if(tds[0]) tds[0].textContent=String(rec.date||"").slice(11,16)||"—";
+    if(tds[2]) tds[2].textContent=String(rec.type||"—");
+    if(tds[3]) tds[3].textContent=(rec.duration==null||rec.duration==="")?"—":String(rec.duration);
+  }
+  function cssEsc(s){ return String(s).replace(/["\\]/g,"\\$&"); }
+
+  document.addEventListener("click",function(e){
+    var b=e.target&&e.target.closest?e.target.closest('[data-qd249="edit"]'):null;
+    if(!b) return;
+    e.preventDefault(); e.stopPropagation(); if(e.stopImmediatePropagation) e.stopImmediatePropagation();
+    openForm(b.getAttribute("data-src")||"session",b.getAttribute("data-id"));
+  },true);
+
+  /* إعادة حقن الزر لو أُعيد رسم الجدول من نسخة قديمة */
+  function ensure(){
+    try{
+      var tbl=document.querySelectorAll("table.md3-tbl");
+      for(var i=0;i<tbl.length;i++){
+        var rows=tbl[i].querySelectorAll("tbody tr");
+        for(var j=0;j<rows.length;j++){
+          var r=rows[j];
+          if(!r.getAttribute("data-qd249-row")) continue;
+          if(r.querySelector('[data-qd249="edit"]')) continue;
+          var b=r.querySelector("td b"); if(!b) continue;
+          b.insertAdjacentHTML("afterend",'<button class="qd249-edit" data-qd249="edit" data-id="'+cssEsc(r.getAttribute("data-qd249-row").split(":").slice(1).join(":"))+'" data-src="'+r.getAttribute("data-qd249-row").split(":")[0]+'" title="'+L("تعديل الجلسة","Edit session")+'">✏</button>');
+        }
+      }
+    }catch(e){}
+  }
+  function boot(){ css(); ensure(); setInterval(function(){ try{ css(); ensure(); }catch(e){} },9000); }
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",function(){ setTimeout(boot,700); });
+  else setTimeout(boot,700);
+
+  window.QD249={open:openForm,ensure:ensure};
+})();
+
+</script>
+
 
 
 
