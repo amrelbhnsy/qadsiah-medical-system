@@ -35146,7 +35146,7 @@ tr:hover .qde-ndate{color:#7E0E14}
 
   function badge(){
     try{ var b=document.getElementById("qdrBadge"); if(!b) return;
-      var w="v11-283 · DEDUPE-NAV";
+      var w="v11-284 · NAV-CANON";
       if(b.textContent!==w+" · BTN-OK") b.textContent=w+" · BTN-OK"; }catch(e){}
   }
 
@@ -44098,6 +44098,64 @@ tr:hover .qde-ndate{color:#7E0E14}
 })();
 
 </script>
+<script>
+/* QD284 · NAV-CANON — قائمة جانبية واحدة نظيفة: لا تكرار، ولا أقسام بلا شاشة
+   السبب: NAV3 يُغذّى من عدة وحدات بنفس العنوان بمعرّفات مختلفة، فيُرسم العنصر 3-4 مرات،
+   وتبقى مداخل لشاشات لا محرّك عرض لها. الحل: تطبيع لحظي بعد كل إعادة رسم. */
+(function(){
+  function isEN(){ try{ return /^en/i.test(localStorage.getItem("qd_lang")||""); }catch(e){ return false; } }
+  function L(a,e){ return isEN()?e:a; }
+  function REND(){ try{ var a=window.__QDAPP||{}; return a.REND||null; }catch(e){ return null; } }
+  function allowed(){
+    var set={}, r=REND();
+    if(r) Object.keys(r).forEach(function(k){ if(typeof r[k]==="function") set[k]=1; });
+    return set;
+  }
+  function norm(t){
+    return String(t||"").replace(/[\u064B-\u0652\u0640]/g,"").replace(/[•·‏‎\s]+/g," ")
+      .replace(/[إأآ]/g,"ا").replace(/ى/g,"ي").replace(/ة/g,"ه").trim().toLowerCase();
+  }
+  function canon(){
+    var nav=document.getElementById("nav"); if(!nav) return 0;
+    var ok=allowed(), seen={}, seenL={}, hidden=0;
+    nav.querySelectorAll(".qd282i,#qd282all").forEach(function(el){ try{ el.remove(); }catch(e){} });
+    nav.querySelectorAll("[data-view]").forEach(function(b){
+      var v=b.getAttribute("data-view")||"";
+      var lab=norm(b.textContent);
+      var bad = !ok[v] || !lab || seenL[lab];
+      if(bad){ if(b.style.display!=="none"){ b.style.display="none"; hidden++; } b.setAttribute("data-qd284","1"); return; }
+      seenL[lab]=1; seen[v]=1;
+      if(b.style.display==="none"&&b.getAttribute("data-qd284")==="1"){ b.style.display=""; }
+    });
+    /* رؤوس المجموعات الفارغة */
+    nav.querySelectorAll(".grp").forEach(function(g){
+      var sib=g.nextElementSibling, any=false;
+      while(sib&&!sib.classList.contains("grp")){
+        if(sib.hasAttribute("data-view")&&sib.style.display!=="none") any=true;
+        sib=sib.nextElementSibling;
+      }
+      g.style.display=any?"":"none";
+    });
+    return hidden;
+  }
+  /* إعادة التطبيع بعد كل تعديل على القائمة (رسم، إضافة وحدة، لغة) */
+  var t=null;
+  function soon(){ if(t) return; t=setTimeout(function(){ t=null; try{ canon(); }catch(e){} },60); }
+  function watch(){
+    var nav=document.getElementById("nav");
+    if(!nav||nav.__qd284){ return; }
+    nav.__qd284=1;
+    if(window.MutationObserver){ new MutationObserver(soon).observe(nav,{childList:true,subtree:true}); }
+    soon();
+  }
+  setInterval(function(){ try{ watch(); canon(); }catch(e){} },1200);
+  setTimeout(function(){ watch(); canon(); },700);
+  ['click','change','hashchange'].forEach(function(ev){ window.addEventListener(ev,soon,true); });
+  window.QD284={canon:canon,allowed:allowed};
+})();
+
+</script>
+
 
 
 
