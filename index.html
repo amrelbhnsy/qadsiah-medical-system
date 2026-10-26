@@ -1733,7 +1733,7 @@ const STATUS={cleared:{k:"st_cleared",c:"green"},partial:{k:"st_partial",c:"ambe
 let S=null;
 
 function seed(){
-  const P=(f,l,pos,dob,w,h,foot,arm)=>({id:uid("pl"),first:f,last:l,pos,dob,w,h,foot:foot||"Right",arm:arm||"Right",sex:"Male",email:"",phone:"",
+  const P=(f,l,pos,dob,w,h,foot,arm)=>({demo:1,id:uid("pl"),first:f,last:l,pos,dob,w,h,foot:foot||"Right",arm:arm||"Right",sex:"Male",email:"",phone:"",
     prevTeam:"",prevContact:"",photo:"",allergies:{has:"No",list:[],other:"",notes:""},
     address:{a1:"",a2:"",city:"Al Khobar",zip:"",country:"Saudi Arabia"},
     nok:{first:"",last:"",phone:"",rel:"Parent",a1:"",a2:"",city:"",zip:"",country:"Saudi Arabia"},
@@ -1785,7 +1785,8 @@ function seed(){
 function migrate(d){ d.settings=Object.assign({},DEF,d.settings||{});
   if(!Array.isArray(d.complaints)) d.complaints=[];
   ["players","injuries","illnesses","therapies","activities","documents","mental","covid","users","log"].forEach(k=>{if(!Array.isArray(d[k]))d[k]=[];}); try{ ensureMed(d.players); }catch(e){} return d; }
-function load(){ try{const raw=localStorage.getItem(LSKEY); if(raw)return qdEnsureModules(migrate(JSON.parse(raw)));}catch(e){console.warn(e);} return qdEnsureModules(seed()); }
+function seedEmpty(){ var d=seed(); ['players','injuries','illnesses','therapies','activities','documents','mental','covid','complaints','log','sessions','loads','wellness','forceTests','promo','callups'].forEach(function(k){ d[k]=[]; }); return d; }
+function load(){ try{const raw=localStorage.getItem(LSKEY); if(raw)return qdEnsureModules(migrate(JSON.parse(raw)));}catch(e){console.warn(e);} return qdEnsureModules(seedEmpty()); }
 function save(){ try{ window.QD_S=S; window.QD_save=save; window.QDSIGN_STATE=function(){ return S; }; }catch(e0){} try{localStorage.setItem(LSKEY,JSON.stringify(S));}catch(e){toast(T("toast_save_fail"),"bad");} try{ if(window.qdR2Sweep) window.qdR2Sweep(); }catch(e){} }
 const player=id=>S.players.find(p=>p.id===id)||{first:T("unknown"),last:"",pos:"Not Specified"};
 const pname=id=>{const p=player(id);return (p.first+" "+p.last).trim();};
@@ -35126,7 +35127,7 @@ tr:hover .qde-ndate{color:#7E0E14}
 
   function badge(){
     try{ var b=document.getElementById("qdrBadge"); if(!b) return;
-      var w="v11-274 · MAP-SMART-TIME";
+      var w="v11-276 · ROSTER-PIN";
       if(b.textContent!==w+" · BTN-OK") b.textContent=w+" · BTN-OK"; }catch(e){}
   }
 
@@ -42265,6 +42266,7 @@ tr:hover .qde-ndate{color:#7E0E14}
     rpe:["rpe","session rpe","exertion","الجهد"],
     load:["load","total load","player load","workload","الحمل","عبء"],
     distanceMin:["distance per minute","m/min","dist/min"],
+    drill:["drill title","drill","session type","activity","تمرين","نوع الجلسة"],
     accel:["accel","accelerations","accel count","عدد التسارعات"],
     decel:["decel","decelerations","decel count","عدد التباطؤات"]
   };
@@ -42305,9 +42307,31 @@ tr:hover .qde-ndate{color:#7E0E14}
       if(full.replace(/ /g,"")===n.replace(/ /g,"")) return p; }
     for(var j=0;j<ps.length;j++){ var p2=ps[j], f2=norm((p2.first||"")+" "+(p2.last||""));
       if(f2&&(f2.indexOf(n)>-1||n.indexOf(f2)>-1)) return p2; }
+    /* مطابقة بالكلمات: أي كلمة مميزة (≥4 أحرف) موجودة في الاسم */
+    var toks=n.split(" ").filter(function(t){ return t.length>=4; });
+    if(toks.length){
+      var cand=null,candScore=0;
+      ps.forEach(function(pp){
+        var f=norm((pp.first||"")+" "+(pp.last||"")), sc=0;
+        toks.forEach(function(t){ if(f.indexOf(t)>-1) sc++; });
+        if(sc>candScore&&sc>=Math.min(2,toks.length)){ cand=pp; candScore=sc; }
+      });
+      if(cand) return cand;
+    }
+    /* مسافة تحرير صغيرة (خطأ إملائي) */
+    function lev(a,b){ var m=a.length,n2=b.length,d=[]; for(var i=0;i<=m;i++){ d[i]=[i]; }
+      for(var j2=0;j2<=n2;j2++){ d[0][j2]=j2; }
+      for(var i2=1;i2<=m;i2++){ for(var j3=1;j3<=n2;j3++){
+        d[i2][j3]=Math.min(d[i2-1][j3]+1,d[i2][j3-1]+1,d[i2-1][j3-1]+(a[i2-1]===b[j3-1]?0:1)); } }
+      return d[m][n2]; }
+    var best=null,bd=99;
+    ps.forEach(function(p3){ var f3=norm((p3.first||"")+" "+(p3.last||"")); if(!f3) return;
+      var dist=lev(n,f3); if(dist<bd){ bd=dist; best=p3; } });
+    if(best&&bd<=2) return best;
     return null;
   }
   var IMP={rows:[],headersIndex:{},mapping:{},provider:"generic",fileName:""};
+  var UNM=[];
   function guessMapping(headers){
     var m={}, score={};
     var PRI={player:6,playerId:5,date:6,distance:4,hsr:4,sprints:3,maxSpeed:4,minutes:3,rpe:3,hr:2,load:3,accel:2,decel:2};
@@ -42334,13 +42358,14 @@ tr:hover .qde-ndate{color:#7E0E14}
     var s=ST(); if(!s) return {added:0,skipped:0,unmatched:0};
     s.loads=Array.isArray(s.loads)?s.loads:[];
     var mp=IMP.mapping, hdr=IMP.rows[0]||[], body=IMP.rows.slice(1);
+    try{ var dcol=mp.date; if(dcol!=null&&dcol>=0){ DMODE=detectDateMode(body.map(function(r){ return r[dcol]; })); } }catch(e){}
     var keyIdx={};
     Object.keys(mp).forEach(function(k){ if(mp[k]>=0) keyIdx[k]=mp[k]; });
     if((keyIdx.player==null&&keyIdx.playerId==null)||keyIdx.date==null) return {added:0,skipped:0,unmatched:0,err:"need player+date"};
-    var added=0, skipped=0, unmatched=0;
+    var added=0, skipped=0, unmatched=0; UNM=[];
     body.forEach(function(r){
       var p=matchPlayer(keyIdx.player!=null?r[keyIdx.player]:null) || (keyIdx.playerId!=null?matchPlayer(r[keyIdx.playerId]):null);
-      if(!p){ unmatched++; return; }
+      if(!p){ unmatched++; var raw=keyIdx.player!=null?str(r[keyIdx.player]).trim():str(r[keyIdx.playerId]).trim(); if(raw&&UNM.indexOf(raw)<0) UNM.push(raw); return; }
       var d=keyIdx.date!=null?str(r[keyIdx.date]).trim():"";
       var iso=isoDate(d); if(!iso){ skipped++; return; }
       var rec={ id:"ld_"+Date.now().toString(36)+Math.random().toString(36).slice(2,6), playerId:p.id, date:iso,
@@ -42355,21 +42380,54 @@ tr:hover .qde-ndate{color:#7E0E14}
         decel:keyIdx.decel!=null?num(r[keyIdx.decel]):0,
         created:new Date().toISOString() };
       rec.loadAU = keyIdx.load!=null?num(r[keyIdx.load]):(rec.rpe&&rec.minutes?rec.rpe*rec.minutes:0);
-      var dup=s.loads.some(function(e){ return String(e.playerId)===String(p.id)&&dk(e.date)===iso&&str(e.src)===IMP.provider; });
+      var sig=[String(p.id),iso,str(IMP.provider),String(rec.minutes||""),String(Math.round(rec.distance||0)),str(r[keyIdx.drill!=null?keyIdx.drill:0]||"")].join("|");
+      var dup=s.loads.some(function(e){
+        if(String(e.playerId)!==String(p.id)) return false;
+        if(dk(e.date)!==iso) return false;
+        if(str(e.src)!==str(IMP.provider)) return false;
+        var s2=[String(e.playerId),dk(e.date),str(e.src),String(e.minutes||""),String(Math.round(e.distance||0)),str(e.drill||"")].join("|");
+        return s2===sig;
+      });
       if(dup){ skipped++; return; }
+      rec.drill=str(r[(function(){ var gi=Object.keys(keyIdx); for(var qi=0;qi<gi.length;qi++){} return keyIdx.drill!=null?keyIdx.drill:(keyIdx.player!=null?keyIdx.player:0); })()]||"");
+      if(keyIdx.drill!=null) rec.drill=str(r[keyIdx.drill]);
       s.loads.push(rec); added++;
     });
     saveAll();
     return {added:added,skipped:skipped,unmatched:unmatched};
   }
+  var DMODE=null;   /* null = يقرر من البيانات · "mdy" أو "dmy" */
+  function validYMD(y,mo,d){
+    if(!(y>=1990&&y<=2100)||mo<1||mo>12||d<1||d>31) return "";
+    var dt=new Date(y,mo-1,d);
+    if(dt.getFullYear()!==y||dt.getMonth()!==mo-1||dt.getDate()!==d) return "";
+    return y+"-"+pad(mo)+"-"+pad(d);
+  }
   function isoDate(v){
     var t=str(v).trim(); if(!t) return "";
     var m=t.match(/^(\d{4})[-/.](\d{1,2})[-/.](\d{1,2})/);
-    if(m) return m[1]+"-"+pad(+m[2])+"-"+pad(+m[3]);
+    if(m) return validYMD(+m[1],+m[2],+m[3]);
     m=t.match(/^(\d{1,2})[-/.](\d{1,2})[-/.](\d{4})/);
-    if(m) return m[3]+"-"+pad(+m[2])+"-"+pad(+m[1]);
+    if(m){
+      var a=+m[1], b=+m[2], y=+m[3], mode=DMODE;
+      if(mode==="mdy") return validYMD(y,a,b);
+      if(mode==="dmy") return validYMD(y,b,a);
+      if(a>12&&b<=12) return validYMD(y,b,a);      /* 25/10 → يوم/شهر */
+      if(b>12&&a<=12) return validYMD(y,a,b);      /* 10/25 → شهر/يوم */
+      return validYMD(y,b,a)||validYMD(y,a,b);
+    }
     var d=new Date(t); if(!isNaN(d.getTime())) return d.getFullYear()+"-"+pad(d.getMonth()+1)+"-"+pad(d.getDate());
     return "";
+  }
+  /* يستنتج نظام التاريخ من عمود كامل قبل الاستيراد */
+  function detectDateMode(vals){
+    var mdy=0,dmy=0;
+    vals.slice(0,80).forEach(function(v){
+      var m=str(v).trim().match(/^(\d{1,2})[-/.](\d{1,2})[-/.](\d{4})/); if(!m) return;
+      var a=+m[1],b=+m[2];
+      if(a>12) dmy++; else if(b>12) mdy++;
+    });
+    if(mdy>dmy) return "mdy"; if(dmy>mdy) return "dmy"; return null;
   }
   function last7(pid){
     var s=ST(); var out={dist:0,hsr:0,spr:0,ms:0,au:0,n:0,hr:0};
@@ -42888,7 +42946,13 @@ tr:hover .qde-ndate{color:#7E0E14}
       var r=importParsed();
       var box=b.querySelector("#q270impmsg");
       if(r.err){ box.innerHTML='<div class="q27note">⚠ '+L("اختر عمود اللاعب (الاسم أو الكود) وعمود التاريخ من القوائم أعلاه ثم اضغط استيراد.","Pick the player column (name or ID) and the date column from the lists above, then press Import.")+'</div>'; return; }
-      box.innerHTML='<div class="q27note">✓ '+L("أُضيف ","Added ")+r.added+L(" · تُخطّي "," · skipped ")+r.skipped+L(" · بلا مطابقة "," · unmatched ")+r.unmatched+'</div>';
+      var msg='<div class="q27note">'+(r.added?'✓ ':'⚠ ')+L("أُضيف ","Added ")+'<b>'+r.added+'</b>'+L(" · تُخطّي "," · skipped ")+r.skipped+L(" · بلا مطابقة "," · unmatched ")+'<b>'+r.unmatched+'</b>';
+      if(UNM&&UNM.length) msg+='<div style="margin-top:6px;font-weight:800;color:#A8161C">'+L("أسماء لم تُطابق الكشف: ","Names not found in the roster: ")+esc(UNM.slice(0,12).join(" · "))+'</div>';
+      if(r.added) msg+='<div style="margin-top:6px">'+L("أين تراها: «الحمل والجاهزية» ← عمود ACWR · تبويب «مخاطر الإصابة» في هذا المختبر · تصدير CSV من الجدول.",
+        "Where to see it: Load & Wellness → ACWR column · the Injury risk tab here · CSV export from the table.")+'</div>';
+      msg+=L("","");
+      msg+='</div>';
+      box.innerHTML=msg;
       IMP.rows=[]; IMP.mapping={};
     };
     var sav=b.querySelector("#q270sav");
@@ -43001,6 +43065,148 @@ tr:hover .qde-ndate{color:#7E0E14}
 })();
 
 </script>
+<script>
+/* QD276 ROSTER-PIN — لا لاعب يُضاف من غير المستخدم + تنقية الكشف */
+(function(){
+  var L=function(a,b){ try{ return (typeof window.qdL==="function")?window.qdL(a,b):a; }catch(e){ return a; } };
+  function L2(a,b){ try{ if(typeof QD_L==="function") return QD_L(a,b); }catch(e){}
+    try{ var lg=localStorage.getItem("qd_lang"); if(lg==="en") return b; }catch(e){} return a; }
+  function st(){ try{ return window.QD_S || (window.__QDAPP&&window.__QDAPP.S) || null; }catch(e){ return null; } }
+  function save(){
+    var s=st(); if(!s) return false;
+    try{ window.QD_S=s; }catch(e){}
+    try{ if(window.__QDAPP) window.__QDAPP.S=s; }catch(e){}
+    try{ localStorage.setItem("qadsiah_u18_v2",JSON.stringify(s)); }catch(e){ return false; }
+    try{ localStorage.setItem("qadsiah_sync_dirty","1"); }catch(e){}
+    try{ if(typeof window.save==="function") window.save(); }catch(e){}
+    return true;
+  }
+  var ARRAYS=["injuries","illnesses","therapies","sessions","loads","wellness","forceTests","promo","callups",
+              "activities","documents","mental","covid","complaints","enrollments"];
+  /* أسماء البذرة التجريبية (seed) — 20 اسمًا */
+  var SEED=[["Talal","Bin Khamis"],["Abdullah","Al-Shamri"],["Faisal","Al-Otaibi"],["Mohammed","Al-Zahrani"],
+    ["Saud","Al-Dosari"],["Nawaf","Al-Baqami"],["Yousef","Al-Ghamdi"],["Hamza","Al-Shehri"],["Rakan","Al-Harbi"],
+    ["Omar","Al-Subaie"],["Khalid","Al-Mutairi"],["Turki","Al-Aseeri"],["Ibrahim","Al-Johani"],["Waleed","Al-Saadi"],
+    ["Bandar","Al-Rashidi"],["Majed","Al-Suhaili"],["Anas","Al-Khaldi"],["Ziyad","Al-Omari"],["Rayan","Al-Qarni"],
+    ["Adnan","Al-Malki"]];
+  function nm(p){ return ((p.first||"")+" "+(p.last||"")).trim(); }
+  function key(p){ return ((p.first||"")+"|"+(p.last||"")).toLowerCase().replace(/\s+/g,""); }
+  var SEEDK={}; SEED.forEach(function(x){ SEEDK[(x[0]+"|"+x[1]).toLowerCase().replace(/\s+/g,"")]=1; });
+  function counts(s,id){
+    var c={total:0}, any=0;
+    ARRAYS.forEach(function(k){ var a=Array.isArray(s[k])?s[k]:[]; var n=a.filter(function(r){ return r&&String(r.playerId)===String(id); }).length; c[k]=n; c.total+=n; });
+    return c;
+  }
+  function rows(){
+    var s=st(); if(!s||!Array.isArray(s.players)) return [];
+    return s.players.map(function(p){ var c=counts(s,p.id); return {p:p,name:nm(p),n:c.total,seed:!!SEEDK[key(p)]||p.demo===1,c:c}; });
+  }
+  function suggested(){ return rows().filter(function(r){ return r.seed&&r.n===0; }); }
+
+  function open(){
+    var ex=document.getElementById("qd276ov"); if(ex) ex.remove();
+    var ov=document.createElement("div"); ov.id="qd276ov";
+    ov.style.cssText="position:fixed;inset:0;background:rgba(8,12,18,.55);z-index:99999;display:flex;align-items:center;justify-content:center;padding:16px";
+    var box=document.createElement("div");
+    box.style.cssText="background:#fff;border-radius:16px;max-width:820px;width:100%;max-height:88vh;overflow:auto;box-shadow:0 24px 60px rgba(0,0,0,.3);direction:rtl";
+    ov.appendChild(box); document.body.appendChild(ov);
+    ov.addEventListener("click",function(e){ if(e.target===ov) ov.remove(); });
+    render(box);
+    return ov;
+  }
+  function render(box){
+    var rs=rows(), sg=suggested();
+    var lock="0"; try{ lock=localStorage.getItem("qd_roster_lock")||"0"; }catch(e){}
+    var h='<div style="padding:16px 18px;border-bottom:1px solid #E6E3DC;display:flex;align-items:center;gap:10px">'+
+      '<div style="flex:1"><div style="font-weight:800;font-size:16px;color:#0C1118">🧹 '+L2("تنقية الكشف — منع أي لاعب غير مضاف منك","Roster cleanup — block players you never added")+'</div>'+
+      '<div style="font-size:12px;color:#6B7280;margin-top:3px">'+L2("اللاعبون القادمون من النسخة التجريبية عُرفوا بالاسم، والمقترحون للحذف هم من لا يملكون أي سجل.","Demo players are matched by name; suggested = no records at all.")+'</div></div>'+
+      '<button id="qd276x" style="border:0;background:#F3F1EC;width:32px;height:32px;border-radius:9px;font-size:16px;cursor:pointer">✕</button></div>';
+    h+='<div style="padding:10px 18px;background:'+(lock==="1"?"#EAF6EF":"#FFF8E8")+';font-size:12.5px;color:'+(lock==="1"?"#1B6B3A":"#8A6A11")+';border-bottom:1px solid #E6E3DC">'+
+      (lock==="1"?'🔒 '+L2("قفل الكشف مُفعّل: لن يُضاف أي لاعب تلقائيًا أبدًا.","Roster locked: no player will ever be auto-added."):'⚠ '+L2("قفل الكشف غير مُفعّل — اضغط «تثبيت الكشف الحالي» لمنع الإضافة التلقائية.","Roster lock off — press “Pin current roster”."))+'</div>';
+    h+='<div style="padding:12px 18px;display:flex;gap:7px;flex-wrap:wrap;border-bottom:1px solid #E6E3DC">'+
+      '<button data-qd276="sug" style="'+B()+'">'+L2("حدّد المقترحين","Select suggested")+' ('+sg.length+')</button>'+
+      '<button data-qd276="all" style="'+B(1)+'">'+L2("حدّد الكل","Select all")+'</button>'+
+      '<button data-qd276="none" style="'+B(1)+'">'+L2("إلغاء التحديد","Clear")+'</button>'+
+      '<button data-qd276="pin" style="'+B(1)+'">📌 '+L2("تثبيت الكشف الحالي","Pin current roster")+'</button>'+
+      '<button data-qd276="del" style="'+B(1)+'background:#A8161C;color:#fff;border-color:#A8161C">🗑 '+L2("حذف المحدد","Delete selected")+'</button></div>';
+    h+='<div style="padding:8px 18px 4px;font-size:12px;color:#6B7280">'+L2("إجمالي اللاعبين","Total players")+': <b>'+rs.length+'</b> · '+L2("مقترح للحذف","Suggested")+': <b>'+sg.length+'</b></div>';
+    h+='<table style="width:100%;border-collapse:collapse;font-size:13px"><thead><tr style="background:#FAF9F6;color:#6B7280;font-size:11.5px">'+
+      '<th style="padding:7px 8px;width:34px"></th><th style="text-align:right;padding:7px 8px">'+L2("اللاعب","Player")+'</th>'+
+      '<th style="padding:7px 8px">'+L2("المركز","Pos")+'</th><th style="padding:7px 8px">'+L2("سجلات","Records")+'</th>'+
+      '<th style="padding:7px 8px">'+L2("المصدر","Source")+'</th></tr></thead><tbody>';
+    rs.forEach(function(r){
+      h+='<tr style="border-top:1px solid #F0EDE6">'+
+        '<td style="padding:6px 8px;text-align:center"><input type="checkbox" data-qd276p="'+esc2(r.p.id)+'" style="width:16px;height:16px;accent-color:#C8A24A"></td>'+
+        '<td style="padding:6px 8px;font-weight:700">'+esc2(r.name)+'</td>'+
+        '<td style="padding:6px 8px;color:#6B7280;font-size:12px">'+esc2(r.p.pos||"—")+'</td>'+
+        '<td style="padding:6px 8px;font-variant-numeric:tabular-nums">'+r.n+'</td>'+
+        '<td style="padding:6px 8px">'+(r.seed?'<span style="background:#FDECEC;color:#A8161C;border-radius:6px;padding:2px 7px;font-size:11px;font-weight:700">'+L2("تجريبي","demo")+'</span>':(r.n===0?'<span style="background:#F1F0EC;color:#6B7280;border-radius:6px;padding:2px 7px;font-size:11px">'+L2("بلا سجلات","no records")+'</span>':''))+'</td></tr>';
+    });
+    if(!rs.length) h+='<tr><td colspan="5" style="padding:18px;text-align:center;color:#6B7280">'+L2("لا يوجد لاعبون.","No players.")+'</td></tr>';
+    h+='</tbody></table><div style="padding:12px 18px;font-size:11.5px;color:#6B7280;border-top:1px solid #E6E3DC">'+
+      L2("الحذف يزيل اللاعب وكل سجلاته المرتبطة (إصابات، علاج، جلسات، حمل، عافية…) ولا يمكن التراجع.","Deleting removes the player and all linked records — it cannot be undone.")+'</div>';
+    box.innerHTML=h;
+    box.querySelector("#qd276x").onclick=function(){ var o=document.getElementById("qd276ov"); if(o) o.remove(); };
+    box.querySelectorAll("[data-qd276]").forEach(function(b){ b.onclick=function(){ act(b.getAttribute("data-qd276"),box); }; });
+  }
+  function B(g){ return "padding:7px 12px;border-radius:9px;border:1px solid "+(g?"#D9D5CB":"#C8A24A")+";background:"+(g?"#fff":"#C8A24A")+";color:"+(g?"#0C1118":"#fff")+";font-weight:800;font-size:12.5px;cursor:pointer"; }
+  function esc2(v){ return String(v==null?"":v).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+  function box(box){ return box; }
+  function act(a,b){
+    if(a==="sug"){ b.querySelectorAll("[data-qd276p]").forEach(function(c){ c.checked=false; }); suggested().forEach(function(r){ var c=b.querySelector('[data-qd276p="'+r.p.id+'"]'); if(c) c.checked=true; }); }
+    if(a==="all"){ b.querySelectorAll("[data-qd276p]").forEach(function(c){ c.checked=true; }); }
+    if(a==="none"){ b.querySelectorAll("[data-qd276p]").forEach(function(c){ c.checked=false; }); }
+    if(a==="pin"){ try{ localStorage.setItem("qd_roster_lock","1"); }catch(e){} render(b); toast2(L2("تم تثبيت الكشف: لن يُضاف لاعب تلقائيًا.","Roster pinned: no auto-adding.")); }
+    if(a==="del"){
+      var ids=[].slice.call(b.querySelectorAll("[data-qd276p]")).filter(function(c){ return c.checked; }).map(function(c){ return c.getAttribute("data-qd276p"); });
+      if(!ids.length){ toast2(L2("حدّد لاعبًا واحدًا على الأقل.","Select at least one player.")); return; }
+      if(!confirm(L2("حذف "+ids.length+" لاعبًا وكل سجلاتهم؟ لا يمكن التراجع.","Delete "+ids.length+" players and all their records? Cannot be undone."))) return;
+      var n=del(ids);
+      try{ localStorage.setItem("qd_roster_lock","1"); }catch(e){}
+      render(b); toast2(L2("تم حذف "+n+" لاعبًا.","Deleted "+n+" players."));
+      try{ if(typeof window.REND==="object"&&REND.players) REND.players(); }catch(e){}
+      try{ if(typeof window.showView==="function") showView(window.CUR_VIEW||"players"); }catch(e){}
+    }
+  }
+  function del(ids){
+    var s=st(); if(!s) return 0;
+    var set={}; ids.forEach(function(i){ set[String(i)]=1; });
+    var before=Array.isArray(s.players)?s.players.length:0;
+    s.players=(s.players||[]).filter(function(p){ return !set[String(p.id)]; });
+    ARRAYS.forEach(function(k){ if(Array.isArray(s[k])) s[k]=s[k].filter(function(r){ return !(r&&set[String(r.playerId)]); }); });
+    (s.injuries||[]).forEach(function(inj){ if(Array.isArray(inj.treatments)){} });
+    try{ if(Array.isArray(s.users)){} }catch(e){}
+    save();
+    return before-s.players.length;
+  }
+  function toast2(m){ try{ if(typeof window.toast==="function"){ toast(m); return; } }catch(e){} try{ console.log(m); }catch(e){} }
+  /* زر الدخول: بجوار «إضافة لاعب» في شاشة اللاعبين */
+  function tick(){
+    if(document.getElementById("qd276ov")) return;
+    var btns=[].slice.call(document.querySelectorAll("button"));
+    var anchor=null;
+    for(var i=0;i<btns.length;i++){
+      var t=(btns[i].textContent||"").trim();
+      if(/^(إضافة لاعب|إضافة لاعب جديد|Add player)$/.test(t) && btns[i].offsetParent!==null){ anchor=btns[i]; break; }
+    }
+    var mine=document.getElementById("qd276btn");
+    if(!anchor){ if(mine) mine.style.display="none"; return; }
+    if(!mine){
+      mine=document.createElement("button"); mine.id="qd276btn"; mine.type="button";
+      mine.textContent="🧹 "+L2("تنقية الكشف","Roster cleanup");
+      mine.style.cssText="margin-inline-start:7px;padding:7px 12px;border-radius:9px;border:1px solid #D9D5CB;background:#fff;color:#0C1118;font-weight:800;font-size:12.5px;cursor:pointer";
+      mine.onclick=function(e){ e.preventDefault(); e.stopPropagation(); open(); };
+      anchor.parentNode.insertBefore(mine,anchor.nextSibling);
+    } else {
+      mine.style.display=""; if(mine.previousSibling!==anchor&&anchor.nextSibling!==mine) anchor.parentNode.insertBefore(mine,anchor.nextSibling);
+    }
+  }
+  setInterval(tick,900); setTimeout(tick,1200);
+  window.QD276={open:open,rows:rows,suggested:suggested,del:del,names:SEED};
+})();
+
+</script>
+
 
 
 
