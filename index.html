@@ -35146,7 +35146,7 @@ tr:hover .qde-ndate{color:#7E0E14}
 
   function badge(){
     try{ var b=document.getElementById("qdrBadge"); if(!b) return;
-      var w="v11-280 · SURVEY-ROUTE";
+      var w="v11-281 · NO-RESURRECT";
       if(b.textContent!==w+" · BTN-OK") b.textContent=w+" · BTN-OK"; }catch(e){}
   }
 
@@ -43155,7 +43155,8 @@ tr:hover .qde-ndate{color:#7E0E14}
       '<button data-qd276="all" style="'+B(1)+'">'+L2("حدّد الكل","Select all")+'</button>'+
       '<button data-qd276="none" style="'+B(1)+'">'+L2("إلغاء التحديد","Clear")+'</button>'+
       '<button data-qd276="pin" style="'+B(1)+'">📌 '+L2("تثبيت الكشف الحالي","Pin current roster")+'</button>'+
-      '<button data-qd276="del" style="'+B(1)+'background:#A8161C;color:#fff;border-color:#A8161C">🗑 '+L2("حذف المحدد","Delete selected")+'</button></div>';
+      '<button data-qd276="del" style="'+B(1)+'background:#A8161C;color:#fff;border-color:#A8161C">🗑 '+L2("حذف المحدد","Delete selected")+'</button>'+
+      '<button data-qd276="blk" style="'+B(1)+'">🚫 '+L2("قائمة الحجب","Block list")+'</button></div>';
     h+='<div style="padding:8px 18px 4px;font-size:12px;color:#6B7280">'+L2("إجمالي اللاعبين","Total players")+': <b>'+rs.length+'</b> · '+L2("مقترح للحذف","Suggested")+': <b>'+sg.length+'</b></div>';
     h+='<table style="width:100%;border-collapse:collapse;font-size:13px"><thead><tr style="background:#FAF9F6;color:#6B7280;font-size:11.5px">'+
       '<th style="padding:7px 8px;width:34px"></th><th style="text-align:right;padding:7px 8px">'+L2("اللاعب","Player")+'</th>'+
@@ -43183,6 +43184,7 @@ tr:hover .qde-ndate{color:#7E0E14}
     if(a==="sug"){ b.querySelectorAll("[data-qd276p]").forEach(function(c){ c.checked=false; }); suggested().forEach(function(r){ var c=b.querySelector('[data-qd276p="'+r.p.id+'"]'); if(c) c.checked=true; }); }
     if(a==="all"){ b.querySelectorAll("[data-qd276p]").forEach(function(c){ c.checked=true; }); }
     if(a==="none"){ b.querySelectorAll("[data-qd276p]").forEach(function(c){ c.checked=false; }); }
+    if(a==="blk"){ try{ if(window.QD281) window.QD281.open(); }catch(e){} }
     if(a==="pin"){ try{ localStorage.setItem("qd_roster_lock","1"); }catch(e){} render(b); toast2(L2("تم تثبيت الكشف: لن يُضاف لاعب تلقائيًا.","Roster pinned: no auto-adding.")); }
     if(a==="del"){
       var ids=[].slice.call(b.querySelectorAll("[data-qd276p]")).filter(function(c){ return c.checked; }).map(function(c){ return c.getAttribute("data-qd276p"); });
@@ -43196,16 +43198,26 @@ tr:hover .qde-ndate{color:#7E0E14}
     }
   }
   function del(ids){
-    var s=st(); if(!s) return 0;
+    var s=(window.QD_S&&Array.isArray(window.QD_S.players))?window.QD_S:((window.__QDAPP&&window.__QDAPP.S)||null);
+    if(!s) return 0;
     var set={}; ids.forEach(function(i){ set[String(i)]=1; });
-    var before=Array.isArray(s.players)?s.players.length:0;
+    var before=(s.players||[]).length;
+    var doomed=(s.players||[]).filter(function(p){ return set[String(p.id)]; });
+    try{ if(window.QD281&&window.QD281.block) window.QD281.block(doomed); }catch(e){}
     s.players=(s.players||[]).filter(function(p){ return !set[String(p.id)]; });
-    ARRAYS.forEach(function(k){ if(Array.isArray(s[k])) s[k]=s[k].filter(function(r){ return !(r&&set[String(r.playerId)]); }); });
-    (s.injuries||[]).forEach(function(inj){ if(Array.isArray(inj.treatments)){} });
-    try{ if(Array.isArray(s.users)){} }catch(e){}
-    save();
-    return before-s.players.length;
+    Array_.forEach(function(k){ if(Array.isArray(s[k])){ s[k]=s[k].filter(function(r){ return !(r&&set[String(r.playerId)]); }); } });
+    try{ window.QD_S=s; }catch(e){}
+    try{ if(window.__QDAPP) window.__QDAPP.S=s; }catch(e){}
+    try{
+      var stt=window.__QDSET||Storage.prototype.setItem;
+      stt.call(localStorage,"qadsiah_u18_v2",JSON.stringify(s));
+      stt.call(localStorage,"qadsiah_sync_dirty","1");
+    }catch(e){}
+    try{ if(window.QD281){ window.QD281.enforce(); window.QD281.refreshBackup(); } }catch(e){}
+    try{ if(typeof window.save==="function"&&window.save!==save){ } }catch(e){}
+    return before-(s.players||[]).length;
   }
+  var Array_=["injuries","illnesses","therapies","sessions","loads","wellness","forceTests","promo","callups","activities","documents","mental","covid","complaints","enrollments"];
   function toast2(m){ try{ if(typeof window.toast==="function"){ toast(m); return; } }catch(e){} try{ console.log(m); }catch(e){} }
   /* زر الدخول: بجوار «إضافة لاعب» في شاشة اللاعبين */
   function tick(){
@@ -43774,6 +43786,143 @@ tr:hover .qde-ndate{color:#7E0E14}
 })();
 
 </script>
+<script>
+/* QD281 · NO-RESURRECT — منع رجوع اللاعبين المحذوفين من أي مصدر
+   المصادر التي كانت تُرجعهم: (1) نسخة IndexedDB الاحتياطية تُستعاد عند نقص السجلات،
+   (2) السحب السحابي يستبدل الحالة، (3) نسخة قديمة في localStorage.
+   الحل: قائمة حجب دائمة بالمعرّف + بصمة الاسم، تُطبَّق قبل كل كتابة وبعد كل قراءة. */
+(function(){
+  var BK="qd_del_players";
+  function isEN(){ try{ return /^en/i.test(localStorage.getItem("qd_lang")||""); }catch(e){ return false; } }
+  function L(a,e){ return isEN()?e:a; }
+  function S(){ try{ if(window.QD_S&&Array.isArray(window.QD_S.players)) return window.QD_S; }catch(e){}
+    try{ if(window.__QDAPP&&window.__QDAPP.S) return window.__QDAPP.S; }catch(e){} return null; }
+  function nm(p){ return (((p.first||"")+" "+(p.last||"")).trim()); }
+  function sig(p){ return nm(p).toLowerCase().replace(/[^a-z\u0621-\u064a]/g,""); }
+  function read(){ try{ var o=JSON.parse(localStorage.getItem(BK)||"{}"); return {ids:o.ids||[],names:o.names||[]}; }catch(e){ return {ids:[],names:[]}; } }
+  function write(o){ try{ localStorage.setItem(BK,JSON.stringify({ids:o.ids.slice(-800),names:o.names.slice(-800)})); }catch(e){} }
+  function blocked(p,o){ o=o||read(); if(!p) return false;
+    if(o.ids.indexOf(String(p.id))>-1) return true;
+    var s2=sig(p); return !!(s2&&o.names.indexOf(s2)>-1); }
+  function block(ps){
+    var o=read();
+    ps.forEach(function(p){ if(!p) return;
+      if(o.ids.indexOf(String(p.id))<0) o.ids.push(String(p.id));
+      var s2=sig(p); if(s2&&o.names.indexOf(s2)<0) o.names.push(s2);
+    });
+    write(o); return o;
+  }
+  function unblock(keys){
+    var o=read(); keys.forEach(function(k){
+      o.ids=o.ids.filter(function(x){ return x!==k; }); o.names=o.names.filter(function(x){ return x!==k; }); });
+    write(o); return o;
+  }
+  var ARR=["injuries","illnesses","therapies","sessions","loads","wellness","forceTests","promo","callups",
+           "activities","documents","mental","covid","complaints","enrollments"];
+  function enforce(){
+    var s=S(); if(!s||!Array.isArray(s.players)) return 0;
+    var o=read(); if(!o.ids.length&&!o.names.length) return 0;
+    var killed=s.players.filter(function(p){ return blocked(p,o); });
+    if(!killed.length) return 0;
+    var set={}; killed.forEach(function(p){ set[String(p.id)]=1; });
+    s.players=s.players.filter(function(p){ return !set[String(p.id)]; });
+    ARR.forEach(function(k){ if(Array.isArray(s[k])) s[k]=s[k].filter(function(r){ return !(r&&set[String(r.playerId)]); }); });
+    (s.injuries||[]).forEach(function(inj){ if(Array.isArray(inj.treatments)) inj.treatments=inj.treatments.filter(function(t){ return !(t&&set[String(t.playerId)]); }); });
+    try{ window.QD_S=s; }catch(e){}
+    try{ if(window.__QDAPP) window.__QDAPP.S=s; }catch(e){}
+    persist();
+    return killed.length;
+  }
+  function persist(){
+    var s=S(); if(!s) return false;
+    try{
+      var set=window.__QDSET||Storage.prototype.setItem;
+      set.call(localStorage,"qadsiah_u18_v2",JSON.stringify(s));
+      set.call(localStorage,"qadsiah_sync_dirty","1");
+    }catch(e){ return false; }
+    try{ if(window.QD257&&window.QD257.backup) window.QD257.backup(); }catch(e){}
+    return true;
+  }
+  /* احفظ بصمة للنسخ الاحتياطية القديمة: أي لاعب محجوب يبقى محجوبًا */
+  function refreshBackup(){
+    try{ if(window.QD257&&window.QD257.backup) window.QD257.backup(); }catch(e){}
+    try{ if(window.__qdBackup) window.__qdBackup(true); }catch(e){}
+  }
+  /* حراسة الكتابة: لا تُكتب نسخة تحتوي محجوبًا */
+  try{
+    var set=window.__QDSET||Storage.prototype.setItem;
+    var wrapped=function(k,v){
+      try{
+        if(k==="qadsiah_u18_v2"&&typeof v==="string"){
+          var o=read();
+          if(o.ids.length||o.names.length){
+            var j=JSON.parse(v);
+            if(j&&Array.isArray(j.players)){
+              var n0=j.players.length;
+              j.players=j.players.filter(function(p){ return !blocked(p,o); });
+              if(j.players.length!==n0){ v=JSON.stringify(j); }
+            }
+          }
+        }
+      }catch(e){}
+      return set.call(this,k,v);
+    };
+    try{ Storage.prototype.setItem=wrapped; }catch(e){}
+  }catch(e){}
+
+  /* التقاط الاستعادة: بعد أي سحب سحابي أو استعادة نسخة */
+  function hook(){
+    try{ if(window.QD231&&window.QD231.pull&&!QD231.__qd281){ var orig=QD231.pull;
+      QD231.pull=function(){ var r=orig.apply(this,arguments); try{ if(r&&r.then) return r.then(function(v){ enforce(); refreshBackup(); return v; }); }catch(e){} setTimeout(function(){ enforce(); refreshBackup(); },700); return r; };
+      QD231.__qd281=1; } }catch(e){}
+    try{ if(!window.__qd281r){ window.__qd281r=1;
+      var origReload=window.location.reload.bind(window.location);
+    } }catch(e){}
+  }
+  /* الواجهة: إظهار المحجوبين والسماح بفكّ الحجب */
+  function open(){
+    var o=read(), s=S();
+    var ids={}; o.ids.forEach(function(i){ ids[i]=1; });
+    var names=(s&&s.players||[]).map(function(p){ return {id:p.id,n:nm(p),b:blocked(p,o)}; });
+    var ov=document.createElement("div"); ov.id="qd281ov";
+    ov.style.cssText="position:fixed;inset:0;background:rgba(8,12,18,.6);z-index:2147483642;display:flex;align-items:center;justify-content:center;padding:14px";
+    var bx=document.createElement("div");
+    bx.style.cssText="background:#fff;border-radius:16px;max-width:640px;width:100%;max-height:86vh;overflow:auto;direction:rtl;padding:16px 18px;box-shadow:0 24px 60px rgba(0,0,0,.35)";
+    var h='<div style="display:flex;align-items:center;gap:8px"><div style="flex:1;font-weight:900;font-size:15.5px;color:#0C1118">🚫 '+L("قائمة الحجب الدائم","Permanent block list")+'</div>'+
+      '<button id="qd281x" style="border:0;background:#F3F1EC;width:30px;height:30px;border-radius:8px;cursor:pointer">✕</button></div>'+
+      '<div style="font-size:12px;color:#6B7280;margin:6px 0 12px;line-height:1.7">'+
+      L("كل لاعب محذوف يُسجَّل هنا بالمعرّف وبالاسم، فلا تعيده النسخة الاحتياطية ولا المزامنة السحابية. المحجوبون: ","Every deleted player is recorded by id and name so neither the backup nor the cloud sync brings him back. Blocked: ")+
+      '<b>'+(ids?Object.keys(ids).length:0)+'</b> '+L("معرّف · ","ids · ")+'<b>'+o.names.length+'</b> '+L("اسم","names")+'</div>';
+    h+='<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">'+
+      '<button id="qd281fix" style="padding:8px 12px;border-radius:9px;border:0;background:#C8A24A;color:#fff;font-weight:900;font-size:12px;cursor:pointer">↻ '+L("تنفيذ الحجب الآن","Enforce now")+'</button>'+
+      '<button id="qd281bk" style="padding:8px 12px;border-radius:9px;border:1px solid #D9D5CB;background:#fff;font-weight:800;font-size:12px;cursor:pointer">💾 '+L("تحديث النسخة الاحتياطية","Refresh backup")+'</button>'+
+      '<button id="qd281clr" style="padding:8px 12px;border-radius:9px;border:1px solid #A8161C;background:#fff;color:#A8161C;font-weight:800;font-size:12px;cursor:pointer">'+L("إفراغ القائمة","Clear list")+'</button></div>';
+    h+='<div style="font-size:11.5px;color:#6B7280;margin-bottom:6px">'+L("أسماء محجوبة (لا يمكن أن تعود):","Blocked names (cannot return):")+'</div>';
+    h+='<div style="display:flex;flex-wrap:wrap;gap:5px;max-height:180px;overflow:auto">'+
+      (o.names.length?o.names.map(function(n){ return '<span style="background:#FDECEC;color:#A8161C;border:1px solid #F3C6C9;border-radius:7px;padding:3px 8px;font-size:11px">'+n+'</span>'; }).join(""):'<span style="font-size:12px;color:#9CA3AF">'+L("لا شيء بعد","Nothing yet")+'</span>')+'</div>';
+    bx.innerHTML=h; ov.appendChild(bx); document.body.appendChild(ov);
+    ov.addEventListener("click",function(e){ if(e.target===ov) ov.remove(); });
+    bx.querySelector("#qd281x").onclick=function(){ ov.remove(); };
+    bx.querySelector("#qd281fix").onclick=function(){ var n=enforce(); refreshBackup(); try{ if(typeof toast==="function") toast(L("تم تنفيذ الحجب — أُزيل "+n,"Enforced — removed "+n)); }catch(e){} ov.remove(); };
+    bx.querySelector("#qd281bk").onclick=function(){ refreshBackup(); try{ if(typeof toast==="function") toast(L("تم تحديث النسخة الاحتياطية","Backup refreshed")); }catch(e){} };
+    bx.querySelector("#qd281clr").onclick=function(){ if(!confirm(L("إفراغ قائمة الحجب؟ قد يعود المحذوفون.","Clear the block list? Deleted players may return."))) return; write({ids:[],names:[]}); ov.remove(); };
+  }
+  /* حلقة الحماية */
+  var last=0;
+  function tick(){
+    var n=enforce();
+    if(n){ last=n; try{ if(typeof toast==="function") toast(L("أُزيل "+n+" لاعبًا محجوبًا أرادت نسخة قديمة إرجاعهم","Removed "+n+" blocked players a stale copy tried to restore"),"warn"); }catch(e){}
+      try{ if(typeof REND==="object"&&REND.players) REND.players(); }catch(e){}
+      try{ if(typeof renderNav==="function") renderNav(); }catch(e){} }
+  }
+  setInterval(tick,1500); setTimeout(tick,2500); setTimeout(tick,6000);
+  try{ window.addEventListener("storage",function(e){ if(e&&e.key==="qadsiah_u18_v2") setTimeout(tick,200); }); }catch(e){}
+  setTimeout(hook,3000); setTimeout(hook,9000);
+  window.QD281={block:block,unblock:unblock,enforce:enforce,open:open,list:read,refreshBackup:refreshBackup};
+})();
+
+</script>
+
 
 
 
