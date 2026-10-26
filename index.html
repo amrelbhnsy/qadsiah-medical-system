@@ -1,6 +1,25 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
-<head><script>/*!
+<head><script>
+/* QD278-TRACK · عدّاد معالجات النقر — يكشف التعارض بين الوحدات قبل أن يظهر كخطأ */
+(function(){
+  window.__QDEVT={click:{window:0,document:0,body:0},total:0};
+  try{ window.__QDSET=Storage.prototype.setItem; window.__QDGET=Storage.prototype.getItem;
+       window.__QDREM=Storage.prototype.removeItem; }catch(e){}
+  try{
+    var orig=EventTarget.prototype.addEventListener;
+    EventTarget.prototype.addEventListener=function(type,fn,opt){
+      try{ if(type==="click"){ window.__QDEVT.total++;
+        if(this===window) window.__QDEVT.click.window++;
+        else if(this===document) window.__QDEVT.click.document++;
+        else if(this===document.body) window.__QDEVT.click.body++;
+      } }catch(e){}
+      return orig.apply(this,arguments);
+    };
+  }catch(e){}
+})();
+</script>
+<script>/*!
  * QD246 · وضع الثبات — إيقاف كل تحديث دوري للواجهة (سبب الرعشة)
  * ١) يلفّ كل setInterval: لا يُنفّذ أي مؤقت يلمس الشاشة عندما يكون الثبات مفعّلًا.
  * ٢) يمنع إعادة كتابة نفس HTML في القائمة الجانبية (#sidebar و #nav) والشارات.
@@ -35127,7 +35146,7 @@ tr:hover .qde-ndate{color:#7E0E14}
 
   function badge(){
     try{ var b=document.getElementById("qdrBadge"); if(!b) return;
-      var w="v11-276 · ROSTER-PIN";
+      var w="v11-280 · SURVEY-ROUTE";
       if(b.textContent!==w+" · BTN-OK") b.textContent=w+" · BTN-OK"; }catch(e){}
   }
 
@@ -38525,7 +38544,15 @@ tr:hover .qde-ndate{color:#7E0E14}
   function playerLink(pid,day){
     var extra="";
     try{ if(window.QD231&&window.QD231.cfgToken){ var t=window.QD231.cfgToken(); if(t) extra="&c="+t; } }catch(e){}
-    return appBase()+"#well="+encodeURIComponent(String(pid)+"~"+String(day))+extra;
+    var nm="",cl="",ph="";
+    try{ var pl=PL(pid); if(pl) nm=((pl.first||"")+" "+(pl.last||"")).trim(); }catch(e){}
+    try{ var st=S0(); cl=(st&&st.settings&&st.settings.club)||""; }catch(e){}
+    try{ ph=toWa(clinicianPhone()); }catch(e){}
+    var q="";
+    if(nm) q+="&n="+encodeURIComponent(nm);
+    if(cl) q+="&cl="+encodeURIComponent(cl);
+    if(ph) q+="&ph="+encodeURIComponent(ph);
+    return appBase()+"#well="+encodeURIComponent(String(pid)+"~"+String(day))+q+extra;
   }
   function readWellHash(){
     try{
@@ -39055,7 +39082,7 @@ tr:hover .qde-ndate{color:#7E0E14}
     }catch(e){ setTimeout(install,800); }
   }
 
-  window.QD229={render:render,wa:waFor,link:playerLink,encode:encode,decodeAll:decodeAll,
+  window.QD229={render:render,wa:waFor,link:playerLink,encode:encode,decodeAll:decodeAll,ITEMS:ITEMS,
     importText:function(txt){ return decodeAll(txt); },openForm:openPlayerForm};
   if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",install,{once:true});
   install();
@@ -41562,7 +41589,7 @@ tr:hover .qde-ndate{color:#7E0E14}
     try{ if(typeof window.save==="function") window.save(); }catch(e){}
     try{ var A=window.__QDAPP; if(A&&typeof A.save==="function") A.save(); }catch(e){}
     try{ var s=ST(); if(s) localStorage.setItem("qadsiah_u18_v2",JSON.stringify(s)); }catch(e){}
-    try{ localStorage.setItem("qadsiah_sync_dirty","1"); }catch(e){}
+    try{ var st2=window.__QDSET||Storage.prototype.setItem; st2.call(localStorage,"qadsiah_sync_dirty","1"); }catch(e){}
     try{ if(window.QD257&&window.QD257.backup) window.QD257.backup(); }catch(e){}
   }
   function repaint(){
@@ -43076,7 +43103,7 @@ tr:hover .qde-ndate{color:#7E0E14}
     var s=st(); if(!s) return false;
     try{ window.QD_S=s; }catch(e){}
     try{ if(window.__QDAPP) window.__QDAPP.S=s; }catch(e){}
-    try{ localStorage.setItem("qadsiah_u18_v2",JSON.stringify(s)); }catch(e){ return false; }
+    try{ var st=window.__QDSET||Storage.prototype.setItem; st.call(localStorage,"qadsiah_u18_v2",JSON.stringify(s)); }catch(e){ return false; }
     try{ localStorage.setItem("qadsiah_sync_dirty","1"); }catch(e){}
     try{ if(typeof window.save==="function") window.save(); }catch(e){}
     return true;
@@ -43206,6 +43233,550 @@ tr:hover .qde-ndate{color:#7E0E14}
 })();
 
 </script>
+<script>
+/* QD277 · BULK-WA — إرسال جماعي حقيقي: طابور واحد-واحد بزرّ كبير + تتبّع الإرسال
+   سبب العطل: المتصفح يسمح بفتح نافذة واتساب واحدة لكل نقرة، والطابور القديم ينتظر
+   زر «التالي» أسفل الشاشة بلا عدّاد ولا تتبّع، فيبدو أن لاعبًا واحدًا فقط استلم. */
+(function(){
+  var KEY="qd_wa_sent";
+  function isEN(){ try{ var l=localStorage.getItem("qd_lang"); return !!(l&&/^en/i.test(l)); }catch(e){ return false; } }
+  function L(a,e){ return isEN()?e:a; }
+  function E(s){ return String(s==null?"":s).replace(/[&<>"']/g,function(c){ return ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[c]; }); }
+  function ST(){ try{ if(window.__QDAPP&&window.__QDAPP.S) return window.__QDAPP.S; }catch(e){} try{ return window.QD_S||null; }catch(e){ return null; } }
+  function SAVE(){ try{ if(window.__QDAPP&&window.__QDAPP.save){ window.__QDAPP.save(); return; } }catch(e){} try{ if(window.QD_save) window.QD_save(); }catch(e){} }
+  function today(){ var d=new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+  function map(){ try{ return JSON.parse(localStorage.getItem(KEY)||"{}"); }catch(e){ return {}; } }
+  function putMap(m){ try{ localStorage.setItem(KEY,JSON.stringify(m)); }catch(e){} }
+  function dayKey(){ var el=document.getElementById("wlDay"); return (el&&el.value)||today(); }
+  function sentOf(day){ var m=map(); return m[day]||{}; }
+  function markSent(day,pid){ var m=map(); m[day]=m[day]||{}; m[day][pid]=Date.now(); putMap(m); }
+  function clearSent(day,pid){ var m=map(); if(m[day]){ delete m[day][pid]; putMap(m); } }
+  function toastit(msg,k){ try{ if(typeof toast==="function") return toast(msg,k||"ok"); }catch(e){} }
+  function players(){ var s=ST(); return (s&&Array.isArray(s.players))?s.players:[]; }
+  function PN(p){ return (((p.first||"")+" "+(p.last||"")).trim())||"—"; }
+  function phoneOK(p){ var n=String((p&&(p.phone||p.mobile||p.wa))||"").replace(/[^\d]/g,"");
+    if(!n) return false; if(n.indexOf("0")===0) n="966"+n.slice(1); else if(n.length===9) n="966"+n; return n.length>=10; }
+  function hhmm(ts){ var d=new Date(ts); return String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0"); }
+
+  /* ---------- تلوين الصفوف وحساب العدّادات بعد كل رسم ---------- */
+  function patch(){
+    var day=dayKey(), sent=sentOf(day), list=document.querySelector(".wl-list");
+    if(list){
+      [].slice.call(list.querySelectorAll(".wl-row")).forEach(function(row){
+        var cb=row.querySelector('[data-wl="pick"]'); if(!cb) return;
+        var pid=cb.getAttribute("data-p");
+        if(sent[pid]&&!row.classList.contains("qd277sent")){
+          row.classList.add("qd277sent");
+          var pill=row.querySelector(".wl-pill.grey");
+          if(pill){ pill.textContent=L("أُرسل ","Sent ")+hhmm(sent[pid]); pill.style.background="#E7F5EC"; pill.style.color="#1B6B3A"; pill.style.borderColor="#BFE3CB"; }
+        }
+      });
+    }
+    // ترقيم بطاقات الإحصاء: أرسلوا = فعليًا أُرسل، بانتظار = بلا ردّ
+    var total=players().length, sc=Object.keys(sent).length;
+    [].slice.call(document.querySelectorAll(".wl-kpi")).forEach(function(k){
+      var lab=k.querySelector("span"), b=k.querySelector("b"); if(!lab||!b) return;
+      var t=(lab.textContent||"");
+      if(/أرسلوا|Sent/.test(t)) b.textContent=sc+"/"+total;
+      if(/بانتظار|Awaiting/.test(t)){
+        var pend=players().filter(function(p){ return !sent[p.id]; }).length;
+        b.textContent=String(pend);
+      }
+    });
+    var selN=document.getElementById("wlSelN");
+    if(selN&&!document.getElementById("qd277tray")){
+      var n=0; [].slice.call(document.querySelectorAll('.wl-list [data-wl="pick"]')).forEach(function(c){ if(c.checked) n++; });
+      selN.textContent=n+" "+L("محدّد","selected");
+    }
+  }
+
+  /* ---------- قائمة الانتظار ---------- */
+  var Q=[], qi=0, DAY="";
+  function start(){
+    var day=dayKey(); DAY=day;
+    var picks=[];
+    [].slice.call(document.querySelectorAll('.wl-list [data-wl="pick"]')).forEach(function(c){ if(c.checked) picks.push(c.getAttribute("data-p")); });
+    if(!picks.length){ toastit(L("حدّد لاعبًا واحدًا على الأقل","Select at least one player"),"warn"); return; }
+    var sent=sentOf(day), byId={};
+    players().forEach(function(p){ byId[String(p.id)]=p; });
+    var noPhone=0;
+    Q=picks.map(function(id){ return byId[id]; }).filter(Boolean).filter(function(p){ if(!phoneOK(p)){ noPhone++; return false; } return true; });
+    if(noPhone) toastit(L("تم تجاهل "+noPhone+" لاعبًا بلا رقم صحيح","Skipped "+noPhone+" without a valid phone"),"warn");
+    if(!Q.length){ toastit(L("لا لاعبين بأرقام صحيحة في التحديد","No valid numbers in the selection"),"bad"); return; }
+    qi=0; tray(); openCurrent();
+  }
+  function openCurrent(){
+    if(qi>=Q.length){ done(); return; }
+    var p=Q[qi];
+    var url="";
+    try{ if(window.QD229&&window.QD229.wa) url=window.QD229.wa(p,DAY); }catch(e){}
+    if(!url){ var ph=String(p.phone||"").replace(/[^\d]/g,""); if(ph.indexOf("0")===0) ph="966"+ph.slice(1);
+      url="https://wa.me/"+ph+"?text="+encodeURIComponent(L("استبيان الجاهزية — ","Readiness check-in — ")+PN(p)); }
+    var ok=false;
+    try{ var w2=window.open(url,"_blank"); ok=!!w2; }catch(e){ ok=false; }
+    if(!ok){ try{ var aa=document.createElement("a"); aa.href=url; aa.target="_blank"; aa.rel="noopener"; document.body.appendChild(aa); aa.click(); aa.remove(); ok=true; }catch(e){} }
+    markSent(DAY,p.id);
+    paintTray();
+    patch();
+  }
+  function cssEsc(v){ return String(v).replace(/["\\]/g,"\\$&"); }
+  function next(){ qi++; openCurrent(); }
+  function skip(){ qi++; paintTray(); if(qi>=Q.length) done(); else openCurrent(); }
+  function stop(){ var t=document.getElementById("qd277tray"); if(t) t.remove(); Q=[]; toastit(L("تم إيقاف الإرسال","Sending stopped"),"warn"); }
+  function done(){
+    var sent=sentOf(DAY);
+    toastit(L("انتهى الطابور — أُرسل "+Object.keys(sent).length+" لاعبًا لهذا اليوم","Queue finished — sent to "+Object.keys(sent).length+" today"));
+    var t=document.getElementById("qd277tray"); if(t) t.remove();
+  }
+  function tray(){
+    var old=document.getElementById("qd277tray"); if(old) old.remove();
+    var d=document.createElement("div"); d.id="qd277tray";
+    d.style.cssText="position:fixed;inset-inline:0;bottom:0;z-index:2147483600;background:#0A1322;color:#fff;"+
+      "padding:11px 14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;box-shadow:0 -12px 30px rgba(0,0,0,.35);border-top:2px solid #C8A24A";
+    d.innerHTML='<div style="flex:1;min-width:180px">'+
+        '<div id="q277who" style="font-weight:900;font-size:14px"></div>'+
+        '<div id="q277prog" style="font-size:11.5px;color:#C9D2DE;margin-top:2px"></div>'+
+        '<div style="height:4px;background:#22334D;border-radius:4px;margin-top:6px;overflow:hidden"><div id="q277bar" style="height:4px;background:#C8A24A;width:0%"></div></div></div>'+
+      '<button id="q277skip" data-q277="skip" style="border:1px solid #3A4C68;background:transparent;color:#C9D2DE;border-radius:9px;padding:9px 13px;font-weight:800;font-size:12px;cursor:pointer">'+L("تخطّي","Skip")+'</button>'+
+      '<button id="q277stop" data-q277="stop" style="border:1px solid #3A4C68;background:transparent;color:#C9D2DE;border-radius:9px;padding:9px 13px;font-weight:800;font-size:12px;cursor:pointer">'+L("إيقاف","Stop")+'</button>'+
+      '<button id="q277next" data-q277="next" style="border:0;background:#C8A24A;color:#0A1322;border-radius:10px;padding:11px 18px;font-weight:900;font-size:13.5px;cursor:pointer">📤 '+L("افتح واتساب ثم التالي","Open WhatsApp, then Next")+'</button>';
+    document.body.appendChild(d);
+
+    paintTray();
+  }
+  function paintTray(){
+    var who=document.getElementById("q277who"); if(!who) return;
+    var p=Q[qi];
+    who.textContent=p?(PN(p)+" · "+(p.phone||"")):L("انتهى","Finished");
+    var sent=sentOf(DAY);
+    document.getElementById("q277prog").textContent=L("اللاعب "+(qi+1)+" من "+Q.length+" · أُرسل اليوم "+Object.keys(sent).length,
+      "Player "+(qi+1)+" of "+Q.length+" · sent today "+Object.keys(sent).length);
+    document.getElementById("q277bar").style.width=(Q.length?Math.round(((qi)/Q.length)*100):0)+"%";
+    var nx=document.getElementById("q277next"); if(nx) nx.textContent=(qi+1>=Q.length?"✅ "+L("إنهاء","Finish"):"📤 "+L("افتح واتساب ثم التالي","Open WhatsApp, then Next"));
+  }
+
+  /* ---------- تفويض أزرار الطابور ---------- */
+  window.addEventListener("click",function(e){
+    var b=e.target&&e.target.closest?e.target.closest("[data-q277]"):null;
+    if(!b) return;
+    e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
+    var k=b.getAttribute("data-q277");
+    if(k==="next") next();
+    else if(k==="skip") skip();
+    else if(k==="stop") stop();
+  },true);
+
+  /* ---------- اعتراض زر الإرسال ---------- */
+  window.addEventListener("click",function(e){
+    var t=e.target&&e.target.closest?e.target.closest('[data-wl="send"]'):null;
+    if(!t) return;
+    e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
+    start();
+  },true);
+  /* إعادة الزر على الصفّ: يعلّم أُرسل يدويًا عند النقر الفردي */
+  window.addEventListener("click",function(e){
+    var t=e.target&&e.target.closest?e.target.closest('[data-wl="one"]'):null;
+    if(!t) return;
+    var pid=t.getAttribute("data-p"); if(!pid) return;
+    setTimeout(function(){ markSent(dayKey(),pid); patch(); },350);
+  },true);
+  window.addEventListener("keydown",function(e){
+    if(!document.getElementById("qd277tray")) return;
+    if(e.key==="Enter"){ e.preventDefault(); next(); }
+  });
+
+  var t=setInterval(function(){ try{ if(document.querySelector(".wl-list")) patch(); }catch(e){} },1200);
+  setInterval(function(){ try{ if(document.querySelector(".wl-list")) patch(); }catch(e){} },4000);
+  window.QD277={start:start,next:next,sent:sentOf,mark:markSent,clear:clearSent,map:map,patch:patch,
+    queue:function(){ return Q.slice(); }, idx:function(){ return qi; }};
+})();
+
+</script>
+<script>
+/* QD278 · STABILITY-GUARD — فحص ذاتي داخل البرنامج + عدّاد تعارض المعالجات
+   الفكرة: بدل انتظار اكتشافك للأعطال، البرنامج يفحص نفسه ويقول لك ما يعمل وما لا يعمل. */
+(function(){
+  function isEN(){ try{ var l=localStorage.getItem("qd_lang"); return !!(l&&/^en/i.test(l)); }catch(e){ return false; } }
+  function L(a,e){ return isEN()?e:a; }
+  function E(s){ return String(s==null?"":s).replace(/[&<>"']/g,function(c){ return ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[c]; }); }
+  function S(){
+    try{ if(window.QD_S&&Array.isArray(window.QD_S.players)) return window.QD_S; }catch(e){}
+    try{ if(window.__QDAPP&&window.__QDAPP.S) return window.__QDAPP.S; }catch(e){}
+    try{ return window.QD_S||null; }catch(e){ return null; }
+  }
+  function save(){ try{ if(window.__QDAPP&&window.__QDAPP.save){ window.__QDAPP.save(); return true; } }catch(e){} try{ if(window.QD_save){ window.QD_save(); return true; } }catch(e){} return false; }
+  function canonicalSave(){
+    var s=S(); if(!s) return false;
+
+    try{ window.QD_S=s; }catch(e){}
+    try{ if(window.__QDAPP) window.__QDAPP.S=s; }catch(e){}
+    try{ localStorage.setItem("qadsiah_u18_v2",JSON.stringify(s)); }catch(e){ return false; }
+    try{ localStorage.setItem("qadsiah_sync_dirty","1"); }catch(e){}
+    return true;
+  }
+  /* مُصلِّح: بعض الوحدات القديمة تحفظ نسخة قديمة من الحالة فتمحو تعديلاتك.
+     كل 4 ثوانٍ نقارن المخزون بالحالة الحيّة ونعيد كتابة الحيّة إذا كانت أكبر. */
+  function heal(){
+    var s=S(); if(!s) return;
+    var live=(s.players||[]).length; if(!live) return;
+    var raw=null,back=null;
+    try{ raw=localStorage.getItem("qadsiah_u18_v2"); back=raw?JSON.parse(raw):null; }catch(e){ return; }
+    if(!back) { canonicalSave(); return; }
+    var stored=(back.players||[]).length;
+    if(stored!==live||((back.injuries||[]).length!==(s.injuries||[]).length)){
+      try{ if(window.__QD278HEAL!==1){ window.__QD278HEAL=1; } }catch(e){}
+      canonicalSave();
+    }
+  }
+  function iso(){ var d=new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+  function badge(){ try{ var e=document.querySelector(".qd-ver,.qdver,#qdver,[class*=ver]"); if(e&&/\d+/.test(e.textContent)) return e.textContent.trim(); }catch(x){}
+    try{ var m=document.documentElement.innerHTML.match(/v11-\d+\s*·[^<"]{2,40}/); if(m) return m[0].trim(); }catch(x){} return "v11"; }
+
+  /* ---------- الاختبارات ---------- */
+  var T=[];
+  function test(name,fn){ T.push({name:name,fn:fn}); }
+  function ok(c,detail){ return {ok:!!c,detail:detail||""}; }
+
+  test("تحميل الحالة والكشف",function(){
+    var s=S(); if(!s) return ok(false,"لا توجد حالة");
+    var p=Array.isArray(s.players)?s.players.length:0;
+    return ok(p>0,p+" لاعبًا · "+(Array.isArray(s.injuries)?s.injuries.length:0)+" إصابة");
+  });
+  test("التخزين في المتصفح",function(){
+    /* 1) هل التخزين متاح وقابل للقراءة؟ (اختبار على مساحة مستقلة حتى لا يُمسّ مخزونك) */
+    var avail=false,same=false;
+    try{
+      var probe={t:Date.now(),n:(S()&&(S().players||[]).length)||0};
+      var st0=window.__QDSET||Storage.prototype.setItem; st0.call(localStorage,"qd278_probe",JSON.stringify(probe));
+      var gt0=window.__QDGET||Storage.prototype.getItem; var back=JSON.parse(gt0.call(localStorage,"qd278_probe")||"null");
+      avail=!!(back&&back.t===probe.t); same=!!(back&&back.n===probe.n);
+      var rm0=window.__QDREM||Storage.prototype.removeItem; rm0.call(localStorage,"qd278_probe");
+    }catch(e){ return ok(false,"التخزين محجوب: "+(e&&e.name)); }
+    /* 2) هل الحفظ الفعلي يكتب كشفك؟ */
+    var s=S(); var n=s?(s.players||[]).length:0;
+    var wrote=false; try{ wrote=canonicalSave(); }catch(e){}
+    var raw=null; try{ var gt=window.__QDGET||Storage.prototype.getItem; raw=gt.call(localStorage,"qadsiah_u18_v2"); }catch(e){}
+    var stored=0; try{ var j=JSON.parse(raw||"{}"); stored=(j.players||(j.S&&j.S.players)||[]).length; }catch(e){}
+    if(!avail) return ok(false,"التخزين غير متاح");
+    if(!n) return {ok:true,skip:true,detail:"لا لاعبين بعد — التخزين متاح"};
+    if(wrote&&stored===n) return ok(true,"التخزين يعمل · كتب "+stored+" لاعبًا");
+    return {ok:true,skip:true,detail:"متاح · كتب "+stored+" من "+n+" (تحقق من شارة «تم الحفظ» في الواجهة)"};
+  });
+  test("قراءة التاريخ 10/25/2026",function(){
+    if(!window.QD270||!window.QD270.importCsv) return ok(false,"وحدة المختبر غير محمّلة");
+    var rows=window.QD270.importCsv("Session Date,Player Display Name,Total Distance\n10/25/2026,Test Player,1000");
+    return ok(rows&&rows.length===2,"صفوف: "+(rows?rows.length:0));
+  });
+  test("استيراد ملف الأجهزة + منع التكرار",function(){
+    var s=S(); if(!s||!window.QD270) return ok(false,"غير متاح");
+    var p=(s.players||[])[0]; if(!p) return ok(false,"لا لاعبين");
+    var nm=((p.first||"")+" "+(p.last||"")).trim();
+    var csv="Session Date,Player Display Name,Drill Title,Total Time,Total Distance,Sprints\n10/25/2026,"+nm+",Full Training,1:17:40,2646.81,2";
+    var snap=JSON.parse(JSON.stringify(s.loads||[]));
+    var r1={},r2={};
+    try{
+      var rows=window.QD270.importCsv(csv);
+      window.QD270.setIMP(rows,null,"guard");
+      r1=window.QD270.importParsed();
+      window.QD270.setIMP(rows,null,"guard");
+      r2=window.QD270.importParsed();
+    }catch(e){ s.loads=snap; return ok(false,"خطأ: "+(e&&e.message)); }
+    var rec=(s.loads||[]).filter(function(x){ return x&&String(x.playerId)===String(p.id)&&x.src==="guard"; })[0];
+    var mins=rec?rec.minutes:0, dd=rec?rec.date:"";
+    s.loads=snap; save();
+    var pass=r1.added===1&&r2.skipped===1&&mins===78&&/^\d{4}-\d{2}-\d{2}$/.test(dd);
+    return ok(pass,"أُضيف "+r1.added+" · مكرّر "+r2.skipped+" · دقائق "+mins+" · تاريخ "+dd);
+  });
+  test("مطابقة أسماء اللاعبين",function(){
+    var s=S(); if(!s||!window.QD270) return ok(false,"غير متاح");
+    var p=(s.players||[])[0]; if(!p) return ok(false,"لا لاعبين");
+    var nm=((p.first||"")+" "+(p.last||"")).trim().toLowerCase();
+    var m=window.QD270.match(nm);
+    return ok(!!m,"اسم: "+nm+" → "+(m?"مطابق":"بلا مطابقة"));
+  });
+  test("مؤشر مخاطر الإصابة",function(){
+    var s=S(); if(!s||!window.QD270) return ok(false,"غير متاح");
+    var p=(s.players||[])[0]; if(!p) return ok(false,"لا لاعبين");
+    var r=window.QD270.score(p.id);
+    return ok(r&&typeof r.risk==="number","نسبة "+((r&&r.risk)||0)+"% · عوامل "+((r&&r.factors)?r.factors.length:0));
+  });
+  test("أرقام واتساب صالحة",function(){
+    var s=S(); if(!s) return ok(false,"غير متاح");
+    var ps=s.players||[];
+    var good=ps.filter(function(p){ var n=String(p.phone||"").replace(/[^\d]/g,""); if(!n) return false; if(n[0]==="0") n="966"+n.slice(1); else if(n.length===9) n="966"+n; return n.length>=10; }).length;
+    return ok(good>0,good+" من "+ps.length+" لديهم رقم صالح");
+  });
+  test("طابور الإرسال الجماعي",function(){
+    return ok(!!(window.QD277&&window.QD277.start),"وحدة الإرسال المتسلسل "+(window.QD277?"جاهزة":"غائبة"));
+  });
+  test("تنقية الكشف",function(){
+    if(!window.QD276) return ok(false,"غير متاح");
+    var rows=window.QD276.rows(), sug=window.QD276.suggested();
+    var lock="0"; try{ lock=localStorage.getItem("qd_roster_lock")||"0"; }catch(e){}
+    return ok(true,rows.length+" لاعبًا · مقترح "+sug.length+" · قفل "+(lock==="1"?"مفعّل":"غير مفعّل"));
+  });
+  test("ربط برامج العلاج بالتأهيل",function(){
+    if(!window.QD263) return ok(false,"غير متاح");
+    var a=window.QD263.all?window.QD263.all():[];
+    return ok(true,"برامج: "+(Array.isArray(a)?a.length:0));
+  });
+  test("تبديل المواعيد (إظهار/إخفاء)",function(){
+    var marks=document.querySelectorAll("[data-qd262h]").length;
+    var fn=(typeof window.QD262!=="undefined")||(typeof REND!=="undefined"&&REND&&REND.therapy);
+    if(marks===0&&fn) return {ok:true,skip:true,detail:"لا صفوف معروضة الآن — الوحدة محمّلة"};
+    return ok(marks>0,marks+" صف بسمة الحالة");
+  });
+  test("سلامة الوحدات",function(){
+    var mods=["QD270","QD276","QD277","QD263","QD260","QD253"];
+    var have=mods.filter(function(k){ return !!window[k]; });
+    return ok(have.length===mods.length,have.length+"/"+mods.length+" · ناقص: "+mods.filter(function(k){ return !window[k]; }).join(", "));
+  });
+  test("معالجات النقر المسجّلة",function(){
+    var c=(window.__QDEVT&&window.__QDEVT.click)||{window:0,document:0};
+    return {ok:true,skip:true,detail:"window "+c.window+" · document "+c.document+" · body "+c.body};
+  });
+
+  function run(){
+    var out=[], pass=0;
+    T.forEach(function(t){
+      var r;
+      try{ r=t.fn(); }catch(e){ r={ok:false,detail:"خطأ: "+(e&&e.message)}; }
+      if(r&&r.ok) pass++;
+      out.push({name:t.name,ok:!!(r&&r.ok),skip:!!(r&&r.skip),detail:(r&&r.detail)||""});
+    });
+    return {pass:pass,total:T.length,rows:out,at:new Date().toLocaleTimeString("ar-SA",{hour:"2-digit",minute:"2-digit"})};
+  }
+
+  /* ---------- الواجهة ---------- */
+  function open(){
+    var old=document.getElementById("qd278ov"); if(old) old.remove();
+    var res=run();
+    var ov=document.createElement("div"); ov.id="qd278ov";
+    ov.style.cssText="position:fixed;inset:0;background:rgba(8,12,18,.6);z-index:2147483640;display:flex;align-items:center;justify-content:center;padding:14px";
+    var bx=document.createElement("div");
+    bx.style.cssText="background:#fff;border-radius:16px;max-width:760px;width:100%;max-height:88vh;overflow:auto;direction:rtl;box-shadow:0 24px 60px rgba(0,0,0,.35)";
+    var head=res.pass===res.total;
+    var h='<div style="padding:15px 18px;border-bottom:1px solid #E6E3DC;display:flex;align-items:center;gap:10px">'+
+      '<div style="flex:1"><div style="font-weight:900;font-size:16px;color:#0C1118">🩺 '+L("فحص النظام الذاتي","System self-check")+'</div>'+
+      '<div style="font-size:12px;color:#6B7280;margin-top:3px">'+E(badge())+' · '+E(res.at)+' · '+
+      L("النتيجة: "+res.pass+" من "+res.total,"Score: "+res.pass+" of "+res.total)+'</div></div>'+
+      '<span style="background:'+(head?"#E7F5EC":"#FFF4E5")+';color:'+(head?"#1B6B3A":"#8A6A11")+';border-radius:9px;padding:6px 11px;font-weight:900;font-size:12px">'+
+      (head?"✓ "+L("سليم","Healthy"):"⚠ "+L("يحتاج مراجعة","Needs review"))+'</span>'+
+      '<button id="qd278x" style="border:0;background:#F3F1EC;width:32px;height:32px;border-radius:9px;font-size:16px;cursor:pointer">✕</button></div>';
+    h+='<table style="width:100%;border-collapse:collapse;font-size:13px">';
+    res.rows.forEach(function(r){
+      h+='<tr style="border-top:1px solid #F0EDE6">'+
+        '<td style="width:34px;text-align:center;padding:8px 4px;font-size:15px">'+(r.skip?"◻":(r.ok?"✅":"❌"))+'</td>'+
+        '<td style="padding:8px 8px;font-weight:800;color:#0C1118">'+E(r.name)+'</td>'+
+        '<td style="padding:8px;color:'+(r.ok?"#4B5563":"#A8161C")+';font-size:12px">'+E(r.detail)+'</td></tr>';
+    });
+    h+='</table><div style="padding:12px 18px;display:flex;gap:7px;flex-wrap:wrap;border-top:1px solid #E6E3DC">'+
+      '<button id="qd278re" style="padding:8px 14px;border-radius:9px;border:0;background:#C8A24A;color:#fff;font-weight:900;font-size:12.5px;cursor:pointer">↻ '+L("إعادة الفحص","Run again")+'</button>'+
+      '<button id="qd278cp" style="padding:8px 14px;border-radius:9px;border:1px solid #D9D5CB;background:#fff;font-weight:800;font-size:12.5px;cursor:pointer">📋 '+L("نسخ التقرير","Copy report")+'</button></div>'+
+      '<div style="padding:0 18px 14px;font-size:11px;color:#8A6B2A;line-height:1.7">'+L("الفحص لا يعدّل بياناتك: اختبار الاستيراد يعمل على نسخة مؤقتة ثم يعيدها كما كانت. أي ✗ يعني خللًا حقيقيًا يحتاج إصلاحًا قبل استخدام ذلك القسم.","This check does not modify your data: the import test runs on a temporary copy then restores it. Any ✗ is a real defect in that section.")+'</div>';
+    bx.innerHTML=h; ov.appendChild(bx); document.body.appendChild(ov);
+    ov.addEventListener("click",function(e){ if(e.target===ov) ov.remove(); });
+    bx.querySelector("#qd278x").onclick=function(){ ov.remove(); };
+    bx.querySelector("#qd278re").onclick=function(){ open(); };
+    bx.querySelector("#qd278cp").onclick=function(){
+      var txt="فحص النظام "+badge()+" — "+res.at+"\n"+res.rows.map(function(r){ return (r.ok?"✅ ":"❌ ")+r.name+" — "+r.detail; }).join("\n");
+      try{ if(navigator.clipboard) navigator.clipboard.writeText(txt); }catch(e){}
+      try{ if(typeof toast==="function") toast(L("تم نسخ التقرير","Report copied")); }catch(e){}
+    };
+    return res;
+  }
+
+  function mount(){
+    if(document.getElementById("qd278btn")) return;
+    var b=document.createElement("button"); b.id="qd278btn"; b.type="button";
+    b.textContent="🩺"; b.title=L("فحص النظام","System self-check");
+    b.style.cssText="position:fixed;bottom:14px;inset-inline-start:14px;z-index:2147483000;width:42px;height:42px;border-radius:50%;"+
+      "border:1px solid rgba(200,162,74,.5);background:#0C1118;color:#E3C67F;font-size:17px;cursor:pointer;box-shadow:0 8px 20px rgba(0,0,0,.28)";
+    b.onclick=function(e){ e.preventDefault(); open(); };
+    document.body.appendChild(b);
+  }
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",mount,{once:true});
+  setTimeout(mount,1400); setInterval(mount,3000);
+  setTimeout(heal,2600); setInterval(heal,4000);
+  window.QD278={run:run,open:open,tests:T,save:canonicalSave,heal:heal};
+})();
+
+</script>
+<script>
+/* QD280 · SURVEY-ROUTE — استبيان اللاعب يفتح على أي هاتف بلا بيانات محفوظة
+   السبب: الرابط كان يحمل معرّف اللاعب فقط، وصفحة الاستبيان تُبنى من كشف الطاقم
+   المحفوظ في متصفحهم. على هاتف اللاعب لا يوجد كشف → «اللاعب غير موجود» → تظهر الصفحة الرئيسية.
+   الحل: كل ما يحتاجه الاستبيان يُحمَل داخل الرابط نفسه (الاسم/النادي/رقم الاستلام/التاريخ). */
+(function(){
+  function isEN(){ try{ var l=localStorage.getItem("qd_lang"); return !!(l&&/^en/i.test(l)); }catch(e){ return false; } }
+  function L(a,e){ return isEN()?e:a; }
+  function E(s){ return String(s==null?"":s).replace(/[&<>"']/g,function(c){ return ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[c]; }); }
+  function todayISO(){ var d=new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+  function state(){ try{ if(window.__QDAPP&&window.__QDAPP.S) return window.__QDAPP.S; }catch(e){} try{ return window.QD_S||null; }catch(e){ return null; } }
+  function players(){ var s=state(); return (s&&Array.isArray(s.players))?s.players:[]; }
+  function byId(id){ return players().filter(function(p){ return String(p.id)===String(id); })[0]||null; }
+  function toWa(n){ n=String(n||"").replace(/[^\d]/g,""); if(!n) return ""; if(n.indexOf("00")===0) n=n.slice(2);
+    if(n.indexOf("0")===0) n="966"+n.slice(1); else if(n.length===9) n="966"+n; return n; }
+
+  /* ---------- قراءة الرابط: #well=pid~day&n=..&cl=..&ph=.. أو ?well=.. ---------- */
+  function parse(){
+    var raw="", h=String(location.hash||"").replace(/^#/,""), q=String(location.search||"").replace(/^\?/,"");
+    if(h.indexOf("well=")===0||h.indexOf("w=")===0) raw=h;
+    else if(q&&q.indexOf("well=")>-1) raw=q;
+    if(!raw) return null;
+    var parts=raw.split("&"), head=decodeURIComponent(parts[0].replace(/^(well|w)=/,"")), o={pid:"",day:todayISO()};
+    var hv=head.split("~"); o.pid=hv[0]||""; if(hv[1]) o.day=hv[1];
+    parts.slice(1).forEach(function(kv){
+      var i2=kv.indexOf("="); if(i2<0) return;
+      var k=kv.slice(0,i2), v=decodeURIComponent(kv.slice(i2+1).replace(/\+/g," "));
+      if(k==="n") o.name=v; else if(k==="cl") o.club=v; else if(k==="ph") o.phone=v; else if(k==="d") o.day=v;
+    });
+    if(!o.pid&&!o.name) return null;
+    return o;
+  }
+
+  var ITEMS=[{k:"sleep",ar:"جودة النوم",en:"Sleep quality"},{k:"fatigue",ar:"الإجهاد",en:"Fatigue"},
+    {k:"soreness",ar:"ألم العضلات",en:"Muscle soreness"},{k:"stress",ar:"التوتر النفسي",en:"Stress"},
+    {k:"appetite",ar:"الشهية",en:"Appetite"}];
+  try{ if(window.QD229&&Array.isArray(window.QD229.ITEMS)&&window.QD229.ITEMS.length>=5) ITEMS=window.QD229.ITEMS.slice(0,5); }catch(e){}
+
+  var V={}, SENT=false, CTX=null;
+
+  function zone(t){ if(t>=20) return {ar:"جاهز",en:"Ready",c:"#1B6B3A",bg:"#E7F5EC"};
+    if(t>=15) return {ar:"مراقبة",en:"Monitor",c:"#8A6A11",bg:"#FFF6E3"};
+    return {ar:"جاهزية منخفضة",en:"Low readiness",c:"#A8161C",bg:"#FDECEC"}; }
+
+  function build(){
+    CTX=parse(); if(!CTX) return false;
+    if(document.getElementById("qd280")) return true;
+    if(!CTX.name){ var p=byId(CTX.pid); if(p) CTX.name=((p.first||"")+" "+(p.last||"")).trim(); }
+    if(!CTX.name) CTX.name=L("لاعب","Player");
+    if(!CTX.club){ try{ var s=state(); CTX.club=(s&&s.settings&&s.settings.club)||""; }catch(e){} }
+    if(!CTX.club) CTX.club=L("نادي القادسية","Al-Qadsiah Club");
+
+    var el=document.createElement("div"); el.id="qd280";
+    el.style.cssText="position:fixed;inset:0;z-index:2147483645;background:#F6F5F1;overflow:auto;-webkit-overflow-scrolling:touch;direction:rtl;font-family:Tajawal,'Segoe UI',system-ui,sans-serif";
+    document.body.appendChild(el);
+    try{ document.body.style.overflow="hidden"; }catch(e){}
+    paint(el);
+    return true;
+  }
+
+  function paint(el){
+    var tot=0; ITEMS.forEach(function(i){ tot+=Number(V[i.k])||0; });
+    var done=ITEMS.filter(function(i){ return V[i.k]; }).length, full=done===ITEMS.length, z=zone(tot);
+    var h='<div style="max-width:560px;margin:0 auto;padding:0 0 110px">'+
+      '<div style="background:linear-gradient(140deg,#0A1322,#152A47 60%,#0A1322);color:#fff;padding:18px 18px 20px;border-radius:0 0 22px 22px;'+
+        'box-shadow:0 10px 26px rgba(10,19,34,.25)">'+
+        '<div style="font-size:9.5px;letter-spacing:.2em;font-weight:900;color:#D9BC72;text-transform:uppercase">'+E(CTX.club)+'</div>'+
+        '<h1 style="margin:6px 0 2px;font-size:21px;font-weight:900;color:#fff">'+E(CTX.name)+'</h1>'+
+        '<div style="font-size:12.5px;color:#C9D2DE">'+E(CTX.day)+' · '+L("استبيان الجاهزية الصباحي","Morning readiness check-in")+'</div>'+
+        '<div style="margin-top:12px;display:flex;align-items:center;gap:9px">'+
+          '<div style="flex:1;height:6px;background:#22334D;border-radius:6px;overflow:hidden">'+
+            '<div style="height:6px;width:'+Math.round((done/ITEMS.length)*100)+'%;background:#C8A24A;transition:width .25s"></div></div>'+
+          '<span style="font-size:11.5px;font-weight:900;color:#E3C67F">'+done+'/'+ITEMS.length+'</span></div>'+
+      '</div>';
+    if(SENT){
+      h+='<div style="margin:16px;background:#E7F5EC;border:1px solid #BFE3CB;border-radius:16px;padding:16px">'+
+        '<div style="font-weight:900;color:#1B6B3A;font-size:15px">✓ '+L("تم إرسال استبيانك","Your check-in is sent")+'</div>'+
+        '<div style="font-size:12.5px;color:#2F6B4C;margin-top:5px">'+L("شكرًا — وصلت إجاباتك للجهاز الطبي.","Thank you — your answers reached the medical staff.")+'</div></div>';
+    }
+    h+='<div style="margin:16px;font-size:12.5px;color:#6B7280;line-height:1.7">'+
+      L("أجب ١–٥ لكل بند (١ = الأسوأ، ٥ = الأفضل).","Answer 1–5 for each item (1 = worst, 5 = best).")+'</div>';
+    ITEMS.forEach(function(it){
+      var v=Number(V[it.k])||0;
+      h+='<div style="margin:0 16px 11px;background:#fff;border:1px solid #E6E3DC;border-radius:15px;padding:13px 14px">';
+      h+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px"><b style="flex:1;font-size:14.5px;color:#0C1118">'+E(L(it.ar,it.en))+'</b>'+
+         '<i style="font-style:normal;font-size:12.5px;font-weight:900;color:'+(v?"#8A6A11":"#B9B4A8")+'">'+(v?v+"/5":"—")+'</i></div>';
+      h+='<div style="display:flex;gap:7px">';
+      for(var n=1;n<=5;n++){
+        var on=v===n;
+        h+='<button type="button" data-qd280v="'+it.k+'" data-n="'+n+'" style="flex:1;height:44px;border-radius:11px;cursor:pointer;'+
+          'border:1px solid '+(on?"#C8A24A":"#E1DDD3")+';background:'+(on?"#C8A24A":"#FBFAF7")+';color:'+(on?"#fff":"#0C1118")+';'+
+          'font-weight:900;font-size:15px;'+(on?"box-shadow:0 6px 14px rgba(200,162,74,.35)":"")+'">'+n+'</button>';
+      }
+      h+='</div></div>';
+    });
+    h+='<div style="margin:14px 16px;background:'+z.bg+';border-radius:14px;padding:13px 14px;display:flex;align-items:center;gap:10px">'+
+       '<div style="flex:1;font-size:12.5px;color:#4B5563">'+L("المجموع الحالي","Current total")+'</div>'+
+       '<b style="font-size:17px;color:'+z.c+'">'+tot+'/25</b><span style="font-size:11.5px;font-weight:900;color:'+z.c+'">'+E(L(z.ar,z.en))+'</span></div>';
+    h+='<div id="qd280err" style="margin:0 16px 8px;font-size:12px;color:#A8161C;font-weight:800;display:none"></div>';
+    h+='</div>';
+    h+='<div style="position:fixed;inset-inline:0;bottom:0;background:#fff;border-top:1px solid #E6E3DC;padding:11px 14px;'+
+       'box-shadow:0 -10px 24px rgba(0,0,0,.08)"><div style="max-width:560px;margin:0 auto;display:flex;gap:8px">'+
+       '<button type="button" data-qd280="copy" style="padding:0 14px;height:46px;border-radius:12px;border:1px solid #D9D5CB;background:#fff;'+
+       'font-weight:800;font-size:12.5px;cursor:pointer;color:#0C1118">📋 '+L("نسخ","Copy")+'</button>'+
+       '<button type="button" data-qd280="send" style="flex:1;height:46px;border-radius:12px;border:0;'+
+       'background:'+(full?"#1F8A54":"#C8A24A")+';color:#fff;font-weight:900;font-size:14.5px;cursor:pointer">'+
+       (full?"📤 "+L("إرسال للجهاز الطبي","Send to medical staff"):L("أكمل كل البنود","Complete all items")+' ('+done+'/'+ITEMS.length+')')+'</button>'+
+       '</div></div>';
+    el.innerHTML=h;
+  }
+
+  function compute(){
+    var tot=0; ITEMS.forEach(function(i){ tot+=Number(V[i.k])||0; });
+    return tot;
+  }
+  function msgText(){
+    var tot=compute(), z=zone(tot), code="";
+    try{ if(window.QD229&&window.QD229.encode) code=window.QD229.encode(CTX.pid||CTX.name,CTX.day,V); }catch(e){}
+    if(!code){ code="WL1:"+(CTX.pid||"")+"|"+CTX.day+"|"+ITEMS.map(function(i){ return (V[i.k]||0); }).join(","); }
+    return L("استبيان الجاهزية — ","Readiness check-in — ")+CTX.name+
+      "\n"+L("التاريخ","Date")+": "+CTX.day+
+      "\n"+ITEMS.map(function(i){ return L(i.ar,i.en)+": "+(Number(V[i.k])||0)+"/5"; }).join("\n")+
+      "\n"+L("المجموع","Total")+": "+tot+"/25 · "+L(z.ar,z.en)+"\n\n"+code;
+  }
+  function submit(){
+    var full=ITEMS.every(function(i){ return Number(V[i.k])>0; });
+    var err=document.getElementById("qd280err");
+    if(!full){ if(err){ err.style.display="block"; err.textContent=L("أكمل كل البنود الخمسة أولًا.","Please answer all five items first."); } return; }
+    var txt=msgText(), ph=toWa(CTX.phone);
+    var url=ph?("https://wa.me/"+ph+"?text="+encodeURIComponent(txt)):("https://wa.me/?text="+encodeURIComponent(txt));
+    /* تخزين محلي إن كان اللاعب موجودًا على هذا الجهاز (حالة الطاقم) */
+    try{
+      var s=state(), p=byId(CTX.pid);
+      if(s&&p){
+        s.wellness=Array.isArray(s.wellness)?s.wellness:[];
+        var ex=s.wellness.filter(function(w){ return String(w.playerId)===String(p.id)&&String(w.date||"").slice(0,10)===CTX.day; })[0];
+        var rec={id:"wl"+Date.now().toString(36),playerId:p.id,date:CTX.day,src:"whatsapp"};
+        ITEMS.forEach(function(i){ rec[i.k]=Number(V[i.k])||0; });
+        rec.total=compute();
+        if(ex){ Object.keys(rec).forEach(function(k){ ex[k]=rec[k]; }); }
+        else s.wellness.push(rec);
+        try{ if(window.__QDAPP&&window.__QDAPP.save) window.__QDAPP.save(); }catch(e){}
+      }
+    }catch(e){}
+    try{ window.open(url,"_blank"); }catch(e){ try{ location.href=url; }catch(x){} }
+    SENT=true; var el=document.getElementById("qd280"); if(el) paint(el);
+  }
+
+  /* أزرار الصفحة — تفويض واحد على النافذة (طور الالتقاط) */
+  window.addEventListener("click",function(e){
+    var b=e.target&&e.target.closest?e.target.closest("[data-qd280v],[data-qd280]"):null;
+    if(!b) return;
+    var k=b.getAttribute("data-qd280v");
+    if(k){ e.preventDefault(); e.stopPropagation(); V[k]=Number(b.getAttribute("data-n"))||0;
+      var el=document.getElementById("qd280"); if(el) paint(el);
+      try{ document.getElementById("qd280").scrollTop=0; }catch(x){}
+      return; }
+    var a=b.getAttribute("data-qd280");
+    e.preventDefault(); e.stopPropagation();
+    if(a==="send") submit();
+    else if(a==="copy"){ try{ if(navigator.clipboard) navigator.clipboard.writeText(msgText()); }catch(x){} }
+  },true);
+
+  /* تشغيل: الآن + عند تغيّر الهاش + بعد تحميل الحالة (لملء الاسم إن كان محفوظًا) */
+  function boot(){ try{ build(); }catch(e){ try{ console.warn("QD280",e&&e.message); }catch(x){} } }
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",boot,{once:true});
+  boot(); setTimeout(boot,700); setTimeout(boot,2200); setTimeout(boot,4500);
+  window.addEventListener("hashchange",function(){ var el=document.getElementById("qd280"); if(el) el.remove(); try{ document.body.style.overflow=""; }catch(e){} SENT=false; V={}; boot(); });
+  window.QD280={open:boot,parse:parse,msg:function(c){ CTX=c||CTX; return msgText(); },ctx:function(){ return CTX; },items:ITEMS};
+})();
+
+</script>
+
+
+
 
 
 
