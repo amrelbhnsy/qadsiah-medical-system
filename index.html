@@ -1973,6 +1973,7 @@ const NAV=[
  {id:"reports",label:"nav_reports",icon:"reports",sub:"sub_reports",grp:"grp_admin"},
  {id:"settings",label:"nav_settings",icon:"settings",sub:"sub_settings",grp:"grp_admin"}];
 let current="dashboard"; const REND={}; const ACT={}; const on=(a,f)=>{ACT[a]=f;};
+try{ window.REND=REND; }catch(e){}
 window.__QDAPP={REND:REND,ACT:ACT,NAV:NAV,showView:showView,renderNav:renderNav,activeInjuries:activeInjuries,get S(){return S;},set S(v){S=v;},state:function(){return S;},setState:function(v){S=v;},save:function(){try{ if(typeof saveState==="function") return saveState(); }catch(e){} try{ if(typeof persist==="function") return persist(); }catch(e){} try{ if(typeof save==="function") return save(); }catch(e){} return false;}};
 function QDT(ar,en){ try{ return ((typeof LANG!=="undefined"&&LANG==="ar")||(typeof isAr==="function"&&isAr()))?ar:en; }catch(e){ return ar; } }
 
@@ -9344,7 +9345,8 @@ REND.complaints=function(){
       ' <button class="btn ghost sm" data-act="editComplaint" data-id="'+c.id+'" title="'+T("btn_edit")+'">'+svg(I.edit,2)+'</button>'+
       ' <button class="btn ghost sm" data-act="delComplaint" data-id="'+c.id+'" title="'+T("btn_delete")+'">'+svg(I.trash,2)+'</button></td></tr>';
   }).join("");
-  $("#v-complaints").innerHTML=
+  var _cv=$("#v-complaints"); if(!_cv) return;
+  _cv.innerHTML=
    '<div class="filters"><h3 style="flex:1">'+T("cp_title")+'</h3>'+
      '<button class="btn primary" data-act="newComplaint">'+svg(I.plus,2.2)+' '+T("cp_new")+'</button></div>'+
    (list.length?'<div class="card"><div class="card-body tight"><div class="table-wrap"><table><thead><tr><th>'+T("f_player")+'</th><th>'+T("cp_col_when")+'</th><th>'+T("f_cp_note")+'</th><th>'+T("cp_pain")+'</th><th>'+T("cp_sched_on")+'</th><th>'+T("rep_status")+'</th><th></th></tr></thead><tbody>'+rows+'</tbody></table></div></div></div>'
@@ -12484,8 +12486,9 @@ function ensureData(){ try{ if(!window.QD_S) window.QD_S=S; }catch(e0){}
   if(!S.settings) S.settings={};
   if(!S.settings.season) S.settings.season=(new Date().getFullYear())+"-"+(new Date().getFullYear()+1);
 }
-function pick(i){ return S.players[i%S.players.length].id; }
+function pick(i){ try{ if(!S.players||!S.players.length) return ""; return S.players[i%S.players.length].id; }catch(e){ return ""; } }
 function seedData(){
+  if(!S.players||!S.players.length) return;
   if(S.sessions.length||S.matches.length||S.events.length) return;
   var d=new Date(), t=todayKey();
   var y=new Date(d.getTime()-864e5), y2=new Date(d.getTime()-2*864e5);
@@ -22635,7 +22638,7 @@ try{
           if(prev&&next){
             var a=totalRec(prev), b=totalRec(next);
             /* حماية: منع استبدال البيانات بنسخة أصغر بكثير (مزامنة قديمة) */
-            if(!window.__qdAllowShrinkOnce && a>=8 && b<a*0.5){
+            if(!window.__qdAllowShrinkOnce && !(window.__qdAllowShrinkUntil>Date.now()) && !window.__qd291del && a>=8 && b<a*0.5){
               try{ lastMirror=0; mirror(true); }catch(e){}
               notify(L("تم منع استبدال بياناتك بنسخة أصغر ("+b+" بدل "+a+" سجلًا) — بياناتك سليمة.","Blocked replacing your data with a smaller copy ("+b+" vs "+a+" records) — your data is intact."),"bad",true);
               return;
@@ -22688,7 +22691,7 @@ try{
     booted=true; patchSetItem(); patchSave();
     var loc=readLocal();
     if(looksEmpty(loc.obj)) restoreFromIdb("empty-local");
-    else { markSaved(); idbGetLatest().then(function(l){ if(l&&l.rec>totalRec(loc.obj)) restoreFromIdb("older-local"); }); }
+    else { markSaved(); /* QD291: كان يستعيد نسخة IndexedDB القديمة كلما صغر المحلي (أي بعد أي حذف) → تعود الإصابات المحذوفة عند الدخول. الاستعادة الآن فقط عند فراغ التخزين. */ }
   }
   try{
     if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",function(){ setTimeout(start,400); });
@@ -39681,6 +39684,7 @@ tr:hover .qde-ndate{color:#7E0E14}
         return r.json().then(function(rows){
           if(!rows||!rows.length){ logIt(L("لا نسخة سحابية بعد","No cloud copy yet"),"warn"); if(!silent) toastit(L("لا نسخة سحابية بعد","No cloud copy yet"),"warn"); return false; }
           var row=rows[0], remote=row.payload||{};
+          try{ if(window.QD291&&window.QD291.apply) remote=window.QD291.apply(remote); }catch(x){}
           var a=A(); if(!a) return false;
           /* دمج: الاستبيانات تُضمّ بالمعرّف، وباقي الحالة تُستبدل */
           var localWell=Array.isArray(ARR("wellness"))?ARR("wellness").slice():[];
@@ -44494,6 +44498,206 @@ tr:hover .qde-ndate{color:#7E0E14}
   if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",boot); else boot();
 
   window.QD290={render:render,ensure:ensure,filter:filter,groups:GROUPS};
+})();
+
+</script>
+<script>
+/*!
+ * QD291 · DELETE-STICK — الحذف يثبت بعد الخروج والدخول.
+ * يعالج سببين حقيقيين:
+ *  ١) حارس «منع النسخة الأصغر» كان يرفض حفظ أي حذف جماعي (أكثر من نصف السجلات) → يرجع كل شيء.
+ *  ٢) نسخة IndexedDB كانت تُستعاد عند كل إقلاع لأن عدد السجلات صار أقل بعد الحذف → تعود المحذوفات.
+ * الحل: شواهد حذف دائمة (tombstones) + نافذة حذف مسموحة + نسخة داخلية محدَّثة فورًا بعد كل حذف.
+ */
+(function(){
+  if(window.__qd291) return; window.__qd291=1;
+
+  var TK="qd291_tomb", KEEP=1000*60*60*24*60;         /* شواهد لمدة ٦٠ يومًا */
+  function isEN(){ try{ return /^en/i.test(localStorage.getItem("qd_lang")||""); }catch(e){ return false; } }
+  function L(a,e){ return isEN()?e:a; }
+  function now(){ return Date.now(); }
+  function S(){ try{ var a=window.__QDAPP; if(a&&a.S&&Array.isArray(a.S.players)) return a.S; }catch(e){}
+                try{ if(window.QDB&&window.QDB.S) return window.QDB.S(); }catch(e){}
+                try{ if(window.QD_S) return window.QD_S; }catch(e){}
+                try{ var r=JSON.parse(localStorage.getItem("qadsiah_u18_v2")||"null"); if(r&&r.players) return r; }catch(e){}
+                return null; }
+  function save(){ try{ if(typeof window.QD_save==="function") return window.QD_save(); }catch(e){}
+                  try{ if(window.QDB&&window.QDB.save) return window.QDB.save(); }catch(e){}
+                  try{ if(typeof window.save==="function") return window.save(); }catch(e){}
+                  try{ var s=S(); if(s) localStorage.setItem("qadsiah_u18_v2",JSON.stringify(s)); }catch(e){} }
+  function backup(){ try{ if(typeof window.__qdBackup==="function") window.__qdBackup(true); }catch(e){} }
+
+  function load(){ try{ var o=JSON.parse(localStorage.getItem(TK)||"{}")||{}; o.inj=o.inj||{}; o.pl=o.pl||{}; return o; }catch(e){ return {inj:{},pl:{}}; } }
+  function store(o){ try{ localStorage.setItem(TK,JSON.stringify(o)); }catch(e){} }
+  function fpInj(i){ return [i.playerId,i.type,String(i.date||"").slice(0,10),i.bodySites].join("|"); }
+  function idsInj(s){ var m={}; try{ (s.injuries||[]).forEach(function(i){ m[String(i.id)]=fpInj(i); }); }catch(e){} return m; }
+
+  function purge(){
+    var s=S(); if(!s) return 0;
+    var t=load(), n=0, changed=false, dirtyFp=false;
+    var deadPlayers=t.pl;
+    if(Array.isArray(s.players) && Object.keys(deadPlayers).length){
+      var keepP=[];
+      s.players.forEach(function(p){
+        if(deadPlayers[String(p.id)]){ n++; changed=true; return; }
+        keepP.push(p);
+      });
+      if(changed) s.players=keepP;
+    }
+    if(Array.isArray(s.injuries) && Object.keys(t.inj).length){
+      var keepI=[];
+      s.injuries.forEach(function(i){
+        var k=String(i.id), d=t.inj[k];
+        if(d && (d.fp===undefined || d.fp===null || d.fp==="" || d.fp===fpInj(i))){ n++; changed=true; return; }
+        if(d && d.fp && d.fp!==fpInj(i)){ delete t.inj[k]; dirtyFp=true; }   /* سجل جديد بنفس المعرّف → لا نحذفه */
+        if(deadPlayers[String(i.playerId)]){ n++; changed=true; return; }
+        keepI.push(i);
+      });
+      if(changed) s.injuries=keepI;
+      store(t);
+    }
+    /* تنظيف الشواهد القديمة */
+    var cut=now()-KEEP, dirty=false;
+    Object.keys(t.inj).forEach(function(k){ if(t.inj[k] && t.inj[k].t && t.inj[k].t<cut){ delete t.inj[k]; dirty=true; } });
+    Object.keys(t.pl).forEach(function(k){ if(t.pl[k] && t.pl[k]<cut){ delete t.pl[k]; dirty=true; } });
+    if(dirty||dirtyFp) store(t);
+    if(changed){ save(); backup(); }
+    return n;
+  }
+
+  function tombInj(id,fp){ var t=load(); t.inj[String(id)]={fp:fp===undefined?"":fp,t:now()}; store(t); }
+  function tombPl(id){ var t=load(); t.pl[String(id)]=now(); store(t); }
+
+  /* ---------- شاهد من أي حذف: مقارنة قبل/بعد (يشمل الأزرار والمسح الجماعي) ---------- */
+  var DELSEL='[data-act^="del"],[data-act^="Del"],[data-act*="Delete"],[data-delbtn],[data-act="wipe"],[data-act="clearAll"],[data-qd253],[data-confirm-del]';
+  function isDeleteTarget(el){
+    try{
+      if(!el||!el.closest) return false;
+      if(el.closest(DELSEL)) return true;
+      var txt=(el.textContent||"").trim();
+      var tgt=el.closest("button,a,[role=button]");
+      if(tgt && /حذف|مسح|تفريغ|إزالة|delete|remove|clear/i.test(txt) && txt.length<40) return true;
+    }catch(e){}
+    return false;
+  }
+  var pending=null;
+  function markWindow(ms){
+    var until=now()+(ms||12000);
+    window.__qdAllowShrinkUntil=Math.max(window.__qdAllowShrinkUntil||0,until);
+    window.__qd291del=true;
+    setTimeout(function(){ window.__qd291del=false; },Math.min(9000,ms||9000));
+  }
+  function watchDiff(before){
+    setTimeout(function(){ diff(before); },700);
+    setTimeout(function(){ diff(before); },2200);
+    setTimeout(function(){ diff(before); },5000);
+  }
+  function diff(before){
+    var s=S(); if(!s||!before) return;
+    if(!(s.players||[]).length) return;                    /* الحالة لم تُحمَّل بعد — لا نحكم */
+    var after={pl:{},inj:{}};
+    (s.players||[]).forEach(function(p){ after.pl[String(p.id)]=1; });
+    (s.injuries||[]).forEach(function(i){ after.inj[String(i.id)]=1; });
+    var n=0;
+    Object.keys(before.pl).forEach(function(k){ if(!after.pl[k]){ tombPl(k); n++; } });
+    Object.keys(before.inj).forEach(function(k){ if(!after.inj[k]){ tombInj(k,before.inj[k]); n++; } });
+    if(n){ markWindow(); backup(); }
+    return n;
+  }
+  document.addEventListener("click",function(ev){
+    var t=ev.target; if(!isDeleteTarget(t)) return;
+    var s=S(); if(!s) return;
+    var before={pl:{},inj:{}};
+    (s.players||[]).forEach(function(p){ before.pl[String(p.id)]=1; });
+    (s.injuries||[]).forEach(function(i){ before.inj[String(i.id)]=fpInj(i); });
+    markWindow(14000);
+    watchDiff(before);
+  },true);
+  /* مسار الحذف المباشر: شاهد فوري بالمعرّف */
+  document.addEventListener("click",function(ev){
+    var b=null; try{ b=ev.target.closest&&ev.target.closest('[data-act="delInjury"]'); }catch(e){}
+    if(!b) return;
+    var id=b.getAttribute("data-id"), s=S(), fp="";
+    try{ (s.injuries||[]).forEach(function(i){ if(String(i.id)===String(id)) fp=fpInj(i); }); }catch(e){}
+    tombInj(id,fp); markWindow(14000); backup();
+  },true);
+
+
+  /* ---------- شبكة أمان: أي سجل يختفي من الحالة يُشهد عليه ---------- */
+  var snap=null, snapAt=0, bootAt=now();
+  function snapNow(){
+    var s=S(); if(!s) return null;
+    var o={pl:{},inj:{}};
+    (s.players||[]).forEach(function(p){ o.pl[String(p.id)]=1; });
+    (s.injuries||[]).forEach(function(i){ o.inj[String(i.id)]=fpInj(i); });
+    return o;
+  }
+  function watchLoop(){
+    try{
+      if(document.hidden) return;
+      var s=S(); if(!s) return;
+      var cur=snapNow(); if(!cur) return;
+      var settled=(s.players||[]).length>0;   /* يكفي أن الحالة محمّلة — لا نؤجّل التقاط الحذف */
+      if(snap && settled){
+        var n=0, lost=[];
+        Object.keys(snap.pl).forEach(function(k){ if(!cur.pl[k]){ lost.push(["pl",k]); n++; } });
+        Object.keys(snap.inj).forEach(function(k){ if(!cur.inj[k]){ lost.push(["inj",k,snap.inj[k]]); n++; } });
+        /* تجاهل الاختفاء الكامل المفاجئ (إعادة تحميل/استعادة/تبديل حساب) */
+        var tot=Object.keys(snap.pl).length+Object.keys(snap.inj).length;
+        var curTot=Object.keys(cur.pl).length+Object.keys(cur.inj).length;
+        /* الحذف الكامل مقصود أيضًا — لا نتجاهله؛ إعادة التحميل تبدأ بلقطة فارغة فلا تُنتج شواهد */
+        if(lost.length){
+          lost.forEach(function(x){ if(x[0]==="pl") tombPl(x[1]); else tombInj(x[1], x[2]); });
+          markWindow(20000);
+          setTimeout(function(){ try{ purge(); backup(); }catch(e){} },120);
+        }
+      }
+      snap=cur; snapAt=now();
+    }catch(e){}
+  }
+  setInterval(watchLoop,2500);
+  setTimeout(watchLoop,1200);
+
+  /* ---------- تطبيق الشواهد باستمرار (بعد أي استعادة/مزامنة/إقلاع) ---------- */
+  function tick(){ try{ purge(); }catch(e){} }
+  function boot(){
+    tick();
+    setTimeout(tick,900); setTimeout(tick,2500); setTimeout(tick,6000);
+    setInterval(tick,4000);
+    window.addEventListener("focus",function(){ setTimeout(tick,300); });
+    document.addEventListener("visibilitychange",function(){ if(!document.hidden) setTimeout(tick,400); });
+    /* بعد أي حفظ: ثبّت النسخة الداخلية على الحالة الجديدة */
+    try{
+      if(typeof window.save==="function" && !window.save.__qd291){
+        var f=window.save;
+        window.save=function(){ var r=f.apply(this,arguments); try{ if(window.__qdBrevebackup!==1) backup(); }catch(e){} return r; };
+        window.save.__qd291=1;
+      }
+    }catch(e){}
+  }
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",boot); else boot();
+
+  /* يطارد السجلات المحذوفة داخل أي نسخة واردة (سحابية/داخلية) قبل اعتمادها */
+  function applyTo(obj){
+    if(!obj||typeof obj!=="object") return obj;
+    var t=load(), deadP=t.pl||{}, deadI=t.inj||{}, n=0;
+    try{
+      if(Array.isArray(obj.players)&&Object.keys(deadP).length){
+        obj.players=obj.players.filter(function(p){ if(deadP[String(p&&p.id)]){ n++; return false; } return true; });
+      }
+      if(Array.isArray(obj.injuries)&&Object.keys(deadI).length){
+        obj.injuries=obj.injuries.filter(function(i){
+          var k=String(i&&i.id), d=deadI[k];
+          if(!d) return true;
+          if(d.fp===undefined||d.fp===null||d.fp===""||d.fp===fpInj(i)){ n++; return false; }
+          return true;
+        });
+      }
+    }catch(e){}
+    try{ if(n) window.__qd291Dropped=n; }catch(e){}
+    return obj;
+  }
+  window.QD291={purge:purge,apply:applyTo,tombInj:tombInj,tombPl:tombPl,load:load,mark:markWindow};
 })();
 
 </script>
