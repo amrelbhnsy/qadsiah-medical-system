@@ -35146,7 +35146,7 @@ tr:hover .qde-ndate{color:#7E0E14}
 
   function badge(){
     try{ var b=document.getElementById("qdrBadge"); if(!b) return;
-      var w="v11-281 · NO-RESURRECT";
+      var w="v11-282 · NAV-RECOVER";
       if(b.textContent!==w+" · BTN-OK") b.textContent=w+" · BTN-OK"; }catch(e){}
   }
 
@@ -43922,6 +43922,171 @@ tr:hover .qde-ndate{color:#7E0E14}
 })();
 
 </script>
+<script>
+/* QD282 · NAV-RECOVER — أقسام اختفت من القائمة + تشخيص الأزرار الميتة
+   1) يعيد بناء أزرار التنقل لكل شاشة مسجّلة فعليًا في محرّك العرض (REND) أو في NAV3
+   2) زر «الأقسام» يفتح قائمة بكل الشاشات الحقيقية ويفتح أيها
+   3) يلتقط الأزرار التي لا ينتج عن نقرها شيء ويسمّيها لك */
+(function(){
+  function isEN(){ try{ return /^en/i.test(localStorage.getItem("qd_lang")||""); }catch(e){ return false; } }
+  function L(a,e){ return isEN()?e:a; }
+  function A(){ try{ return window.__QDAPP||null; }catch(e){ return null; } }
+  function REND(){ try{ var a=A(); return (a&&a.REND)||null; }catch(e){ return null; } }
+  function st(){ try{ if(window.QD_S&&Array.isArray(window.QD_S.players)) return window.QD_S; }catch(e){}
+    try{ return (A()||{}).S||null; }catch(e){ return null; } }
+
+  var LABELS={wellness:["الاستبيان اليومي","Daily survey"],cloud:["المزامنة السحابية","Cloud sync"],
+    load:["الحمل والجاهزية","Load & wellness"],clinical:["القيادة الطبية","Clinical"],reports:["التقارير","Reports"],
+    players:["اللاعبون","Players"],dashboard:["لوحة التحكم","Dashboard"],injuries:["الإصابات","Injuries"],
+    illnesses:["الأمراض","Illnesses"],therapy:["العلاج الرياضي","Therapy"],sessions:["الجلسات","Sessions"],
+    proto:["برامج العلاج","Programmes"],documents:["المستندات","Documents"],fixtures:["المباريات","Fixtures"],
+    settings:["الإعدادات","Settings"],access:["المستخدمون","Users"],promotion:["الترقيات","Promotions"],
+    screening:["الفحص قبل الموسم","Screening"],weekly:["البرنامج الأسبوعي","Weekly plan"],link:["ملف اللاعب الشامل","Full profile"],
+    clinic:["العيادة اليومية","Clinic"],physio:["التقييم الفيزيائي","Physio"],posture:["قوام APECS","Posture"],
+    mental:["الصحة النفسية","Mental"],daily:["التقييم اليومي","Daily"],activities:["الاستدعاءات","Call-ups"],
+    calendar:["تقويم الإصابات","Calendar"],complaints:["الشكاوى","Complaints"],links:["الروابط","Links"]};
+
+  function viewIds(){
+    var out=[], r=REND();
+    if(r) Object.keys(r).forEach(function(k){ if(typeof r[k]==="function") out.push(k); });
+    try{ if(typeof NAV3!=="undefined"&&Array.isArray(NAV3)) NAV3.forEach(function(n){ if(n&&n.id&&out.indexOf(n.id)<0) out.push(n.id); }); }catch(e){}
+    return out;
+  }
+  function have(){
+    var s={};
+    document.querySelectorAll("#nav [data-view]").forEach(function(b){ s[b.getAttribute("data-view")]=1; });
+    return s;
+  }
+  function label(id){
+    if(LABELS[id]) return LABELS[id][isEN()?1:0];
+    try{ if(typeof NAV3!=="undefined"){ for(var i=0;i<NAV3.length;i++){ if(NAV3[i].id===id){ var t=NAV3[i].label;
+      if(typeof T==="function"){ try{ var v=T(t); if(v&&v!==t) return v; }catch(e){} } return t; } } } }catch(e){}
+    return id;
+  }
+  function icon(){ var s=document.createElement("span"); s.textContent="•"; s.style.cssText="opacity:.55"; return s; }
+
+  function inject(){
+    var nav=document.getElementById("nav"); if(!nav) return 0;
+    var h=have(), ids=viewIds(), added=0;
+    ids.forEach(function(id){
+      if(h[id]) return;
+      var b=document.createElement("button");
+      b.className="nav-item qd282i"; b.setAttribute("data-view",id); b.setAttribute("data-qd282","1");
+      b.innerHTML='<span class="nv-ic">•</span><span class="nv-lb">'+String(label(id)).replace(/[<>&]/g,"")+'</span>';
+      b.style.cssText="display:flex;align-items:center;gap:8px;padding:8px 12px;width:100%;border:0;background:transparent;color:inherit;font:inherit;text-align:right;cursor:pointer";
+      b.onclick=function(ev){ ev.preventDefault(); ev.stopPropagation(); openView(id); };
+      nav.appendChild(b); added++;
+      h[id]=1;
+    });
+    // زر الأقسام + زر الاستبيان إن لم يكن للشاشة محرّك عرض
+    if(!document.getElementById("qd282all")){
+      var all=document.createElement("button"); all.id="qd282all"; all.type="button";
+      all.textContent="☰ "+L("كل الشاشات","All screens");
+      all.style.cssText="margin:8px 10px;padding:8px 10px;border-radius:9px;border:1px dashed rgba(200,162,74,.55);background:transparent;color:#D9BC72;font-weight:800;font-size:11.5px;cursor:pointer;width:calc(100% - 20px)";
+      all.onclick=function(e){ e.preventDefault(); e.stopPropagation(); menu(); };
+      nav.appendChild(all);
+    }
+    return added;
+  }
+  function openView(id){
+    var r=REND(), ran=false;
+    try{ if(r&&typeof r[id]==="function"){ r[id](); ran=true; } }catch(e){ ran=false; }
+    if(!ran){
+      try{ var b=document.querySelector('#nav [data-view="'+id+'"]:not([data-qd282])'); if(b){ b.click(); ran=true; } }catch(e){}
+    }
+    if(!ran){ try{ if(typeof window.showView==="function"){ window.showView(id); ran=true; } }catch(e){} }
+    if(!ran){ try{ if(typeof window.qdGo==="function"){ window.qdGo(id); ran=true; } }catch(e){} }
+    try{ document.querySelectorAll("#nav [data-view]").forEach(function(b){ b.classList.toggle("on",b.getAttribute("data-view")===id); }); }catch(e){}
+    if(!ran){ toast2(L("لم أجد محرّك عرض لهذه الشاشة","No renderer for this screen")); }
+    return ran;
+  }
+  function menu(){
+    var old=document.getElementById("qd282ov"); if(old) old.remove();
+    var ids=viewIds().sort(), ov=document.createElement("div"); ov.id="qd282ov";
+    ov.style.cssText="position:fixed;inset:0;background:rgba(8,12,18,.6);z-index:2147483644;display:flex;align-items:center;justify-content:center;padding:14px";
+    var bx=document.createElement("div");
+    bx.style.cssText="background:#fff;border-radius:16px;max-width:640px;width:100%;max-height:86vh;overflow:auto;direction:rtl;padding:16px 18px;box-shadow:0 24px 60px rgba(0,0,0,.35)";
+    var h='<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><div style="flex:1;font-weight:900;font-size:15.5px;color:#0C1118">☰ '+L("كل الشاشات المتاحة","All available screens")+'</div>'+
+      '<span style="font-size:11px;color:#6B7280">'+ids.length+'</span>'+
+      '<button id="qd282x" style="border:0;background:#F3F1EC;width:30px;height:30px;border-radius:8px;cursor:pointer">✕</button></div>';
+    h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:7px">';
+    ids.forEach(function(id){
+      h+='<button data-qd282go="'+id+'" style="text-align:right;padding:10px 11px;border-radius:10px;border:1px solid #E6E3DC;background:#FBFAF7;cursor:pointer;font-weight:800;font-size:12.5px;color:#0C1118">'+String(label(id)).replace(/[<>&]/g,"")+
+         '<div style="font-size:10px;color:#9CA3AF;font-weight:600;margin-top:2px">'+id+'</div></button>';
+    });
+    h+='</div>';
+    bx.innerHTML=h; ov.appendChild(bx); document.body.appendChild(ov);
+    ov.addEventListener("click",function(e){ if(e.target===ov) ov.remove(); });
+    bx.querySelector("#qd282x").onclick=function(){ ov.remove(); };
+    bx.querySelectorAll("[data-qd282go]").forEach(function(b){ b.onclick=function(){ openView(b.getAttribute("data-qd282go")); ov.remove(); }; });
+  }
+  function toast2(m){ try{ if(typeof toast==="function") return toast(m); }catch(e){} }
+
+  /* ---------- تشخيص الأزرار الميتة ---------- */
+  var dead=[];
+  function instrument(){
+    window.addEventListener("click",function(e){
+      var b=e.target&&e.target.closest?e.target.closest("button"):null;
+      if(!b) return;
+      var tag=(b.textContent||"").trim().slice(0,40);
+      var id=b.id||"", dv=b.getAttribute("data-view")||"", dq=[...b.attributes].filter(function(a){ return a.name.indexOf("data-q2")===0; }).map(function(a){ return a.name+"="+a.value; }).join(",");
+      if(!tag&&!id) return;
+      var before=document.body.innerHTML.length;
+      setTimeout(function(){
+        var after=document.body.innerHTML.length;
+        var modal=document.querySelector(".qd-mod,#q27ov,.q27ov,[id^=qd2][style*='position:fixed']");
+        if(Math.abs(after-before)<24 && !modal){
+          var key=id||dq||tag;
+          if(!dead.some(function(d){ return d.key===key; })){
+            dead.push({key:key,tag:tag,id:id,attr:dq,at:new Date().toLocaleTimeString("ar-SA",{hour:"2-digit",minute:"2-digit"})});
+            if(dead.length>40) dead.shift();
+            try{ localStorage.setItem("qd_deadbtns",JSON.stringify(dead)); }catch(x){}
+          }
+        }
+      },420);
+    },true);
+  }
+  function report(){
+    var list=dead;
+    try{ var saved=JSON.parse(localStorage.getItem("qd_deadbtns")||"[]"); if(saved.length>list.length) list=saved; }catch(e){}
+    var ov=document.createElement("div"); ov.id="qd282rep";
+    ov.style.cssText="position:fixed;inset:0;background:rgba(8,12,18,.65);z-index:2147483645;display:flex;align-items:center;justify-content:center;padding:14px";
+    var bx=document.createElement("div"); bx.style.cssText="background:#fff;border-radius:16px;max-width:680px;width:100%;max-height:86vh;overflow:auto;direction:rtl;padding:16px 18px";
+    var txt=list.length?list.map(function(d,i){ return (i+1)+") "+d.tag+"  ["+(d.id||d.attr||"—")+"]  "+d.at; }).join("\n"):L("لم يُلتقط أي زر ميت بعد. اضغط الزر الذي لا يعمل ثم أعد الفتح.","No dead button captured yet. Press the broken button then reopen.");
+    bx.innerHTML='<div style="display:flex;gap:8px;align-items:center;margin-bottom:10px"><b style="flex:1;font-size:15px">🔧 '+L("تشخيص الأزرار","Button diagnostics")+'</b><button id="qd282rx" style="border:0;background:#F3F1EC;width:30px;height:30px;border-radius:8px;cursor:pointer">✕</button></div>'+
+      '<div style="font-size:12px;color:#6B7280;margin-bottom:8px">'+L("كل زر لا يغيّر شيئًا عند النقر يُسجَّل هنا مع معرّفه. أرسل هذه القائمة وأصلحه في الدقيقة.","Every button whose click changes nothing is recorded here with its id. Send the list and it gets fixed.")+'</div>'+
+      '<pre id="qd282txt" style="white-space:pre-wrap;font:12px/1.8 ui-monospace,monospace;background:#FAF9F6;border:1px solid #E6E3DC;border-radius:10px;padding:10px;max-height:44vh;overflow:auto">'+txt.replace(/[<>&]/g,"")+'</pre>'+
+      '<div style="display:flex;gap:7px;margin-top:9px"><button id="qd282cp" style="padding:8px 13px;border:0;border-radius:9px;background:#C8A24A;color:#fff;font-weight:900;font-size:12px;cursor:pointer">📋 '+L("نسخ","Copy")+'</button>'+
+      '<button id="qd282cl" style="padding:8px 13px;border:1px solid #D9D5CB;border-radius:9px;background:#fff;font-weight:800;font-size:12px;cursor:pointer">'+L("تصفير","Reset")+'</button></div>';
+    ov.appendChild(bx); document.body.appendChild(ov);
+    bx.querySelector("#qd282rx").onclick=function(){ ov.remove(); };
+    bx.querySelector("#qd282cp").onclick=function(){ try{ navigator.clipboard.writeText(txt); }catch(e){} };
+    bx.querySelector("#qd282cl").onclick=function(){ dead=[]; try{ localStorage.removeItem("qd_deadbtns"); }catch(e){} ov.remove(); };
+  }
+
+  /* ---------- أزرار عائمة: كل الشاشات + تشخيص ---------- */
+  function mount(){
+    if(!document.getElementById("qd282fab")){
+      var wrap=document.createElement("div"); wrap.id="qd282fab";
+      wrap.style.cssText="position:fixed;bottom:14px;inset-inline-end:14px;z-index:2147483300;display:flex;flex-direction:column;gap:7px";
+      var a=document.createElement("button"); a.type="button"; a.textContent="☰"; a.title=L("كل الشاشات","All screens");
+      a.style.cssText="width:40px;height:40px;border-radius:50%;border:1px solid rgba(200,162,74,.55);background:#0C1118;color:#E3C67F;font-size:16px;cursor:pointer;box-shadow:0 8px 20px rgba(0,0,0,.3)";
+      a.onclick=function(e){ e.preventDefault(); menu(); };
+      var b=document.createElement("button"); b.type="button"; b.textContent="🔧"; b.title=L("تشخيص الأزرار","Button diagnostics");
+      b.style.cssText="width:40px;height:40px;border-radius:50%;border:1px solid #D9D5CB;background:#fff;color:#0C1118;font-size:15px;cursor:pointer;box-shadow:0 8px 20px rgba(0,0,0,.18)";
+      b.onclick=function(e){ e.preventDefault(); report(); };
+      wrap.appendChild(a); wrap.appendChild(b); document.body.appendChild(wrap);
+    }
+    inject();
+  }
+  setInterval(function(){ try{ mount(); }catch(e){} },2000);
+  setTimeout(mount,1200);
+  instrument();
+  window.QD282={inject:inject,openView:openView,menu:menu,report:report,views:viewIds,dead:function(){ return dead; }};
+})();
+
+</script>
+
 
 
 
