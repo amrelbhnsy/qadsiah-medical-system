@@ -1,0 +1,589 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,maximum-scale=1">
+<meta name="theme-color" content="#0B0B0D">
+<title>Wellness — القادسية</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{--bg:#0B0B0D;--card:#16161A;--card2:#1D1D22;--line:#2A2A31;--txt:#F4F4F6;--mut:#8E8E99;--red:#E2342C;--red2:#B5121B;--ok:#34C759;--warn:#FF9F0A}
+html,body{margin:0;background:var(--bg);color:var(--txt);font-family:-apple-system,system-ui,"Segoe UI",Tahoma,sans-serif;-webkit-font-smoothing:antialiased}
+body{padding-bottom:calc(96px + env(safe-area-inset-bottom))}
+.top{position:sticky;top:0;z-index:30;background:rgba(11,11,13,.94);backdrop-filter:blur(14px);border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px;padding:12px 14px}
+.top .bk{width:34px;height:34px;border-radius:10px;background:var(--card2);border:1px solid var(--line);color:var(--txt);display:grid;place-items:center;font-size:15px;cursor:pointer;flex:none}
+.top h1{font-size:16px;font-weight:800;margin:0;flex:1;letter-spacing:-.2px}
+.lang{display:flex;background:var(--card2);border:1px solid var(--line);border-radius:11px;overflow:hidden;flex:none}
+.lang button{border:0;background:transparent;color:var(--mut);font:800 11px inherit;padding:7px 11px;cursor:pointer}
+.lang button.on{background:var(--red);color:#fff}
+.wrap{max-width:560px;margin:0 auto;padding:14px 14px 20px}
+.who{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:13px 14px;margin-bottom:12px}
+.who .r{display:flex;align-items:center;gap:9px;margin-bottom:10px}
+.who .av{width:38px;height:38px;border-radius:11px;background:linear-gradient(150deg,#3A0A0C,#E2342C);display:grid;place-items:center;font-weight:900;color:#fff;flex:none;font-size:14px}
+.who .nm{flex:1;min-width:0}
+.who .nm b{display:block;font:800 13.5px inherit}
+.who .nm span{display:block;font:700 10.5px inherit;color:var(--mut);margin-top:2px}
+.who input,.who select{width:100%;background:#111114;border:1px solid var(--line);border-radius:11px;color:var(--txt);font:700 13px inherit;padding:10px 12px;outline:0}
+.who input:focus,.who select:focus{border-color:var(--red);box-shadow:0 0 0 3px rgba(226,52,44,.16)}
+.who label{display:block;font:800 10px inherit;color:var(--mut);margin:0 0 5px 2px}
+.dt{display:flex;align-items:center;gap:8px;margin-top:10px;color:var(--mut);font:700 11px inherit}
+.dt b{color:var(--txt);font-weight:800}
+.q{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 14px 10px;margin-bottom:11px}
+.q h3{margin:0 0 2px;font:800 14px inherit;display:flex;align-items:center;gap:6px}
+.q h3 i{color:var(--red);font-style:normal;font-size:12px}
+.q p{margin:0 0 10px;font:600 11px inherit;color:var(--mut);line-height:1.55}
+.legend{display:flex;justify-content:space-between;font:700 9.5px inherit;color:#6E6E7A;margin-top:7px}
+.legend span:last-child{text-align:end}
+.rng{position:relative;padding:12px 2px 4px;direction:ltr}
+.rng input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:4px;background:linear-gradient(90deg,var(--red2) 0%,var(--red) 50%,#3A3A42 50%,#3A3A42 100%);outline:0;margin:0}
+.rng input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:26px;height:26px;border-radius:50%;background:#fff;border:4px solid var(--red);box-shadow:0 2px 10px rgba(0,0,0,.6);cursor:pointer}
+.rng input[type=range]::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:#fff;border:4px solid var(--red);cursor:pointer}
+.rng .bub{position:absolute;top:-14px;transform:translateX(-50%);background:var(--red);color:#fff;font:900 11px inherit;border-radius:7px;padding:2px 7px;min-width:22px;text-align:center;pointer-events:none;transition:left .08s}
+.rng .bub:after{content:"";position:absolute;left:50%;bottom:-4px;transform:translateX(-50%);border:4px solid transparent;border-top-color:var(--red)}
+.ticks{display:flex;justify-content:space-between;font:800 10px inherit;color:#5F5F6B;margin-top:6px;padding:0 1px}
+.sore h3{margin-bottom:8px}
+.frontback{display:flex;gap:6px;margin-bottom:10px}
+.frontback button{flex:1;border:1px solid var(--line);background:#111114;color:var(--mut);border-radius:10px;padding:9px;font:800 11.5px inherit;cursor:pointer}
+.frontback button.on{background:var(--card2);color:#fff;border-color:#3A3A42}
+.body{position:relative;display:flex;justify-content:center;padding:6px 0 2px}
+.body svg{width:100%;max-width:230px;height:auto;display:block}
+.zone{fill:#2A2A32;stroke:#43434F;stroke-width:1;cursor:pointer;transition:fill .12s,stroke .12s}
+.zone:hover{fill:#3D3D48}
+.zone.on{fill:url(#qg);stroke:#FF8B84}
+.znl{stroke:#3A3A44;stroke-width:.75;fill:none}
+.znl.on{stroke:#E2342C;stroke-width:1.1}
+.znc{fill:#1C1C22;stroke:#3E3E49;stroke-width:.9}
+.znc.on{fill:#E2342C;stroke:#FF8B84}
+.znt{fill:#8E8E99;font-size:5.2px;font-weight:800;font-family:system-ui,sans-serif}
+.znt.on{fill:#fff}
+.lgrid{display:grid;grid-template-columns:1fr 1fr;gap:2px 10px;margin-top:8px}
+.lg{display:flex;align-items:baseline;gap:5px;font:700 9.5px inherit;color:#8E8E99;cursor:pointer;line-height:1.5}
+.lg b{min-width:13px;text-align:center;background:#26262E;border-radius:4px;color:#B9B9C4;font-size:8.5px;padding:0 2px}
+.lg.on{color:#FF8B84;font-weight:900}
+.lg.on b{background:#E2342C;color:#fff}
+.srch{position:relative;margin-top:10px}
+.srch input{width:100%;background:#111114;border:1px solid var(--line);border-radius:11px;color:var(--txt);font:700 12px inherit;padding:11px 12px 11px 34px;outline:0}
+.srch:before{content:"⌕";position:absolute;left:12px;top:9px;font-size:15px;color:var(--mut)}
+.res{position:absolute;left:0;right:0;top:44px;z-index:20;background:#1A1A20;border:1px solid var(--line);border-radius:11px;overflow:hidden;display:none;max-height:190px;overflow-y:auto}
+.res.on{display:block}
+.res button{display:block;width:100%;text-align:start;background:transparent;border:0;border-bottom:1px solid #26262E;color:var(--txt);font:700 12px inherit;padding:10px 12px;cursor:pointer}
+.res button:active{background:#26262E}
+.picked{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.picked .p{background:rgba(226,52,44,.14);border:1px solid rgba(226,52,44,.4);color:#FF8B84;border-radius:999px;padding:5px 10px;font:800 10.5px inherit;display:flex;align-items:center;gap:6px}
+.picked .p b{cursor:pointer;color:#FF6B62;font-size:13px;line-height:1}
+.picked .empty{color:#5F5F6B;font:700 10.5px inherit}
+textarea{width:100%;background:var(--card);border:1px solid var(--line);border-radius:14px;color:var(--txt);font:600 12.5px inherit;padding:12px;min-height:86px;outline:0;resize:vertical}
+textarea:focus{border-color:var(--red)}
+.score{background:linear-gradient(135deg,#1A1012,#241114);border:1px solid #3A1A1C;border-radius:16px;padding:14px;margin-bottom:12px;display:flex;align-items:center;gap:12px}
+.score .v{font:900 30px/1 inherit}
+.score .s{font:800 11px inherit;color:var(--mut);line-height:1.5}
+.bar{position:fixed;bottom:0;left:0;right:0;background:rgba(11,11,13,.96);backdrop-filter:blur(14px);border-top:1px solid var(--line);padding:10px 14px calc(10px + env(safe-area-inset-bottom));z-index:40}
+.bar .in{max-width:560px;margin:0 auto;display:flex;gap:9px}
+.save{flex:1;border:0;border-radius:13px;padding:14px;font:900 14px inherit;background:var(--red);color:#fff;cursor:pointer;box-shadow:0 8px 22px rgba(226,52,44,.3)}
+.save:active{transform:translateY(1px)}
+.clr{border:1px solid var(--line);background:transparent;color:var(--mut);border-radius:13px;padding:14px 16px;font:800 12px inherit;cursor:pointer}
+.out{display:none;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin-bottom:12px}
+.out.on{display:block}
+.out code{display:block;background:#0D0D10;border:1px solid var(--line);border-radius:10px;padding:10px;font:600 9.5px/1.5 ui-monospace,Menlo,monospace;color:#9FE8B0;word-break:break-all;direction:ltr;text-align:left;max-height:92px;overflow:auto}
+.out .row{display:flex;gap:8px;margin-top:9px}
+.out button{flex:1;border:1px solid var(--line);background:var(--card2);color:var(--txt);border-radius:11px;padding:11px;font:800 11.5px inherit;cursor:pointer}
+.out button.wa{background:#1F8A3B;border-color:#1F8A3B;color:#fff}
+.toast{position:fixed;bottom:calc(118px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%) translateY(20px);background:#fff;color:#111;font:800 12px inherit;padding:11px 18px;border-radius:12px;opacity:0;pointer-events:none;transition:.22s;z-index:60}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+<div class="top">
+  <button class="bk" id="bk">‹</button>
+  <h1 id="ttl">Wellness_Men</h1>
+  <div class="lang"><button data-l="ar" class="on">ع</button><button data-l="en">EN</button></div>
+</div>
+
+<div class="wrap">
+  <div class="who">
+    <div class="r">
+      <div class="av" id="av">Q</div>
+      <div class="nm"><b id="hname">—</b><span id="hsub">الاستبيان اليومي · القادسية U18</span></div>
+    </div>
+    <label id="lbName">اللاعب</label>
+    <button type="button" id="pickBtn" style="width:100%;display:flex;align-items:center;gap:9px;background:#111114;border:1px solid var(--line);border-radius:11px;color:var(--txt);font:800 13px inherit;padding:9px 11px;cursor:pointer;text-align:start">
+      <span id="pbAv" style="width:32px;height:32px;border-radius:9px;background:#26262E;display:grid;place-items:center;overflow:hidden;flex:none;font-size:13px">?</span>
+      <span id="pbNm" style="flex:1;color:var(--mut);font-weight:800">اختر اسمك من القائمة</span>
+      <span style="color:var(--mut);font-size:14px">⌄</span>
+    </button>
+    <input id="nm" type="hidden" value="">
+    <div class="dt"><span>📅</span><b id="dtv"></b><span id="dtsub">تاريخ اليوم — يُسجّل تلقائيًا</span></div>
+  </div>
+
+  <div id="qs"></div>
+
+  <div class="q sore">
+    <h3><span id="saT">أماكن الألم</span><i>*</i></h3>
+    <p id="saH">ألم؟ أين؟ — اضغط على المنطقة في المجسم أو ابحث بالاسم.</p>
+    <div class="frontback"><button data-side="front" class="on" id="fbF">أمامي</button><button data-side="back" id="fbB">خلفي</button></div>
+    <div class="body" id="bodyHost"></div>
+    <div class="legend2" id="legend"></div>
+    <div class="srch"><input id="srch" placeholder="اكتب للبحث عن منطقة…"><div class="res" id="res"></div></div>
+    <div class="picked" id="picked"><span class="empty" id="pkEmpty">لم يتم اختيار شيء</span></div>
+  </div>
+
+  <div class="score"><div class="v" id="sv">—</div><div class="s" id="sl">أجب على الأسئلة</div></div>
+
+  <div class="q"><h3 id="ntT">معلومات إضافية</h3><p id="ntH">أي شيء تريد أن يعرفه الأخصائي.</p><textarea id="nt" placeholder="مثال: ألم أسفل الظهر بعد تمرين الأمس"></textarea></div>
+
+  <div class="out" id="outc">
+    <h3 style="margin:0 0 6px;font:800 13px inherit" id="outT">رمز الإرسال</h3>
+    <p style="margin:0 0 8px;font:600 10.5px inherit;color:var(--mut)" id="outH">انسخ الرمز وأرسله للأخصائي — أو أرسله بواتساب.</p>
+    <code id="code"></code>
+    <div class="row"><button id="cp">نسخ</button><button class="wa" id="wa">واتساب</button></div>
+  </div>
+</div>
+
+<div class="bar"><div class="in"><button class="save" id="go">حفظ</button><button class="clr" id="rs">تفريغ</button></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  var T={
+    ar:{ttl:"Wellness_Men",sub:"الاستبيان اليومي · القادسية U18",lbName:"اسم اللاعب",nmPh:"اكتب اسمك كما في البرنامج",
+      today:"تاريخ اليوم — يُسجّل تلقائيًا",save:"حفظ",clr:"تفريغ",ntT:"معلومات إضافية",ntH:"أي شيء تريد أن يعرفه الأخصائي.",
+      ntPh:"مثال: ألم أسفل الظهر بعد تمرين الأمس",saT:"أماكن الألم",saH:"ألم؟ أين؟ — اضغط على المنطقة أو ابحث بالاسم.",
+      front:"أمامي",back:"خلفي",srchPh:"اكتب للبحث عن منطقة…",none:"لم يتم اختيار شيء",outT:"رمز الإرسال",
+      outH:"انسخ الرمز وأرسله للأخصائي — أو أرسله بواتساب.",copy:"نسخ",whats:"واتساب",answered:"أجب على الأسئلة",
+      ready:"جاهز للتدريب",watch:"راقب نفسك اليوم",low:"أخبر الأخصائي قبل التمرين",
+      aReady:"حالتك جيدة — التزم بالإحماء والنوم ٨ ساعات.",aWatch:"جاهزيتك متوسطة — خفّف الشدة وأبلغ المدرب إن استمر التعب.",
+      aLow:"جاهزيتك منخفضة — لا تبدأ التمرين قبل تقييم الأخصائي.",needName:"اكتب اسمك أولًا",needAns:"أجب على جميع الأسئلة",
+      copied:"تم النسخ ✓",saved:"حُفظت الإجابات على جهازك ✓"},
+    en:{ttl:"Wellness_Men",sub:"Daily wellness · Qadsiah U18",lbName:"Player name",nmPh:"Type your name as registered",
+      today:"Today — logged automatically",save:"Save",clr:"Clear",ntT:"Additional Information",ntH:"Anything your clinician should know.",
+      ntPh:"e.g. lower-back pain after yesterday's session",saT:"Sore Areas",saH:"Pain? Where — tap a body area or search by name.",
+      front:"Front",back:"Back",srchPh:"Tap to search body areas…",none:"Nothing selected",outT:"Submit code",
+      outH:"Copy the code and send it to your clinician — or send via WhatsApp.",copy:"Copy",whats:"WhatsApp",answered:"Answer the questions",
+      ready:"Ready to train",watch:"Monitor today",low:"See your clinician first",
+      aReady:"You're in good shape — warm up well and sleep 8 hours.",aWatch:"Moderate readiness — reduce intensity and tell your coach if fatigue persists.",
+      aLow:"Low readiness — do not train before your clinician's assessment.",needName:"Please enter your name",needAns:"Answer all questions",
+      copied:"Copied ✓",saved:"Answers saved on this device ✓"}
+  };
+  var LANG="ar";
+  var QS=[
+    {k:"fatigue",ar:"الإجهاد",en:"Fatigue",har:"مستوى التعب أو الإجهاد العام",hen:"Level of fatigue or general tiredness",l1ar:"مرتاح جدًا",l5ar:"متعب جدًا",l1en:"Very rested",l5en:"Very fatigued"},
+    {k:"mood",ar:"المزاج",en:"Mood",har:"مستوى الحالة المزاجية",hen:"Mood level",l1ar:"ممتاز",l5ar:"سيئ جدًا",l1en:"Very good",l5en:"Very bad"},
+    {k:"soreness",ar:"ألم العضلات",en:"Soreness",har:"ألم أو شدّ في العضلات",hen:"Muscle pain",l1ar:"لا ألم",l5ar:"ألم شديد",l1en:"No pain",l5en:"Too much pain"},
+    {k:"sleep",ar:"جودة النوم",en:"Sleep Quality",har:"كيف كان نومك ليلة أمس؟",hen:"How did you sleep last night?",l1ar:"جيد جدًا",l5ar:"سيئ جدًا",l1en:"Very good",l5en:"Very bad"},
+    {k:"stress",ar:"التوتر النفسي",en:"Stress",har:"مستوى الضغط النفسي",hen:"Level of psychological stress",l1ar:"هادئ جدًا",l5ar:"ضغط شديد",l1en:"Very calm",l5en:"Very stressed"}
+  ];
+  var DUR={ar:"مدة النوم",en:"Sleep Duration",har:"كم ساعة نمت ليلة أمس؟",hen:"How many hours did you sleep last night?"};
+  var BM={front:[{"v": "HEAD", "d": "M78.6,30.0 75.0,31.2 72.3,33.6 70.5,37.6 70.1,42.5 71.2,48.3 73.4,52.6 76.1,55.2 78.8,56.3 80.8,56.3 84.3,54.8 87.5,51.0 89.3,46.3 89.7,40.5 89.0,36.1 86.1,32.0 82.6,30.3Z", "cx": 79.9, "cy": 42.8, "hw": 9.8, "interior": 1}, {"v": "NECK", "d": "M67.6,64.4 67.6,65.0 68.7,65.7 77.9,66.8 91.7,65.5 92.4,64.8 86.8,61.0 86.1,56.3 85.5,55.9 81.9,57.7 78.1,57.7 74.3,55.9 73.0,61.0Z", "cx": 80.0, "cy": 62.3, "hw": 12.4, "interior": 1}, {"v": "CHEST", "d": "M65.6,67.9 63.6,78.6 64.1,88.7 64.7,92.9 65.6,93.8 67.2,94.0 77.7,91.8 82.3,91.8 93.0,94.0 95.0,93.1 96.2,87.1 96.2,77.5 94.8,69.0 93.5,67.0 79.2,68.4 67.0,66.8Z", "cx": 80.0, "cy": 80.4, "hw": 16.3, "interior": 1}, {"v": "ABDOMEN", "d": "M65.2,96.9 65.4,106.3 64.5,114.7 65.8,116.5 73.0,118.3 79.9,119.2 89.3,117.9 93.5,116.8 95.0,115.6 95.5,112.7 94.6,107.4 94.6,96.9 93.0,95.4 82.1,93.3 78.1,93.3 67.0,95.4Z", "cx": 80.0, "cy": 106.3, "hw": 15.5, "interior": 1}, {"v": "GROIN", "d": "M63.2,120.5 63.4,123.4 71.4,129.0 76.5,135.3 79.0,137.0 82.3,136.4 88.4,129.0 95.7,124.1 96.8,122.8 96.2,118.8 95.0,117.9 82.6,120.5 74.3,120.1 65.0,117.9 63.8,118.5Z", "cx": 79.9, "cy": 125.5, "hw": 16.8, "interior": 1}, {"v": "L. SHOULDER", "d": "M96.2,66.2 95.7,67.0 98.2,79.3 100.8,79.7 105.1,78.9 106.0,78.0 106.0,76.0 104.0,69.9 100.2,66.8 97.7,65.9Z", "cx": 100.7, "cy": 73.4, "hw": 5.1, "interior": 0}, {"v": "L. UPPER ARM", "d": "M105.3,80.4 100.0,81.3 97.9,82.4 96.8,91.8 97.9,97.8 99.1,99.1 106.0,98.0 107.5,95.8 106.2,81.3Z", "cx": 102.3, "cy": 89.7, "hw": 5.3, "interior": 0}, {"v": "L. ELBOW", "d": "M107.8,100.5 106.9,99.6 104.9,99.6 99.7,100.9 99.1,101.8 99.5,104.9 102.4,105.2 107.5,103.8 108.2,102.9 107.8,101.1 104.2,102.7 103.5,102.5Z", "cx": 103.5, "cy": 102.4, "hw": 4.6, "interior": 0}, {"v": "L. FOREARM", "d": "M107.5,105.4 101.3,106.7 99.7,108.1 100.4,113.4 104.0,125.7 104.6,126.6 106.6,126.8 109.1,126.3 110.7,124.6 109.3,107.4 108.9,106.1Z", "cx": 105.6, "cy": 115.2, "hw": 5.5, "interior": 0}, {"v": "L. HAND", "d": "M109.3,127.5 104.9,129.0 104.4,131.0 104.9,139.0 106.0,142.4 106.6,141.7 106.9,139.3 107.3,143.1 108.0,143.7 109.8,143.5 110.2,144.4 111.1,144.4 111.3,140.6 112.0,142.8 112.7,143.3 113.3,142.8 112.2,134.6 114.9,137.0 115.8,136.1 113.3,130.6 111.1,127.9Z", "cx": 109.3, "cy": 135.4, "hw": 5.7, "interior": 0}, {"v": "R. SHOULDER", "d": "M63.6,66.2 62.5,65.9 59.6,67.0 55.8,70.4 53.8,76.0 54.0,78.2 54.7,78.9 58.9,79.7 61.8,79.3 64.1,67.9Z", "cx": 59.2, "cy": 73.4, "hw": 5.1, "interior": 0}, {"v": "R. UPPER ARM", "d": "M54.5,80.4 53.6,81.8 52.7,87.1 52.9,88.2 54.7,89.3 52.7,89.1 52.7,96.9 53.6,97.8 57.8,98.7 58.0,99.4 58.5,98.9 60.7,99.1 61.8,97.8 62.9,92.5 62.1,82.6 60.9,81.5Z", "cx": 57.7, "cy": 89.9, "hw": 5.1, "interior": 0}, {"v": "R. ELBOW", "d": "M51.8,101.1 51.6,102.9 53.8,104.3 59.6,105.4 61.2,103.4 60.0,100.7 55.6,99.6 52.9,99.6 52.2,100.3 52.9,100.9Z", "cx": 56.5, "cy": 102.4, "hw": 4.8, "interior": 0}, {"v": "R. FOREARM", "d": "M51.6,105.6 50.5,107.8 49.3,124.8 50.7,126.1 55.1,126.6 55.8,126.1 59.4,113.6 60.0,107.6 59.4,106.9 54.0,105.6Z", "cx": 54.2, "cy": 115.5, "hw": 5.3, "interior": 0}, {"v": "R. HAND", "d": "M50.2,127.2 48.9,127.7 46.5,130.8 44.0,136.1 44.4,137.0 45.3,137.0 47.8,134.4 46.2,142.4 47.3,143.3 48.5,141.0 48.5,143.7 49.1,144.6 50.2,143.5 51.6,143.9 52.2,143.3 53.1,139.0 53.4,141.9 54.3,142.2 55.4,135.3 55.1,129.2 54.5,128.3Z", "cx": 50.6, "cy": 135.4, "hw": 5.7, "interior": 0}, {"v": "L. THIGH", "d": "M97.1,125.7 95.3,125.9 88.6,130.8 81.9,138.8 81.7,145.7 83.0,153.3 83.5,161.1 84.8,163.1 94.8,162.4 95.9,161.1 97.3,154.2 98.6,141.0 98.2,129.5Z", "cx": 90.6, "cy": 145.5, "hw": 8.5, "interior": 0}, {"v": "L. KNEE", "d": "M84.6,165.6 84.8,172.5 86.1,176.0 92.1,176.0 95.5,175.2 95.9,170.0 95.5,170.5 90.4,170.3 95.5,169.8 95.3,165.6 94.6,164.5 86.6,164.5Z", "cx": 90.1, "cy": 170.2, "hw": 5.7, "interior": 0}, {"v": "L. SHIN", "d": "M95.7,177.4 86.4,177.8 85.5,178.9 85.0,189.2 86.8,199.0 86.8,204.1 88.1,205.5 92.6,205.7 93.7,204.4 96.2,189.9 90.6,189.4 96.4,189.0 97.1,182.5 96.8,179.4Z", "cx": 90.8, "cy": 190.2, "hw": 6.0, "interior": 0}, {"v": "L. FOOT", "d": "M87.5,207.3 86.8,208.1 86.6,213.9 88.1,218.2 90.4,219.7 97.5,218.4 98.2,217.7 97.5,215.5 95.0,212.6 93.7,213.3 94.6,212.2 93.5,210.4 93.3,207.7Z", "cx": 91.5, "cy": 213.7, "hw": 5.8, "interior": 0}, {"v": "R. THIGH", "d": "M62.9,125.7 62.1,127.5 61.4,142.6 62.3,152.9 63.8,160.7 64.5,162.0 65.8,162.7 75.0,163.1 76.3,161.8 78.3,139.7 77.7,138.2 75.7,136.6 71.6,131.0 64.3,125.7Z", "cx": 69.3, "cy": 145.5, "hw": 8.5, "interior": 0}, {"v": "R. KNEE", "d": "M65.2,164.5 64.5,169.8 69.6,170.3 64.5,170.5 64.3,174.9 65.4,175.8 69.9,176.3 74.1,175.8 75.7,167.8 75.0,165.1 72.3,164.2Z", "cx": 69.8, "cy": 170.2, "hw": 5.7, "interior": 0}, {"v": "R. SHIN", "d": "M64.1,177.4 63.2,180.1 63.2,188.5 63.6,189.2 69.4,189.4 63.6,189.9 66.3,204.4 67.2,205.7 72.1,205.5 73.0,204.4 73.4,196.3 74.8,189.6 74.5,179.2 73.2,177.6Z", "cx": 69.1, "cy": 190.2, "hw": 5.8, "interior": 0}, {"v": "R. FOOT", "d": "M72.8,207.5 72.1,207.0 67.0,207.5 66.3,208.1 66.3,210.6 65.2,212.4 67.6,214.4 67.2,214.6 64.7,212.6 62.1,215.9 61.8,217.7 65.2,219.3 67.9,219.1 69.2,219.7 70.7,219.3 73.2,214.4Z", "cx": 68.4, "cy": 213.7, "hw": 5.7, "interior": 0}],back:[{"v": "HEAD", "d": "M74.9,31.6 72.2,34.0 70.4,38.0 70.2,44.7 72.2,51.1 74.4,52.7 86.7,52.0 88.0,50.0 89.6,44.7 89.6,39.6 88.2,35.1 85.8,32.2 83.6,30.9 78.2,30.4Z", "cx": 79.8, "cy": 41.9, "hw": 9.7, "interior": 1}, {"v": "NECK", "d": "M74.0,54.7 73.6,59.3 74.7,60.4 85.1,60.4 86.0,59.8 85.8,54.7 85.1,54.0 74.7,54.0Z", "cx": 79.8, "cy": 57.3, "hw": 6.2, "interior": 1}, {"v": "UPPER BACK", "d": "M94.0,66.0 93.1,64.9 87.3,61.8 72.2,62.0 65.8,65.6 64.0,77.3 64.9,78.4 95.1,78.4 95.8,76.0Z", "cx": 79.9, "cy": 70.8, "hw": 15.9, "interior": 1}, {"v": "MID BACK", "d": "M63.8,80.9 63.6,84.2 65.1,100.4 66.2,102.2 92.9,102.4 94.4,101.3 96.2,81.3 95.6,80.4 94.4,80.0 65.6,80.0Z", "cx": 79.9, "cy": 91.0, "hw": 16.3, "interior": 1}, {"v": "LOWER BACK", "d": "M65.6,105.1 64.4,115.3 65.8,116.9 80.4,117.8 94.0,116.9 95.1,115.8 94.2,105.3 92.9,104.0 66.7,104.0Z", "cx": 79.9, "cy": 110.7, "hw": 15.3, "interior": 1}, {"v": "GLUTES", "d": "M63.6,120.0 61.8,127.8 61.6,132.7 63.6,135.6 66.7,137.1 71.1,138.2 75.6,138.2 80.2,136.2 83.8,138.2 88.7,138.2 93.6,137.1 96.4,135.3 98.0,133.3 96.7,121.8 95.8,119.3 94.4,118.4 85.8,119.1 65.3,118.4Z", "cx": 79.9, "cy": 128.3, "hw": 18.2, "interior": 1}, {"v": "R. SHOULDER", "d": "M96.7,66.0 95.8,67.3 97.8,79.3 98.7,80.0 100.4,80.0 105.3,78.9 105.8,75.1 103.8,70.2 102.7,69.1 101.8,70.2 102.2,68.9 101.1,67.8Z", "cx": 100.6, "cy": 73.7, "hw": 5.0, "interior": 0}, {"v": "R. UPPER ARM", "d": "M105.1,80.7 99.8,81.6 97.8,83.1 96.9,91.8 98.0,98.0 99.1,99.3 105.1,98.4 107.1,97.1 107.1,89.3 102.2,90.7 106.9,88.4 106.2,82.2Z", "cx": 102.1, "cy": 90.2, "hw": 5.1, "interior": 0}, {"v": "R. ELBOW", "d": "M107.6,100.4 106.9,99.8 105.1,99.8 100.0,100.9 98.9,102.0 99.1,105.1 101.8,105.3 107.3,104.0 108.2,102.7 107.6,101.1 103.3,102.7Z", "cx": 103.3, "cy": 102.6, "hw": 4.7, "interior": 0}, {"v": "R. FOREARM", "d": "M108.2,105.8 101.1,106.7 99.8,107.8 99.6,108.9 100.9,115.8 104.4,126.7 109.3,126.2 110.4,124.9 109.6,109.8 108.9,106.4Z", "cx": 105.5, "cy": 115.4, "hw": 5.4, "interior": 0}, {"v": "R. HAND", "d": "M106.0,128.2 104.4,129.6 104.2,134.0 105.1,141.8 105.8,142.4 106.4,142.2 106.7,139.3 107.6,143.6 108.7,143.8 109.6,142.0 109.8,144.2 110.7,144.7 111.3,143.3 111.3,141.1 112.0,143.1 112.7,143.3 113.3,142.7 112.0,134.4 114.7,137.1 115.3,137.1 115.8,136.2 111.6,128.4 110.4,127.6Z", "cx": 109.1, "cy": 135.4, "hw": 5.8, "interior": 0}, {"v": "L. SHOULDER", "d": "M63.1,66.2 59.8,67.1 57.6,68.7 57.8,69.6 57.1,69.1 56.0,70.2 54.7,72.7 53.8,76.9 54.4,78.9 59.3,80.0 61.8,79.6 62.4,78.2 63.8,66.9Z", "cx": 59.1, "cy": 73.7, "hw": 5.0, "interior": 0}, {"v": "L. UPPER ARM", "d": "M54.7,80.7 53.6,82.0 52.7,87.1 52.9,88.9 54.4,89.8 52.4,89.6 52.7,97.1 54.0,98.2 60.7,99.3 61.8,98.0 62.9,91.6 62.0,83.3 60.7,81.8Z", "cx": 57.6, "cy": 90.2, "hw": 5.2, "interior": 0}, {"v": "L. ELBOW", "d": "M52.0,100.7 56.0,102.4 52.0,101.3 51.8,103.3 52.9,104.2 56.7,105.3 60.7,104.9 60.9,102.0 59.3,100.7 52.9,99.8Z", "cx": 56.4, "cy": 102.6, "hw": 4.6, "interior": 0}, {"v": "L. FOREARM", "d": "M51.8,105.6 50.7,106.9 49.3,124.9 50.7,126.2 55.1,126.7 58.9,115.8 60.2,108.7 59.6,107.3 56.9,106.7 56.7,106.0Z", "cx": 54.2, "cy": 115.7, "hw": 5.4, "interior": 0}, {"v": "L. HAND", "d": "M49.3,127.6 48.2,128.4 44.0,136.2 44.2,137.1 45.1,137.1 47.8,134.4 46.4,142.7 47.6,143.3 48.4,141.3 48.9,144.4 49.6,144.4 50.4,142.9 51.3,144.0 52.2,143.6 52.9,140.2 53.3,142.2 54.0,142.4 55.1,138.4 55.3,129.6 54.2,128.4Z", "cx": 50.6, "cy": 135.5, "hw": 5.7, "interior": 0}, {"v": "R. HAMSTRING", "d": "M97.1,136.7 90.9,139.3 85.3,139.8 83.3,139.3 83.1,138.7 81.6,139.8 81.3,143.1 83.8,162.4 84.4,163.1 94.7,162.7 95.8,161.3 97.1,152.7 95.1,151.3 97.6,151.8 98.2,137.6Z", "cx": 90.0, "cy": 150.1, "hw": 8.4, "interior": 0}, {"v": "R. KNEE BACK", "d": "M94.2,164.4 84.9,165.1 84.2,166.0 84.2,169.3 84.9,173.3 85.8,174.9 87.1,175.3 94.2,174.7 95.3,174.0 95.1,171.1 90.4,170.9 90.7,170.4 95.3,170.2 95.1,166.0Z", "cx": 89.8, "cy": 169.7, "hw": 5.6, "interior": 0}, {"v": "R. CALF", "d": "M95.1,176.2 86.7,176.7 85.3,178.2 84.9,190.0 86.7,200.0 86.7,204.4 88.2,206.0 91.8,206.2 92.9,205.8 93.8,204.4 93.8,201.3 96.0,189.8 90.4,189.3 96.0,189.1 96.4,188.4 96.7,180.4 96.2,177.3Z", "cx": 90.6, "cy": 189.8, "hw": 5.9, "interior": 0}, {"v": "R. FOOT", "d": "M86.4,208.4 86.9,212.2 86.4,217.1 87.8,219.1 92.0,219.1 98.0,215.6 97.8,213.6 95.3,212.2 94.2,212.7 94.7,212.0 93.6,210.4 93.6,208.4 92.4,207.6 87.3,207.6Z", "cx": 91.1, "cy": 213.6, "hw": 5.8, "interior": 0}, {"v": "L. HAMSTRING", "d": "M62.0,136.9 61.3,138.0 62.4,152.0 66.7,150.2 62.4,152.9 64.2,162.0 65.6,162.9 74.9,163.3 76.0,162.2 76.7,160.0 76.7,155.3 78.4,140.2 77.3,139.1 74.7,139.8 67.8,139.1 63.3,136.9Z", "cx": 69.7, "cy": 150.1, "hw": 8.6, "interior": 0}, {"v": "L. KNEE BACK", "d": "M65.3,164.4 64.7,165.6 64.2,170.2 69.1,170.4 69.3,170.9 64.4,171.1 64.2,173.8 65.8,174.7 74.0,174.9 75.1,172.4 75.1,165.6 74.0,164.7Z", "cx": 69.8, "cy": 169.7, "hw": 5.4, "interior": 0}, {"v": "L. CALF", "d": "M64.7,176.2 63.6,177.3 62.9,181.3 63.3,188.9 69.3,189.3 63.6,189.8 66.2,204.9 67.6,206.2 71.8,206.0 72.9,204.2 73.1,198.7 74.9,188.9 74.2,178.2 72.9,176.7Z", "cx": 69.0, "cy": 189.8, "hw": 6.0, "interior": 0}, {"v": "L. FOOT", "d": "M67.3,207.6 66.2,208.4 66.0,210.7 64.9,212.0 65.8,212.9 64.2,212.2 61.3,214.0 61.6,215.3 62.4,216.4 67.1,218.9 71.3,219.3 73.1,217.3 72.7,212.0 73.3,208.9 72.2,207.6Z", "cx": 68.4, "cy": 213.7, "hw": 6.0, "interior": 0}]};
+  var NM={"HEAD": "\u0627\u0644\u0631\u0623\u0633", "NECK": "\u0627\u0644\u0631\u0642\u0628\u0629", "CHEST": "\u0627\u0644\u0635\u062f\u0631", "ABDOMEN": "\u0627\u0644\u0628\u0637\u0646", "GROIN": "\u0627\u0644\u0645\u0646\u0637\u0642\u0629 \u0627\u0644\u0625\u0631\u0628\u064a\u0629", "UPPER BACK": "\u0623\u0639\u0644\u0649 \u0627\u0644\u0638\u0647\u0631", "MID BACK": "\u0648\u0633\u0637 \u0627\u0644\u0638\u0647\u0631", "LOWER BACK": "\u0623\u0633\u0641\u0644 \u0627\u0644\u0638\u0647\u0631", "GLUTES": "\u0627\u0644\u0623\u0631\u062f\u0627\u0641", "L. SHOULDER": "\u0627\u0644\u0643\u062a\u0641 \u0627\u0644\u0623\u064a\u0633\u0631", "R. SHOULDER": "\u0627\u0644\u0643\u062a\u0641 \u0627\u0644\u0623\u064a\u0645\u0646", "L. UPPER ARM": "\u0627\u0644\u0639\u0636\u062f \u0627\u0644\u0623\u064a\u0633\u0631", "R. UPPER ARM": "\u0627\u0644\u0639\u0636\u062f \u0627\u0644\u0623\u064a\u0645\u0646", "L. ELBOW": "\u0627\u0644\u0645\u0631\u0641\u0642 \u0627\u0644\u0623\u064a\u0633\u0631", "R. ELBOW": "\u0627\u0644\u0645\u0631\u0641\u0642 \u0627\u0644\u0623\u064a\u0645\u0646", "L. FOREARM": "\u0627\u0644\u0633\u0627\u0639\u062f \u0627\u0644\u0623\u064a\u0633\u0631", "R. FOREARM": "\u0627\u0644\u0633\u0627\u0639\u062f \u0627\u0644\u0623\u064a\u0645\u0646", "L. HAND": "\u0627\u0644\u064a\u062f \u0627\u0644\u064a\u0633\u0631\u0649", "R. HAND": "\u0627\u0644\u064a\u062f \u0627\u0644\u064a\u0645\u0646\u0649", "L. THIGH": "\u0627\u0644\u0641\u062e\u0630 \u0627\u0644\u0623\u064a\u0633\u0631", "R. THIGH": "\u0627\u0644\u0641\u062e\u0630 \u0627\u0644\u0623\u064a\u0645\u0646", "L. KNEE": "\u0627\u0644\u0631\u0643\u0628\u0629 \u0627\u0644\u064a\u0633\u0631\u0649", "R. KNEE": "\u0627\u0644\u0631\u0643\u0628\u0629 \u0627\u0644\u064a\u0645\u0646\u0649", "L. SHIN": "\u0627\u0644\u0633\u0627\u0642 \u0627\u0644\u0623\u064a\u0633\u0631", "R. SHIN": "\u0627\u0644\u0633\u0627\u0642 \u0627\u0644\u0623\u064a\u0645\u0646", "L. FOOT": "\u0627\u0644\u0642\u062f\u0645 \u0627\u0644\u064a\u0633\u0631\u0649", "R. FOOT": "\u0627\u0644\u0642\u062f\u0645 \u0627\u0644\u064a\u0645\u0646\u0649", "L. HAMSTRING": "\u0623\u0648\u062a\u0627\u0631 \u0627\u0644\u0631\u0643\u0628\u0629 \u0627\u0644\u062e\u0644\u0641\u064a\u0629 \u0627\u0644\u064a\u0633\u0631\u0649", "R. HAMSTRING": "\u0623\u0648\u062a\u0627\u0631 \u0627\u0644\u0631\u0643\u0628\u0629 \u0627\u0644\u062e\u0644\u0641\u064a\u0629 \u0627\u0644\u064a\u0645\u0646\u0649", "L. KNEE BACK": "\u0627\u0644\u0631\u0643\u0628\u0629 \u0627\u0644\u062e\u0644\u0641\u064a\u0629 \u0627\u0644\u064a\u0633\u0631\u0649", "R. KNEE BACK": "\u0627\u0644\u0631\u0643\u0628\u0629 \u0627\u0644\u062e\u0644\u0641\u064a\u0629 \u0627\u0644\u064a\u0645\u0646\u0649", "L. CALF": "\u0628\u0637\u0629 \u0627\u0644\u0633\u0627\u0642 \u0627\u0644\u064a\u0633\u0631\u0649", "R. CALF": "\u0628\u0637\u0629 \u0627\u0644\u0633\u0627\u0642 \u0627\u0644\u064a\u0645\u0646\u0649"};
+  var A={}, AREAS=[], SIDE="front", DURV=8;
+  var $=function(id){ return document.getElementById(id); };
+  function t(k){ return (T[LANG]&&T[LANG][k])||T.ar[k]||k; }
+  function today(){ var d=new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+  function hname(){ return LANG==="ar"?"الاسم":"Name"; }
+  function zl(z){ return LANG==="ar"?z[1]:z[2]; }
+
+  /* ---------- بناء الأسئلة ---------- */
+  function buildQs(){
+    var host=$("qs"); host.innerHTML="";
+    QS.concat([{k:"sdur",ar:DUR.ar,en:DUR.en,har:DUR.har,hen:DUR.hen,dur:true}]).forEach(function(q){
+      var d=document.createElement("div"); d.className="q";
+      var v=q.dur?DURV:(A[q.k]||3);
+      var max=q.dur?9:5;
+      var l1=q.dur?"١ ساعة":"1", l5=q.dur?"٩+ ساعات":"5";
+      d.innerHTML='<h3><span>'+(LANG==="ar"?q.ar:q.en)+'</span><i>*</i></h3>'+
+        '<p>'+(LANG==="ar"?q.har:q.hen)+'</p>'+
+        '<div class="rng"><div class="bub" style="left:0">'+v+'</div><input type="range" min="1" max="'+max+'" step="1" value="'+v+'" data-q="'+q.k+'"></div>'+
+        (function(){
+          var s1='1 = '+(q.dur?(LANG==="ar"?"ساعة":"1 hour"):(LANG==="ar"?q.l1ar:q.l1en));
+          var s2=max+' = '+(q.dur?(LANG==="ar"?"٩+ ساعات":"9+ hours"):(LANG==="ar"?q.l5ar:q.l5en));
+          return '<div class="legend" style="direction:ltr"><span>'+s1+'</span><span>'+s2+'</span></div>';
+        })();
+      host.appendChild(d);
+      var inp=d.querySelector("input"), bub=d.querySelector(".bub");
+      function paint(){
+        var p=(inp.value-inp.min)/(inp.max-inp.min)*100;
+        bub.style.left="calc("+p+"% + "+(13-p*0.26)+"px)"; bub.textContent=inp.value;
+        inp.style.background="linear-gradient(90deg,var(--red2) 0%,var(--red) "+p+"%,#3A3A42 "+p+"%,#3A3A42 100%)";
+      }
+      inp.addEventListener("input",function(){
+        if(q.dur) DURV=Number(inp.value); else A[q.k]=Number(inp.value);
+        paint(); calc();
+      });
+      paint();
+      if(!q.dur && !A[q.k]) A[q.k]=Number(inp.value);
+    });
+  }
+
+  /* ---------- المجسم ---------- */
+  function buildBody(){
+    var list=BM[SIDE], sel=AREAS;
+    /* ترتيب أرقام الأسطورة: ترقيم متسلسل يطابق الدوائر على المجسم */
+    var side={};
+    list.forEach(function(zz){ if(zz.interior) return; var k=zz.cx<80?"-1":"1"; (side[k]=side[k]||[]).push({z:zz,y:zz.cy}); });
+    Object.keys(side).forEach(function(k){
+      var arr=side[k].sort(function(a,b){ return a.y-b.y; }); var prev=-999;
+      arr.forEach(function(o){ if(o.y-prev<9.5) o.y=prev+9.5; prev=o.y; });
+      var maxy=244;
+      for(var i=arr.length-1;i>=0;i--){ if(arr[i].y>maxy) arr[i].y=maxy; maxy=arr[i].y-9.5; }
+    });
+    function labelY(zz){
+      var k=zz.cx<80?"-1":"1", arr=side[k]||[];
+      for(var j=0;j<arr.length;j++) if(arr[j].z===zz) return arr[j].y;
+      return zz.cy;
+    }
+    var h='<svg viewBox="0 0 160 250" preserveAspectRatio="xMidYMid meet">';
+    h+='<defs><linearGradient id="qg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#E2342C"/><stop offset="1" stop-color="#B5121B"/></linearGradient></defs>';
+    list.forEach(function(zz){ h+='<path class="zone'+(sel.indexOf(zz.v)>-1?" on":"")+'" data-z="'+zz.v+'" d="'+zz.d+'"/>'; });
+    var n=0;
+    function mk(x,y,on,num){
+      return '<circle class="znc'+(on?" on":"")+'" cx="'+x.toFixed(1)+'" cy="'+y.toFixed(1)+'" r="5.2"/>'+
+             '<text class="znt'+(on?" on":"")+'" x="'+x.toFixed(1)+'" y="'+(y+2.1).toFixed(1)+'" text-anchor="middle">'+num+'</text>';
+    }
+    list.forEach(function(zz){
+      var on=sel.indexOf(zz.v)>-1; n++;
+      if(zz.interior){ h+=mk(zz.cx,zz.cy,on,n); return; }
+      var s=(zz.cx<80)?-1:1, y=labelY(zz), elx=(s<0)?33:(160-33);
+      h+='<path class="znl'+(on?" on":"")+'" d="M'+(zz.cx+s*zz.hw).toFixed(1)+','+zz.cy.toFixed(1)+' L'+elx+','+zz.cy.toFixed(1)+' L'+elx+','+y.toFixed(1)+' L'+(s<0?elx+4:elx-4)+','+y.toFixed(1)+'"/>';
+      h+=mk(elx,y,on,n);
+    });
+    h+='</svg>';
+    $("bodyHost").innerHTML=h;
+    /* أسطورة مرقمة أسفل المجسم */
+    var lg=list.map(function(zz,i){ var on=sel.indexOf(zz.v)>-1;
+      return '<span class="lg'+(on?" on":"")+'" data-lz="'+zz.v+'"><b>'+(i+1)+'</b>'+(LANG==="ar"?(NM[zz.v]||zz.v):zz.v)+'</span>'; }).join("");
+    var lh=$("legend"); if(lh) lh.innerHTML='<div class="lgrid">'+lg+'</div>';
+  }
+  function zname(k){
+    var all=BM.front.concat(BM.back).filter(function(x){ return x.v===k; })[0];
+    if(!all) return k;
+    return LANG==="ar"?(NM[k]||k):k;
+  }
+  function paintPicked(){
+    var host=$("picked");
+    if(!AREAS.length){ host.innerHTML='<span class="empty">'+t("none")+'</span>'; return; }
+    host.innerHTML=AREAS.map(function(k){
+      return '<span class="p" data-a="'+k+'">'+zname(k)+'<b data-x="'+k+'">×</b></span>';
+    }).join("");
+  }
+  function toggleZone(k){
+    var i=AREAS.indexOf(k);
+    if(i>-1) AREAS.splice(i,1); else AREAS.push(k);
+    [].forEach.call(document.querySelectorAll(".zone"),function(el){ el.classList.toggle("on",AREAS.indexOf(el.getAttribute("data-z"))>-1); });
+    [].forEach.call(document.querySelectorAll("#legend .lg"),function(el){ el.classList.toggle("on",AREAS.indexOf(el.getAttribute("data-lz"))>-1); });
+    [].forEach.call(document.querySelectorAll("#bodyHost .znc"),function(el,i){ });
+    paintPicked(); calc();
+  }
+
+  /* ---------- البحث ---------- */
+  function wireSearch(){
+    var inp=$("srch"), res=$("res");
+    inp.addEventListener("input",function(){
+      var q=inp.value.trim().toLowerCase();
+      if(!q){ res.classList.remove("on"); res.innerHTML=""; return; }
+      var all=[], seen0={};
+      BM[SIDE].concat(BM[SIDE==="front"?"back":"front"]).forEach(function(z){
+        if(seen0[z.v]) return; seen0[z.v]=1;
+        all.push({k:z.v,n:zname(z.v)});
+      });
+      var hit=all.filter(function(x){ return x.n.toLowerCase().indexOf(q)>-1||x.k.toLowerCase().indexOf(q)>-1; });
+      var seen={}, out=[];
+      hit.forEach(function(x){ if(!seen[x.k]){ seen[x.k]=1; out.push(x); } });
+      res.innerHTML=out.length?out.slice(0,8).map(function(x){ return '<button data-add="'+x.k+'">'+x.n+'</button>'; }).join(""):'<button disabled style="color:#666">—</button>';
+      res.classList.add("on");
+    });
+    res.addEventListener("click",function(e){
+      var b=e.target.closest("[data-add]"); if(!b) return;
+      if(AREAS.indexOf(b.getAttribute("data-add"))<0) toggleZone(b.getAttribute("data-add"));
+      inp.value=""; res.classList.remove("on"); res.innerHTML="";
+    });
+    document.addEventListener("click",function(e){
+      if(!e.target.closest(".srch")) res.classList.remove("on");
+    });
+  }
+
+  /* ---------- الحساب ---------- */
+  function ready(){ return QS.every(function(q){ return A[q.k]>0; }); }
+  function pct(){
+    var s=0, c=0;
+    QS.forEach(function(q){ if(A[q.k]){ s+=A[q.k]; c++; } });
+    if(!c) return null;
+    var p=Math.round((c*5-s)/(c*4)*100);
+    /* مدة النوم: ٨ ساعات مثالية، كل ساعة نقص/زيادة تُخصم */
+    var pen=Math.min(20, Math.abs(8-DURV)*4);
+    p=Math.max(0,Math.min(100,p-pen));
+    return p;
+  }
+  function calc(){
+    var p=pct();
+    var v=$("sv"), l=$("sl"), s=$("scoreSub");
+    if(p===null){ v.textContent="—"; v.style.color="#8E8E99"; l.textContent=t("answered"); return; }
+    v.textContent=p+"%";
+    v.style.color=p>=80?"var(--ok)":p>=60?"var(--warn)":"var(--red)";
+    l.textContent=p>=80?t("ready"):p>=60?t("watch"):t("low");
+  }
+
+  /* ---------- الإرسال ---------- */
+  function encode(){
+    var o={v:2,n:($("nm").value||"").trim(),d:today(),w:{},sd:DURV,a:AREAS.slice(),t:($("nt").value||"").trim(),l:LANG,c:new Date().toISOString()};
+    QS.forEach(function(q){ o.w[q.k]=A[q.k]; });
+    return "QDW1."+btoa(unescape(encodeURIComponent(JSON.stringify(o)))).replace(/=+$/,"");
+  }
+  function toast(m){ var e=$("toast"); e.textContent=m; e.classList.add("on"); setTimeout(function(){ e.classList.remove("on"); },1900); }
+  var SEND=null;
+  window.__setSend=function(f){ SEND=f; };
+  window.__W={state:function(){ return {A:A,AREAS:AREAS,DURV:DURV,nt:$("nt").value,pct:pct()}; },
+    setName:function(v){ $("nm").value=v; $("nm").dispatchEvent(new Event("input",{bubbles:true})); },
+    name:function(){ return $("nm").value; }, toast:toast, ready:ready, pct:pct, reset:function(){ A={};AREAS=[];DURV=8;$("nt").value="";buildQs();buildBody();paintPicked();calc(); } };
+  function go(){
+    if(!$("nm").value.trim()){ toast(t("needName")); $("nm").focus(); return; }
+    if(!ready()){ toast(t("needAns")); return; }
+    if(SEND&&SEND()) return;
+    var code=encode();
+    $("code").textContent=code; $("outc").classList.add("on");
+    try{ var k="qdw_outbox"; var a=JSON.parse(localStorage.getItem(k)||"[]"); a.push(code); localStorage.setItem(k,JSON.stringify(a)); }catch(e){}
+    toast(t("saved"));
+    $("outc").scrollIntoView({behavior:"smooth",block:"center"});
+  }
+
+  /* ---------- اللغة ---------- */
+  function setLang(l){
+    LANG=l;
+    document.documentElement.lang=l; document.documentElement.dir=l==="ar"?"rtl":"ltr";
+    [].forEach.call(document.querySelectorAll(".lang button"),function(b){ b.classList.toggle("on",b.getAttribute("data-l")===l); });
+    $("ttl").textContent=t("ttl"); $("hsub").textContent=t("sub"); $("lbName").textContent=t("lbName");
+    $("nm").placeholder=t("nmPh"); $("dtsub").textContent=t("today");
+    $("saT").textContent=t("saT"); $("saH").textContent=t("saH");
+    $("fbF").textContent=t("front"); $("fbB").textContent=t("back");
+    $("srch").placeholder=t("srchPh"); $("go").textContent=t("save"); $("rs").textContent=t("clr");
+    $("ntT").textContent=t("ntT"); $("ntH").textContent=t("ntH"); $("nt").placeholder=t("ntPh");
+    $("outT").textContent=t("outT"); $("outH").textContent=t("outH");
+    $("cp").textContent=t("copy"); $("wa").textContent=t("whats");
+    var curName=$("nm").value;
+    buildQs(); buildBody(); paintPicked(); calc();
+    $("nm").value=curName;
+    try{ localStorage.setItem("qdw_lang",l); }catch(e){}
+  }
+
+  /* ---------- التهيئة ---------- */
+  function init(){
+    $("dtv").textContent=today();
+    try{
+      var l=localStorage.getItem("qdw_lang"); if(l==="en"||l==="ar") LANG=l;
+      var n=localStorage.getItem("qdw_name"); if(n) $("nm").value=n;
+    }catch(e){}
+    [].forEach.call(document.querySelectorAll(".lang button"),function(b){
+      b.onclick=function(){ setLang(b.getAttribute("data-l")); };
+    });
+    $("nm").addEventListener("input",function(){
+      var v=$("nm").value.trim();
+      $("hname").textContent=v||(LANG==="ar"?"لاعب القادسية":"Qadsiah player");
+      $("av").textContent=v?v.charAt(0).toUpperCase():"Q";
+      try{ localStorage.setItem("qdw_name",v); }catch(e){}
+    });
+    [].forEach.call(document.querySelectorAll(".frontback button"),function(b){
+      b.onclick=function(){
+        SIDE=b.getAttribute("data-side");
+        [].forEach.call(document.querySelectorAll(".frontback button"),function(x){ x.classList.toggle("on",x===b); });
+        buildBody();
+      };
+    });
+    $("bodyHost").addEventListener("click",function(e){
+      var z=e.target.closest(".zone"); if(!z) return;
+      toggleZone(z.getAttribute("data-z"));
+    });
+    $("legend").addEventListener("click",function(e){
+      var s=e.target.closest("[data-lz]"); if(!s) return;
+      toggleZone(s.getAttribute("data-lz"));
+    });
+    $("picked").addEventListener("click",function(e){
+      var x=e.target.closest("[data-x]"); if(x){ toggleZone(x.getAttribute("data-x")); return; }
+      var p=e.target.closest("[data-a]"); if(p){ toggleZone(p.getAttribute("data-a")); }
+    });
+    $("go").onclick=go;
+    $("rs").onclick=function(){
+      A={}; AREAS=[]; DURV=8; $("nt").value=""; $("outc").classList.remove("on");
+      try{ localStorage.removeItem("qdw_name"); $("nm").value=""; $("hname").textContent=LANG==="ar"?"لاعب القادسية":"Qadsiah player"; $("av").textContent="Q"; }catch(e){}
+      buildQs(); buildBody(); paintPicked(); calc();
+    };
+    $("cp").onclick=function(){
+      var v=$("code").textContent, ta=document.createElement("textarea");
+      ta.value=v; document.body.appendChild(ta); ta.select();
+      try{ document.execCommand("copy"); }catch(e){}
+      ta.remove();
+      if(navigator.clipboard) navigator.clipboard.writeText(v).catch(function(){});
+      $("cp").textContent=t("copied"); setTimeout(function(){ $("cp").textContent=t("copy"); },1500);
+    };
+    $("wa").onclick=function(){
+      var p=pct()||0;
+      var msg=(LANG==="ar"?"الاستبيان اليومي":"Daily wellness")+" — "+$("nm").value+"\n"+
+        (LANG==="ar"?"الجاهزية":"Readiness")+": "+p+"%\n"+encode();
+      window.open("https://wa.me/?text="+encodeURIComponent(msg),"_blank");
+    };
+    wireSearch(); setLang(LANG);
+    $("hname").textContent=$("nm").value||(LANG==="ar"?"لاعب القادسية":"Qadsiah player");
+  }
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",init,{once:true}); else init();
+})();
+</script>
+<div id="pickOv" style="position:fixed;inset:0;z-index:99999;background:#0B0B0D;display:none;flex-direction:column">
+  <div style="display:flex;align-items:center;gap:10px;padding:14px;border-bottom:1px solid #2A2A31">
+    <b style="font:800 15px inherit;flex:1" id="pvT">اختر اسمك</b>
+    <button id="pvX" style="width:34px;height:34px;border-radius:10px;background:#1D1D22;border:1px solid #2A2A31;color:#F4F4F6;font-size:15px">✕</button>
+  </div>
+  <div style="padding:12px"><input id="pvQ" placeholder="ابحث بالاسم أو الرقم…" style="width:100%;background:#16161A;border:1px solid #2A2A31;border-radius:12px;color:#F4F4F6;font:700 13px inherit;padding:11px 13px;outline:0"></div>
+  <div id="pvList" style="flex:1;overflow-y:auto;padding:0 12px 24px;display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:9px;align-content:start"></div>
+</div>
+<div id="pairOv" style="position:fixed;inset:0;z-index:99999;background:#0B0B0D;display:none;flex-direction:column;padding:18px">
+  <b style="font:800 15px inherit;margin-bottom:8px">ربط الجوال بالبرنامج</b>
+  <p style="font:600 12px inherit;color:#8E8E99;line-height:1.7;margin:0 0 14px">افتح الرابط الذي أرسله لك الأخصائي من البرنامج، أو الصق رمز الربط هنا مرة واحدة فقط.</p>
+  <textarea id="pairIn" placeholder="الصق رمز الربط (يبدأ بـ QDP1)" style="width:100%;min-height:110px;background:#16161A;border:1px solid #2A2A31;border-radius:12px;color:#F4F4F6;font:600 11px ui-monospace,monospace;padding:12px;direction:ltr;text-align:left"></textarea>
+  <button id="pairGo" style="margin-top:12px;border:0;border-radius:13px;padding:14px;font:900 13.5px inherit;background:var(--red);color:#fff">ربط الآن</button>
+  <div id="pairMsg" style="margin-top:10px;font:800 11.5px inherit;color:#FF9F0A"></div>
+</div>
+
+
+
+<script>
+/* QD-MOBILE · اختيار اللاعب بالصور + الإرسال المباشر إلى البرنامج */
+(function(){
+  var CFG=null, SEL=null, CK="qdw_cfg_v5", OUT="qdw_queue_v5";
+  function $(i){ return document.getElementById(i); }
+  function ls(k,d){ try{ var v=localStorage.getItem(k); return v?JSON.parse(v):d; }catch(e){ return d; } }
+  function ss(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} }
+  function tst(m,c){
+    var e=$("toast"); if(!e) return;
+    e.textContent=m; if(c) e.style.background=c;
+    e.style.color=(c==="#34C759")?"#fff":"#111";
+    e.classList.add("on");
+    setTimeout(function(){ e.classList.remove("on"); },2400);
+  }
+  function parseCode(v){
+    var raw=String(v||"").replace(/^QDP1[.]?/,"").replace(/-/g,"+").replace(/_/g,"/");
+    while(raw.length%4) raw+="=";
+    var obj=JSON.parse(decodeURIComponent(escape(atob(raw))));
+    if(!obj||!obj.p) throw new Error("bad");
+    return obj;
+  }
+  function loadCfg(){
+    var h="";
+    try{ h=String(window.__QDSVHASH||location.hash||"").replace(/^#/,""); }catch(e){}
+    if(!/c=/.test(h)){ var _m=/[?&]c=([^&]+)/.exec(location.search||""); if(_m) h="c="+_m[1]; }
+    var m=/c=([^&]+)/.exec(h);
+    if(m){
+      try{
+        var o=parseCode(decodeURIComponent(m[1]));
+        ss(CK,o); CFG=o;
+        try{ history.replaceState(null,"",location.pathname+location.search); }catch(e){}
+      }catch(e){}
+    }
+    if(!CFG) CFG=ls(CK,null);
+    return CFG;
+  }
+  function renderList(q){
+    var host=$("pvList"); if(!host) return;
+    if(!CFG){ host.innerHTML='<div style="grid-column:1/-1;color:#8E8E99;font:700 12px inherit;padding:18px;text-align:center;line-height:1.8">لم يتم ربط الجوال بالبرنامج بعد.<br>اطلب رابط الاستبيان من الأخصائي.</div>'; return; }
+    q=String(q||"").trim().toLowerCase();
+    var ps=(CFG.p||[]).filter(function(p){
+      if(!q) return true;
+      return String(p.n||"").toLowerCase().indexOf(q)>-1 || String(p.num||"").indexOf(q)>-1;
+    });
+    host.innerHTML=ps.map(function(p){
+      var on=String(SEL)===String(p.id);
+      return '<button data-pid="'+p.id+'" style="background:#16161A;border:'+(on?'2px solid #E2342C':'1px solid #2A2A31')+';border-radius:14px;padding:8px 6px;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;color:#F4F4F6;font:inherit">'+
+        (p.ph?'<img src="'+p.ph+'" style="width:100%;aspect-ratio:1;object-fit:cover;border-radius:11px" alt="">':
+              '<span style="width:100%;aspect-ratio:1;border-radius:11px;background:#26262E;display:grid;place-items:center;font:900 22px inherit;color:#8E8E99">'+String(p.n||"?").charAt(0)+'</span>')+
+        '<span style="font:800 10.5px inherit;line-height:1.3;text-align:center;width:100%;overflow:hidden;white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;min-height:26px">'+String(p.n||"")+'</span>'+
+        (p.num?'<span style="font:800 9px inherit;color:#8E8E99">#'+p.num+'</span>':'')+
+      '</button>';
+    }).join("") || '<div style="grid-column:1/-1;color:#8E8E99;font:700 12px inherit;padding:18px;text-align:center">لا نتائج</div>';
+  }
+  function openPick(){ renderList($("pvQ")?$("pvQ").value:""); $("pickOv").style.display="flex"; if($("pvQ")) $("pvQ").value=""; }
+  function selectPlayer(id){
+    if(!CFG) return;
+    var p=(CFG.p||[]).filter(function(x){ return String(x.id)===String(id); })[0];
+    if(!p) return;
+    SEL=p.id;
+    try{ window.__W.setName(p.n); }catch(e){}
+    $("pbNm").textContent=p.n+(p.num?" · #"+p.num:"");
+    $("pbNm").style.color="#F4F4F6";
+    $("pbAv").innerHTML=p.ph?('<img src="'+p.ph+'" style="width:100%;height:100%;object-fit:cover">'):String(p.n).charAt(0);
+    $("pvT").textContent="اللاعب: "+p.n;
+    $("pickOv").style.display="none";
+  }
+  function endpoint(){
+    if(!CFG||!CFG.u) return null;
+    var u=String(CFG.u); while(u.charAt(u.length-1)==="/") u=u.slice(0,-1);
+    return u+"/rest/v1/"+(CFG.t||"wellness");
+  }
+  function payload(){
+    var s=window.__W.state(), d=new Date();
+    return {player_id:String(SEL),player_name:$("nm").value,
+      date:d.toISOString().slice(0,10),
+      sleep:s.A.sleep||null,fatigue:s.A.fatigue||null,soreness:s.A.soreness||null,
+      stress:s.A.stress||null,mood:s.A.mood||null,
+      sleep_hours:s.DURV,areas:(s.AREAS||[]).join(","),note:s.nt||"",
+      readiness:s.pct,client_ts:d.toISOString(),source:"mobile"};
+  }
+  function hdr(){ var h={"Content-Type":"application/json","Prefer":"return=minimal","apikey":CFG.k}; if(/^eyJ/.test(String(CFG.k||""))) h.Authorization="Bearer "+CFG.k; return h; }
+  function send(o){
+    var url=endpoint(); if(!url) return Promise.reject(new Error("noconf"));
+    return fetch(url,{method:"POST",headers:hdr(),body:JSON.stringify(o)})
+      .then(function(r){ if(!r.ok) throw new Error("http"+r.status); return true; });
+  }
+  function queue(o){ var q=ls(OUT,[]); q.push(o); ss(OUT,q); }
+  function flush(){
+    var q=ls(OUT,[]); if(!q.length||!endpoint()) return;
+    (function step(){
+      var o=q.shift(); if(!o) return;
+      send(o).then(function(){ ss(OUT,q); }).catch(function(){ q.unshift(o); ss(OUT,q); return; })
+        .then(function(){ setTimeout(step,150); });
+    })();
+  }
+  function hookSend(){
+    if(!endpoint()) return false;
+    if(!SEL){ openPick(); tst("اختر اسمك أولًا من القائمة"); return true; }
+    var o=payload();
+    tst("جارٍ الإرسال…");
+    send(o).then(function(){
+      tst("تم الإرسال إلى البرنامج ✓","#34C759");
+      try{ window.__W.reset(); }catch(e){}
+      try{ $("pbNm").textContent="اختر اسمك من القائمة"; $("pbNm").style.color="#8E8E99"; $("pbAv").textContent="?"; SEL=null; }catch(e){}
+    }).catch(function(){
+      queue(o);
+      tst("لا إنترنت أو لم يُقبل الآن — حُفظ وسيُرسل تلقائيًا","#FF9F0A");
+    });
+    return true;
+  }
+  function init(){
+    loadCfg();
+    $("pickBtn").onclick=openPick;
+    $("pvX").onclick=function(){ $("pickOv").style.display="none"; };
+    $("pvQ").oninput=function(){ renderList($("pvQ").value); };
+    $("pvList").addEventListener("click",function(e){
+      var b=e.target.closest("[data-pid]"); if(b) selectPlayer(b.getAttribute("data-pid"));
+    });
+    $("pairGo").onclick=function(){
+      var v=($("pairIn").value||"").trim();
+      if(!v){ $("pairMsg").textContent="الصق رمز الربط أولًا."; return; }
+      try{
+        var o=parseCode(v);
+        ss(CK,o); CFG=o; $("pairOv").style.display="none"; $("pairMsg").textContent="";
+        tst("تم الربط بالبرنامج ✓","#34C759");
+        openPick(); flush();
+      }catch(e){ $("pairMsg").textContent="رمز غير صالح — انسخه كاملًا من البرنامج."; }
+    };
+    window.__setSend(hookSend);
+    if(CFG) flush(); else setTimeout(function(){ tst("لم يُربط الجوال بعد — اطلب رابط الاستبيان من الأخصائي"); },600);
+    window.addEventListener("online",flush);
+    setInterval(flush,20000);
+  }
+  window.QDP={cfg:function(){ return CFG; },pick:openPick,flush:flush,parse:parseCode,
+    linkWith:function(o){ var raw=encodeURIComponent("QDP1."+btoa(unescape(encodeURIComponent(JSON.stringify(o)))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,""));
+      return location.href.replace(/[#?].*$/,"")+"#c="+raw; }};
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",function(){ setTimeout(init,60); },{once:true});
+  else setTimeout(init,60);
+})();
+</script>
+
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
+</html>
