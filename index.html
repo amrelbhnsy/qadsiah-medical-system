@@ -35139,7 +35139,7 @@ tr:hover .qde-ndate{color:#7E0E14}
 
   function badge(){
     try{ var b=document.getElementById("qdrBadge"); if(!b) return;
-      var w="v11-340 · KEYS-LINK";
+      var w="v11-341 · INSERT-OK";
       if(b.textContent!==w+" · BTN-OK") b.textContent=w+" · BTN-OK"; }catch(e){}
   }
 
@@ -39713,7 +39713,8 @@ tr:hover .qde-ndate{color:#7E0E14}
           var s=ST(); if(!s) return 0;
           if(!Array.isArray(s.wellness)) s.wellness=[];
           var added=0;
-          rows.forEach(function(w){
+          rows=rows.filter(function(w){ return String(w.player_id||"").indexOf("__")!==0; });
+        rows.forEach(function(w){
             var pid=String(w.player_id||w.playerId||""), day=String(w.date||"").slice(0,10);
             if(!pid||!day) return;
             var has=s.wellness.some(function(x){ return x&&String(x.playerId)===pid&&String(x.date||"").slice(0,10)===day; });
@@ -48109,17 +48110,12 @@ tr:hover .qde-ndate{color:#7E0E14}
         var probe={player_id:"__conn_test__",player_name:"اختبار الاتصال",date:new Date().toISOString().slice(0,10),
           sleep:3,fatigue:3,soreness:3,stress:3,mood:3,sleep_hours:8,areas:"",note:"حذف تلقائي",readiness:0,
           client_ts:new Date().toISOString(),source:"conn-test"};
-        return fetch(root,{method:"POST",headers:hdr(k,{"Content-Type":"application/json","Prefer":"return=representation"}),body:JSON.stringify(probe)})
+        return fetch(root,{method:"POST",headers:hdr(k,{"Content-Type":"application/json","Prefer":"return=minimal"}),body:JSON.stringify(probe)})
           .then(function(r){
-            if(r.ok||r.status===201){
+            if(r.ok||r.status===201||r.status===204){
               logLine("   ✓ الإدراج مقبول — الجوال سيتمكن من الإرسال.","ok");
-              return r.text().then(function(t){
-                var id=null; try{ var j=JSON.parse(t); id=j&&j[0]&&j[0].id; }catch(e){}
-                if(id==null){ logLine("   (تعذّر حذف سجل الاختبار — احذفه يدويًا: player_id = __conn_test__)","warn"); return; }
-                return fetch(root+"?id=eq."+id,{method:"DELETE",headers:hdr(k)}).then(function(d){
-                  logLine(d.ok?"   ✓ حُذف سجل الاختبار.":"   (تعذّر الحذف — احذفه من Table Editor)","ok");
-                });
-              });
+              logLine("   (سجل اختبار واحد باسم __conn_test__ يبقى في الجدول — يُهمَل تلقائيًا عند السحب)","");
+              return "posted";
             }
             return r.text().then(function(t){
               var m=String(t||"");
@@ -48153,6 +48149,7 @@ tr:hover .qde-ndate{color:#7E0E14}
       .then(function(rows){
         if(!Array.isArray(rows)) throw new Error("شكل غير متوقع");
         var ok=0;
+        rows=rows.filter(function(w){ return String(w.player_id||"").indexOf("__")!==0; });
         rows.forEach(function(w){
           try{
             if(typeof window.QD320!=="undefined"&&window.QD320.addWell){
@@ -48163,7 +48160,10 @@ tr:hover .qde-ndate{color:#7E0E14}
             }
           }catch(e){}
         });
-        if(m) m.textContent="تم سحب "+ok+" إجابة"+(ok?" — ظهرت في مركز الحالة":"")+(rows.length>ok?(" · "+rows.length+" صف مقروء"):"");
+        if(m){
+          if(!rows.length) m.textContent="لم تُقرأ أي إجابة — القراءة تتطلب تسجيل الدخول للحساب السحابي في البرنامج (وضع «البيانات المحلية» لا يقرأ).";
+          else m.textContent="تم سحب "+ok+" إجابة"+(ok?" — ظهرت في مركز الحالة":"")+(rows.length>ok?(" · "+rows.length+" صف مقروء"):"");
+        }
         try{ if(typeof window.__QDAPP.save==="function") window.__QDAPP.save(); }catch(e){}
       })
       .catch(function(e){ if(m) m.textContent="✕ فشل السحب: "+String(e.message||e)+" (تحقق من الجدول والسياسات)"; });
