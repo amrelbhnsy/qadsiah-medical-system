@@ -2733,8 +2733,7 @@ REND.dashboard=function(){
 
 };
 on("goTherapy",()=>showView("therapy")); on("goActivities",()=>showView("activities"));
-on("newInjury",()=>openInjuryForm(null)); try{ window.openInjuryDetail=openInjuryDetail; }catch(e){}
-on("openInjury",d=>openInjuryDetail(d.id)); on("openPlayer",d=>openPlayerProfile(d.id));
+on("newInjury",()=>openInjuryForm(null)); on("openInjury",d=>openInjuryDetail(d.id)); on("openPlayer",d=>openPlayerProfile(d.id));
 
 /* ================= PLAYERS ================= */
 let pFilter={q:"",pos:"",status:""};
@@ -35139,7 +35138,7 @@ tr:hover .qde-ndate{color:#7E0E14}
 
   function badge(){
     try{ var b=document.getElementById("qdrBadge"); if(!b) return;
-      var w="v11-310 · EDIT-ORIGINAL+SAVE";
+      var w="v11-311 · ONE-EDIT-BTN";
       if(b.textContent!==w+" · BTN-OK") b.textContent=w+" · BTN-OK"; }catch(e){}
   }
 
@@ -46936,9 +46935,9 @@ tr:hover .qde-ndate{color:#7E0E14}
 (function(){
   if(window.__qd308) return; window.__qd308=1;
   var CSS=[
-   '.qd308b{border:1px solid #E4E0D6;background:#fff;color:#5B6472;border-radius:7px;font:900 9.5px/1 inherit;padding:3px 6px;cursor:pointer;margin-inline-start:3px;vertical-align:middle;width:auto !important;min-width:0 !important;white-space:nowrap;display:inline-block;flex:none}',
+   '.qd308b{border:1px solid #E4E0D6;background:#fff;color:#5B6472;border-radius:8px;font:900 11px inherit;padding:3px 8px;cursor:pointer;margin-inline-start:4px}',
    '.qd308b:hover{border-color:#8E1015;color:#8E1015}',
-   '.qd308b.main{background:#8E1015;color:#fff;border-color:#8E1015;font-size:9px;padding:3px 6px;width:auto !important;white-space:nowrap}',
+   '.qd308b.main{background:#8E1015;color:#fff;border-color:#8E1015}',
    '.qd308b.main:hover{background:#6E0C10;border-color:#6E0C10;color:#fff}'
   ].join("");
   function css(){ if(document.getElementById("qd308css")) return; var st=document.createElement("style"); st.id="qd308css"; st.textContent=CSS; document.head.appendChild(st); }
@@ -46958,48 +46957,38 @@ tr:hover .qde-ndate{color:#7E0E14}
   }
   window.QD308_actEdit=actEdit;
   /* فتح ملف الإصابة الأصلي من أي مصدر متاح في الشاشة الحالية */
-  /* النموذج الكامل = مسار «تعديل» الأصلي (openInjuryForm) — بلا أي زر «تقرير» */
-  function probeFire(act,id){
-    var b=document.createElement("button");
-    b.type="button"; b.tabIndex=-1;
-    b.style.cssText="position:fixed;left:-9999px;top:-9999px;width:1px;height:1px;opacity:0";
-    b.setAttribute("data-act",act); if(id) b.setAttribute("data-id",id);
-    document.body.appendChild(b);
-    try{ b.click(); }catch(e){}
-    setTimeout(function(){ try{ b.remove(); }catch(e){} },80);
+  function openViaFile(id){
+    var sels=['[data-qc224="report"][data-i="'+id+'"]','[data-act="openInjury"][data-id="'+id+'"]',
+              '[data-rep][data-id="'+id+'"]','[data-repdl][data-id="'+id+'"]','[data-reph][data-id="'+id+'"]'];
+    for(var i=0;i<sels.length;i++){
+      var el=document.querySelector(sels[i]);
+      if(el){ try{ el.click(); }catch(e){}
+        var n=0;
+        (function go(){
+          var ed=detailBtn(id);
+          if(ed){ try{ ed.click(); }catch(e){} return; }
+          var mc=document.getElementById("modalCard");
+          if(mc&&mc.querySelector('[data-f="type"]')&&mc.querySelector('[data-act="saveInjury"]')) return;
+          if(n++<16) return setTimeout(go,120);
+          try{ if(window.QD306&&window.QD306.open) window.QD306.open(id); }catch(e){}
+        })();
+        return true;
+      }
+    }
+    return false;
   }
-  function fullFormOpen(){
-    var mc=document.getElementById("modalCard");
-    if(!mc) return false;
-    return !!(mc.querySelector('[data-act="saveInjury"]')&&mc.querySelector('[data-f="type"]'));
-  }
-  /* تعبئة الحقول المتداخلة الناقصة — النموذج الأصلي يقرأ contact.fromContact وغيرها */
-  function ensureShape(id){
-    try{
-      var S=(window.__QDAPP&&window.__QDAPP.S)||{};
-      var i=(S.injuries||[]).filter(function(x){ return String(x.id)===String(id); })[0];
-      if(!i) return false;
-      ["contact","recurrence","football","sanction","exam","signoff","plan"].forEach(function(k){
-        if(!i[k]||typeof i[k]!=="object") i[k]={};
-      });
-      if(!Array.isArray(i.treatments)) i.treatments=[];
-      if(!Array.isArray(i.history)) i.history=[];
-      if(i.status==null) i.status="unable";
-      if(i.date==null) i.date=new Date().toISOString().slice(0,10);
-      return true;
-    }catch(e){ return false; }
-  }
-  window.QD309_ensureShape=ensureShape;
   function openFull(id){
-    ensureShape(id);
-    try{ if(typeof window.openInjuryForm==="function"){ window.openInjuryForm(id); if(fullFormOpen()) return true; } }catch(e){}
-    ensureShape(id);
-    try{ if(typeof window.openInjuryForm==="function"){ window.openInjuryForm(id); if(fullFormOpen()) return true; } }catch(e){}
-    probeFire("editInjury",id);
-    setTimeout(function(){
-      if(fullFormOpen()) return;
-      try{ if(window.QD306&&window.QD306.open) window.QD306.open(id); }catch(e){}
-    },700);
+    if(actEdit(id)) return true;
+    if(openViaFile(id)) return true;
+    /* المسار الأصلية للنموذج الكامل: نفس مسار زر «تعديل» داخل ملف الإصابة */
+    var probe=document.createElement("button");
+    probe.type="button"; probe.tabIndex=-1;
+    probe.style.cssText="position:fixed;left:-9999px;top:-9999px;width:1px;height:1px;opacity:0";
+    probe.setAttribute("data-act","editInjury"); probe.setAttribute("data-id",id);
+    document.body.appendChild(probe);
+    try{ probe.click(); }catch(e){}
+    setTimeout(function(){ try{ probe.remove(); }catch(e){} },60);
+    /* تحقق: إن لم يظهر النموذج الكامل، افتح عبر ملف الإصابة ثم زر التعديل */
     return true;
   }
   window.QD308={openFull:openFull};
@@ -47016,7 +47005,7 @@ tr:hover .qde-ndate{color:#7E0E14}
         var old=host.querySelector('.qd306b[data-for="'+id+'"]');
         var main=document.createElement("button");
         main.type="button"; main.className="qd308b main"; main.setAttribute("data-main",id);
-        main.textContent="✎ تعديل"; main.title="فتح ملف الإصابة الأصلي للتعديل الكامل";
+        main.textContent="✎ تعديل الملف الكامل"; main.title="فتح ملف الإصابة الأصلي للتعديل الكامل";
         main.onclick=function(ev){ ev.preventDefault(); ev.stopPropagation(); openFull(id); };
         var q=document.createElement("button");
         q.type="button"; q.className="qd308b"; q.setAttribute("data-quick",id);
@@ -47052,26 +47041,60 @@ tr:hover .qde-ndate{color:#7E0E14}
 </script>
 <script>
 /*!
- * QD310 · SAVE-BRIDGE — يجعل «حفظ الإصابة» في نموذج التعديل الأصلي يحفظ فعلاً
- *  يقرأ كل حقول النموذج ([data-f]) ويكتبها في سجل الإصابة: الجذر، أو الحقل المتداخل الذي ينتمي إليه.
- *  ثم يغلق النافذة ويحدّث الشاشة — دون الاعتماد على المعالج الأصلي الذي يتعطّل على سجلات ناقصة.
+ * QD311 · ONE-EDIT-BTN
+ *  زر تعديل واحد فقط في سجل الإصابات: «✎ تعديل» يفتح نموذج الإصابة الأصلي (تعديل).
+ *  ويُحذف الزر المختصر ⚡ نهائيًا (كان نفس الوظيفة). ويُحفظ التعديل فعليًا عبر جسر الحفظ.
  */
 (function(){
-  if(window.__qd310) return; window.__qd310=1;
+  if(window.__qd311) return; window.__qd311=1;
   function S(){ try{ var a=window.__QDAPP; if(a&&a.S) return a.S; }catch(e){} return null; }
   function persist(){ try{ if(window.__QDAPP&&window.__QDAPP.save){ window.__QDAPP.save(); return; } }catch(e){}
     try{ if(typeof window.save==="function") window.save(); }catch(e){} }
   function toast(m,k){ try{ if(typeof window.toast==="function") window.toast(m,k); }catch(e){} }
   function closeM(){ try{ if(typeof window.closeModal==="function"){ window.closeModal(); return; } }catch(e){}
-    var mc=document.getElementById("modalCard"); if(mc){ mc.style.display="none"; } }
+    var mc=document.getElementById("modalCard"); if(mc) mc.style.display="none"; }
   function refresh(){ try{ var v=window.current||"injuries"; if(typeof window.showView==="function") window.showView(v); }catch(e){} }
 
+  /* ---------- ١) تطبيع السجل قبل فتح النموذج (يمنع انهيار fromContact) ---------- */
+  function ensureShape(id){
+    try{
+      var s=S()||{};
+      var i=(s.injuries||[]).filter(function(x){ return String(x.id)===String(id); })[0];
+      if(!i) return false;
+      ["contact","recurrence","football","sanction","exam","signoff","plan"].forEach(function(k){
+        if(!i[k]||typeof i[k]!=="object") i[k]={}; });
+      if(!Array.isArray(i.treatments)) i.treatments=[];
+      if(!Array.isArray(i.history)) i.history=[];
+      if(i.status==null) i.status="unable";
+      if(i.date==null) i.date=new Date().toISOString().slice(0,10);
+      return true;
+    }catch(e){ return false; }
+  }
+
+  /* ---------- ٢) فتح النموذج الأصلي الكامل ---------- */
+  function fullOpen(){ var mc=document.getElementById("modalCard");
+    return !!(mc&&mc.querySelector('[data-act="saveInjury"]')&&mc.querySelector('[data-f="type"]')); }
+  function openFull(id){
+    ensureShape(id);
+    try{ if(typeof window.openInjuryForm==="function"){ window.openInjuryForm(id); } }catch(e){}
+    if(fullOpen()) return true;
+    var probe=document.createElement("button"); probe.type="button"; probe.tabIndex=-1;
+    probe.style.cssText="position:fixed;left:-9999px;top:-9999px;opacity:0";
+    probe.setAttribute("data-act","editInjury"); probe.setAttribute("data-id",id);
+    document.body.appendChild(probe);
+    try{ probe.click(); }catch(e){}
+    setTimeout(function(){ try{ probe.remove(); }catch(e){} },80);
+    return fullOpen();
+  }
+  window.QD311={openFull:openFull,ensureShape:ensureShape};
+
+  /* ---------- ٣) جسر الحفظ ---------- */
   function setDeep(obj,key,val){
-    if(obj&&Object.prototype.hasOwnProperty.call(obj,key)) { obj[key]=val; return true; }
+    if(Object.prototype.hasOwnProperty.call(obj,key)){ obj[key]=val; return; }
     for(var k in obj){ if(!Object.prototype.hasOwnProperty.call(obj,k)) continue;
       var o=obj[k];
-      if(o&&typeof o==="object"&&!Array.isArray(o)&&Object.prototype.hasOwnProperty.call(o,key)){ o[key]=val; return true; } }
-    obj[key]=val; return false;
+      if(o&&typeof o==="object"&&!Array.isArray(o)&&Object.prototype.hasOwnProperty.call(o,key)){ o[key]=val; return; } }
+    obj[key]=val;
   }
   function collectAll(root){
     var v={};
@@ -47084,6 +47107,14 @@ tr:hover .qde-ndate{color:#7E0E14}
     });
     return v;
   }
+  var MAP={diagnosis:["exam","diagnosis"],causeGuess:["exam","causeGuess"],comments:["exam","comments"],
+    fromContact:["contact","fromContact"],object:["contact","object"],player:["contact","player"],c_notes:["contact","notes"],
+    recurrent:["recurrence","recurrent"],dateReturn:["recurrence","dateReturn"],
+    withWho:["football","withWho"],context:["football","context"],surface:["football","surface"],minutes:["football","minutes"],
+    s_type:["sanction","type"],s_off:["sanction","offender"],s_own:["sanction","own"],s_opp:["sanction","opp"],
+    ability:["signoff","ability"],expDays:["plan","expDays"],physioStart:["plan","physioStart"],medStart:["plan","medStart"],
+    rtpDate:["plan","rtpDate"],groupDate:["plan","groupDate"],healedDate:["plan","healedDate"],surgery:["plan","surgery"],
+    surgDate:["plan","surgDate"],stageNow:["plan","stageNow"]};
   function saveEdit(root,id){
     var s=S(); if(!s) return false;
     var rec=(s.injuries||[]).filter(function(x){ return String(x.id)===String(id); })[0];
@@ -47092,50 +47123,66 @@ tr:hover .qde-ndate{color:#7E0E14}
       if(!rec[k]||typeof rec[k]!=="object") rec[k]={}; });
     var v=collectAll(root), n=0;
     Object.keys(v).forEach(function(k){
-      if(k.indexOf("__")===0||k==="__id"||k==="__tid") return;
+      if(k.indexOf("__")===0) return;
       var val=v[k];
-      if(k==="bodySites"){ val=String(val||"").split(",").map(function(x){return x.trim();}).filter(Boolean); val=val.filter(function(x,i,a){ return a.indexOf(x)===i; }).join(","); }
+      if(k==="bodySites"){ val=String(val||"").split(",").map(function(x){return x.trim();}).filter(Boolean);
+        val=val.filter(function(x,i,a){ return a.indexOf(x)===i; }).join(","); }
       if(rec[k]!==undefined){ rec[k]=val; n++; return; }
-      if(setDeep(rec,k,val)) n++;
+      setDeep(rec,k,val); n++;
     });
-    /* ربط الحقول المتداخلة المعروفة (كما يقرأها التقرير) */
-    var MAP={diagnosis:["exam","diagnosis"],causeGuess:["exam","causeGuess"],comments:["exam","comments"],
-             fromContact:["contact","fromContact"],object:["contact","object"],player:["contact","player"],c_notes:["contact","notes"],
-             recurrent:["recurrence","recurrent"],dateReturn:["recurrence","dateReturn"],
-             withWho:["football","withWho"],context:["football","context"],surface:["football","surface"],minutes:["football","minutes"],f_notes:["football","notes"],
-             s_type:["sanction","type"],s_off:["sanction","offender"],s_own:["sanction","own"],s_opp:["sanction","opp"],
-             ability:["signoff","ability"],expDays:["plan","expDays"],physioStart:["plan","physioStart"],medStart:["plan","medStart"],
-             rtpDate:["plan","rtpDate"],groupDate:["plan","groupDate"],healedDate:["plan","healedDate"],surgery:["plan","surgery"],surgDate:["plan","surgDate"],
-             stageNow:["plan","stageNow"],exp_days:["plan","expDays"]};
     Object.keys(MAP).forEach(function(k){
       if(v[k]===undefined) return;
-      var path=MAP[k]; rec[path[0]]=rec[path[0]]||{}; rec[path[0]][path[1]]=v[k]; n++;
+      var p=MAP[k]; rec[p[0]]=rec[p[0]]||{}; rec[p[0]][p[1]]=v[k]; n++;
     });
-    if(v.__id) rec.id=id;
     rec.edited=new Date().toISOString();
-    try{
-      var pl=(s.players||[]).filter(function(p){ return String(p.id)===String(rec.playerId); })[0];
-      if(pl){ var st=String(rec.status||""); pl.status=(st==="cleared"?"سليم":"مصاب"); }
-    }catch(e){}
+    try{ var pl=(s.players||[]).filter(function(x){ return String(x.id)===String(rec.playerId); })[0];
+      if(pl) pl.status=(String(rec.status)==="cleared"?"سليم":"مصاب"); }catch(e){}
     persist();
     try{ if(window.QD304&&window.QD304.sweep) window.QD304.sweep(); }catch(e){}
-    closeM(); refresh();
-    toast("تم حفظ التعديل ("+n+" حقلًا)","ok");
+    closeM(); refresh(); toast("تم حفظ التعديل ("+n+" حقلًا)","ok");
     return true;
   }
-  window.QD310={saveEdit:saveEdit,collectAll:collectAll};
+  window.QD311.saveEdit=saveEdit;
 
-  /* اعتراض زر الحفظ داخل نموذج التعديل فقط (وجود __id) */
   document.addEventListener("click",function(e){
     var t=e.target&&e.target.closest?e.target.closest('[data-act="saveInjury"]'):null;
     if(!t) return;
     var root=document.getElementById("modalCard"); if(!root) return;
     var hid=root.querySelector('[data-f="__id"]');
-    var id=hid&&hid.value; if(!id) return;              /* إصابة جديدة: نترك المعالج الأصلي */
+    if(!hid||!hid.value) return;                       /* إصابة جديدة → المعالج الأصلي */
     if(!root.querySelector('[data-f="playerId"]')) return;
     e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
-    saveEdit(root,id);
+    saveEdit(root,hid.value);
   },true);
+
+  /* ---------- ٤) زر تعديل واحد + إزالة المكرر ---------- */
+  var CSS='.qd311b{border:1px solid #8E1015;background:#fff;color:#8E1015;border-radius:7px;'+
+          'font:900 10px/1 system-ui,Tahoma,sans-serif;padding:4px 7px;cursor:pointer;'+
+          'margin-inline-start:4px;width:auto!important;white-space:nowrap;display:inline-block;vertical-align:middle}'+
+          '.qd311b:hover{background:#8E1015;color:#fff}';
+  function css(){ if(document.getElementById("qd311css")) return; var st=document.createElement("style");
+    st.id="qd311css"; st.textContent=CSS; document.head.appendChild(st); }
+  function strip(){
+    Array.prototype.forEach.call(document.querySelectorAll('.qd306b,[data-qd306],[data-quick],.qd308b'),function(b){ b.remove(); });
+  }
+  function decorate(){
+    try{
+      css(); strip();
+      Array.prototype.forEach.call(document.querySelectorAll('[data-qc224="report"][data-i]'),function(el){
+        var id=el.getAttribute("data-i"); if(!id) return;
+        var host=el.parentNode; if(!host) return;
+        if(host.querySelector('.qd311b[data-for="'+id+'"]')) return;
+        var b=document.createElement("button");
+        b.type="button"; b.className="qd311b"; b.setAttribute("data-for",id);
+        b.textContent="✎ تعديل"; b.title="تعديل الإصابة — النموذج الأصلي الكامل";
+        b.onclick=function(ev){ ev.preventDefault(); ev.stopPropagation(); openFull(id); };
+        host.insertBefore(b, el.nextSibling);
+      });
+    }catch(e){}
+  }
+  setInterval(function(){ try{ decorate(); }catch(e){} },1300);
+  try{ new MutationObserver(function(){ clearTimeout(window.__qd311t);
+    window.__qd311t=setTimeout(decorate,200); }).observe(document.body,{childList:true,subtree:true}); }catch(e){}
 })();
 </script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
