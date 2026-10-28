@@ -1923,7 +1923,8 @@ function bodyMap(name,val){ const sel=String(val||"").split(",").filter(Boolean)
 try{ window.bodyMap=bodyMap; }catch(e){}
 try{ if(typeof I!=="undefined"){ if(!I.shield) I.shield=I.injury||I.warn; if(!I.search) I.search=I.injury||I.warn; } }catch(e){}
 document.addEventListener("click",e=>{ const z=e.target.closest(".bmz"); if(!z)return;
-  const wrap=z.closest("[data-f]"),v=z.dataset.v,arr=wrap.dataset.val?wrap.dataset.val.split(",").filter(Boolean):[];
+  const wrap=z.closest("[data-f]"); if(!wrap) return;
+  const v=z.dataset.v,arr=wrap.dataset.val?wrap.dataset.val.split(",").filter(Boolean):[];
   const i=arr.indexOf(v); if(i>-1)arr.splice(i,1); else arr.push(v);
   wrap.dataset.val=arr.join(","); wrap.querySelectorAll(".bmz").forEach(function(x){x.classList.toggle("on",arr.indexOf(x.dataset.v)>-1);});
   const lab=wrap.parentElement.querySelector("#bmSel"); if(lab)lab.textContent=arr.length?(T("bm_selected_lbl")+arr.map(site).join(" — ")):T("bm_none_sel"); });
@@ -13723,13 +13724,15 @@ function bind(){
   document.addEventListener("click",function(e){
     var it=e.target.closest(".mp-it");
     if(it){
-      var mp=it.closest(".mp"), v=it.dataset.v, arr=mp.dataset.val?mp.dataset.val.split("|").filter(Boolean):[];
+      var mp=it.closest(".mp"); if(!mp) return;
+      var v=it.dataset.v, arr=mp.dataset.val?mp.dataset.val.split("|").filter(Boolean):[];
       var i=arr.indexOf(v); if(i>-1){arr.splice(i,1);it.classList.remove("on");} else {arr.push(v);it.classList.add("on");}
       mp.dataset.val=arr.join("|"); paint(mp); return;
     }
     var x=e.target.closest("[data-x]");
     if(x){
-      var m=x.closest(".mp"), val=x.dataset.x, a=m.dataset.val?m.dataset.val.split("|").filter(Boolean):[];
+      var m=x.closest(".mp"); if(!m) return;
+      var val=x.dataset.x, a=m.dataset.val?m.dataset.val.split("|").filter(Boolean):[];
       var j=a.indexOf(val); if(j>-1)a.splice(j,1);
       m.dataset.val=a.join("|"); syncMP(m);
     }
@@ -35134,7 +35137,7 @@ tr:hover .qde-ndate{color:#7E0E14}
 
   function badge(){
     try{ var b=document.getElementById("qdrBadge"); if(!b) return;
-      var w="v11-307b · ANATOMY-ONE";
+      var w="v11-308b · EDIT-FULL";
       if(b.textContent!==w+" · BTN-OK") b.textContent=w+" · BTN-OK"; }catch(e){}
   }
 
@@ -46920,6 +46923,119 @@ tr:hover .qde-ndate{color:#7E0E14}
   setInterval(function(){ try{ tick(); }catch(e){} },1000);
   try{ new MutationObserver(function(){ clearTimeout(window.__qd307t); window.__qd307t=setTimeout(tick,150); }).observe(document.body,{childList:true,subtree:true}); }catch(e){}
   window.QD307={tick:tick,syncLegend:syncLegend,killDup:killDup};
+})();
+</script>
+<script>
+/*!
+ * QD308 · EDIT-FULL — زر «تعديل» يفتح ملف الإصابة الأصلي الكامل (لا نموذجًا مختصرًا)
+ *  المسار: يفتح ملف الإصابة ← يضغط «تعديل» الأصلي داخل الملف (نموذج الإصابة الكامل بكل حقوله).
+ *  ويُبقي «⚡ تحديث الحالة» اختياريًا للتحديث السريع فقط.
+ */
+(function(){
+  if(window.__qd308) return; window.__qd308=1;
+  var CSS=[
+   '.qd308b{border:1px solid #E4E0D6;background:#fff;color:#5B6472;border-radius:8px;font:900 11px inherit;padding:3px 8px;cursor:pointer;margin-inline-start:4px}',
+   '.qd308b:hover{border-color:#8E1015;color:#8E1015}',
+   '.qd308b.main{background:#8E1015;color:#fff;border-color:#8E1015}',
+   '.qd308b.main:hover{background:#6E0C10;border-color:#6E0C10;color:#fff}'
+  ].join("");
+  function css(){ if(document.getElementById("qd308css")) return; var st=document.createElement("style"); st.id="qd308css"; st.textContent=CSS; document.head.appendChild(st); }
+
+  function detailBtn(id){
+    return document.querySelector('#modalCard [data-act="editInjury"][data-id="'+id+'"]');
+  }
+  /* يفتح ملف الإصابة الأصلي ثم يضغط «تعديل» الأصلي داخله */
+  function actEdit(id){
+    try{
+      var act=null;
+      try{ if(typeof window.omAct==="function") act=window.omAct(); }catch(e){}
+      if(!act) act=window.ACT||null;
+      if(act&&typeof act.editInjury==="function"){ act.editInjury({act:"editInjury",id:id}); return true; }
+    }catch(e){}
+    return false;
+  }
+  window.QD308_actEdit=actEdit;
+  /* فتح ملف الإصابة الأصلي من أي مصدر متاح في الشاشة الحالية */
+  function openViaFile(id){
+    var sels=['[data-qc224="report"][data-i="'+id+'"]','[data-act="openInjury"][data-id="'+id+'"]',
+              '[data-rep][data-id="'+id+'"]','[data-repdl][data-id="'+id+'"]','[data-reph][data-id="'+id+'"]'];
+    for(var i=0;i<sels.length;i++){
+      var el=document.querySelector(sels[i]);
+      if(el){ try{ el.click(); }catch(e){}
+        var n=0;
+        (function go(){
+          var ed=detailBtn(id);
+          if(ed){ try{ ed.click(); }catch(e){} return; }
+          var mc=document.getElementById("modalCard");
+          if(mc&&mc.querySelector('[data-f="type"]')&&mc.querySelector('[data-act="saveInjury"]')) return;
+          if(n++<16) return setTimeout(go,120);
+          try{ if(window.QD306&&window.QD306.open) window.QD306.open(id); }catch(e){}
+        })();
+        return true;
+      }
+    }
+    return false;
+  }
+  function openFull(id){
+    if(actEdit(id)) return true;
+    if(openViaFile(id)) return true;
+    /* المسار الأصلية للنموذج الكامل: نفس مسار زر «تعديل» داخل ملف الإصابة */
+    var probe=document.createElement("button");
+    probe.type="button"; probe.tabIndex=-1;
+    probe.style.cssText="position:fixed;left:-9999px;top:-9999px;width:1px;height:1px;opacity:0";
+    probe.setAttribute("data-act","editInjury"); probe.setAttribute("data-id",id);
+    document.body.appendChild(probe);
+    try{ probe.click(); }catch(e){}
+    setTimeout(function(){ try{ probe.remove(); }catch(e){} },60);
+    /* تحقق: إن لم يظهر النموذج الكامل، افتح عبر ملف الإصابة ثم زر التعديل */
+    return true;
+  }
+  window.QD308={openFull:openFull};
+
+  function decorate(){
+    try{
+      css();
+      var s=(window.__QDAPP&&window.__QDAPP.S)||{};
+      /* (أ) صفوف سجل الإصابات: ✎ تعديل = النموذج الأصلي الكامل · ⚡ = تحديث سريع */
+      Array.prototype.forEach.call(document.querySelectorAll('[data-qc224="report"][data-i]'),function(el){
+        var id=el.getAttribute("data-i"); if(!id) return;
+        var host=el.parentNode; if(!host) return;
+        if(host.querySelector('.qd308b[data-main="'+id+'"]')) return;
+        var old=host.querySelector('.qd306b[data-for="'+id+'"]');
+        var main=document.createElement("button");
+        main.type="button"; main.className="qd308b main"; main.setAttribute("data-main",id);
+        main.textContent="✎ تعديل الملف الكامل"; main.title="فتح ملف الإصابة الأصلي للتعديل الكامل";
+        main.onclick=function(ev){ ev.preventDefault(); ev.stopPropagation(); openFull(id); };
+        var q=document.createElement("button");
+        q.type="button"; q.className="qd308b"; q.setAttribute("data-quick",id);
+        q.textContent="⚡"; q.title="تحديث سريع للحالة";
+        q.onclick=function(ev){ ev.preventDefault(); ev.stopPropagation(); try{ window.QD306.open(id); }catch(e){} };
+        if(old){ host.replaceChild(main, old); } else { host.insertBefore(main, el.nextSibling); }
+        if(!host.querySelector('[data-quick="'+id+'"]')) host.insertBefore(q, main.nextSibling);
+      });
+      /* (ب) لا نكرر داخل ملف الإصابة: التعديل الأصلي موجود — نضيف ⚡ فقط */
+      var mc=document.getElementById("modalCard");
+      if(mc){
+        Array.prototype.forEach.call(mc.querySelectorAll(".qd306b,[data-qd306]"),function(b){
+          if(b.closest('[data-qc224="report"]')||b.closest("tr")) return;
+          if(b.className.indexOf("qd306b")>-1) b.remove();
+        });
+        var ed=mc.querySelector('[data-act="editInjury"][data-id]');
+        if(ed){
+          var id=ed.getAttribute("data-id");
+          if(!mc.querySelector('[data-quick="'+id+'"]')){
+            var qb=document.createElement("button");
+            qb.type="button"; qb.className="qd308b"; qb.setAttribute("data-quick",id);
+            qb.textContent="⚡ تحديث الحالة السريع";
+            qb.onclick=function(ev){ ev.preventDefault(); ev.stopPropagation(); try{ window.QD306.open(id); }catch(e){} };
+            ed.parentNode.insertBefore(qb, ed.nextSibling);
+          }
+        }
+      }
+    }catch(e){}
+  }
+  setInterval(function(){ try{ decorate(); }catch(e){} },1200);
+  try{ new MutationObserver(function(){ clearTimeout(window.__qd308t); window.__qd308t=setTimeout(decorate,180); }).observe(document.body,{childList:true,subtree:true}); }catch(e){}
 })();
 </script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
