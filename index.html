@@ -35142,7 +35142,7 @@ tr:hover .qde-ndate{color:#7E0E14}
 
   function badge(){
     try{ var b=document.getElementById("qdrBadge"); if(!b) return;
-      var w="v11-345 · PER-PLAYER";
+      var w="v11-346 · READ-FIX";
       if(b.textContent!==w+" · BTN-OK") b.textContent=w+" · BTN-OK"; }catch(e){}
   }
 
@@ -39716,7 +39716,7 @@ tr:hover .qde-ndate{color:#7E0E14}
           var s=ST(); if(!s) return 0;
           if(!Array.isArray(s.wellness)) s.wellness=[];
           var added=0;
-          rows=rows.filter(function(w){ return String(w.player_id||"").indexOf("__")!==0; });
+          rows=rows.filter(function(w){ var id=String(w.player_id||""); return id.indexOf("__")!==0 && String(w.source||"")!=="conn-test" && String(w.source||"")!=="probe"; });
         rows.forEach(function(w){
             var pid=String(w.player_id||w.playerId||""), day=String(w.date||"").slice(0,10);
             if(!pid||!day) return;
@@ -48197,7 +48197,7 @@ tr:hover .qde-ndate{color:#7E0E14}
       .then(function(rows){
         if(!Array.isArray(rows)) throw new Error("شكل غير متوقع");
         var ok=0;
-        rows=rows.filter(function(w){ return String(w.player_id||"").indexOf("__")!==0; });
+        rows=rows.filter(function(w){ var id=String(w.player_id||""); return id.indexOf("__")!==0 && String(w.source||"")!=="conn-test" && String(w.source||"")!=="probe"; });
         rows.forEach(function(w){
           try{
             if(typeof window.QD320!=="undefined"&&window.QD320.addWell){
@@ -48209,8 +48209,18 @@ tr:hover .qde-ndate{color:#7E0E14}
           }catch(e){}
         });
         if(m){
-          if(!rows.length) m.textContent="لم تُقرأ أي إجابة — القراءة تتطلب تسجيل الدخول للحساب السحابي في البرنامج (وضع «البيانات المحلية» لا يقرأ).";
-          else m.textContent="تم سحب "+ok+" إجابة"+(ok?" — ظهرت في مركز الحالة":"")+(rows.length>ok?(" · "+rows.length+" صف مقروء"):"");
+          if(!rows.length){
+            m.innerHTML='<div style="color:#B45309;font:900 12px inherit;line-height:1.8">الإجابات موجودة في الجدول لكن <b>القراءة مقفلة</b> على المفتاح العام (سياسة RLS).<br>'+
+              'إصلاح لمرة واحدة: نفّذ في SQL Editor ثم اضغط السحب مرة أخرى.</div>'+
+              '<button id="q321fix" style="margin-top:6px;border:0;border-radius:8px;padding:7px 11px;background:#B45309;color:#fff;font:900 11px inherit;cursor:pointer">نسخ أمر الإصلاح</button>';
+            var fx=document.getElementById("q321fix");
+            if(fx) fx.onclick=function(){
+              var sql="create policy wellness_read_anon on wellness for select to anon using (true);";
+              var ta=document.createElement("textarea"); ta.value=sql; document.body.appendChild(ta); ta.select();
+              try{ document.execCommand("copy"); fx.textContent="✓ نُسخ — نفّذه في Supabase"; }catch(e){}
+              ta.remove();
+            };
+          } else m.textContent="تم سحب "+ok+" إجابة"+(ok?" — ظهرت في مركز الحالة":"")+(rows.length>ok?(" · "+rows.length+" صف مقروء"):"");
         }
         try{ if(typeof window.__QDAPP.save==="function") window.__QDAPP.save(); }catch(e){}
       })
