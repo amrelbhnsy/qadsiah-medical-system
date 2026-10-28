@@ -35139,7 +35139,7 @@ tr:hover .qde-ndate{color:#7E0E14}
 
   function badge(){
     try{ var b=document.getElementById("qdrBadge"); if(!b) return;
-      var w="v11-322 · LAB-TABS";
+      var w="v11-330 · ASSESS-MERGE";
       if(b.textContent!==w+" · BTN-OK") b.textContent=w+" · BTN-OK"; }catch(e){}
   }
 
@@ -47979,6 +47979,384 @@ tr:hover .qde-ndate{color:#7E0E14}
     var on=document.querySelector("#qd270tabs [data-q270t].on");
     return {tabs:tabs.length,active:on?on.getAttribute("data-q270t"):null,bodyLen:(document.querySelector("#qd270body")||{innerHTML:""}).innerHTML.length};
   }};
+})();
+</script>
+
+<script>
+/* QD330 · ASSESS-MERGE v11-330 — دمج أقسام التقييم والجاهزية (8 ← 4) + محرّك حساب مبني على الدراسات */
+(function(){
+  var K_SCREEN="qd330_screen", K_PSY="qd330_psy";
+  function $(i){ return document.getElementById(i); }
+  function esc(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+  function S(){ try{ return window.__QDAPP.S; }catch(e){ return {}; } }
+  function arr(k){ var v=S()[k]; return Array.isArray(v)?v:[]; }
+  function players(){ return arr("players").filter(function(p){ return p && !p.deleted; }); }
+  function pname(p){ return ((p.first||"")+" "+(p.last||"")).trim() || p.id; }
+  function pidOf(r){ return r&&(r.playerId||r.pid||r.player_id||r.player||""); }
+  function dtOf(r){ return String((r&&(r.date||r.d||r.day||r.dt||r.ts))||"").slice(0,10); }
+  function num(v){ var n=Number(v); return isFinite(n)?n:null; }
+  function daysAgo(d){ if(!d) return 9e9; var t=new Date(d+"T00:00:00"); if(isNaN(t)) return 9e9; return Math.round((Date.now()-t.getTime())/86400000); }
+  function ls(k,d){ try{ var v=localStorage.getItem(k); return v?JSON.parse(v):d; }catch(e){ return d; } }
+  function ss(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} }
+  function save(){ try{ if(window.__QDAPP&&window.__QDAPP.save) window.__QDAPP.save(); }catch(e){} }
+
+  /* ---------- 1) مقياس ويلنس هوبر ---------- */
+  function hooperOf(pid,withinDays){
+    var rows=arr("wellness").filter(function(w){ return String(pidOf(w))===String(pid) && daysAgo(dtOf(w))<=(withinDays||3); });
+    if(!rows.length) return null;
+    rows.sort(function(a,b){ return dtOf(b)>dtOf(a)?1:-1; });
+    var r=rows[0];
+    var it=["sleep","fatigue","soreness","stress","mood"].map(function(k){ return num(r[k]); }).filter(function(x){ return x!=null; });
+    if(it.length<3) return null;
+    var sum=it.reduce(function(a,b){ return a+b; },0), max=it.length*5;
+    var pct=Math.round(Math.max(0,Math.min(100,(max-sum)/(max-it.length)*100)));
+    var dur=num(r.dur!=null?r.dur:r.sleep_hours);
+    var pen=dur==null?0:Math.min(20,Math.abs(8-dur)*4);
+    return {date:dtOf(r),pct:pct,raw:it,dur:dur,pen:pen,adj:Math.max(0,pct-pen),n:rows.length};
+  }
+  /* ---------- 2) الحمل: ACWR + الرتابة والإجهاد ---------- */
+  function loadSeries(pid){
+    var rows=arr("loads").filter(function(x){ return String(pidOf(x))===String(pid); });
+    return rows.map(function(r){
+      var v=null, keys=["load","srpe","au","rpeLoad","totalLoad","distance","dist"];
+      for(var i=0;i<keys.length;i++){ if(num(r[keys[i]])!=null){ v=num(r[keys[i]]); break; } }
+      return {d:dtOf(r),v:v};
+    }).filter(function(x){ return x.v!=null && x.d; }).sort(function(a,b){ return a.d<b.d?-1:1; });
+  }
+  function acwrOf(pid){
+    var se=loadSeries(pid); if(se.length<8) return null;
+    var cut=function(d,maxD){ var a=0,n=0; se.forEach(function(x){ var g=daysAgo(x.d); if(g<maxD){ a+=x.v; n++; } }); return n?a/n:null; };
+    var acute=cut(null,7), chronic=cut(null,28);
+    if(acute==null||chronic==null||chronic===0) return null;
+    var r=+(acute/chronic).toFixed(2);
+    var flag = r>1.5?"خطر مرتفع":(r>1.3?"حدّ المراقبة":(r<0.8?"انخفاض حمل":"نطاق آمن"));
+    return {acwr:r,flag:flag,acute:Math.round(acute),chronic:Math.round(chronic),days:se.length};
+  }
+  function monotonyOf(pid){
+    var se=loadSeries(pid).filter(function(x){ return daysAgo(x.d)<7; });
+    if(se.length<4) return null;
+    var vals=se.map(function(x){ return x.v; }), m=vals.reduce(function(a,b){return a+b;},0)/vals.length;
+    var sd=Math.sqrt(vals.reduce(function(a,b){ return a+Math.pow(b-m,2); },0)/vals.length);
+    var mono=sd>0?+(m/sd).toFixed(2):null;
+    return {mean:Math.round(m),mono:mono,strain:mono?Math.round(m*mono):null};
+  }
+  /* ---------- 3) الإتاحة الطبية ---------- */
+  function injuryOf(pid){
+    var rows=arr("injuries").filter(function(i){ return String(pidOf(i)||i.playerId)===String(pid) && !i.closed && !i.resolved; });
+    if(!rows.length) return null;
+    var r=rows[0];
+    return {type:r.type||"إصابة", status:String(r.status||"active"), days:dtOf(r)?daysAgo(dtOf(r)):null};
+  }
+  /* ---------- 4) الدرجة المركبة ---------- */
+  function W(){ return {well:40,load:30,med:30}; }
+  var BANDS=[{min:80,k:"ready",t:"جاهز",c:"#0F766E"},{min:60,k:"watch",t:"مراقبة",c:"#B45309"},{min:40,k:"caution",t:"حذر",c:"#C2410C"},{min:0,k:"danger",t:"خطر",c:"#B5121B"}];
+  function band(s){ for(var i=0;i<BANDS.length;i++) if(s>=BANDS[i].min) return BANDS[i]; return BANDS[3]; }
+  function scoreOf(pid){
+    var w=hooperOf(pid,3), a=acwrOf(pid), inj=injuryOf(pid), m=monotonyOf(pid);
+    var wS=w?w.adj:null;
+    var lS=100;
+    if(a){ var dev=0; if(a.acwr>1.3) dev=(a.acwr-1.3)/0.5; if(a.acwr<0.8) dev=(0.8-a.acwr)/0.5; lS=Math.max(0,Math.round(100-dev*100)); }
+    else lS=70;
+    var medS=inj?(inj.status==="partial"?50:0):100;
+    var wt=W(), sum=0, tot=0;
+    sum+=(wS==null?70:wS)*wt.well; tot+=wt.well;
+    sum+=lS*wt.load; tot+=wt.load;
+    sum+=medS*wt.med; tot+=wt.med;
+    var sc=Math.round(sum/tot);
+    if(inj && inj.status!=="partial") sc=Math.min(sc,25);
+    var b=band(sc);
+    var why=[];
+    if(w) why.push("هوبر "+w.pct+"%"+ (w.pen?(" − خصم نوم "+w.pen):"") +" = "+w.adj+"%");
+    else why.push("لا استبيان خلال ٣ أيام");
+    if(a) why.push("ACWR "+a.acwr+" ("+a.flag+")");
+    else why.push("بيانات حمل غير كافية");
+    if(inj) why.push("إصابة "+(inj.status==="partial"?"جزئية":"نشطة")+": "+inj.type);
+    if(m&&m.mono&&m.mono>2) why.push("رتابة عالية "+m.mono);
+    return {pid:pid,score:sc,band:b,well:w,acwr:a,mo:m,inj:inj,reasons:why};
+  }
+
+  /* ---------- 5) الفحص الشامل: LESS / FMS / OSTRC ---------- */
+  function screenStore(){ return ls(K_SCREEN,{}); }
+  function lessRisk(v){ return v==null?null:(v>=6?{t:"مرتفع",c:"#B5121B"}:{t:"منخفض",c:"#0F766E"}); }
+  function fmsRisk(v){ return v==null?null:(v<=14?{t:"مؤشر ضعف حركي",c:"#B45309"}:{t:"داخل النطاق",c:"#0F766E"}); }
+  function ostrcSev(scoreItems){ var s=scoreItems.reduce(function(a,b){return a+b;},0); return +(s/100).toFixed(2); }
+  function psyStore(){ return ls(K_PSY,{}); }
+  function phq4(a){ var anx=(a.q1||0)+(a.q2||0), dep=(a.q3||0)+(a.q4||0), tot=anx+dep;
+    return {anx:anx,dep:dep,tot:tot,flag:(anx>=3||dep>=3),sev:(tot>=9?"مرتفع":(tot>=6?"متوسط":(tot>=3?"خفيف":"منخفض")))}; }
+
+  /* ---------- الواجهة ---------- */
+  var TAB="daily";
+  var CSS=
+   '#qd330btn{position:fixed;right:16px;bottom:78px;z-index:2147482100;background:linear-gradient(135deg,#0F172A,#1E293B);color:#fff;border:1px solid rgba(255,255,255,.18);border-radius:14px;padding:11px 15px;font:900 12.5px system-ui,Tahoma,sans-serif;box-shadow:0 10px 26px rgba(15,23,42,.45);cursor:pointer;display:flex;align-items:center;gap:7px;white-space:nowrap}'+
+   '#qd330btn b{color:#5EEAD4}'+
+   '#qd330{position:fixed;inset:0;z-index:2147483300;display:none;background:rgba(12,12,14,.55);padding:14px 10px;overflow:auto}'+
+   '#qd330.on{display:block}'+
+   '#qd330c{background:#fff;max-width:1080px;margin:0 auto;border-radius:16px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.45);font-family:system-ui,Tahoma,sans-serif}'+
+   '#qd330h{background:#0C1118;color:#fff;padding:13px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}'+
+   '#qd330h b{font-size:14.5px;font-weight:900}#qd330h span{font-size:10.5px;opacity:.6;font-weight:700}'+
+   '#qd330t{display:flex;gap:6px;padding:9px 12px;background:#F7F7FA;border-bottom:1px solid #E6E6EC;flex-wrap:wrap}'+
+   '#qd330t button{border:1px solid #DEDEE6;background:#fff;color:#33333C;border-radius:999px;padding:7px 13px;font:900 11.5px system-ui;cursor:pointer}'+
+   '#qd330t button.on{background:#8E1015;border-color:#8E1015;color:#fff}'+
+   '#qd330b{padding:14px 16px 22px;color:#1B1B22}'+
+   '.q33card{border:1px solid #E6E6EC;border-radius:12px;padding:12px;margin-bottom:11px;background:#fff}'+
+   '.q33card h4{margin:0 0 6px;font:900 13px system-ui;color:#111}'+
+   '.q33card .sub{font:700 10.5px system-ui;color:#71717A;margin-bottom:8px}'+
+   '.q33grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}'+
+   '.q33kpi{background:#FAFAFC;border:1px solid #EDEDF2;border-radius:10px;padding:9px}'+
+   '.q33kpi i{display:block;font:800 9.5px system-ui;color:#71717A;font-style:normal;margin-bottom:3px}'+
+   '.q33kpi b{font:900 17px system-ui;color:#111}'+
+   '.q33kpi small{font:800 9px system-ui;color:#8E8E99;display:block;margin-top:2px}'+
+   'table.q33{width:100%;border-collapse:collapse;font:700 11px system-ui}'+
+   'table.q33 th{background:#F5F5F8;color:#4B4B55;text-align:right;padding:7px 8px;border-bottom:1px solid #E6E6EC;font-weight:900;white-space:nowrap}'+
+   'table.q33 td{padding:7px 8px;border-bottom:1px solid #F0F0F4}'+
+   '.q33pill{display:inline-block;border-radius:999px;padding:2px 9px;font:900 10px system-ui;color:#fff}'+
+   '.q33ev{font:600 11px system-ui;line-height:1.9;color:#33333C}'+
+   '.q33ev b{color:#8E1015}'+
+   '.q33ev .ref{color:#71717A;font-size:10px}'+
+   '.q33in{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:7px;margin-top:7px}'+
+   '.q33in label{font:800 9.5px system-ui;color:#52525B;display:block;margin-bottom:3px}'+
+   '.q33in input,.q33in select{width:100%;border:1px solid #DEDEE6;border-radius:8px;padding:7px 8px;font:800 12px system-ui}'+
+   '.q33go{border:0;border-radius:9px;padding:9px 14px;background:#0F766E;color:#fff;font:900 11.5px system-ui;cursor:pointer;margin-top:9px}'+
+   '.q33gh{border:1px solid #DEDEE6;background:#fff;border-radius:9px;padding:8px 12px;font:900 11px system-ui;cursor:pointer;color:#33333C}'+
+   '.q33note{background:#FFFBEB;border:1px solid #FDE68A;border-radius:10px;padding:9px 11px;font:700 10.5px system-ui;color:#7C4A03;line-height:1.8}'+
+   '.q33ok{background:#F0FDFA;border:1px solid #99F6E4;color:#115E59}'+
+   '.q33bar{height:7px;border-radius:999px;background:#EDEDF2;overflow:hidden;margin-top:5px}'+
+   '.q33bar i{display:block;height:100%;border-radius:999px}';
+
+  function mount(){
+    if(!document.getElementById("qd330css")){ var st=document.createElement("style"); st.id="qd330css"; st.textContent=CSS; document.head.appendChild(st); }
+    if(!$("qd330btn")){
+      var b=document.createElement("button"); b.id="qd330btn"; b.type="button";
+      b.innerHTML='<span>◎</span><span>التقييم والجاهزية</span><b>4</b>';
+      b.onclick=function(){ open(); };
+      document.body.appendChild(b);
+    }
+    if(!$("qd330")){
+      var h=document.createElement("div"); h.id="qd330";
+      h.innerHTML='<div id="qd330c"><div id="qd330h"><b>◎ مركز التقييم والجاهزية</b><span>8 أقسام مدمجة في 4 · محرّك حساب مبني على الدراسات</span>'+
+        '<button id="qd330x" style="margin-inline-start:auto;background:transparent;border:1px solid rgba(255,255,255,.35);color:#fff;border-radius:8px;padding:5px 10px;font:900 11px system-ui;cursor:pointer">✕</button></div>'+
+        '<div id="qd330t"></div><div id="qd330b"></div></div>';
+      document.body.appendChild(h);
+      $("qd330x").onclick=function(){ h.classList.remove("on"); };
+      h.addEventListener("click",function(e){ if(e.target===h) h.classList.remove("on"); });
+    }
+    mergeNav();
+    setTimeout(mergeNav,900); setTimeout(mergeNav,2400);
+  }
+
+  /* ---------- دمج عناصر القائمة الجانبية ---------- */
+  var HIDE=["load","daily","wellness","screening","physio","posture"];
+  function navItem(v){ return document.querySelector('#qd290nav [data-view="'+v+'"]')||document.querySelector('.nav-item[data-view="'+v+'"]'); }
+  function mkBtn(id,label,tab,first){
+    var b=document.createElement("button");
+    b.id=id; b.type="button"; b.className="qds-i qd330nav";
+    b.setAttribute("data-qd330",tab);
+    b.innerHTML='<span class="qds-l">'+label+'</span><span class="qds-b" style="background:#0F766E;color:#fff;border-radius:6px;padding:0 5px;font:900 8.5px system-ui;margin-inline-start:auto">مدمج</span>';
+    b.style.cssText="display:flex;align-items:center;gap:8px;width:100%;padding:9px 10px;background:transparent;border:0;color:inherit;font:800 12px system-ui;cursor:pointer;border-radius:9px;text-align:start";
+    b.onclick=function(e){ e.preventDefault(); e.stopPropagation(); open(tab); };
+    return b;
+  }
+  function mergeNav(){
+    var host=navItem("load");
+    if(host&&!$("qd330navDaily")){
+      host.parentNode.insertBefore(mkBtn("qd330navDaily","الجاهزية اليومية","daily"),host);
+    }
+    var host2=navItem("screening")||navItem("physio");
+    if(host2&&!$("qd330navScreen")){
+      host2.parentNode.insertBefore(mkBtn("qd330navScreen","الفحص الشامل","screen"),host2);
+    }
+    HIDE.forEach(function(v){
+      var el=navItem(v);
+      if(el&&el.style.display!=="none"){ el.style.display="none"; el.setAttribute("data-qd330hidden","1"); }
+    });
+  }
+  function unhide(){
+    HIDE.forEach(function(v){ var el=navItem(v); if(el){ el.style.display=""; el.removeAttribute("data-qd330hidden"); } });
+  }
+  function goView(v){
+    var el=navItem(v); if(el){ try{ el.click(); }catch(e){} var h=$("qd330"); if(h) h.classList.remove("on"); }
+  }
+
+  /* ---------- التبويبات ---------- */
+  var TABS=[["daily","١ · الجاهزية اليومية"],["screen","٢ · الفحص الشامل"],["protect","٣ · الوقاية والتأهيل"],["psy","٤ · الصحة النفسية"],["ev","٥ · الأدلة والحسابات"]];
+  function open(t){
+    TAB=t||TAB||"daily";
+    mount();
+    document.getElementById("qd330").classList.add("on");
+    render();
+  }
+  function render(){
+    var h=$("qd330"); if(!h) return;
+    $("qd330t").innerHTML=TABS.map(function(t){ return '<button data-qd330t="'+t[0]+'" class="'+(TAB===t[0]?"on":"")+'">'+t[1]+'</button>'; }).join("");
+    $("qd330t").querySelectorAll("[data-qd330t]").forEach(function(b){ b.onclick=function(){ TAB=b.getAttribute("data-qd330t"); render(); }; });
+    var body=$("qd330b");
+    if(TAB==="daily") body.innerHTML=dailyHtml();
+    else if(TAB==="screen") body.innerHTML=screenHtml();
+    else if(TAB==="protect") body.innerHTML=protectHtml();
+    else if(TAB==="psy") body.innerHTML=psyHtml();
+    else body.innerHTML=evHtml();
+    wire();
+  }
+  function rowsOf(){
+    return players().map(function(p){ var s=scoreOf(p.id); s.name=pname(p); return s; })
+      .sort(function(a,b){ return a.score-b.score; });
+  }
+  function dailyHtml(){
+    var rs=rowsOf();
+    if(!rs.length) return '<div class="q33card"><h4>لا لاعبين بعد</h4><div class="sub">أضف لاعبين من «اللاعبين» ثم ستُحسب الجاهزية لكل لاعب تلقائيًا.</div></div>';
+    var m={ready:0,watch:0,caution:0,danger:0};
+    rs.forEach(function(r){ m[r.band.k]=(m[r.band.k]||0)+1; });
+    var avg=Math.round(rs.reduce(function(a,b){ return a+b.score; },0)/rs.length);
+    var withW=rs.filter(function(r){ return r.well; }).length;
+    var withA=rs.filter(function(r){ return r.acwr; }).length;
+    return '<div class="q33card"><h4>لوحة الجاهزية اليوم</h4>'+
+      '<div class="sub">دُمج فيها: «الحمل والجاهزية» + «التقييم اليومي» + «الاستبيان اليومي» — مصدر واحد للقراءة اليومية</div>'+
+      '<div class="q33grid">'+
+        '<div class="q33kpi"><i>متوسط الجاهزية</i><b>'+avg+'%</b><small>'+rs.length+' لاعبًا</small></div>'+
+        '<div class="q33kpi"><i>جاهزون</i><b style="color:#0F766E">'+m.ready+'</b><small>≥ 80%</small></div>'+
+        '<div class="q33kpi"><i>مراقبة</i><b style="color:#B45309">'+m.watch+'</b><small>60–79%</small></div>'+
+        '<div class="q33kpi"><i>حذر / خطر</i><b style="color:#B5121B">'+(m.caution+m.danger)+'</b><small>&lt; 60%</small></div>'+
+        '<div class="q33kpi"><i>لديهم استبيان</i><b>'+withW+'/'+rs.length+'</b><small>آخر ٣ أيام</small></div>'+
+        '<div class="q33kpi"><i>لديهم حمل ACWR</i><b>'+withA+'/'+rs.length+'</b><small>≥ 8 جلسات</small></div>'+
+      '</div></div>'+
+      '<div class="q33card"><h4>اللاعبون — مرتبون من الأدنى</h4><div class="sub">الدرجة = 40% ويلنس + 30% حمل + 30% إتاحة طبية · إصابة نشطة تحدّ الدرجة بـ 25</div>'+
+      '<table class="q33"><thead><tr><th>اللاعب</th><th>الجاهزية</th><th>الويلنس</th><th>ACWR</th><th>السبب الرئيسي</th><th></th></tr></thead><tbody>'+
+      rs.map(function(r){
+        return '<tr><td><b>'+esc(r.name)+'</b></td>'+
+          '<td><span class="q33pill" style="background:'+r.band.c+'">'+r.score+'% · '+r.band.t+'</span>'+
+            '<div class="q33bar"><i style="width:'+r.score+'%;background:'+r.band.c+'"></i></div></td>'+
+          '<td>'+(r.well?(r.well.pct+'%'+(r.well.pen?' <small style="color:#B45309">−'+r.well.pen+'</small>':'')):'—')+'</td>'+
+          '<td>'+(r.acwr?(r.acwr.acwr+'<br><small style="color:#71717A">'+r.acwr.flag+'</small>'):'—')+'</td>'+
+          '<td style="font-weight:700;color:#52525B">'+esc(r.reasons[0])+'</td>'+
+          '<td><button class="q33gh" data-qd330p="'+esc(r.pid)+'">تفصيل</button></td></tr>';
+      }).join("")+'</tbody></table></div>'+
+      '<div class="q33note">الاستبيان ناقص لـ '+(rs.length-withW)+' لاعبًا. الويلنس يُقاس بمقياس هوبر (٥ بنود) — أيام بلا استبيان تُحتسب 70% افتراضيًا لا صفرًا، حتى لا يُعاقب اللاعب على غياب البيانات.</div>';
+  }
+  function screenHtml(){
+    var st=screenStore();
+    var ps=players();
+    return '<div class="q33card"><h4>بطارية الفحص الشامل</h4>'+
+      '<div class="sub">دُمج فيها: «الفحص قبل الموسم» + «التقييم الفيزيائي» + «القوام» — جلسة واحدة، ثلاث أدوات معتمدة</div>'+
+      '<div class="q33in">'+
+        '<div><label>اللاعب</label><select id="q33sp">'+ps.map(function(p){ return '<option value="'+esc(p.id)+'">'+esc(pname(p))+'</option>'; }).join("")+'</select></div>'+
+        '<div><label>LESS (0–19)</label><input id="q33less" type="number" min="0" max="19" placeholder="6"></div>'+
+        '<div><label>FMS (0–21)</label><input id="q33fms" type="number" min="0" max="21" placeholder="15"></div>'+
+        '<div><label>قوام — انحراف (0–5)</label><input id="q33pos" type="number" min="0" max="5" placeholder="1"></div>'+
+        '<div><label>OSTRC ألم مزمن (0–100)</label><input id="q33ostrc" type="number" min="0" max="100" placeholder="0"></div>'+
+      '</div>'+
+      '<button class="q33go" id="q33sav">حساب وحفظ</button>'+
+      '<div id="q33smsg" style="font:800 11px system-ui;margin-top:8px;color:#0F766E"></div></div>'+
+      (Object.keys(st).length?('<div class="q33card"><h4>نتائج الفحص المسجّلة</h4><table class="q33"><thead><tr><th>اللاعب</th><th>LESS</th><th>FMS</th><th>قوام</th><th>OSTRC</th><th>الحكم</th></tr></thead><tbody>'+
+        Object.keys(st).map(function(pid){
+          var r=st[pid], p=ps.filter(function(x){ return String(x.id)===String(pid); })[0];
+          var lr=lessRisk(r.less), fr=fmsRisk(r.fms);
+          var flag=(r.less!=null&&r.less>=6)||(r.fms!=null&&r.fms<=14)||(r.ostrc!=null&&r.ostrc>=50);
+          return '<tr><td><b>'+esc(p?pname(p):pid)+'</b></td><td>'+(-(-r.less)||'—')+'</td><td>'+(r.fms||'—')+'</td><td>'+(r.pos||'—')+'</td><td>'+(r.ostrc||'—')+'</td>'+
+            '<td><span class="q33pill" style="background:'+(flag?"#B5121B":"#0F766E")+'">'+(flag?"يحتاج خطة وقاية":"داخل النطاق")+'</span></td></tr>';
+        }).join("")+'</tbody></table></div>'):'')+
+      '<div class="q33note">LESS ≥ 6 يرفع خطر إصابة الرباط الصليبي (Padua 2009) — يُوجب برنامج قفز وإبطاء. FMS ≤ 14 مؤشر ضعف حركي لكن قدرته التنبؤية محدودة (Moran 2017) فلا يُستخدم وحده. OSTRC ≥ 50 = ألم مزمن يحتاج تدخلًا.</div>';
+  }
+  function protectHtml(){
+    return '<div class="q33card"><h4>برامج الوقاية — الجرعات التي أثبتت أثرًا</h4>'+
+      '<div class="sub">دُمج فيها: «برامج العلاج» + توصيات الفحص — جرعة محددة لا نصائح عامة</div>'+
+      '<table class="q33"><thead><tr><th>البرنامج</th><th>الجرعة</th><th>الأثر المنشور</th><th>المرجع</th></tr></thead><tbody>'+
+      '<tr><td><b>كوبنهاجن للعضلة الضامة</b></td><td>٣ مرات/أسبوع · ٦–٨ أسابيع · تدرّج ٢→٣ مجموعات</td><td>انخفاض إصابات العانة ≈ 41%</td><td>Harøy 2019, BJSM</td></tr>'+
+      '<tr><td><b>النوردك للخلفية</b></td><td>٢–٣ مرات/أسبوع · ٢٤ جلسة موسمية · ٣×٥→٣×١٢</td><td>انخفاض إصابات الخلفية حتى 51%</td><td>Petersen 2011, AJSM</td></tr>'+
+      '<tr><td><b>إبطاء القفز (LESS-based)</b></td><td>١٥ دقيقة قبل التمرين · ٣ مرات/أسبوع · ٦ أسابيع</td><td>تحسين نمط الهبوط وخفض LESS</td><td>Padua 2012, AJSM</td></tr>'+
+      '<tr><td><b>FIFA 11+</b></td><td>٢٠ دقيقة إحماء · ≥ ٢ مرات/أسبوع</td><td>انخفاض شامل للإصابات ≈ 30–40%</td><td>Soligard 2008, BMJ</td></tr>'+
+      '</tbody></table>'+
+      '<div style="margin-top:9px;display:flex;gap:7px;flex-wrap:wrap"><button class="q33gh" id="q33goproto">فتح «برامج العلاج»</button><button class="q33gh" id="q33goscreen">فتح «الفحص قبل الموسم»</button></div></div>'+
+      '<div class="q33ok q33note">قاعدة التطبيق: لا يُدرج برنامج وقاية للاعب ظهر عليه LESS مرتفع أو OSTRC مرتفع قبل استبعاد إصابة قائمة — الوقاية لا تسبق التشخيص.</div>';
+  }
+  function psyHtml(){
+    var st=psyStore(), ps=players();
+    return '<div class="q33card"><h4>الصحة النفسية — أدوات قصيرة معتمدة</h4>'+
+      '<div class="sub">PHQ-4 (٤ بنود) للفرز السريع · كل بند 0–3 خلال أسبوعين</div>'+
+      '<div class="q33in">'+
+        '<div><label>اللاعب</label><select id="q33pp">'+ps.map(function(p){ return '<option value="'+esc(p.id)+'">'+esc(pname(p))+'</option>'; }).join("")+'</select></div>'+
+        '<div><label>قلق — عصبية (0–3)</label><input id="q33q1" type="number" min="0" max="3" value="0"></div>'+
+        '<div><label>قلق — لا أستطيع التوقف عن القلق (0–3)</label><input id="q33q2" type="number" min="0" max="3" value="0"></div>'+
+        '<div><label>اكتئاب — خمول/فقدان متعة (0–3)</label><input id="q33q3" type="number" min="0" max="3" value="0"></div>'+
+        '<div><label>اكتئاب — انخفاض مزاج/يأس (0–3)</label><input id="q33q4" type="number" min="0" max="3" value="0"></div>'+
+      '</div><button class="q33go" id="q33psav">حساب وحفظ</button><div id="q33pmsg" style="font:800 11px system-ui;margin-top:8px;color:#0F766E"></div></div>'+
+      (Object.keys(st).length?('<div class="q33card"><h4>نتائج الفرز</h4><table class="q33"><thead><tr><th>اللاعب</th><th>قلق</th><th>اكتئاب</th><th>المجموع</th><th>القرار</th></tr></thead><tbody>'+
+        Object.keys(st).map(function(pid){
+          var v=st[pid], f=phq4(v), p=ps.filter(function(x){ return String(x.id)===String(pid); })[0];
+          return '<tr><td><b>'+esc(p?pname(p):pid)+'</b></td><td>'+f.anx+'</td><td>'+f.dep+'</td><td>'+f.tot+'</td>'+
+            '<td><span class="q33pill" style="background:'+(f.flag?"#B45309":"#0F766E")+'">'+(f.flag?"إحالة لتقييم":"متابعة روتينية")+'</span> <small style="color:#71717A">'+f.sev+'</small></td></tr>';
+        }).join("")+'</tbody></table></div>'):'')+
+      '<div class="q33note">PHQ-4 ليس تشخيصًا: نتيجة ≥ 3 في أي محور تُوجب مقابلة قصيرة وتقييمًا أدق (GAD-7 / PHQ-9) وإحالة عند اللزوم. لا تُحفظ نتيجة الفرز في ملف اللاعب الطبي بلا إذنه — تُعرض للمدرب كإشارة «تحت المتابعة» فقط.</div>';
+  }
+  function evHtml(){
+    return '<div class="q33card"><h4>المعادلات المستخدمة</h4><div class="q33ev">'+
+      '<b>هوبر:</b> (المجموع الأقصى − مجموع البنود) ÷ (الأقصى − عدد البنود) × 100 · بند واحد = 1–5.<br>'+
+      '<b>خصم النوم:</b> min(20, |8 − ساعات النوم| × 4) نقطة.<br>'+
+      '<b>ACWR:</b> متوسط حمل ٧ أيام ÷ متوسط حمل ٢٨ يومًا · آمن 0.8–1.3 · مراقبة 1.3–1.5 · خطر &gt; 1.5.<br>'+
+      '<b>الرتابة:</b> متوسط الحمل الأسبوعي ÷ انحرافه المعياري · <span class="ref">Foster 1998</span><br>'+
+      '<b>الإجهاد الأسبوعي:</b> الحمل الأسبوعي × الرتابة.<br>'+
+      '<b>الدرجة المركبة:</b> 40% ويلنس + 30% حمل + 30% إتاحة طبية · إصابة نشطة تحدّ النتيجة بـ 25.<br>'+
+      '<b>PHQ-4:</b> مجموع القلق = ب1+ب2 · الاكتئاب = ب3+ب4 · ≥ 3 في أي محور = إشارة.<br>'+
+      '<b>OSTRC:</b> الشدة = مجموع البنود ÷ 100 أسبوعًا مفقودًا.'+
+      '</div></div>'+
+      '<div class="q33card"><h4>ما تسنده الدراسات — وما لا تسنده</h4><div class="q33ev">'+
+      '<b>يسنده:</b> استبيان الويلنس يرصد التغيّر اليومي بثبات معقول <span class="ref">(Saw 2016, BJSM)</span> · برنامج كوبنهاجن يخفض إصابات العانة ≈ 41% <span class="ref">(Harøy 2019)</span> · النوردك يخفض إصابات الخلفية حتى 51% <span class="ref">(Petersen 2011)</span> · LESS ≥ 6 مرتبط بخطر الرباط الصليبي <span class="ref">(Padua 2009)</span> · النوم القصير مرتبط بارتفاع الإصابات ارتباطًا لا سببية <span class="ref">(Milewski 2014; von Rosen 2017)</span>.<br><br>'+
+      '<b>لا يسنده (تحفّظ صريح):</b> ACWR مؤشر شائع لكن صلاحيته التنبؤية محل نقد إحصائي قوي <span class="ref">(Impellizzeri 2020)</span> — يُقرأ كاتجاه لا كإنذار · FMS لا يتنبأ بالإصابة في التحليلات التجميعية <span class="ref">(Moran 2017)</span> · أوزان الدرجة 40/30/30 اختيار عملي غير مُصادَق عليه كأداة تنبؤ، فتُقرأ كمؤشر متابعة لا كتشخيص.'+
+      '</div></div>'+
+      '<div class="q33card"><h4>الدمج: ٨ ← ٤</h4><table class="q33"><thead><tr><th>الوحدة المدمجة</th><th>الأقسام الأصلية</th><th>السبب</th></tr></thead><tbody>'+
+      '<tr><td><b>الجاهزية اليومية</b></td><td>الحمل والجاهزية · التقييم اليومي · الاستبيان اليومي</td><td>ثلاث شاشات تقرأ اليوم نفسه من زوايا متقاطعة؛ دمجها يمنع الإدخال المكرر ويوحّد الرقم.</td></tr>'+
+      '<tr><td><b>الفحص الشامل</b></td><td>الفحص قبل الموسم · التقييم الفيزيائي · القوام</td><td>تُجرى في جلسة واحدة قبل الموسم، ونتيجتها بطارية واحدة لا ثلاث شاشات منفصلة.</td></tr>'+
+      '<tr><td><b>الوقاية والتأهيل</b></td><td>برامج العلاج + توصيات الفحص</td><td>الجُرعات مرتبطة بنتيجة الفحص، فيجب أن تُقرأ في مكان واحد.</td></tr>'+
+      '<tr><td><b>الصحة النفسية</b></td><td>الصحة النفسية</td><td>تُركت منفصلة عن الويلنس اليومي عمدًا: الفرز النفسي لا يُخلط بمؤشر تدريبي.</td></tr>'+
+      '</tbody></table>'+
+      '<button class="q33gh" id="q33unhide" style="margin-top:9px">إظهار الأقسام الأصلية (٦) — للعودة الكاملة</button></div>';
+  }
+  function wire(){
+    var s=$("q33sav");
+    if(s) s.onclick=function(){
+      var pid=($("q33sp")||{}).value; if(!pid) return;
+      var st=screenStore(); st[pid]={less:num(($("q33less")||{}).value),fms:num(($("q33fms")||{}).value),pos:num(($("q33pos")||{}).value),ostrc:num(($("q33ostrc")||{}).value),d:new Date().toISOString().slice(0,10)};
+      ss(K_SCREEN,st); render();
+      var m=$("q33smsg"); if(m) m.textContent="حُفظت نتيجة الفحص ✓";
+    };
+    var p=$("q33psav");
+    if(p) p.onclick=function(){
+      var pid=($("q33pp")||{}).value; if(!pid) return;
+      var st=psyStore();
+      st[pid]={q1:num(($("q33q1")||{}).value)||0,q2:num(($("q33q2")||{}).value)||0,q3:num(($("q33q3")||{}).value)||0,q4:num(($("q33q4")||{}).value)||0,d:new Date().toISOString().slice(0,10)};
+      ss(K_PSY,st); render();
+      var m=$("q33pmsg"); if(m) m.textContent="حُفظ الفرز ✓ — لا يُعرض للاعب";
+    };
+    document.querySelectorAll("[data-qd330p]").forEach(function(b){
+      b.onclick=function(){ detail(b.getAttribute("data-qd330p")); };
+    });
+    if($("q33unhide")) $("q33unhide").onclick=function(){ unhide(); var m=$("qd330b"); if(m) m.innerHTML='<div class="q33card"><h4>أُعيدت الأقسام الأصلية</h4><div class="sub">ستظهر الستة في القائمة الجانبية حتى إعادة تحميل الصفحة.</div></div>'; };
+    if($("q33goproto")) $("q33goproto").onclick=function(){ goView("proto"); };
+    if($("q33goscreen")) $("q33goscreen").onclick=function(){ goView("screening"); };
+  }
+  function detail(pid){
+    var r=scoreOf(pid), p=players().filter(function(x){ return String(x.id)===String(pid); })[0];
+    var box=$("qd330b"); if(!box) return;
+    box.innerHTML='<div class="q33card"><h4>'+esc(p?pname(p):pid)+' — تفصيل الحساب</h4>'+
+      '<div class="sub">كل رقم ظاهر مع طريقة احتسابه، لا صندوق أسود</div>'+
+      '<div class="q33grid">'+
+        '<div class="q33kpi"><i>الدرجة المركبة</i><b style="color:'+r.band.c+'">'+r.score+'%</b><small>'+r.band.t+'</small></div>'+
+        '<div class="q33kpi"><i>هوبر (خام)</i><b>'+(r.well?r.well.pct+'%':'—')+'</b><small>'+(r.well?('آخر استبيان '+r.well.date):'لا استبيان')+'</small></div>'+
+        '<div class="q33kpi"><i>بعد خصم النوم</i><b>'+(r.well?r.well.adj+'%':'—')+'</b><small>'+(r.well&&r.well.dur!=null?r.well.dur+' ساعة':'—')+'</small></div>'+
+        '<div class="q33kpi"><i>ACWR</i><b>'+(r.acwr?r.acwr.acwr:'—')+'</b><small>'+(r.acwr?r.acwr.flag:'بيانات ناقصة')+'</small></div>'+
+        '<div class="q33kpi"><i>حمل حاد / مزمن</i><b>'+(r.acwr?r.acwr.acute+' / '+r.acwr.chronic:'—')+'</b><small>وحدة</small></div>'+
+        '<div class="q33kpi"><i>الرتابة</i><b>'+(r.mo&&r.mo.mono?r.mo.mono:'—')+'</b><small>'+(r.mo&&r.mo.strain?('إجهاد '+r.mo.strain):'—')+'</small></div>'+
+      '</div>'+
+      '<div style="margin-top:10px;font:800 11.5px system-ui;line-height:1.9;color:#33333C">'+r.reasons.map(function(x){ return "• "+esc(x); }).join("<br>")+'</div>'+
+      '<div style="margin-top:11px;display:flex;gap:7px;flex-wrap:wrap"><button class="q33gh" id="q33back">رجوع للقائمة</button><button class="q33gh" id="q33goload">فتح «الحمل والجاهزية» الأصلي</button><button class="q33gh" id="q33gowell">فتح «الاستبيان اليومي»</button></div></div>';
+    if($("q33back")) $("q33back").onclick=function(){ render(); };
+    if($("q33goload")) $("q33goload").onclick=function(){ goView("load"); };
+    if($("q33gowell")) $("q33gowell").onclick=function(){ goView("wellness"); };
+  }
+
+  window.QD330={open:open,score:scoreOf,hooper:hooperOf,acwr:acwrOf,band:band,phq4:phq4,mergeNav:mergeNav,unhide:unhide,tab:function(){ return TAB; }};
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",mount,{once:true}); else mount();
+  setTimeout(mount,1200);
+  setTimeout(mount,3000);
 })();
 </script>
 
