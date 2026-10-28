@@ -2733,7 +2733,8 @@ REND.dashboard=function(){
 
 };
 on("goTherapy",()=>showView("therapy")); on("goActivities",()=>showView("activities"));
-on("newInjury",()=>openInjuryForm(null)); on("openInjury",d=>openInjuryDetail(d.id)); on("openPlayer",d=>openPlayerProfile(d.id));
+on("newInjury",()=>openInjuryForm(null)); try{ window.openInjuryDetail=openInjuryDetail; }catch(e){}
+on("openInjury",d=>openInjuryDetail(d.id)); on("openPlayer",d=>openPlayerProfile(d.id));
 
 /* ================= PLAYERS ================= */
 let pFilter={q:"",pos:"",status:""};
@@ -8347,6 +8348,7 @@ function openInjuryForm(id,presetPlayer){
     foot:'<button class="btn primary" data-act="saveInjury">'+svg(I.check,2.2)+' '+T("btn_save_injury")+'</button><button class="btn ghost" data-close>'+T("btn_cancel")+'</button>',
     onMount:root=>{ qdWireFiles(root); $$(".acc-head",root).forEach(b=>b.onclick=()=>b.parentElement.classList.toggle("open")); initSigPads(root); }});
 }
+try{ window.openInjuryForm=openInjuryForm; }catch(e){}
 on("rpAuto",function(){
   var root=$("#modalCard"); if(!root) return;
   function get(n){ var e=root.querySelector('[data-f="'+n+'"]'); return e?e.value:""; }
@@ -35137,7 +35139,7 @@ tr:hover .qde-ndate{color:#7E0E14}
 
   function badge(){
     try{ var b=document.getElementById("qdrBadge"); if(!b) return;
-      var w="v11-308c · EDIT-FULL";
+      var w="v11-310 · EDIT-ORIGINAL+SAVE";
       if(b.textContent!==w+" · BTN-OK") b.textContent=w+" · BTN-OK"; }catch(e){}
   }
 
@@ -46934,9 +46936,9 @@ tr:hover .qde-ndate{color:#7E0E14}
 (function(){
   if(window.__qd308) return; window.__qd308=1;
   var CSS=[
-   '.qd308b{border:1px solid #E4E0D6;background:#fff;color:#5B6472;border-radius:8px;font:900 11px inherit;padding:3px 8px;cursor:pointer;margin-inline-start:4px}',
+   '.qd308b{border:1px solid #E4E0D6;background:#fff;color:#5B6472;border-radius:7px;font:900 9.5px/1 inherit;padding:3px 6px;cursor:pointer;margin-inline-start:3px;vertical-align:middle;width:auto !important;min-width:0 !important;white-space:nowrap;display:inline-block;flex:none}',
    '.qd308b:hover{border-color:#8E1015;color:#8E1015}',
-   '.qd308b.main{background:#8E1015;color:#fff;border-color:#8E1015}',
+   '.qd308b.main{background:#8E1015;color:#fff;border-color:#8E1015;font-size:9px;padding:3px 6px;width:auto !important;white-space:nowrap}',
    '.qd308b.main:hover{background:#6E0C10;border-color:#6E0C10;color:#fff}'
   ].join("");
   function css(){ if(document.getElementById("qd308css")) return; var st=document.createElement("style"); st.id="qd308css"; st.textContent=CSS; document.head.appendChild(st); }
@@ -46971,25 +46973,33 @@ tr:hover .qde-ndate{color:#7E0E14}
     if(!mc) return false;
     return !!(mc.querySelector('[data-act="saveInjury"]')&&mc.querySelector('[data-f="type"]'));
   }
+  /* تعبئة الحقول المتداخلة الناقصة — النموذج الأصلي يقرأ contact.fromContact وغيرها */
+  function ensureShape(id){
+    try{
+      var S=(window.__QDAPP&&window.__QDAPP.S)||{};
+      var i=(S.injuries||[]).filter(function(x){ return String(x.id)===String(id); })[0];
+      if(!i) return false;
+      ["contact","recurrence","football","sanction","exam","signoff","plan"].forEach(function(k){
+        if(!i[k]||typeof i[k]!=="object") i[k]={};
+      });
+      if(!Array.isArray(i.treatments)) i.treatments=[];
+      if(!Array.isArray(i.history)) i.history=[];
+      if(i.status==null) i.status="unable";
+      if(i.date==null) i.date=new Date().toISOString().slice(0,10);
+      return true;
+    }catch(e){ return false; }
+  }
+  window.QD309_ensureShape=ensureShape;
   function openFull(id){
-    /* ١) المسار الأصلي المباشر: editInjury ← openInjuryForm (النموذج الكامل بكل حقوله) */
+    ensureShape(id);
+    try{ if(typeof window.openInjuryForm==="function"){ window.openInjuryForm(id); if(fullFormOpen()) return true; } }catch(e){}
+    ensureShape(id);
+    try{ if(typeof window.openInjuryForm==="function"){ window.openInjuryForm(id); if(fullFormOpen()) return true; } }catch(e){}
     probeFire("editInjury",id);
     setTimeout(function(){
       if(fullFormOpen()) return;
-      /* ٢) عبر ملف الإصابة ثم زر «تعديل» الأصلي داخله */
-      probeFire("openInjury",id);
-      setTimeout(function(){
-        if(fullFormOpen()) return;
-        var mc=document.getElementById("modalCard");
-        var ed=mc&&mc.querySelector('[data-act="editInjury"][data-id="'+id+'"]');
-        if(ed){ try{ ed.click(); }catch(e){} }
-        setTimeout(function(){
-          if(fullFormOpen()) return;
-          /* ٣) خطة أخيرة: التحديث السريع (لا يفتح أي تقرير) */
-          try{ if(window.QD306&&window.QD306.open) window.QD306.open(id); }catch(e){}
-        },700);
-      },450);
-    },750);
+      try{ if(window.QD306&&window.QD306.open) window.QD306.open(id); }catch(e){}
+    },700);
     return true;
   }
   window.QD308={openFull:openFull};
@@ -47006,7 +47016,7 @@ tr:hover .qde-ndate{color:#7E0E14}
         var old=host.querySelector('.qd306b[data-for="'+id+'"]');
         var main=document.createElement("button");
         main.type="button"; main.className="qd308b main"; main.setAttribute("data-main",id);
-        main.textContent="✎ تعديل الملف الكامل"; main.title="فتح ملف الإصابة الأصلي للتعديل الكامل";
+        main.textContent="✎ تعديل"; main.title="فتح ملف الإصابة الأصلي للتعديل الكامل";
         main.onclick=function(ev){ ev.preventDefault(); ev.stopPropagation(); openFull(id); };
         var q=document.createElement("button");
         q.type="button"; q.className="qd308b"; q.setAttribute("data-quick",id);
@@ -47038,6 +47048,94 @@ tr:hover .qde-ndate{color:#7E0E14}
   }
   setInterval(function(){ try{ decorate(); }catch(e){} },1200);
   try{ new MutationObserver(function(){ clearTimeout(window.__qd308t); window.__qd308t=setTimeout(decorate,180); }).observe(document.body,{childList:true,subtree:true}); }catch(e){}
+})();
+</script>
+<script>
+/*!
+ * QD310 · SAVE-BRIDGE — يجعل «حفظ الإصابة» في نموذج التعديل الأصلي يحفظ فعلاً
+ *  يقرأ كل حقول النموذج ([data-f]) ويكتبها في سجل الإصابة: الجذر، أو الحقل المتداخل الذي ينتمي إليه.
+ *  ثم يغلق النافذة ويحدّث الشاشة — دون الاعتماد على المعالج الأصلي الذي يتعطّل على سجلات ناقصة.
+ */
+(function(){
+  if(window.__qd310) return; window.__qd310=1;
+  function S(){ try{ var a=window.__QDAPP; if(a&&a.S) return a.S; }catch(e){} return null; }
+  function persist(){ try{ if(window.__QDAPP&&window.__QDAPP.save){ window.__QDAPP.save(); return; } }catch(e){}
+    try{ if(typeof window.save==="function") window.save(); }catch(e){} }
+  function toast(m,k){ try{ if(typeof window.toast==="function") window.toast(m,k); }catch(e){} }
+  function closeM(){ try{ if(typeof window.closeModal==="function"){ window.closeModal(); return; } }catch(e){}
+    var mc=document.getElementById("modalCard"); if(mc){ mc.style.display="none"; } }
+  function refresh(){ try{ var v=window.current||"injuries"; if(typeof window.showView==="function") window.showView(v); }catch(e){} }
+
+  function setDeep(obj,key,val){
+    if(obj&&Object.prototype.hasOwnProperty.call(obj,key)) { obj[key]=val; return true; }
+    for(var k in obj){ if(!Object.prototype.hasOwnProperty.call(obj,k)) continue;
+      var o=obj[k];
+      if(o&&typeof o==="object"&&!Array.isArray(o)&&Object.prototype.hasOwnProperty.call(o,key)){ o[key]=val; return true; } }
+    obj[key]=val; return false;
+  }
+  function collectAll(root){
+    var v={};
+    Array.prototype.forEach.call(root.querySelectorAll("[data-f]"),function(el){
+      var n=el.getAttribute("data-f"); if(!n) return;
+      if(el.classList.contains("opts")||el.classList.contains("pain-grid")||el.classList.contains("bodymap")) v[n]=el.getAttribute("data-val")||"";
+      else if(el.tagName==="INPUT"||el.tagName==="SELECT"||el.tagName==="TEXTAREA"){
+        if(el.type==="checkbox") v[n]=el.checked?"YES":"NO"; else v[n]=el.value;
+      }
+    });
+    return v;
+  }
+  function saveEdit(root,id){
+    var s=S(); if(!s) return false;
+    var rec=(s.injuries||[]).filter(function(x){ return String(x.id)===String(id); })[0];
+    if(!rec){ toast("لم يُعثر على سجل الإصابة","bad"); return false; }
+    ["contact","recurrence","football","sanction","exam","signoff","plan"].forEach(function(k){
+      if(!rec[k]||typeof rec[k]!=="object") rec[k]={}; });
+    var v=collectAll(root), n=0;
+    Object.keys(v).forEach(function(k){
+      if(k.indexOf("__")===0||k==="__id"||k==="__tid") return;
+      var val=v[k];
+      if(k==="bodySites"){ val=String(val||"").split(",").map(function(x){return x.trim();}).filter(Boolean); val=val.filter(function(x,i,a){ return a.indexOf(x)===i; }).join(","); }
+      if(rec[k]!==undefined){ rec[k]=val; n++; return; }
+      if(setDeep(rec,k,val)) n++;
+    });
+    /* ربط الحقول المتداخلة المعروفة (كما يقرأها التقرير) */
+    var MAP={diagnosis:["exam","diagnosis"],causeGuess:["exam","causeGuess"],comments:["exam","comments"],
+             fromContact:["contact","fromContact"],object:["contact","object"],player:["contact","player"],c_notes:["contact","notes"],
+             recurrent:["recurrence","recurrent"],dateReturn:["recurrence","dateReturn"],
+             withWho:["football","withWho"],context:["football","context"],surface:["football","surface"],minutes:["football","minutes"],f_notes:["football","notes"],
+             s_type:["sanction","type"],s_off:["sanction","offender"],s_own:["sanction","own"],s_opp:["sanction","opp"],
+             ability:["signoff","ability"],expDays:["plan","expDays"],physioStart:["plan","physioStart"],medStart:["plan","medStart"],
+             rtpDate:["plan","rtpDate"],groupDate:["plan","groupDate"],healedDate:["plan","healedDate"],surgery:["plan","surgery"],surgDate:["plan","surgDate"],
+             stageNow:["plan","stageNow"],exp_days:["plan","expDays"]};
+    Object.keys(MAP).forEach(function(k){
+      if(v[k]===undefined) return;
+      var path=MAP[k]; rec[path[0]]=rec[path[0]]||{}; rec[path[0]][path[1]]=v[k]; n++;
+    });
+    if(v.__id) rec.id=id;
+    rec.edited=new Date().toISOString();
+    try{
+      var pl=(s.players||[]).filter(function(p){ return String(p.id)===String(rec.playerId); })[0];
+      if(pl){ var st=String(rec.status||""); pl.status=(st==="cleared"?"سليم":"مصاب"); }
+    }catch(e){}
+    persist();
+    try{ if(window.QD304&&window.QD304.sweep) window.QD304.sweep(); }catch(e){}
+    closeM(); refresh();
+    toast("تم حفظ التعديل ("+n+" حقلًا)","ok");
+    return true;
+  }
+  window.QD310={saveEdit:saveEdit,collectAll:collectAll};
+
+  /* اعتراض زر الحفظ داخل نموذج التعديل فقط (وجود __id) */
+  document.addEventListener("click",function(e){
+    var t=e.target&&e.target.closest?e.target.closest('[data-act="saveInjury"]'):null;
+    if(!t) return;
+    var root=document.getElementById("modalCard"); if(!root) return;
+    var hid=root.querySelector('[data-f="__id"]');
+    var id=hid&&hid.value; if(!id) return;              /* إصابة جديدة: نترك المعالج الأصلي */
+    if(!root.querySelector('[data-f="playerId"]')) return;
+    e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
+    saveEdit(root,id);
+  },true);
 })();
 </script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
