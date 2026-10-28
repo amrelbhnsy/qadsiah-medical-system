@@ -35139,7 +35139,7 @@ tr:hover .qde-ndate{color:#7E0E14}
 
   function badge(){
     try{ var b=document.getElementById("qdrBadge"); if(!b) return;
-      var w="v11-314 · SAVE-FIX";
+      var w="v11-320 · STATUS-HUB";
       if(b.textContent!==w+" · BTN-OK") b.textContent=w+" · BTN-OK"; }catch(e){}
   }
 
@@ -47179,6 +47179,642 @@ tr:hover .qde-ndate{color:#7E0E14}
 </script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 <style id="qd314css">.qd308b[data-quick],[data-quick],.qd306b{display:none !important}</style>
+<script>
+/*!
+ * QD320 · STATUS-HUB — دمج الإصابات + الجاهزية (الاستبيان) + GPS + الحمل في مؤشر واحد
+ *  (١) رفع نتائج GPS اليومية من Excel/CSV مع تعرّف تلقائي على الأعمدة ومطابقة أسماء اللاعبين.
+ *  (٢) استيراد استبيان الجوال (رمز QDW1) أو ملف CSV.
+ *  (٣) محرك حالة اللاعب: جاهزية (Hooper) + حمل حاد/مزمن (ACWR) + التوفّر الطبي.
+ *  (٤) لوحة واحدة: من جاهز الآن · من يُراقب · من في خطر · ولماذا.
+ */
+(function(){
+  if(window.__qd320) return; window.__qd320=1;
+  var CFGKEY="qd320_cfg";
+  var DEF={wWell:40,wLoad:30,wMed:30,acwrLow:0.8,acwrHigh:1.3,acwrDanger:1.5,wellDays:3};
+  function cfg(){ try{ return Object.assign({},DEF,JSON.parse(localStorage.getItem(CFGKEY)||"{}")); }catch(e){ return Object.assign({},DEF); } }
+  function setCfg(o){ try{ localStorage.setItem(CFGKEY,JSON.stringify(Object.assign(cfg(),o))); }catch(e){} }
+  function S(){ try{ var a=window.__QDAPP; if(a&&a.S) return a.S; }catch(e){} return null; }
+  function save(){ try{ if(window.__QDAPP&&window.__QDAPP.save){ window.__QDAPP.save(); return; } }catch(e){}
+    try{ if(typeof window.save==="function") window.save(); }catch(e){} }
+  function esc(t){ return String(t==null?"":t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+  function norm(t){
+    return String(t||"").toLowerCase()
+      .replace(/[\u064B-\u0652\u0670\u0640]/g,"")
+      .replace(/[أإآٱ]/g,"ا").replace(/ى/g,"ي").replace(/ة/g,"ه").replace(/ؤ/g,"و").replace(/ئ/g,"ي")
+      .replace(/[^a-z0-9\u0600-\u06FF]+/g," ").replace(/\s+/g," ").trim();
+  }
+  function today(){ var d=new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+  function dnum(d){ try{ var x=new Date(String(d).slice(0,10)+"T00:00:00"); return isNaN(x)?null:x.getTime(); }catch(e){ return null; } }
+  function daysAgo(n){ var x=new Date(); x.setHours(0,0,0,0); x.setDate(x.getDate()-n); return x.getTime(); }
+
+  /* ---------- مطابقة الأسماء ---------- */
+  function players(){ var s=S()||{}; return (s.players||[]); }
+  function pname(p){ return [p.first,p.last,p.name].filter(Boolean).join(" ").trim(); }
+  function matchName(raw){
+    var n=norm(raw); if(!n) return null;
+    var ps=players(), best=null, bestScore=0;
+    ps.forEach(function(p){
+      var full=norm(pname(p)), first=norm(p.first||""), last=norm(p.last||"");
+      var sc=0;
+      if(full&&full===n) sc=100;
+      else if(last&&last===n) sc=92;
+      else if(first&&last&&(first+" "+last)===n) sc=96;
+      else if(full&&(full.indexOf(n)>-1||n.indexOf(full)>-1)) sc=80;
+      else if(last&&n.indexOf(last)>-1) sc=72;
+      else if(first&&n.indexOf(first)>-1&&first.length>2) sc=60;
+      else{
+        var a=n.split(" ").filter(Boolean), b=full.split(" ").filter(Boolean), hit=0;
+        a.forEach(function(x){ if(b.indexOf(x)>-1) hit++; });
+        if(hit&&a.length) sc=Math.round(hit/a.length*55);
+      }
+      if(String(p.num||p.number||"")&&String(p.num||p.number||"")===String(raw).replace(/\D/g,"")) sc=Math.max(sc,90);
+      if(sc>bestScore){ bestScore=sc; best=p; }
+    });
+    return bestScore>=55?{p:best,score:bestScore}:null;
+  }
+
+  /* ---------- قراءة Excel (xlsx) و CSV ---------- */
+  function readZip(buf){
+    var u=new Uint8Array(buf), dv=new DataView(buf), i=u.length-22, eocd=-1;
+    for(;i>=0&&i>u.length-66000;i--){ if(dv.getUint32(i,true)===0x06054b50){ eocd=i; break; } }
+    if(eocd<0) throw new Error("ملف xlsx غير صالح");
+    var n=dv.getUint16(eocd+10,true), off=dv.getUint32(eocd+16,true), out={}, p=off;
+    for(var k=0;k<n;k++){
+      if(dv.getUint32(p,true)!==0x02014b50) break;
+      var method=dv.getUint16(p+10,true), csize=dv.getUint32(p+20,true),
+          fnLen=dv.getUint16(p+28,true), exLen=dv.getUint16(p+30,true), cmLen=dv.getUint16(p+32,true),
+          lho=dv.getUint32(p+42,true);
+      var name=new TextDecoder().decode(u.subarray(p+46,p+46+fnLen));
+      out[name]={method:method,csize:csize,lho:lho};
+      p+=46+fnLen+exLen+cmLen;
+    }
+    return {bytes:u,dv:dv,entries:out};
+  }
+  async function unzipEntry(z,name){
+    var e=z.entries[name]; if(!e) return null;
+    var dv=z.dv, u=z.bytes, p=e.lho;
+    if(dv.getUint32(p,true)!==0x04034b50) throw new Error("رأس zip غير صالح");
+    var fnLen=dv.getUint16(p+26,true), exLen=dv.getUint16(p+28,true);
+    var start=p+30+fnLen+exLen, data=u.subarray(start,start+(e.csize||u.length-start));
+    if(e.method===0) return new TextDecoder().decode(data);
+    if(typeof DecompressionStream!=="undefined"){
+      var ds=new DecompressionStream("deflate-raw");
+      var stream=new Blob([data]).stream().pipeThrough(ds);
+      var ab=await new Response(stream).arrayBuffer();
+      return new TextDecoder().decode(ab);
+    }
+    throw new Error("المتصفح لا يدعم فك ضغط xlsx — صدّر الملف CSV");
+  }
+  function colIndex(ref){
+    var m=/^([A-Z]+)/.exec(ref||""); if(!m) return 0;
+    var s=m[1], n=0; for(var i=0;i<s.length;i++) n=n*26+(s.charCodeAt(i)-64);
+    return n-1;
+  }
+  async function parseXlsx(file){
+    var buf=await file.arrayBuffer(); var z=readZip(buf);
+    var shared=[];
+    var ss=await unzipEntry(z,"xl/sharedStrings.xml");
+    if(ss){ var sd=new DOMParser().parseFromString(ss,"application/xml");
+      Array.prototype.forEach.call(sd.getElementsByTagName("si"),function(si){
+        shared.push(Array.prototype.map.call(si.getElementsByTagName("t"),function(t){return t.textContent;}).join(""));
+      });
+    }
+    var sheetName=null;
+    Object.keys(z.entries).forEach(function(k){ if(!sheetName&&/^xl\/worksheets\/sheet1\.xml$/.test(k)) sheetName=k; });
+    if(!sheetName) Object.keys(z.entries).forEach(function(k){ if(!sheetName&&/^xl\/worksheets\/sheet\d+\.xml$/.test(k)) sheetName=k; });
+    var xml=await unzipEntry(z,sheetName); if(!xml) throw new Error("لا توجد ورقة بيانات");
+    var doc=new DOMParser().parseFromString(xml,"application/xml");
+    var rows=[];
+    Array.prototype.forEach.call(doc.getElementsByTagName("row"),function(r){
+      var arr=[];
+      Array.prototype.forEach.call(r.getElementsByTagName("c"),function(c){
+        var ci=colIndex(c.getAttribute("r")||"");
+        var t=c.getAttribute("t"), v="";
+        if(t==="inlineStr"){ v=Array.prototype.map.call(c.getElementsByTagName("t"),function(x){return x.textContent;}).join(""); }
+        else{ var vn=c.getElementsByTagName("v")[0]; v=vn?vn.textContent:""; if(t==="s") v=shared[Number(v)]||""; }
+        arr[ci]=String(v).trim();
+      });
+      rows.push(arr);
+    });
+    return rows;
+  }
+  function parseCSV(text){
+    text=String(text||"").replace(/^\uFEFF/,"");
+    var sep=(text.split("\n")[0].match(/\t/g)||[]).length>(text.split("\n")[0].match(/,/g)||[]).length?"\t":",";
+    var rows=[], row=[], cur="", q=false;
+    for(var i=0;i<text.length;i++){
+      var ch=text[i];
+      if(q){ if(ch==='"'){ if(text[i+1]==='"'){ cur+='"'; i++; } else q=false; } else cur+=ch; }
+      else if(ch==='"') q=true;
+      else if(ch===sep){ row.push(cur); cur=""; }
+      else if(ch==="\n"){ row.push(cur); rows.push(row); row=[]; cur=""; }
+      else if(ch!=="\r") cur+=ch;
+    }
+    if(cur.length||row.length){ row.push(cur); rows.push(row); }
+    return rows.filter(function(r){ return r.some(function(x){ return String(x).trim()!==""; }); });
+  }
+
+  /* ---------- تعرّف على الأعمدة ---------- */
+  var COLS={
+    player:["player","player name","name","athlete","اللاعب","الاسم","اسم اللاعب"],
+    date:["date","day","session date","التاريخ","اليوم"],
+    td:["total distance","totaldistance","total dist","td","distance","المسافة","المسافة الكلية","اجمالي المسافة"],
+    hsr:["hsr","high speed running","high speed","hsr distance","الجري السريع","مسافة الجري السريع"],
+    sprint:["sprint","sprint distance","sprints","العدو","مسافة العدو"],
+    maxSpeed:["max speed","vmax","top speed","peak speed","اقصى سرعة","أقصى سرعة"],
+    playerLoad:["player load","playerload","pl","load","الحمل","حمل اللاعب"],
+    accel:["accel","acc","accelerations","number of accelerations","التسارع","التسارعات"],
+    decel:["decel","dec","decelerations","التباطؤ","التباطؤات"],
+    duration:["duration","minutes","min","time","المدة","الدقائق"],
+    dpm:["m/min","m per min","distance per minute","dist/min","متر/دقيقة"]
+  };
+  function detectCols(head){
+    var map={}, used={};
+    Object.keys(COLS).forEach(function(key){
+      var cands=COLS[key];
+      for(var i=0;i<head.length;i++){
+        if(used[i]) continue;
+        var h=norm(head[i]);
+        for(var c=0;c<cands.length;c++){
+          var cand=norm(cands[c]);
+          if(h===cand||h.indexOf(cand)===0||cand.indexOf(h)===0&&h.length>2){ map[key]=i; used[i]=1; return; }
+        }
+      }
+    });
+    return map;
+  }
+  function toNum(v){ var n=Number(String(v==null?"":v).replace(/[^\d.\-]/g,"")); return isFinite(n)?n:null; }
+
+  /* ---------- تخزين ---------- */
+  function gpsStore(){ var s=S(); if(!s) return [];
+    if(!Array.isArray(s.gps)) s.gps=[];
+    return s.gps; }
+  function addGps(recs){
+    var s=S(); if(!s) return 0;
+    if(!Array.isArray(s.gps)) s.gps=[];
+    var n=0;
+    recs.forEach(function(r){
+      var ex=s.gps.filter(function(x){ return x.playerId===r.playerId&&String(x.date).slice(0,10)===String(r.date).slice(0,10); })[0];
+      if(ex){ Object.assign(ex,r); } else { r.id="g_"+Date.now()+Math.random().toString(36).slice(2,6); s.gps.push(r); }
+      n++;
+    });
+    save(); return n;
+  }
+  function wellStore(){ var s=S(); return (s&&Array.isArray(s.wellness))?s.wellness:[]; }
+  function addWell(rec){
+    var s=S(); if(!s) return false;
+    if(!Array.isArray(s.wellness)) s.wellness=[];
+    var d=String(rec.date).slice(0,10);
+    var ex=s.wellness.filter(function(x){ return String(x.playerId)===String(rec.playerId)&&String(x.date).slice(0,10)===d; })[0];
+    if(ex) Object.assign(ex,rec); else { rec.id="w_"+Date.now()+Math.random().toString(36).slice(2,6); s.wellness.push(rec); }
+    save(); return true;
+  }
+
+  /* ---------- محرك الحالة ---------- */
+  function wellScore(pid,days){
+    var ws=wellStore().filter(function(w){ return String(w.playerId)===String(pid); });
+    if(!ws.length) return null;
+    var best=null, bt=-1;
+    ws.forEach(function(w){
+      var t=dnum(w.date); if(t==null) return;
+      if(t>=daysAgo(days)&&t>bt){ bt=t; best=w; }
+    });
+    if(!best) return null;
+    var sum=0, cnt=0;
+    ["sleep","fatigue","soreness","stress","mood"].forEach(function(k){
+      var v=Number(best[k]); if(isFinite(v)&&v>0){ sum+=v; cnt++; }
+    });
+    if(!cnt) return null;
+    var pct=Math.round((25-sum)/(20)*100);
+    if(cnt<5) pct=Math.round((cnt*5-sum)/(cnt*4)*100);
+    return {pct:Math.max(0,Math.min(100,pct)),date:String(best.date).slice(0,10),raw:best};
+  }
+  function loadSeries(pid){
+    var s=S()||{}, out=[];
+    (s.gps||[]).forEach(function(g){
+      if(String(g.playerId)!==String(pid)) return;
+      var v=Number(g.td); if(!isFinite(v)||v<=0) v=Number(g.playerLoad)||0;
+      var t=dnum(g.date); if(t!=null&&v>0) out.push({t:t,v:v,src:"gps"});
+    });
+    (s.loads||[]).forEach(function(l){
+      if(String(l.playerId)!==String(pid)) return;
+      var v=Number(l.load!=null?l.load:(l.tl!=null?l.tl:(l.rpe&&l.duration?l.rpe*l.duration:l.value)));
+      var t=dnum(l.date); if(t!=null&&isFinite(v)&&v>0) out.push({t:t,v:v,src:"load"});
+    });
+    return out.sort(function(a,b){ return a.t-b.t; });
+  }
+  function acwr(pid){
+    var c=cfg(), ser=loadSeries(pid);
+    if(!ser.length) return null;
+    var a7=ser.filter(function(x){ return x.t>=daysAgo(6); }), c28=ser.filter(function(x){ return x.t>=daysAgo(27); });
+    if(!c28.length) return null;
+    var acute=a7.reduce(function(s,x){ return s+x.v; },0)/7;
+    var chronic=c28.reduce(function(s,x){ return s+x.v; },0)/28;
+    if(!chronic) return null;
+    var r=acute/chronic;
+    var flag=r>c.acwrDanger?"خطر":(r>c.acwrHigh?"مرتفع":(r<c.acwrLow?"منخفض":"مثالي"));
+    return {acwr:+r.toFixed(2),flag:flag,acute:Math.round(acute),chronic:Math.round(chronic),days7:a7.length};
+  }
+  function injuryOf(pid){
+    var s=S()||{};
+    var act=(s.injuries||[]).filter(function(i){ return String(i.playerId)===String(pid)&&String(i.status)!=="cleared"; });
+    if(!act.length) return null;
+    act.sort(function(a,b){ return String(b.date||"").localeCompare(String(a.date||"")); });
+    var i=act[0];
+    return {type:i.type||"",sites:i.bodySites||"",date:i.date,status:i.status,
+      days:Math.max(0,Math.round((Date.now()-(dnum(i.date)||Date.now()))/86400000)),
+      n:act.length};
+  }
+  function statusOf(pid){
+    var c=cfg(), w=wellScore(pid,c.wellDays), a=acwr(pid), inj=injuryOf(pid);
+    var wS=w?w.pct:null, lS=100, medS=100;
+    if(a){
+      var dev=0;
+      if(a.acwr>c.acwrHigh) dev=(a.acwr-c.acwrHigh)/0.5;
+      if(a.acwr<c.acwrLow) dev=(c.acwrLow-a.acwr)/0.5;
+      lS=Math.max(0,Math.round(100-dev*100));
+    } else lS=70;
+    if(inj){ medS=(String(inj.status)==="partial")?50:0; }
+    var wsum=0, tot=0;
+    if(wS!=null){ wsum+=wS*c.wWell; tot+=c.wWell; }
+    else { wsum+=70*c.wWell; tot+=c.wWell; }
+    wsum+=lS*c.wLoad; tot+=c.wLoad;
+    wsum+=medS*c.wMed; tot+=c.wMed;
+    var score=Math.round(wsum/tot);
+    if(inj&&String(inj.status)!=="partial") score=Math.min(score,25);
+    var band = score>=80?"ready":(score>=60?"watch":(score>=40?"caution":"danger"));
+    var reasons=[];
+    if(inj) reasons.push((String(inj.status)==="partial"?"إصابة جزئية: ":"إصابة نشطة: ")+(inj.type||"")+(inj.days?" · "+inj.days+" يوم":""));
+    if(w) reasons.push("جاهزية الاستبيان "+w.pct+"%");
+    else reasons.push("لا استبيان خلال "+c.wellDays+" أيام");
+    if(a) reasons.push("ACWR "+a.acwr+" ("+a.flag+")");
+    return {score:score,band:band,well:w,acwr:a,inj:inj,reasons:reasons};
+  }
+
+  /* ---------- الواجهة ---------- */
+  var CSS=[
+   '#qd320btn{position:fixed;right:16px;bottom:16px;z-index:2147482000;background:linear-gradient(135deg,#8E1015,#B5121B);color:#fff;border:0;border-radius:14px;padding:12px 16px;font:900 12.5px system-ui,Tahoma,sans-serif;box-shadow:0 10px 26px rgba(142,16,21,.36);cursor:pointer;display:flex;align-items:center;gap:7px}',
+   '#qd320btn i{font-style:normal;font-size:15px}',
+   '#qd320{position:fixed;inset:0;z-index:2147482001;background:#EEF0F3;display:none;overflow:auto;direction:rtl;font-family:system-ui,Tahoma,sans-serif;color:#151A21}',
+   '#qd320.on{display:block}',
+   '.q320w{max-width:1180px;margin:0 auto;padding:16px 16px 60px}',
+   '.q320hd{background:linear-gradient(135deg,#0F172A,#1E293B);color:#fff;border-radius:16px;padding:16px 18px;display:flex;align-items:center;gap:12px;margin-bottom:12px}',
+   '.q320hd .n{width:44px;height:44px;border-radius:13px;background:linear-gradient(150deg,#fff,#F3ECDD);color:#8E1015;display:grid;place-items:center;font:900 16px inherit;flex:none}',
+   '.q320hd b{display:block;font:900 16px inherit}',
+   '.q320hd span{display:block;font:700 11px inherit;color:#AEB8C7;margin-top:3px}',
+   '.q320hd .x{margin-inline-start:auto;background:rgba(255,255,255,.12);border:0;color:#fff;width:34px;height:34px;border-radius:10px;font:900 16px inherit;cursor:pointer}',
+   '.q320tabs{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px}',
+   '.q320tabs button{border:1px solid #E0DBD4;background:#fff;border-radius:999px;padding:8px 15px;font:900 11.5px inherit;color:#5B6472;cursor:pointer}',
+   '.q320tabs button.on{background:#8E1015;border-color:#8E1015;color:#fff}',
+   '.q320k{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:9px;margin-bottom:12px}',
+   '.q320k .c{background:#fff;border:1px solid #E4E0D6;border-radius:13px;padding:11px 13px}',
+   '.q320k .c i{display:block;font:800 10px inherit;color:#6E7683;font-style:normal;margin-bottom:4px}',
+   '.q320k .c b{font:900 21px inherit;display:block}',
+   '.q320k .c s{text-decoration:none;font:800 10px inherit;color:#6E7683}',
+   '.q320card{background:#fff;border:1px solid #E4E0D6;border-radius:15px;padding:14px;margin-bottom:12px}',
+   '.q320card h3{margin:0 0 3px;font:900 13.5px inherit}',
+   '.q320card p.h{margin:0 0 12px;font:700 11px inherit;color:#6E7683;line-height:1.6}',
+   '.q320t{width:100%;border-collapse:collapse;font:700 11.5px inherit}',
+   '.q320t th{background:#F7F5F0;color:#5B6472;font:900 10px inherit;padding:8px 9px;text-align:start;border-bottom:1px solid #E4E0D6;white-space:nowrap}',
+   '.q320t td{padding:7px 9px;border-bottom:1px solid #F1EEE7;vertical-align:middle}',
+   '.q320t tr:hover td{background:#FBFAF7}',
+   '.q320b{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:3px 9px;font:900 10px inherit;white-space:nowrap}',
+   '.q320dot{width:7px;height:7px;border-radius:50%;display:inline-block;flex:none}',
+   '.q320sc{font:900 15px inherit}',
+   '.q320bar{height:5px;border-radius:3px;background:#EDEAE2;overflow:hidden;min-width:52px}',
+   '.q320bar i{display:block;height:100%;border-radius:3px}',
+   '.q320drop{border:2px dashed #D9D3C4;border-radius:14px;padding:22px;text-align:center;background:#FBFAF7;cursor:pointer}',
+   '.q320drop.on{border-color:#8E1015;background:#FDF6F6}',
+   '.q320drop b{display:block;font:900 13px inherit;margin-bottom:5px}',
+   '.q320drop span{font:700 11px inherit;color:#6E7683}',
+   '.q320row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px}',
+   '.q320in{border:1px solid #E4E0D6;border-radius:10px;padding:9px 11px;font:700 12px inherit;flex:1;min-width:180px;outline:0}',
+   '.q320in:focus{border-color:#C8A24A;box-shadow:0 0 0 3px rgba(200,162,74,.16)}',
+   '.q320go{border:0;border-radius:10px;padding:10px 16px;font:900 12px inherit;background:#8E1015;color:#fff;cursor:pointer}',
+   '.q320go.gh{background:#fff;border:1px solid #E0DBD4;color:#5B6472}',
+   '.q320msg{margin-top:10px;font:800 11.5px inherit;padding:10px 12px;border-radius:11px;display:none}',
+   '.q320msg.on{display:block}',
+   '.q320msg.ok{background:#E8F5EC;color:#15803D;border:1px solid #CFE7D6}',
+   '.q320msg.bad{background:#FDECEC;color:#B5121B;border:1px solid #F3C9C9}',
+   '.q320msg.warn{background:#FFF7E8;color:#B45309;border:1px solid #F0DDB6}',
+   '.q320note{background:#FBF8F1;border:1px dashed #E3D6B4;border-radius:12px;padding:11px 13px;font:700 10.5px inherit;color:#7A6A45;line-height:1.75}',
+   '.q320mini{font:800 10px inherit;color:#6E7683}',
+   '@media(max-width:640px){.q320w{padding:10px 10px 50px}.q320k .c b{font-size:18px}}'
+  ].join("\n");
+  function css(){ if(document.getElementById("q320css")) return; var st=document.createElement("style"); st.id="q320css"; st.textContent=CSS; document.head.appendChild(st); }
+
+  var TAB="dash", pending=null, lastImport=null;
+  function closeRels(){ var s=S()||{}; return {gps:(s.gps||[]).length,well:(s.wellness||[]).length}; }
+
+  function body(){
+    var s=S()||{}, ps=players();
+    var rows=ps.map(function(p){ var st=statusOf(p.id); return {p:p,st:st}; });
+    var cnt={ready:0,watch:0,caution:0,danger:0,nodata:0};
+    rows.forEach(function(r){ var st=r.st; if(!st.well&&!st.acwr&&!st.inj) cnt.nodata++; cnt[st.band]=(cnt[st.band]||0)+1; });
+    var rel=closeRels();
+    var h='';
+    if(TAB==="dash"){
+      h+='<div class="q320k">'+
+        kpi("جاهز","q320-ready",cnt.ready||0,"درجة ٨٠+")+
+        kpi("مراقبة","#B45309",cnt.watch||0,"٦٠–٧٩")+
+        kpi("حذر","#C2410C",cnt.caution||0,"٤٠–٥٩")+
+        kpi("خطر","#B5121B",cnt.danger||0,"أقل من ٤٠")+
+        kpi("بدون بيانات","#6E7683",cnt.nodata||0,"لم يُرسل استبيان")+
+        '</div>';
+      h+='<div class="q320card"><h3>حالة اللاعبين اليوم</h3>'+
+         '<p class="h">الدرجة تجمع: جاهزية الاستبيان ('+cfg().wWell+'%) · مؤشر الحمل الحاد/المزمن ('+cfg().wLoad+'%) · التوفّر الطبي ('+cfg().wMed+'%). اضغط أي لاعب لعرض سبب الحالة.</p>'+
+         '<table class="q320t"><thead><tr><th>اللاعب</th><th>الحالة</th><th>الدرجة</th><th>جاهزية الاستبيان</th><th>ACWR</th><th>GPS</th><th>طبي</th><th>سبب</th></tr></thead><tbody>'+
+         rows.map(function(r){
+           var st=r.st, p=r.p, band=BAND[st.band];
+           var w=st.well, a=st.acwr, inj=st.inj;
+           var gps7=(s.gps||[]).filter(function(g){ return String(g.playerId)===String(p.id)&&dnum(g.date)>=daysAgo(6); });
+           var gpsSum=gps7.reduce(function(x,g){ return x+(Number(g.td)||0); },0);
+           return '<tr data-q320-row="'+esc(p.id)+'">'+
+             '<td><b style="font-weight:900">'+esc(pname(p)||"—")+'</b></td>'+
+             '<td><span class="q320b" style="background:'+band.bg+';color:'+band.fg+'"><i class="q320dot" style="background:'+band.dot+'"></i>'+band.t+'</span></td>'+
+             '<td><span class="q320sc" style="color:'+band.dot+'">'+st.score+'</span></td>'+
+             '<td>'+(w?('<div style="display:flex;align-items:center;gap:6px"><div class="q320bar"><i style="width:'+w.pct+'%;background:'+(w.pct>=80?"#15803D":w.pct>=60?"#B45309":"#B5121B")+'"></i></div><span class="q320mini">'+w.pct+'%</span></div>'):'<span class="q320mini">—</span>')+'</td>'+
+             '<td>'+(a?('<b style="color:'+(a.flag==="خطر"?"#B5121B":a.flag==="مرتفع"?"#B45309":"#15803D")+'">'+a.acwr+'</b> <span class="q320mini">'+a.flag+'</span>'):'<span class="q320mini">—</span>')+'</td>'+
+             '<td>'+(gpsSum?('<b>'+(gpsSum>=1000?(gpsSum/1000).toFixed(1)+' كلم':Math.round(gpsSum)+' م')+'</b>'):'<span class="q320mini">—</span>')+'</td>'+
+             '<td>'+(inj?('<span class="q320b" style="background:#FDECEC;color:#B5121B">'+esc(String(inj.type).slice(0,22))+'</span>'):'<span class="q320b" style="background:#E8F5EC;color:#15803D">سليم</span>')+'</td>'+
+             '<td class="q320mini">'+esc(st.reasons.join(" · "))+'</td></tr>';
+         }).join("")+
+         '</tbody></table></div>';
+      h+='<div class="q320card"><h3>مصادر البيانات المرتبطة</h3><p class="h">كل مصدر يُغذّي الدرجة تلقائيًا — ويمكنك فتح قسمه الأصلي للتعديل.</p>'+
+        '<div style="display:flex;gap:9px;flex-wrap:wrap">'+
+        srcCard("الإصابات",(s.injuries||[]).length+" سجل","injuries","مصدر التوفّر الطبي")+
+        srcCard("الاستبيان اليومي",rel.well+" إدخال","load","مصدر الجاهزية الذاتية")+
+        srcCard("GPS",rel.gps+" سجل","gps","مصدر الحمل الخارجي")+
+        srcCard("الحمل الداخلي",(s.loads||[]).length+" قياس","load","RPE × المدة")+
+        '</div></div>';
+    }
+    if(TAB==="gps"){
+      h+='<div class="q320card"><h3>رفع نتائج GPS اليومية</h3>'+
+        '<p class="h">اسحب ملف Excel (xlsx) أو CSV — يتعرّف البرنامج على الأعمدة تلقائيًا: اللاعب · التاريخ · المسافة الكلية · الجري السريع · العدو · أقصى سرعة · Player Load · التسارع/التباطؤ. الأعمدة الإنجليزية والعربية مدعومة.</p>'+
+        '<div class="q320drop" id="q320drop"><b>📊 أفلت الملف هنا أو اضغط للاختيار</b><span>xlsx · xls · csv · txt</span><input type="file" id="q320file" accept=".xlsx,.csv,.txt" style="display:none"></div>'+
+        '<div class="q320msg" id="q320msg"></div>'+
+        '<div id="q320prev"></div></div>';
+      h+='<div class="q320card"><h3>آخر سجلات GPS</h3><p class="h">أحدث ١٢ سجلًا محفوظًا.</p>'+
+        '<table class="q320t"><thead><tr><th>اللاعب</th><th>التاريخ</th><th>المسافة</th><th>HSR</th><th>عدو</th><th>أقصى سرعة</th><th>Load</th></tr></thead><tbody>'+
+        (s.gps||[]).slice().sort(function(a,b){ return String(b.date).localeCompare(String(a.date)); }).slice(0,12).map(function(g){
+          var p=players().filter(function(x){ return String(x.id)===String(g.playerId); })[0];
+          return '<tr><td>'+esc(p?pname(p):g.playerId)+'</td><td>'+esc(String(g.date).slice(0,10))+'</td><td>'+fmt(g.td)+'</td><td>'+fmt(g.hsr)+'</td><td>'+fmt(g.sprint)+'</td><td>'+fmt(g.maxSpeed)+'</td><td>'+fmt(g.playerLoad)+'</td></tr>';
+        }).join("")+'</tbody></table></div>';
+    }
+    if(TAB==="well"){
+      h+='<div class="q320card"><h3>استبيان اللاعب على الجوال</h3>'+
+        '<p class="h">أرسل الرابط للاعب مرة واحدة — يفتحه على جواله، يجيب على ٥ أسئلة، ويحصل على رمز يرسله لك بضغطة واحدة. لا يحتاج تسجيل دخول ولا إنترنت بعد فتح الصفحة.</p>'+
+        '<div class="q320row"><input class="q320in" id="q320url" readonly><button class="q320go" id="q320copy">نسخ الرابط</button><button class="q320go gh" id="q320wa">إرسال واتساب</button></div>'+
+        '<p class="h" style="margin-top:10px">لإرسال الرابط على واتساب يلزم أن يكون موقعك منشورًا (Netlify) وأن تكون صفحة الاستبيان مرفوعة بجانب index.html.</p></div>';
+      h+='<div class="q320card"><h3>استيراد ردود الاستبيان</h3><p class="h">ألصق رمز الاستبيان (يبدأ بـ QDW1) — يمكن لصق عدة رموز في سطور منفصلة.</p>'+
+        '<textarea class="q320in" id="q320code" rows="4" placeholder="QDW1.eyJ2IjoxLCJuIjoi..." style="width:100%;font-family:ui-monospace,monospace;direction:ltr;text-align:left"></textarea>'+
+        '<div class="q320row"><button class="q320go" id="q320imp">استيراد</button><button class="q320go gh" id="q320sample">تجربة برمز نموذجي</button></div>'+
+        '<div class="q320msg" id="q320wmsg"></div></div>';
+      h+='<div class="q320card"><h3>آخر ردود الاستبيان</h3>'+
+        '<table class="q320t"><thead><tr><th>اللاعب</th><th>التاريخ</th><th>نوم</th><th>إجهاد</th><th>ألم</th><th>توتر</th><th>مزاج</th><th>الجاهزية</th></tr></thead><tbody>'+
+        (rel.well?wellStore().slice().sort(function(a,b){ return String(b.date).localeCompare(String(a.date)); }).slice(0,12).map(function(w){
+          var p=players().filter(function(x){ return String(x.id)===String(w.playerId); })[0];
+          var sum=0,c=0; ["sleep","fatigue","soreness","stress","mood"].forEach(function(k){ var v=Number(w[k]); if(isFinite(v)&&v>0){ sum+=v; c++; } });
+          var pct=c?Math.round((c*5-sum)/(c*4)*100):"—";
+          return '<tr><td>'+esc(p?pname(p):w.playerId)+'</td><td>'+esc(String(w.date).slice(0,10))+'</td><td>'+esc(w.sleep||"—")+'</td><td>'+esc(w.fatigue||"—")+'</td><td>'+esc(w.soreness||"—")+'</td><td>'+esc(w.stress||"—")+'</td><td>'+esc(w.mood||"—")+'</td><td><b>'+pct+'%</b></td></tr>';
+        }).join(""):'<tr><td colspan="8" class="q320mini">لا ردود بعد.</td></tr>')+'</tbody></table></div>';
+    }
+    if(TAB==="sci"){
+      h+='<div class="q320card"><h3>الأساس العلمي للمؤشر</h3><p class="h">كل وزن وحدّ قابل للتعديل أدناه، ويُحفظ فورًا.</p>'+
+        '<div class="q320note">'+
+        '<b>١) الجاهزية الذاتية — Hooper Index:</b> خمسة بنود (النوم · الإجهاد · ألم العضلات · التوتر · المزاج) بمقياس ١–٥. المجموع ٥–٢٥؛ الأقل أفضل. تُحوَّل إلى نسبة مئوية: (٢٥ − المجموع) ÷ ٢٠.<br>'+
+        '<b>٢) نسبة الحمل الحاد/المزمن — ACWR:</b> متوسط الحمل في ٧ أيام ÷ متوسطه في ٢٨ يومًا. النطاق الآمن الشائع ٠٫٨–١٫٣؛ فوق ١٫٥ يُصنَّف خطرًا (ارتفاع مفاجئ في الحمل).<br>'+
+        '<b>٣) التوفّر الطبي:</b> إصابة نشطة = ٠ · إصابة جزئية = ٥٠ · سليم = ١٠٠. وهي حدٌّ أعلى للدرجة: لاعب مصاب لا تُعرض حالته «جاهز» مهما كان استبيانه.<br>'+
+        '<b>٤) الدمج:</b> مجموع مرجّح — ٤٠٪ جاهزية + ٣٠٪ حمل + ٣٠٪ طبي (قابل للتغيير).<br>'+
+        '<b>ملاحظة مهنية:</b> هذه مؤشرات متابعة تدريبية شائعة في علوم الرياضة، وليست تشخيصًا طبيًا ولا بديلًا عن تقييم الأخصائي. القرار النهائي للمشاركة طبي وتدريبي.'+
+        '</div></div>';
+      var c=cfg();
+      h+='<div class="q320card"><h3>الأوزان والحدود</h3><div class="q320row">'+
+        numIn("وزن الجاهزية %","wWell",c.wWell)+numIn("وزن الحمل %","wLoad",c.wLoad)+numIn("وزن الطبي %","wMed",c.wMed)+
+        numIn("ACWR آمن — الأدنى","acwrLow",c.acwrLow)+numIn("ACWR آمن — الأعلى","acwrHigh",c.acwrHigh)+numIn("ACWR خطر","acwrDanger",c.acwrDanger)+
+        numIn("أيام صلاحية الاستبيان","wellDays",c.wellDays)+'</div>'+
+        '<div class="q320row"><button class="q320go" id="q320save">حفظ الإعدادات</button><button class="q320go gh" id="q320reset">استعادة الافتراضي</button></div>'+
+        '<div class="q320msg" id="q320cmsg"></div></div>';
+    }
+    return h;
+  }
+  var BAND={
+    ready:{t:"جاهز",bg:"#E8F5EC",fg:"#15803D",dot:"#15803D"},
+    watch:{t:"مراقبة",bg:"#FFF7E8",fg:"#B45309",dot:"#B45309"},
+    caution:{t:"حذر",bg:"#FFF1E6",fg:"#C2410C",dot:"#C2410C"},
+    danger:{t:"خطر",bg:"#FDECEC",fg:"#B5121B",dot:"#B5121B"}
+  };
+  function kpi(l,col,v,sub){ return '<div class="c"><i>'+esc(l)+'</i><b style="color:'+col+'">'+v+'</b><s>'+esc(sub||"")+'</s></div>'; }
+  function srcCard(t,n,v,sub){ return '<div style="flex:1;min-width:150px;border:1px solid #E4E0D6;border-radius:12px;padding:11px 13px;background:#FBFAF7"><b style="display:block;font:900 12.5px inherit">'+esc(t)+'</b><s style="text-decoration:none;font:900 11px inherit;color:#8E1015">'+esc(n)+'</s><div class="q320mini" style="margin-top:3px">'+esc(sub)+'</div><button class="q320go gh" style="margin-top:7px;padding:6px 10px;font-size:10.5px" data-q320-go="'+esc(v)+'">فتح القسم</button></div>'; }
+  function numIn(l,k,v){ return '<label style="display:flex;flex-direction:column;gap:3px;flex:1;min-width:120px"><span class="q320mini">'+esc(l)+'</span><input class="q320in" data-cfg="'+esc(k)+'" type="number" step="0.01" value="'+esc(v)+'" style="min-width:0"></label>'; }
+  function fmt(v){ var n=Number(v); if(!isFinite(n)||!n) return "—"; return n>=1000?(n/1000).toFixed(2)+" ك":Math.round(n); }
+  function msg(el,txt,kind){ var m=document.getElementById(el); if(!m) return; m.className="q320msg on "+(kind||"ok"); m.textContent=txt; }
+
+  function render(){
+    var host=document.getElementById("qd320"); if(!host) return;
+    host.innerHTML='<div class="q320w">'+
+      '<div class="q320hd"><div class="n">Q</div><div><b>مركز حالة اللاعب</b><span>إصابات · جاهزية · GPS · حمل — في مؤشر واحد</span></div><button class="x" data-q320="close">✕</button></div>'+
+      '<div class="q320tabs">'+
+        tabBtn("dash","لوحة اليوم")+tabBtn("gps","رفع GPS")+tabBtn("well","استبيان اللاعب")+tabBtn("sci","الأساس العلمي والإعدادات")+
+      '</div>'+ body()+'</div>';
+    wire();
+  }
+  function tabBtn(k,t){ return '<button data-q320-tab="'+k+'" class="'+(TAB===k?"on":"")+'">'+t+'</button>'; }
+
+  function wire(){
+    var host=document.getElementById("qd320");
+    host.addEventListener("click",function(e){
+      var t=e.target.closest?e.target.closest("[data-q320],[data-q320-tab],[data-q320-go],[data-q320-row]"):null;
+      if(!t) return;
+      if(t.hasAttribute("data-q320-tab")){ TAB=t.getAttribute("data-q320-tab"); render(); return; }
+      if(t.getAttribute("data-q320")==="close"){ host.classList.remove("on"); return; }
+      var go=t.getAttribute("data-q320-go");
+      if(go){ host.classList.remove("on"); try{ if(typeof window.showView==="function") window.showView(go); }catch(x){} return; }
+      var rowId=t.getAttribute("data-q320-row");
+      if(rowId){ detail(rowId); return; }
+    },true);
+    var f=document.getElementById("q320file"), drop=document.getElementById("q320drop");
+    if(drop&&f){
+      drop.onclick=function(){ f.click(); };
+      ["dragenter","dragover"].forEach(function(ev){ drop.addEventListener(ev,function(e){ e.preventDefault(); drop.classList.add("on"); }); });
+      ["dragleave","drop"].forEach(function(ev){ drop.addEventListener(ev,function(e){ e.preventDefault(); drop.classList.remove("on"); }); });
+      drop.addEventListener("drop",function(e){ if(e.dataTransfer.files&&e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]); });
+      f.onchange=function(){ if(f.files&&f.files[0]) handleFile(f.files[0]); };
+    }
+    var sv=document.getElementById("q320save");
+    if(sv) sv.onclick=function(){
+      var o={};
+      Array.prototype.forEach.call(document.querySelectorAll("#qd320 [data-cfg]"),function(i){ o[i.getAttribute("data-cfg")]=Number(i.value); });
+      setCfg(o); msg("q320cmsg","تم حفظ الإعدادات — وأُعيد حساب جميع اللاعبين.","ok"); setTimeout(render,600);
+    };
+    var rs=document.getElementById("q320reset");
+    if(rs) rs.onclick=function(){ try{ localStorage.removeItem(CFGKEY); }catch(e){} msg("q320cmsg","أُعيدت القيم الافتراضية.","warn"); setTimeout(render,600); };
+    var u=document.getElementById("q320url");
+    if(u){ u.value=surveyUrl(); }
+    var cp=document.getElementById("q320copy");
+    if(cp) cp.onclick=function(){ var v=surveyUrl(); try{ if(navigator.clipboard) navigator.clipboard.writeText(v); }catch(e){}
+      try{ var t=document.getElementById("q320url"); t.select(); document.execCommand("copy"); }catch(e){}
+      cp.textContent="تم النسخ ✓"; setTimeout(function(){ cp.textContent="نسخ الرابط"; },1500); };
+    var wa=document.getElementById("q320wa");
+    if(wa) wa.onclick=function(){ window.open("https://wa.me/?text="+encodeURIComponent("استبيانك اليومي — القادسية U18:\n"+surveyUrl()),"_blank"); };
+    var imp=document.getElementById("q320imp");
+    if(imp) imp.onclick=function(){
+      var txt=document.getElementById("q320code").value||"";
+      var codes=txt.split(/\s+/).filter(function(x){ return /^QDW1\./.test(x); });
+      if(!codes.length){ msg("q320wmsg","لم أجد رمزًا صالحًا — يجب أن يبدأ بـ QDW1.","bad"); return; }
+      var ok=0, bad=[];
+      codes.forEach(function(c){ var r=importCode(c); if(r&&r.ok) ok++; else bad.push(r&&r.err?r.err:c.slice(0,14)); });
+      msg("q320wmsg","تم استيراد "+ok+" ردًا."+(bad.length?" · فشل: "+bad.slice(0,2).join(" ، "):""),ok?"ok":"bad");
+      if(ok) setTimeout(render,700);
+    };
+    var sp=document.getElementById("q320sample");
+    if(sp) sp.onclick=function(){
+      var p=players()[0]; if(!p){ msg("q320wmsg","لا يوجد لاعبون في البرنامج.","bad"); return; }
+      var o={v:1,n:pname(p),d:today(),w:{sleep:2,fatigue:2,soreness:1,stress:2,mood:1},t:"نموذج تجريبي",c:new Date().toISOString()};
+      var code="QDW1."+btoa(unescape(encodeURIComponent(JSON.stringify(o)))).replace(/=+$/,"");
+      document.getElementById("q320code").value=code;
+      msg("q320wmsg","رمز نموذجي جاهز — اضغط استيراد لتجربته.","warn");
+    };
+  }
+  function surveyUrl(){
+    var base="";
+    try{ base=location.href.replace(/[^\/]*$/,""); }catch(e){}
+    return base+"survey.html";
+  }
+  function importCode(code){
+    try{
+      var b=code.replace(/^QDW1\./,"").replace(/-/g,"+").replace(/_/g,"/");
+      var json=decodeURIComponent(escape(atob(b)));
+      var o=JSON.parse(json);
+      var m=matchName(o.n||"");
+      if(!m||!m.p) return {ok:false,err:"اسم غير مطابق: "+(o.n||"?")};
+      var rec={playerId:m.p.id,date:String(o.d||today()).slice(0,10),
+        sleep:num0(o.w&&o.w.sleep),fatigue:num0(o.w&&o.w.fatigue),soreness:num0(o.w&&o.w.soreness),
+        stress:num0(o.w&&o.w.stress),mood:num0(o.w&&o.w.mood),note:o.t||"",src:"mobile"};
+      addWell(rec);
+      return {ok:true,player:m.p};
+    }catch(e){ return {ok:false,err:"رمز تالف"}; }
+  }
+  function num0(v){ var n=Number(v); return isFinite(n)&&n>0?n:null; }
+
+  async function handleFile(file){
+    pending=null; lastImport=null;
+    msg("q320msg","جارٍ قراءة الملف…","warn");
+    var rows=null;
+    try{
+      if(/\.xlsx$/i.test(file.name)) rows=await parseXlsx(file);
+      else if(/\.csv$|\.txt$/i.test(file.name)) rows=parseCSV(await file.text());
+      else { rows=await parseXlsx(file); }
+    }catch(e){
+      try{ rows=parseCSV(await file.text()); }catch(e2){}
+    }
+    if(!rows||rows.length<2){ msg("q320msg","لم أستطع قراءة صفوف من الملف — تأكد أنه Excel وليس صورة، أو صدّره CSV UTF-8.","bad"); return; }
+    var head=rows[0].map(function(x){ return String(x||""); });
+    var map=detectCols(head);
+    if(map.player==null||map.date==null){ msg("q320msg","لم أجد عمودي «اللاعب» و«التاريخ». الأعمدة الموجودة: "+head.slice(0,8).join(" · "),"bad"); return; }
+    var parsed=[], unmatched={}, matched=0;
+    for(var r=1;r<rows.length;r++){
+      var row=rows[r]; if(!row) continue;
+      var nm=row[map.player], dt=row[map.date];
+      if(!nm) continue;
+      var d=parseDate(dt); if(!d) continue;
+      var m=matchName(nm);
+      if(!m||!m.p){ unmatched[String(nm)]=(unmatched[String(nm)]||0)+1; continue; }
+      matched++;
+      parsed.push({playerId:m.p.id,playerName:pname(m.p),raw:nm,date:d,
+        td:map.td!=null?toNum(row[map.td]):null, hsr:map.hsr!=null?toNum(row[map.hsr]):null,
+        sprint:map.sprint!=null?toNum(row[map.sprint]):null, maxSpeed:map.maxSpeed!=null?toNum(row[map.maxSpeed]):null,
+        playerLoad:map.playerLoad!=null?toNum(row[map.playerLoad]):null,
+        accel:map.accel!=null?toNum(row[map.accel]):null, decel:map.decel!=null?toNum(row[map.decel]):null,
+        duration:map.duration!=null?toNum(row[map.duration]):null, src:"xlsx"});
+    }
+    pending=parsed;
+    var cols=Object.keys(map).map(function(k){ return k; });
+    var h='<div class="q320card" style="margin-top:12px"><h3>مراجعة الاستيراد</h3>'+
+      '<p class="h">تم التعرّف على '+cols.length+' عمودًا ('+cols.join(" · ")+') · صفوف مقروءة '+parsed.length+' · لاعبون مطابقون '+matched+'.</p>'+
+      (parsed.length?'<table class="q320t"><thead><tr><th>الاسم في الملف</th><th>اللاعب</th><th>التاريخ</th><th>مسافة</th><th>HSR</th><th>عدو</th><th>Load</th></tr></thead><tbody>'+
+        parsed.slice(0,15).map(function(x){
+          return '<tr><td class="q320mini">'+esc(x.raw)+'</td><td><b>'+esc(x.playerName)+'</b></td><td>'+esc(x.date)+'</td><td>'+fmt(x.td)+'</td><td>'+fmt(x.hsr)+'</td><td>'+fmt(x.sprint)+'</td><td>'+fmt(x.playerLoad)+'</td></tr>';
+        }).join("")+'</tbody></table>':'')+
+      (Object.keys(unmatched).length?'<p class="q320mini" style="margin-top:9px;color:#B45309">أسماء لم تُطابق ('+Object.keys(unmatched).length+'): '+esc(Object.keys(unmatched).slice(0,8).join(" · "))+' — أضفهم في «اللاعبون» بنفس الاسم ثم أعد الرفع.</p>':'')+
+      '<div class="q320row"><button class="q320go" id="q320commit"'+(parsed.length?'':' disabled')+'>حفظ '+parsed.length+' سجلًا</button><button class="q320go gh" id="q320cancel">إلغاء</button></div></div>';
+    document.getElementById("q320prev").innerHTML=h;
+    msg("q320msg","الملف جاهز للمراجعة قبل الحفظ.","ok");
+    var c=document.getElementById("q320commit");
+    if(c) c.onclick=function(){
+      var n=addGps(pending||[]);
+      msg("q320msg","تم حفظ "+n+" سجل GPS وربطها باللاعبين.","ok");
+      pending=null; setTimeout(render,700);
+    };
+    var x=document.getElementById("q320cancel");
+    if(x) x.onclick=function(){ pending=null; document.getElementById("q320prev").innerHTML=""; msg("q320msg","أُلغي الاستيراد.","warn"); };
+  }
+  function parseDate(v){
+    var s=String(v||"").trim(); if(!s) return null;
+    var m;
+    if((m=/^(\d{4})-(\d{1,2})-(\d{1,2})/.exec(s))) return m[1]+"-"+String(m[2]).padStart(2,"0")+"-"+String(m[3]).padStart(2,"0");
+    if((m=/^(\d{1,2})[\/.](\d{1,2})[\/.](\d{4})/.exec(s))){
+      var a=+m[1], b=+m[2];
+      var dd=a>12? a : (b>12? a : b), mm=a>12? b : (b>12? a : a);
+      if(mm>12){ mm=b; dd=a; }
+      return m[3]+"-"+String(mm).padStart(2,"0")+"-"+String(dd).padStart(2,"0");
+    }
+    if((m=/^(\d{5})(\.\d+)?$/.exec(s))){
+      var t=(Number(m[1])-25569)*86400000; var d=new Date(t);
+      if(!isNaN(d)) return d.toISOString().slice(0,10);
+    }
+    var d2=new Date(s); if(!isNaN(d2)) return d2.toISOString().slice(0,10);
+    return null;
+  }
+
+  function detail(pid){
+    var s=S()||{}, p=players().filter(function(x){ return String(x.id)===String(pid); })[0];
+    if(!p) return;
+    var st=statusOf(pid), b=BAND[st.band];
+    var g=(s.gps||[]).filter(function(x){ return String(x.playerId)===String(pid); }).sort(function(a,b){ return String(a.date).localeCompare(String(b.date)); });
+    var w=wellStore().filter(function(x){ return String(x.playerId)===String(pid); }).sort(function(a,b){ return String(a.date).localeCompare(String(b.date)); });
+    var html='<div style="position:fixed;inset:0;z-index:2147482003;background:rgba(11,15,23,.6);display:flex;align-items:flex-start;justify-content:center;padding:24px 12px;overflow:auto;direction:rtl" id="q320det">'+
+      '<div style="background:#fff;border-radius:16px;max-width:720px;width:100%;overflow:hidden;margin:auto">'+
+      '<div style="background:linear-gradient(135deg,#0F172A,#1E293B);color:#fff;padding:15px 18px;display:flex;align-items:center;gap:10px">'+
+      '<div><b style="font:900 15px inherit;display:block">'+esc(pname(p))+'</b><span style="font:700 11px inherit;color:#AEB8C7">الدرجة '+st.score+'/100 · '+b.t+'</span></div>'+
+      '<button style="margin-inline-start:auto;background:rgba(255,255,255,.12);border:0;color:#fff;width:32px;height:32px;border-radius:9px;font:900 15px inherit;cursor:pointer" onclick="document.getElementById(\'q320det\').remove()">✕</button></div>'+
+      '<div style="padding:16px 18px">'+
+      '<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px">'+
+        chip("الاستبيان",st.well?st.well.pct+"%":"—",st.well&&st.well.pct>=80?"#15803D":st.well&&st.well.pct>=60?"#B45309":"#B5121B")+
+        chip("ACWR",st.acwr?st.acwr.acwr:"—",st.acwr&&st.acwr.flag==="مثالي"?"#15803D":"#B45309")+
+        chip("طبي",st.inj?"مصاب":"سليم",st.inj?"#B5121B":"#15803D")+
+        chip("GPS ٧ أيام",fmt(g.filter(function(x){ return dnum(x.date)>=daysAgo(6); }).reduce(function(a,x){ return a+(Number(x.td)||0); },0)),"#5B6472")+
+      '</div>'+
+      '<div class="q320note" style="margin-bottom:12px">'+st.reasons.map(esc).join("<br>")+'</div>'+
+      '<h4 style="margin:12px 0 6px;font:900 12px inherit">آخر ٨ استبيانات</h4>'+
+      (w.length?'<table class="q320t"><thead><tr><th>التاريخ</th><th>نوم</th><th>إجهاد</th><th>ألم</th><th>توتر</th><th>مزاج</th></tr></thead><tbody>'+
+        w.slice(-8).reverse().map(function(x){ return '<tr><td>'+esc(String(x.date).slice(0,10))+'</td><td>'+esc(x.sleep||"—")+'</td><td>'+esc(x.fatigue||"—")+'</td><td>'+esc(x.soreness||"—")+'</td><td>'+esc(x.stress||"—")+'</td><td>'+esc(x.mood||"—")+'</td></tr>'; }).join("")+'</tbody></table>':'<div class="q320mini">لا ردود استبيان.</div>')+
+      '<h4 style="margin:12px 0 6px;font:900 12px inherit">آخر ١٠ قياسات GPS</h4>'+
+      (g.length?'<table class="q320t"><thead><tr><th>التاريخ</th><th>مسافة</th><th>HSR</th><th>عدو</th><th>أقصى سرعة</th><th>Load</th></tr></thead><tbody>'+
+        g.slice(-10).reverse().map(function(x){ return '<tr><td>'+esc(String(x.date).slice(0,10))+'</td><td>'+fmt(x.td)+'</td><td>'+fmt(x.hsr)+'</td><td>'+fmt(x.sprint)+'</td><td>'+fmt(x.maxSpeed)+'</td><td>'+fmt(x.playerLoad)+'</td></tr>'; }).join("")+'</tbody></table>':'<div class="q320mini">لا سجلات GPS.</div>')+
+      '</div></div></div>';
+    var d=document.createElement("div"); d.innerHTML=html; document.body.appendChild(d.firstElementChild);
+  }
+  function chip(l,v,c){ return '<div style="border:1px solid #E4E0D6;border-radius:11px;padding:7px 11px;background:#FBFAF7"><s style="display:block;text-decoration:none;font:800 9.5px inherit;color:#6E7683">'+esc(l)+'</s><b style="font:900 13px inherit;color:'+c+'">'+esc(v)+'</b></div>'; }
+
+  function mount(){
+    css();
+    if(!document.getElementById("qd320btn")){
+      var b=document.createElement("button");
+      b.id="qd320btn"; b.type="button";
+      b.innerHTML="<i>◎</i> مركز الحالة";
+      b.onclick=function(){ var h=document.getElementById("qd320"); if(!h){ h=document.createElement("div"); h.id="qd320"; document.body.appendChild(h); } h.classList.add("on"); render(); };
+      document.body.appendChild(b);
+    }
+    if(!document.getElementById("qd320")){ var h2=document.createElement("div"); h2.id="qd320"; document.body.appendChild(h2); }
+  }
+  window.QD320={open:function(){ mount(); document.getElementById("qd320").classList.add("on"); render(); },
+    status:statusOf, parseXlsx:parseXlsx, parseCSV:parseCSV, detectCols:detectCols,
+    importCode:importCode, addGps:addGps, addWell:addWell, matchName:matchName, cfg:cfg};
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",mount,{once:true}); else mount();
+  setTimeout(mount,1200);
+})();
+</script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 </body>
 </html>
