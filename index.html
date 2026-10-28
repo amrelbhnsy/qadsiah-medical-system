@@ -35139,7 +35139,7 @@ tr:hover .qde-ndate{color:#7E0E14}
 
   function badge(){
     try{ var b=document.getElementById("qdrBadge"); if(!b) return;
-      var w="v11-320 · STATUS-HUB";
+      var w="v11-322 · LAB-TABS";
       if(b.textContent!==w+" · BTN-OK") b.textContent=w+" · BTN-OK"; }catch(e){}
   }
 
@@ -47815,6 +47815,173 @@ tr:hover .qde-ndate{color:#7E0E14}
   setTimeout(mount,1200);
 })();
 </script>
+<script>
+/* QD321 · MOBILE-BRIDGE v11-321 — ربط جوال اللاعب بالبرنامج (رابط + رمز + سحب الإجابات) */
+(function(){
+  var $=function(i){ return document.getElementById(i); };
+  function esc(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+  function st(){ try{ return window.__QDAPP.S; }catch(e){ return null; } }
+  function cfg(){ try{ if(window.__qdCFG) return window.__qdCFG; }catch(e){}
+    try{ var c=JSON.parse(localStorage.getItem("qd_cfg")||"null"); if(c&&c.url) return c; }catch(e){}
+    try{ if(typeof window.cfg==="function") return window.cfg(); }catch(e){}
+    return null; }
+  function pname(p){ return ((p&&p.first)||"")+" "+((p&&p.last)||""); }
+  function pnum(p){ return (p&&(p.num||p.no||p.shirt||p.number))||""; }
+
+  function b64(str){ return btoa(unescape(encodeURIComponent(str))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,""); }
+
+  function buildCfg(withPhotos){
+    var S=st()||{}, c=cfg()||{};
+    var players=(S.players||[]).filter(function(p){ return p && !p.deleted; }).map(function(p){
+      var ph=String(p.photo||"");
+      if(!withPhotos || ph.length>60000) ph="";
+      return {id:p.id,n:pname(p).trim(),num:pnum(p),ph:ph};
+    });
+    return {u:c.url||"",k:c.key||"",t:"wellness",p:players};
+  }
+  function makeLink(withPhotos){
+    var o=buildCfg(withPhotos);
+    var base=location.href.replace(/[#?].*$/,"").replace(/index\.html$/,"")+"survey.html";
+    return base+"#c="+encodeURIComponent("QDP1."+b64(JSON.stringify(o)));
+  }
+  var SQL=[
+    "-- 1) جدول إجابات الجوال (مرة واحدة فقط في Supabase)",
+    "create table if not exists wellness (",
+    "  id bigserial primary key,",
+    "  player_id text, player_name text, date date,",
+    "  sleep int, fatigue int, soreness int, stress int, mood int,",
+    "  sleep_hours numeric, areas text, note text, readiness int,",
+    "  client_ts timestamptz, source text, created_at timestamptz default now()",
+    ");",
+    "alter table wellness enable row level security;",
+    "create policy if not exists wellness_insert_anon on wellness for insert to anon with check (true);",
+    "create policy if not exists wellness_read_auth on wellness for select to authenticated using (true);"
+  ].join("\n");
+
+  function mount(){
+    if(!$("qd321btn")){
+      var b=document.createElement("button");
+      b.id="qd321btn"; b.type="button";
+      b.textContent="جوال اللاعب";
+      b.style.cssText="position:fixed;left:16px;bottom:152px;z-index:9999;border:0;border-radius:999px;padding:10px 16px;font:900 12.5px inherit;background:#0F766E;color:#fff;box-shadow:0 8px 24px rgba(15,118,110,.45);cursor:pointer;white-space:nowrap;max-width:none;overflow:visible;line-height:1.2";
+      b.onclick=open; document.body.appendChild(b);
+    }
+  }
+  function open(){
+    var h=$("qd321p");
+    if(!h){ h=document.createElement("div"); h.id="qd321p"; document.body.appendChild(h); }
+    h.innerHTML="";
+    h.style.cssText="position:fixed;inset:0;z-index:10000;background:rgba(8,8,10,.72);display:flex;align-items:flex-start;justify-content:center;padding:22px;overflow:auto";
+    var c=cfg();
+    var S=st()||{}; var n=(S.players||[]).filter(function(p){ return p&&!p.deleted; }).length;
+    var box=document.createElement("div");
+    box.style.cssText="background:#fff;color:#111;max-width:720px;width:100%;border-radius:16px;padding:18px;font:600 13px inherit;line-height:1.7";
+    box.innerHTML=
+      '<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px"><b style="font:900 15px inherit;flex:1">📱 ربط جوال اللاعب بالبرنامج</b>'+
+      '<button id="q321x" style="border:0;background:#F1F1F4;border-radius:9px;width:32px;height:32px;font-size:15px;cursor:pointer">✕</button></div>'+
+      '<div style="font:700 11.5px inherit;color:'+(c&&c.url?"#0F766E":"#B5121B")+';margin-bottom:10px">'+
+        (c&&c.url?("السحابة: "+esc(c.url)+" · اللاعبون: "+n):"⚠ لا يوجد اتصال سحابي مضبوط — الرابط سيُبنى بدون مصدر بيانات، والإرسال لن يعمل حتى تضبط Supabase.")+'</div>'+
+      '<div style="background:#F7F7F9;border:1px solid #E6E6EA;border-radius:12px;padding:11px;margin-bottom:10px">'+
+        '<label style="font:800 11.5px inherit;display:block;margin-bottom:5px">رابط الاستبيان (يُرسل للاعب مرة واحدة)</label>'+
+        '<textarea id="q321link" readonly style="width:100%;min-height:74px;font:600 10.5px ui-monospace,monospace;direction:ltr;text-align:left;border:1px solid #DCDCE2;border-radius:9px;padding:9px;background:#fff"></textarea>'+
+        '<div style="display:flex;gap:7px;margin-top:7px;flex-wrap:wrap">'+
+          '<button id="q321cp" style="flex:1;border:0;border-radius:10px;padding:10px;background:#111;color:#fff;font:900 12px inherit;cursor:pointer">نسخ الرابط</button>'+
+          '<button id="q321ph" style="flex:1;border:1px solid #DCDCE2;border-radius:10px;padding:10px;background:#fff;font:900 12px inherit;cursor:pointer">نسخة بدون صور</button>'+
+          '<button id="q321wa" style="flex:1;border:0;border-radius:10px;padding:10px;background:#25D366;color:#08331A;font:900 12px inherit;cursor:pointer">واتساب</button>'+
+        '</div>'+
+        '<div id="q321sz" style="font:800 10.5px inherit;color:#6B6B76;margin-top:6px"></div>'+
+      '</div>'+
+      '<div style="background:#FFFBEB;border:1px solid #FDE68A;border-radius:12px;padding:11px;margin-bottom:10px">'+
+        '<b style="font:900 12px inherit">الشرط الوحيد للتشغيل:</b>'+
+        '<div style="font:600 11.5px inherit;color:#5B5B66;margin:4px 0 7px">استبيان الجوال يجب أن يكون مستضافًا على رابط ويب (نفس مجلد البرنامج). ثم نفّذ SQL التالي مرة واحدة في Supabase لإنشاء جدول الاستقبال وسياسة الإرسال.</div>'+
+        '<textarea id="q321sql" readonly style="width:100%;min-height:120px;font:600 10px ui-monospace,monospace;direction:ltr;text-align:left;border:1px solid #E6E6EA;border-radius:9px;padding:8px;background:#fff"></textarea>'+
+        '<button id="q321cps" style="margin-top:6px;border:0;border-radius:9px;padding:9px 12px;background:#0F766E;color:#fff;font:900 11.5px inherit;cursor:pointer">نسخ SQL</button>'+
+      '</div>'+
+      '<div style="display:flex;gap:7px;flex-wrap:wrap">'+
+        '<button id="q321pull" style="flex:1;border:0;border-radius:11px;padding:11px;background:#B5121B;color:#fff;font:900 12px inherit;cursor:pointer">⬇ سحب إجابات الجوال</button>'+
+        '<button id="q321open" style="flex:1;border:1px solid #DCDCE2;border-radius:11px;padding:11px;background:#fff;font:900 12px inherit;cursor:pointer">معاينة كلاعب</button>'+
+      '</div>'+
+      '<div id="q321msg" style="font:800 11.5px inherit;color:#0F766E;margin-top:9px;min-height:16px"></div>';
+    h.appendChild(box);
+
+    function setLink(withPhotos){
+      var l=makeLink(withPhotos);
+      $("q321link").value=l;
+      $("q321sz").textContent="طول الرابط: "+l.length+" حرف"+(l.length>7000?" — طويل جدًا لبعض التطبيقات، استخدم النسخة بدون صور":"");
+      return l;
+    }
+    setLink(true);
+    $("q321x").onclick=function(){ h.remove(); };
+    $("q321ph").onclick=function(){ setLink(false); $("q321msg").textContent="نسخة بدون صور (أخف بكثير — الأسماء فقط)."; };
+    $("q321cp").onclick=function(){ var t=$("q321link"); t.select(); try{ document.execCommand("copy"); $("q321msg").textContent="تم نسخ الرابط ✓"; }catch(e){ $("q321msg").textContent="انسخ يدويًا."; } };
+    $("q321wa").onclick=function(){ window.open("https://wa.me/?text="+encodeURIComponent("استبيان الجاهزية اليومي — اختر اسمك من الصور:\n"+$("q321link").value),"_blank"); };
+    $("q321sql").value=SQL;
+    $("q321cps").onclick=function(){ var t=$("q321sql"); t.select(); try{ document.execCommand("copy"); $("q321msg").textContent="تم نسخ SQL ✓"; }catch(e){} };
+    $("q321open").onclick=function(){ window.open($("q321link").value,"_blank"); };
+    $("q321pull").onclick=function(){ pull(); };
+  }
+
+  function pull(){
+    var m=$("q321msg"); var c=cfg();
+    if(!c||!c.url||!c.key){ if(m) m.textContent="✕ لا يوجد اتصال سحابي."; return; }
+    if(m) m.textContent="جارٍ السحب…";
+    fetch(c.url.replace(/\/$/,"")+"/rest/v1/wellness?select=*&order=created_at.desc&limit=200",{headers:{apikey:c.key,Authorization:"Bearer "+c.key}})
+      .then(function(r){ if(!r.ok) throw new Error("HTTP "+r.status); return r.json(); })
+      .then(function(rows){
+        if(!Array.isArray(rows)) throw new Error("شكل غير متوقع");
+        var ok=0;
+        rows.forEach(function(w){
+          try{
+            if(typeof window.QD320!=="undefined"&&window.QD320.addWell){
+              window.QD320.addWell({playerId:w.player_id,name:w.player_name,date:String(w.date||"").slice(0,10),
+                sleep:w.sleep,fatigue:w.fatigue,soreness:w.soreness,stress:w.stress,mood:w.mood,
+                dur:w.sleep_hours,areas:w.areas,note:w.note,readiness:w.readiness,src:"mobile"});
+              ok++;
+            }
+          }catch(e){}
+        });
+        if(m) m.textContent="تم سحب "+ok+" إجابة"+(ok?" — ظهرت في مركز الحالة":"")+(rows.length>ok?(" · "+rows.length+" صف مقروء"):"");
+        try{ if(typeof window.__QDAPP.save==="function") window.__QDAPP.save(); }catch(e){}
+      })
+      .catch(function(e){ if(m) m.textContent="✕ فشل السحب: "+String(e.message||e)+" (تحقق من الجدول والسياسات)"; });
+  }
+
+  window.QD321={open:open,link:makeLink,pull:pull,sql:SQL};
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",mount,{once:true}); else mount();
+  setTimeout(mount,1500);
+})();
+</script>
+
+<script>
+/* QD322 · LAB-TABS v11-322 — تفعيل أقسام «مختبر التطوير المتقدم» (كانت الأزرار بلا مستمع) */
+(function(){
+  function jar(){ return document.getElementById("qd270ov"); }
+  function go(t){
+    if(!t) return;
+    try{ window.QD270.open(t); }catch(e){}
+    var ov=jar(); if(ov){ try{ ov.scrollTop=0; }catch(e){} }
+  }
+  document.addEventListener("click",function(e){
+    var el=e.target;
+    if(!el||!el.closest) return;
+    var t=el.closest("#qd270tabs [data-q270t]");
+    if(!t) return;
+    if(!jar()) return;
+    e.preventDefault(); e.stopPropagation();
+    go(t.getAttribute("data-q270t"));
+  },true);
+  var st=document.createElement("style");
+  st.id="qd322css";
+  st.textContent="#qd270tabs [data-q270t]{cursor:pointer;-webkit-tap-highlight-color:transparent}";
+  document.head.appendChild(st);
+  window.QD322={go:go,state:function(){
+    var tabs=document.querySelectorAll("#qd270tabs [data-q270t]");
+    var on=document.querySelector("#qd270tabs [data-q270t].on");
+    return {tabs:tabs.length,active:on?on.getAttribute("data-q270t"):null,bodyLen:(document.querySelector("#qd270body")||{innerHTML:""}).innerHTML.length};
+  }};
+})();
+</script>
+
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 </body>
 </html>
