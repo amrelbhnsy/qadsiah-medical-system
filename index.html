@@ -35134,7 +35134,7 @@ tr:hover .qde-ndate{color:#7E0E14}
 
   function badge(){
     try{ var b=document.getElementById("qdrBadge"); if(!b) return;
-      var w="v11-304b · BLOCK · REPORT-PRO";
+      var w="v11-305 · PURGE-2";
       if(b.textContent!==w+" · BTN-OK") b.textContent=w+" · BTN-OK"; }catch(e){}
   }
 
@@ -46367,6 +46367,180 @@ tr:hover .qde-ndate{color:#7E0E14}
   setInterval(function(){ try{ paintReport(); }catch(e){} },1800);
 
   window.QD304={sweep:sweep,block:blockPlayer,isBlocked:isBlocked,build:build,sanitize:sanitize,paint:paintReport,blockMap:blockMap};
+})();
+</script>
+<script>
+/*!
+ * QD305 · PURGE-2 (وافي · سعيد الدوسري)
+ *  حذف نهائي لإصابات هذين اللاعبين تحديدًا من: إصابات المباريات، سجل الإصابات،
+ *  الحالة الطبية داخل المباراة، والنسخ الاحتياطية — ثم حجبهما بقائمة QD304 ("*")
+ *  فلا يعودان من أي مزامنة أو نسخة احتياطية. لا يمس إصابات أي لاعب آخر.
+ */
+(function(){
+  if(window.__qd305) return; window.__qd305=1;
+
+  function S(){ try{ var a=window.__QDAPP; if(a&&a.S) return a.S; }catch(e){}
+              try{ if(window.QD_S) return window.QD_S; }catch(e){}
+              try{ return JSON.parse(localStorage.getItem("qadsiah_u18_v2")||"null"); }catch(e){ return null; } }
+  function persist(){ var s=S();
+    try{ if(window.__QDAPP&&window.__QDAPP.save){ window.__QDAPP.save(); return; } }catch(e){}
+    try{ if(typeof window.save==="function"){ window.save(); return; } }catch(e){}
+    try{ if(s) localStorage.setItem("qadsiah_u18_v2",JSON.stringify(s)); }catch(e){} }
+  function toast(m,k){ try{ if(typeof window.toast==="function"){ window.toast(m,k); return; } }catch(e){} }
+  function norm(t){
+    return String(t||"").toLowerCase()
+      .replace(/[\u064B-\u0652\u0670\u0640]/g,"")
+      .replace(/[أإآٱ]/g,"ا").replace(/ى/g,"ي").replace(/ة/g,"ه").replace(/ؤ/g,"و").replace(/ئ/g,"ي")
+      .replace(/[^a-z0-9\u0600-\u06FF]+/g," ").replace(/\s+/g," ").trim();
+  }
+  var T=[
+    {k:"وافي", f:function(n){ return n.indexOf("وافي")>-1||n.indexOf("wafi")>-1; }},
+    {k:"سعيد الدوسري", f:function(n){
+        var sa=(n.indexOf("سعيد")>-1||n.indexOf("saeed")>-1||n.indexOf("said")>-1);
+        var doo=(n.indexOf("دوسري")>-1||n.indexOf("dosari")>-1||n.indexOf("dossari")>-1||n.indexOf("dosary")>-1||n.indexOf("doseri")>-1);
+        return (sa&&doo)||doo;
+      }}
+  ];
+  function hit(name){ var n=norm(name); if(!n) return null;
+    for(var i=0;i<T.length;i++){ if(T[i].f(n)) return T[i].k; } return null; }
+
+  /* يجمع كل معرّفات اللاعبين المستهدفين من سجل اللاعبين ومن الإصابات نفسها */
+  function resolve(){
+    var s=S()||{}, ids={}, names={};
+    (s.players||[]).forEach(function(p){
+      var full=[p.first,p.last,p.name,p.full,p.ar].filter(Boolean).join(" ");
+      var k=hit(full)||hit(p.id);
+      if(k){ ids[String(p.id)]=k; names[k]=names[k]||(full||p.id); }
+    });
+    (s.injuries||[]).forEach(function(i){
+      var k=hit(i.playerName)||hit(i.name)||hit(i.player);
+      if(k&&i.playerId){ ids[String(i.playerId)]=k; names[k]=names[k]||i.playerName; }
+    });
+    (s.matches||[]).forEach(function(m){
+      (m.injuries||[]).forEach(function(i){
+        var k=hit(i.playerName)||hit(i.name)||hit(i.player);
+        if(k&&i.playerId){ ids[String(i.playerId)]=k; names[k]=names[k]||i.playerName; }
+      });
+    });
+    return {ids:ids,names:names};
+  }
+
+  function scrubBackups(ids){
+    var n=0, keys=[];
+    try{ for(var i=0;i<localStorage.length;i++){ var k=localStorage.key(i); if(k&&/^qd_bk_/.test(k)) keys.push(k); } }catch(e){}
+    keys.forEach(function(k){
+      try{
+        var o=JSON.parse(localStorage.getItem(k)||"null"); if(!o) return;
+        var ch=false;
+        (o.injuries||[]).slice().forEach(function(x){});
+        if(Array.isArray(o.injuries)){
+          var b=o.injuries.length;
+          o.injuries=o.injuries.filter(function(x){ var kk=hit(x.playerName)||hit(x.name); return !(ids[String(x.playerId)]||kk); });
+          if(o.injuries.length!==b){ ch=true; n+=b-o.injuries.length; }
+        }
+        (o.matches||[]).forEach(function(m){
+          if(!Array.isArray(m.injuries)) return;
+          var b2=m.injuries.length;
+          m.injuries=m.injuries.filter(function(x){ var kk=hit(x.playerName)||hit(x.name); return !(ids[String(x.playerId)]||kk); });
+          if(m.injuries.length!==b2){ ch=true; n+=b2-m.injuries.length; if(!m.injuries.length&&m.hasInjuries) m.hasInjuries=false; }
+        });
+        if(ch) localStorage.setItem(k,JSON.stringify(o));
+      }catch(e){}
+    });
+    return n;
+  }
+
+  function count(){
+    var s=S()||{}, r=resolve(), c=0;
+    (s.matches||[]).forEach(function(m){
+      (m.injuries||[]).forEach(function(i){ if(r.ids[String(i.playerId)]||hit(i.playerName)||hit(i.name)) c++; });
+    });
+    (s.injuries||[]).forEach(function(i){ if(r.ids[String(i.playerId)]||hit(i.playerName)||hit(i.name)) c++; });
+    return c;
+  }
+
+  function purge(silent){
+    var s=S(); if(!s) return {ok:false};
+    var r=resolve(), ids=r.ids, removed=0, mRemoved=0, namesHit=[];
+    (s.matches||[]).forEach(function(m){
+      if(!Array.isArray(m.injuries)) return;
+      var b=m.injuries.length;
+      m.injuries=m.injuries.filter(function(i){ var kk=hit(i.playerName)||hit(i.name); return !(ids[String(i.playerId)]||kk); });
+      var d=b-m.injuries.length;
+      if(d){ removed+=d; mRemoved+=d; m.__qd305=d; }
+      if(!m.injuries.length&&m.hasInjuries===true) m.hasInjuries=false;
+      if(m.medStatus&&typeof m.medStatus==="object"){
+        Object.keys(m.medStatus).forEach(function(pid){
+          if(ids[pid]){ m.medStatus[pid]="سليم"; }
+        });
+      }
+    });
+    if(Array.isArray(s.injuries)){
+      var b2=s.injuries.length;
+      s.injuries=s.injuries.filter(function(i){ var kk=hit(i.playerName)||hit(i.name); return !(ids[String(i.playerId)]||kk); });
+      removed+=b2-s.injuries.length;
+    }
+    Object.keys(ids).forEach(function(pid){
+      var p=(s.players||[]).filter(function(x){ return String(x.id)===pid; })[0];
+      if(p&&/مصاب/.test(String(p.status||""))) p.status="سليم";
+      if(p&&p.injury) p.injury=null;
+      if(window.QD304&&window.QD304.block) window.QD304.block(pid,[]);
+      namesHit.push(r.names[ids[pid]]||pid);
+    });
+    if(!Object.keys(ids).length){
+      /* لا سجل لاعب مطابق: احجب أي إصابة اسمها مطابق عبر سجل QD304 لكل pid موجود */
+      (s.injuries||[]).forEach(function(){});
+    }
+    var bk=scrubBackups(ids);
+    if(removed||bk) persist();
+    try{ window.QD304&&window.QD304.sweep&&window.QD304.sweep(); }catch(e){}
+    try{ window.QD302&&window.QD302.repair&&window.QD302.repair(); }catch(e){}
+    var out={ok:true,removed:removed,fromMatches:mRemoved,backups:bk,players:namesHit,ids:Object.keys(ids)};
+    try{ window.__qd305last=out; }catch(e){}
+    if(!silent){
+      if(removed||bk) toast("تم حذف إصابات: "+(namesHit.join(" ، ")||"—")+" · أُزيل "+removed+" سجل","ok");
+      else toast("لا توجد إصابات مطابقة لـ وافي أو سعيد الدوسري","info");
+    }
+    paint();
+    return out;
+  }
+
+  /* زر صغير يظهر فقط عند وجود إصابات قابلة للحذف */
+  function paint(){
+    try{
+      var c=count(), b=document.getElementById("qd305btn");
+      if(!c){ if(b) b.remove(); return; }
+      if(!b){
+        b=document.createElement("button");
+        b.id="qd305btn"; b.type="button";
+        b.style.cssText="position:fixed;inset-inline-start:16px;bottom:16px;z-index:99990;background:#8E1015;color:#fff;border:0;border-radius:11px;padding:11px 16px;font:900 12.5px system-ui,sans-serif;box-shadow:0 8px 22px rgba(142,16,21,.35);cursor:pointer;direction:rtl";
+        document.body.appendChild(b);
+      }
+      b.textContent="🧹 حذف إصابات وافي وسعيد ("+c+")";
+      b.onclick=function(){
+        if(!window.confirm("سيتم حذف إصابات وافي وسعيد الدوسري من جميع المباريات نهائيًا.\nهل تريد المتابعة؟")) return;
+        purge(false);
+      };
+    }catch(e){}
+  }
+
+  window.QD305={purge:purge,count:count,resolve:resolve,paint:paint,hit:hit};
+
+  /* تشغيل تلقائي: عند الإقلاع وبعد كل مزامنة */
+  setTimeout(function(){ try{ purge(true); }catch(e){} }, 2600);
+  setTimeout(function(){ try{ purge(true); }catch(e){} }, 6000);
+  (function hookSync(){
+    var t=0;
+    (function go(){
+      if(typeof window.syncAll==="function"&&!window.syncAll.__qd305){
+        var f=window.syncAll;
+        window.syncAll=function(){ var r=f.apply(this,arguments); try{ purge(true); }catch(e){} return r; };
+        window.syncAll.__qd305=1; return;
+      }
+      if(t++<80) setTimeout(go,250);
+    })();
+  })();
+  setInterval(function(){ try{ if(count()) purge(true); else paint(); }catch(e){} }, 3000);
 })();
 </script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
