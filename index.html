@@ -35142,7 +35142,7 @@ tr:hover .qde-ndate{color:#7E0E14}
 
   function badge(){
     try{ var b=document.getElementById("qdrBadge"); if(!b) return;
-      var w="v11-359 · REHAB-NUT";
+      var w="v11-361 · NAV-TOP";
       if(b.textContent!==w+" · BTN-OK") b.textContent=w+" · BTN-OK"; }catch(e){}
   }
 
@@ -44210,9 +44210,9 @@ tr:hover .qde-ndate{color:#7E0E14}
     nutrition:{id:"nutrition",label:"التغذية",icon:"activity",sub:"sub_nutrition",grp:"grp_assess"}
   };
   var GROUPS=[
-    {id:"overview",a:"نظرة عامة",e:"Overview",items:["dashboard"]},
-    {id:"clinic",a:"العيادة والملف الطبي",e:"Clinic & medical file",items:["injuries","illnesses","complaints","clinic","therapy","rehab","promotion","players","link","calendar","matches"]},
-    {id:"perf",a:"التقييم والجاهزية",e:"Assessment & readiness",items:["load","physio","posture","proto","screening","daily","wellness","mental","nutrition"]},
+    {id:"overview",a:"نظرة عامة",e:"Overview",items:["dashboard","rehab","nutrition"]},
+    {id:"clinic",a:"العيادة والملف الطبي",e:"Clinic & medical file",items:["injuries","illnesses","complaints","clinic","therapy","promotion","players","link","calendar","matches"]},
+    {id:"perf",a:"التقييم والجاهزية",e:"Assessment & readiness",items:["load","physio","posture","proto","screening","daily","wellness","mental"]},
     {id:"follow",a:"المتابعة والتقارير",e:"Follow-up & reports",items:["activities","documents","fixtures","reports","clinical","weekly"]},
     {id:"admin",a:"الإدارة والنظام",e:"Admin & system",items:["settings","access","cloud"]}
   ];
@@ -49554,200 +49554,7 @@ return map;
 </script>
 
 
-<script>
-/* QD354 · USERS-PANEL v11-354 — شاشة المستخدمين تعمل ذاتيًا: تفتح وتُرسم بغض النظر عن حالة الصلاحيات أو الدخول */
-(function(){
-  var $=function(i){ return document.getElementById(i); };
-  function esc(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
-  function S(){ try{ return window.__QDAPP&&window.__QDAPP.S||null; }catch(e){ return null; } }
-  function save(){
-    try{ if(window.__QDAPP&&window.__QDAPP.save) return window.__QDAPP.save(); }catch(e){}
-    try{ if(typeof window.save==="function") return window.save(); }catch(e){}
-    try{ var s=S(); if(s) localStorage.setItem("qadsiah_u18_v2",JSON.stringify(s)); }catch(e){}
-  }
-  function LSKEY(){ return "qd354_users"; }
-  function lsGet(){ try{ var v=localStorage.getItem(LSKEY()); return v?JSON.parse(v):null; }catch(e){ return null; } }
-  function lsSet(a){ try{ localStorage.setItem(LSKEY(),JSON.stringify(a)); }catch(e){} }
-  function users(){
-    var a=lsGet();
-    if(!Array.isArray(a)){
-      var s=S()||{};
-      a=Array.isArray(s.users)?s.users.filter(function(u){ return u&&typeof u==="object"&&u.username; }):[];
-      lsSet(a);
-    }
-    return a;
-  }
-  function persist(a){
-    lsSet(a);
-    var s=S(); if(s){ s.users=a.slice(); }
-    save();
-  }
-  function view(){ return $("v-access"); }
-  function show(){
-    var v=view();
-    if(!v){
-      var main=document.querySelector("main");
-      v=document.createElement("section"); v.className="view"; v.id="v-access";
-      if(main) main.appendChild(v); else document.body.appendChild(v);
-    }
-    document.querySelectorAll(".view.active").forEach(function(x){ x.classList.remove("active"); });
-    v.classList.add("active");
-    document.querySelectorAll('#qd290nav .qds-i,#nav .nav-item').forEach(function(b){ b.classList.remove("active"); if(b.getAttribute("data-view")==="access") b.classList.add("active"); });
-    try{ if(typeof window.current!=="undefined"&&window.current!==undefined) window.current="access"; }catch(e){}
-    paint(v);
-    return v;
-  }
-  function ts(x){ try{ return new Date(x).toLocaleString("ar-EG",{dateStyle:"short",timeStyle:"short"}); }catch(e){ return "—"; } }
-  function paint(v){
-    v=v||view(); if(!v) return;
-    var us=users();
-    var roles=[["admin","مدير النظام"],["clinician","طبيب/أخصائي"],["viewer","موظف (قراءة)"]];
-    var h='<div class="q354w">'+
-      '<div class="q354hd"><div class="q354ic">👥</div><div><b>المستخدمون</b>'+
-      '<span>إضافة حساب · الدور والصلاحية · تعطيل الدخول — التغييرات تُحفظ في ملف الفريق فورًا</span></div>'+
-      '<button class="q354p" id="q354add">+ مستخدم جديد</button></div>'+
-      '<div class="q354k"><div class="q354kc"><i>إجمالي المستخدمين</i><b>'+us.length+'</b></div>'+
-      '<div class="q354kc"><i>نشط</i><b>'+us.filter(function(u){ return u.active!==false; }).length+'</b></div>'+
-      '<div class="q354kc"><i>مديرون</i><b>'+us.filter(function(u){ return u.role==="admin"; }).length+'</b></div>'+
-      '<div class="q354kc"><i>معطّل</i><b>'+us.filter(function(u){ return u.active===false; }).length+'</b></div></div>'+
-      (us.length?('<div class="q354tw"><table class="q354t"><thead><tr><th>الاسم الكامل</th><th>اسم المستخدم</th><th>الدور</th><th>الدخول</th><th>أُنشئ</th><th>إجراءات</th></tr></thead><tbody>'+
-        us.map(function(u){
-          var rl=(roles.filter(function(r){ return r[0]===u.role; })[0]||[,u.role||"—"])[1];
-          var on=u.active!==false;
-          return '<tr><td><b>'+esc(u.name||u.full||"—")+'</b></td>'+
-            '<td dir="ltr" style="text-align:start">'+esc(u.username||u.user||"—")+'</td>'+
-            '<td><span class="q354b'+(u.role==="admin"?" adm":"")+'">'+esc(rl)+'</span></td>'+
-            '<td><button class="q354tg'+(on?" on":"")+'" data-tg="'+esc(u.id||u.username)+'">'+(on?"نشط":"معطّل")+'</button></td>'+
-            '<td class="dim">'+esc(u.created?ts(u.created):"—")+'</td>'+
-            '<td><button class="q354x" data-rm="'+esc(u.id||u.username)+'">حذف</button></td></tr>';
-        }).join("")+'</tbody></table></div>'):
-        '<div class="q354empty"><b>لا يوجد مستخدمون بعد</b><span>أضف أول حساب: الاسم الكامل · اسم المستخدم · كلمة المرور · الدور. هذه الحسابات تُستخدم للدخول إلى النظام.</span><button class="q354p" id="q354add2">+ إضافة أول مستخدم</button></div>')+
-      '<div class="q354note">كلمة المرور تُخزَّن في هذا الملف المحلي (نسخة الفريق) — للنشر الرسمي على الإنترنت استخدم دعوة مستخدمين من لوحة Supabase Authentication حتى لا تُخزَّن كلمات المرور داخل الملف.</div>'+
-      '</div>';
-    v.innerHTML=h;
-    strip(v);
-    var a=$("q354add")||$("q354add2"); if(a) a.onclick=function(){ form(); };
-    v.querySelectorAll("[data-rm]").forEach(function(b){ b.onclick=function(){
-      var k=b.getAttribute("data-rm"), us2=users(), u=us2.filter(function(x){ return String(x.id||x.username)===String(k); })[0];
-      if(!u) return;
-      if(!confirm("حذف المستخدم «"+(u.name||u.username)+"»؟")) return;
-      var all=users(), i=all.indexOf(u); if(i>-1) all.splice(i,1);
-      persist(all); paint(); toast("حُذف المستخدم");
-    }; });
-    v.querySelectorAll("[data-tg]").forEach(function(b){ b.onclick=function(){
-      var k=b.getAttribute("data-tg"), u=users().filter(function(x){ return String(x.id||x.username)===String(k); })[0];
-      if(!u) return; u.active=(u.active===false); persist(users()); paint(); toast(u.active===false?"أُوقف الدخول":"أُتيح الدخول");
-    }; });
-  }
-  function strip(v){
-    v=v||view(); if(!v) return;
-    var w=v.querySelector(".q354w"); if(!w) return;
-    Array.prototype.slice.call(v.childNodes).forEach(function(c){ if(c!==w) c.remove(); });
-    if(!w.classList.contains("q354w")) w.className="q354w";
-  }
-  function form(){
-    var old=$("q354modal"); if(old) old.remove();
-    var m=document.createElement("div"); m.id="q354modal";
-    m.innerHTML='<div class="q354mc"><div class="q354mh"><b>مستخدم جديد</b><span>اسم واضح · مستخدم لاتيني · كلمة مرور 6 أحرف وأكثر</span>'+
-      '<button id="q354mx" class="q354g" style="margin-inline-start:auto">✕</button></div>'+
-      '<div class="q354mb"><div class="q354grid">'+
-        '<label><i>الاسم الكامل</i><input id="u_name" placeholder="مثال: د. أحمد العلي"></label>'+
-        '<label><i>اسم المستخدم</i><input id="u_user" dir="ltr" placeholder="ahmed"></label>'+
-        '<label><i>كلمة المرور</i><input id="u_pw" type="text" dir="ltr" placeholder="6 أحرف على الأقل"></label>'+
-        '<label><i>الدور</i><select id="u_role">'+
-          '<option value="clinician">طبيب/أخصائي — بيانات كاملة</option>'+
-          '<option value="admin">مدير النظام — كل شيء</option>'+
-          '<option value="viewer">موظف — قراءة</option></select></label>'+
-      '</div><div id="u_msg" class="q354msg"></div></div>'+
-      '<div class="q354mf"><button class="q354p" id="u_save">حفظ المستخدم</button><button class="q354g" id="u_cancel">إلغاء</button></div></div>';
-    document.body.appendChild(m);
-    $("q354mx").onclick=$("u_cancel").onclick=function(){ m.remove(); };
-    $("u_save").onclick=function(){
-      var name=$("u_name").value.trim(), un=$("u_user").value.trim(), pw=$("u_pw").value, role=$("u_role").value;
-      var msg=$("u_msg");
-      if(!name){ msg.textContent="اكتب الاسم الكامل."; return; }
-      if(!/^[a-zA-Z0-9_.-]{3,}$/.test(un)){ msg.textContent="اسم المستخدم: 3 أحرف لاتينية/أرقام على الأقل بلا مسافات."; return; }
-      if(String(pw).length<6){ msg.textContent="كلمة المرور 6 أحرف على الأقل."; return; }
-      var us=users();
-      if(us.some(function(u){ return String(u.username).toLowerCase()===un.toLowerCase(); })){ msg.textContent="اسم المستخدم مستعمل مسبقًا."; return; }
-      var all=users();
-      all.push({id:"u"+Date.now().toString(36),name:name,username:un,password:pw,role:role,active:true,created:Date.now()});
-      persist(all); m.remove(); paint(); toast("أُضيف المستخدم ✓");
-      try{ if(window.QD320&&QD320.refresh) QD320.refresh(); }catch(e){}
-    };
-  }
-  function toast(t){
-    try{ if(window.toast){ window.toast(t); return; } }catch(e){}
-    var d=$("q354t"); if(!d){ d=document.createElement("div"); d.id="q354t"; d.style.cssText="position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#111;color:#fff;padding:9px 16px;border-radius:10px;font:900 12px system-ui;z-index:2147483647;transition:.2s"; document.body.appendChild(d); }
-    d.textContent=t; d.style.opacity="1"; clearTimeout(d.__h); d.__h=setTimeout(function(){ d.style.opacity="0"; },1800);
-  }
-
-  var CSS=
-   '#v-access .q354w{max-width:1080px;margin:0 auto;padding:14px;font-family:system-ui,Tahoma,sans-serif;direction:rtl;color:#151A21}'+
-   '.q354hd{display:flex;align-items:center;gap:12px;background:linear-gradient(135deg,#0F172A,#232B3A);color:#fff;border-radius:16px;padding:16px 18px;margin-bottom:12px}'+
-   '.q354ic{width:44px;height:44px;border-radius:13px;background:linear-gradient(150deg,#fff,#F3ECDD);color:#8E1015;display:grid;place-items:center;font-size:19px;flex:none}'+
-   '.q354hd b{display:block;font:900 16px inherit}.q354hd span{display:block;font:700 11px inherit;color:#AEB8C7;margin-top:3px;line-height:1.6}'+
-   '.q354p{margin-inline-start:auto;background:#B5121B;color:#fff;border:0;border-radius:11px;padding:10px 16px;font:900 12px inherit;cursor:pointer;white-space:nowrap}'+
-   '.q354k{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-bottom:12px}'+
-   '.q354kc{background:#fff;border:1px solid #E4E0D6;border-radius:12px;padding:10px 12px}'+
-   '.q354kc i{display:block;font:800 10px inherit;color:#6E7683;font-style:normal;margin-bottom:3px}'+
-   '.q354kc b{font:900 20px inherit}'+
-   '.q354tw{background:#fff;border:1px solid #E4E0D6;border-radius:13px;overflow:auto}'+
-   '.q354t{width:100%;border-collapse:collapse;font:700 12px inherit}'+
-   '.q354t th{background:#F7F5F0;color:#5B6472;font:900 10px inherit;padding:9px 10px;text-align:start;border-bottom:1px solid #E4E0D6;white-space:nowrap}'+
-   '.q354t td{padding:9px 10px;border-bottom:1px solid #F4F1EA}'+
-   '.q354t td.dim{color:#8A8F99;font-size:10.5px}'+
-   '.q354b{background:#F2F4F7;color:#3A4250;border-radius:999px;padding:3px 10px;font:900 10px inherit}'+
-   '.q354b.adm{background:#FDF2F2;color:#8E1015}'+
-   '.q354tg{border:1px solid #CFE7D6;background:#EFFAF2;color:#15803D;border-radius:999px;padding:4px 11px;font:900 10.5px inherit;cursor:pointer}'+
-   '.q354tg:not(.on){border-color:#F3C9C9;background:#FDECEC;color:#B5121B}'+
-   '.q354x{border:1px solid #EFD9D9;background:#fff;color:#B5121B;border-radius:8px;padding:4px 9px;font:900 10px inherit;cursor:pointer}'+
-   '.q354empty{background:#fff;border:1px dashed #D9D3C4;border-radius:14px;padding:30px;text-align:center}'+
-   '.q354empty b{display:block;font:900 14px inherit;margin-bottom:5px}'+
-   '.q354empty span{display:block;font:700 11px inherit;color:#6E7683;margin-bottom:12px;line-height:1.8}'+
-   '.q354empty .q354p{margin:0 auto}'+
-   '.q354note{margin-top:12px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:11px;padding:10px 12px;font:800 10.5px inherit;color:#7C4A03;line-height:1.8}'+
-   '#q354modal{position:fixed;inset:0;z-index:2147483647;background:rgba(10,10,12,.62);display:flex;align-items:center;justify-content:center;padding:16px}'+
-   '.q354mc{background:#fff;border-radius:16px;width:100%;max-width:560px;direction:rtl;font-family:system-ui,Tahoma,sans-serif;overflow:hidden}'+
-   '.q354mh{background:#0C1118;color:#fff;padding:13px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}'+
-   '.q354mh b{font:900 14px inherit}.q354mh span{font:700 10.5px inherit;opacity:.6}'+
-   '.q354mb{padding:14px}'+
-   '.q354grid{display:grid;grid-template-columns:1fr 1fr;gap:9px}'+
-   '.q354grid label{display:block}.q354grid i{display:block;font:800 10px inherit;color:#6E7683;font-style:normal;margin-bottom:4px}'+
-   '.q354grid input,.q354grid select{width:100%;box-sizing:border-box;border:1px solid #E4E0D6;border-radius:9px;padding:9px 10px;font:700 12px inherit;outline:0}'+
-   '.q354msg{margin-top:9px;font:800 11px inherit;color:#B5121B;min-height:15px}'+
-   '.q354mf{padding:11px 14px;border-top:1px solid #EDE7DA;display:flex;gap:9px;background:#FBFAF7}'+
-   '.q354g{border:1px solid #E0DBD4;background:#fff;color:#5B6472;border-radius:10px;padding:9px 14px;font:900 12px inherit;cursor:pointer}'+
-   '.q354mf .q354p{margin:0}'+
-   '@media(max-width:640px){.q354grid{grid-template-columns:1fr}}';
-
-  function css(){ if($("q354css")) return; var st=document.createElement("style"); st.id="q354css"; st.textContent=CSS; document.head.appendChild(st); }
-
-  /* اعتراض أي ضغطة على عنصر المستخدمين في أي قائمة */
-  document.addEventListener("click",function(e){
-    var t=e.target; if(!t||!t.closest) return;
-    var b=t.closest('[data-view="access"]');
-    if(!b) return;
-    e.preventDefault(); e.stopPropagation();
-    css(); show();
-    setTimeout(function(){ var v=view(); if(v&&!/q354w/.test(v.innerHTML)) paint(v); },60);
-  },true);
-
-  /* حماية: لو فُتح القسم بأي طريق آخر ورسم رسالة صلاحية أو بقي فارغًا → استبدلها */
-  function guard(){
-    var v=view(); if(!v||!v.classList.contains("active")) return;
-    css();
-    if(!v.querySelector(".q354w")) paint(v); else strip(v);
-  }
-  function watch(){
-    var main=document.querySelector("main"); if(!main||main.__q354) return;
-    main.__q354=1; new MutationObserver(function(){ setTimeout(guard,40); }).observe(main,{childList:true,subtree:true,attributes:true,attributeFilter:["class"]});
-  }
-  setInterval(function(){ watch(); guard(); },1000);
-  setTimeout(function(){ css(); watch(); },500);
-  window.QD354={show:show,paint:paint,users:users};
-})();
-</script>
+<!-- QD354 disabled: superseded by QD356 access-roles panel -->
 
 
 <script>
@@ -50277,6 +50084,39 @@ return map;
 })();
 </script>
 
+
+<script>
+/* QD361 · NAV-TOP v11-361 — القائمة تبدأ من أعلى (لوحة التحكم · التأهيل · التغذية) ولوحة المستخدمين الجديدة وحدها */
+(function(){
+  function top(){
+    try{ var n=document.getElementById("qd290nav"); if(n&&n.scrollTop) n.scrollTop=0;
+      var s=document.getElementById("sidebar"); if(s&&s.scrollTop) s.scrollTop=0; }catch(e){}
+  }
+  [200,700,1500,3000,6000].forEach(function(t){ setTimeout(top,t); });
+  document.addEventListener("click",function(e){
+    var b=e.target&&e.target.closest&&e.target.closest('#qd290nav [data-view]');
+    if(b) setTimeout(top,80);
+  },true);
+  /* أزرار سريعة ثابتة: التأهيل والتغذية — ظاهرة دائمًا حتى لو طالت القائمة */
+  function quick(){
+    if(document.getElementById("qd361q")) return;
+    var d=document.createElement("div"); d.id="qd361q";
+    d.style.cssText="position:fixed;left:16px;bottom:366px;z-index:9999;display:flex;flex-direction:column;gap:6px";
+    d.innerHTML='<button data-q361="rehab" style="border:0;border-radius:999px;padding:9px 14px;font:900 11.5px system-ui,Tahoma,sans-serif;background:#0F4C3A;color:#fff;box-shadow:0 8px 22px rgba(15,76,58,.4);cursor:pointer">🦵 التأهيل</button>'+
+      '<button data-q361="nutrition" style="border:0;border-radius:999px;padding:9px 14px;font:900 11.5px system-ui,Tahoma,sans-serif;background:#B45309;color:#fff;box-shadow:0 8px 22px rgba(180,83,9,.4);cursor:pointer">🥗 التغذية</button>';
+    document.body.appendChild(d);
+    d.querySelectorAll("[data-q361]").forEach(function(b){
+      b.onclick=function(){ var k=b.getAttribute("data-q361");
+        if(window.QD359&&QD359.open){ QD359.open(k); }
+        else { var nb=document.querySelector('#qd290nav [data-view="'+k+'"]'); if(nb) nb.click(); }
+        top();
+      };
+    });
+  }
+  setTimeout(quick,1500); setInterval(quick,4000);
+  window.QD361={top:top};
+})();
+</script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 </body>
 </html>
