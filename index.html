@@ -35134,7 +35134,7 @@ tr:hover .qde-ndate{color:#7E0E14}
 
   function badge(){
     try{ var b=document.getElementById("qdrBadge"); if(!b) return;
-      var w="v11-300 · ALL-IN";
+      var w="v11-301 · CONSISTENCY";
       if(b.textContent!==w+" · BTN-OK") b.textContent=w+" · BTN-OK"; }catch(e){}
   }
 
@@ -45650,6 +45650,154 @@ tr:hover .qde-ndate{color:#7E0E14}
   }
   if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",boot); else boot();
   window.QD300={inject:inject,persist:persist,fixStatus:fixStatus,fixTimes:fixTimes};
+})();
+</script>
+<script>
+/*!
+ * QD301 · REPORT-CONSISTENCY — توافق البيانات مع التقرير الشامل، وإزالة التكرار.
+ *  أ) الحقول المضافة تُحقن في نموذج التحرير فقط (وجود زر حفظ) ولا تتكرر في التقرير.
+ *  ب) إزالة أي حقل/بطاقة مكرّرة في التقرير (الدوري · الأرضية · النتيجة · التشريح).
+ *  ج) تصحيح الملعب إذا بدأ بتاريخ، وتوحيد النتيجة والوقت.
+ *  د) التشريح التفصيلي: قائمة واحدة بلا تكرار لكل إصابة.
+ *  هـ) مزامنة شرائح المواضع مع المجسم (لا شرائح لمواضع غير محددة).
+ */
+(function(){
+  if(window.__qd301) return; window.__qd301=1;
+  function isEN(){ try{ return /^en/i.test(localStorage.getItem("qd_lang")||""); }catch(e){ return false; } }
+  function L(a,e){ return isEN()?e:a; }
+  function S(){ try{ var a=window.__QDAPP; if(a&&a.S) return a.S; }catch(e){}
+              try{ if(window.QD_S) return window.QD_S; }catch(e){}
+              try{ var r=JSON.parse(localStorage.getItem("qadsiah_u18_v2")||"null"); if(r) return r; }catch(e){}
+              return null; }
+  function save(){ var s=S();
+    try{ if(window.__QDAPP&&window.__QDAPP.save) window.__QDAPP.save(); }catch(e){}
+    try{ if(typeof window.save==="function") window.save(); }catch(e){}
+    try{ if(s) localStorage.setItem("qadsiah_u18_v2",JSON.stringify(s)); }catch(e){} }
+  function mc(){ return document.getElementById("modalCard"); }
+  function isForm(){ var m=mc(); return !!(m&&m.querySelector('[data-act="saveMatch"]')); }
+
+  /* ---------- أ) منع التكرار داخل النافذة ---------- */
+  function dedupeBoxes(){
+    var m=mc(); if(!m) return;
+    ["#qd299box","#qd300box","#qd298box"].forEach(function(sel){
+      var all=m.querySelectorAll(sel);
+      for(var i=1;i<all.length;i++) all[i].remove();
+    });
+  }
+
+  /* ---------- ب) إزالة التكرار في التقرير ---------- */
+  var DUP_KEYS=[["الدوري","League"],["البطولة","Competition"],["المسابقة","Competition"],["نوع الأرضية","Surface"],["الأرضية","Surface"],["النتيجة","Result"],["الملعب","Venue"],["التاريخ","Date"]];
+  function labelOf(el){
+    var t=(el.textContent||"").trim().replace(/\s+/g," ");
+    for(var i=0;i<DUP_KEYS.length;i++){
+      if(t===DUP_KEYS[i][0]||t===DUP_KEYS[i][1]||t.indexOf(DUP_KEYS[i][0]+":")===0) return DUP_KEYS[i][0];
+    }
+    return null;
+  }
+  function dedupeMeta(){
+    var scope=mc()||document.body;
+    var cells=scope.querySelectorAll("dt,th,label,.lbl,.k,.tiny");
+    var seen={}, n=0;
+    cells.forEach(function(el){
+      var k=labelOf(el); if(!k) return;
+      if(el.closest("#qd299box,#qd300box,#qd298box")) return;
+      if(seen[k]){ var host=el.closest(".qd-grid2>div,tr,.row,div")||el; if(host&&host.parentNode){ host.parentNode.removeChild(host); n++; } }
+      else seen[k]=1;
+    });
+    return n;
+  }
+
+  /* ---------- ج) تصحيح الملعب والوقت ---------- */
+  function fixMeta(){
+    var s=S(); if(!s||!Array.isArray(s.matches)) return 0;
+    var n=0;
+    s.matches.forEach(function(m){
+      var v=String(m.venue||"");
+      var cleaned=v.replace(/^\s*\d{1,2}\s+[^\d]{3,12}\s+\d{4}\s*[·\-–]?\s*/,"").trim();
+      if(cleaned!==v&&cleaned){ m.venue=cleaned; n++; }
+      if(m.timeEnd&&m.timeEnd===String(m.date||"").slice(11,16)){ m.timeEnd=""; n++; }
+    });
+    if(n) save();
+    return n;
+  }
+
+  /* ---------- د) التشريح التفصيلي: بلا تكرار ---------- */
+  function uniqStructures(){
+    var s=S(); if(!s||!Array.isArray(s.injuries)) return 0;
+    var n=0;
+    s.injuries.forEach(function(i){
+      ["structure","structures","anatomy","anatomyList"].forEach(function(k){
+        var v=i[k];
+        if(!v) return;
+        if(Array.isArray(v)){
+          var seen={}, out=[];
+          v.forEach(function(x){
+            var key=(x&&(x.id||x.a||x.name))||x;
+            key=String(key);
+            if(seen[key]) return; seen[key]=1; out.push(x);
+          });
+          if(out.length!==v.length){ i[k]=out; n++; }
+        }
+      });
+    });
+    if(n) save();
+    return n;
+  }
+  /* إزالة أسطر التشريح المكرّرة في العرض */
+  function dedupeStructRows(){
+    var scope=mc()||document.body, seen={}, n=0;
+    scope.querySelectorAll("li,tr,.chip,.tag").forEach(function(el){
+      var t=(el.textContent||"").trim();
+      if(t.length<3||t.length>90) return;
+      if(!/عضل|وتر|رباط|عظم|مفصل|عصب|غضروف|Muscle|Tendon|Ligament|Bone|Joint|Nerve|Cartilage/i.test(t)) return;
+      var k=t.replace(/\s+/g," ");
+      if(seen[k]){ el.remove(); n++; } else seen[k]=1;
+    });
+    return n;
+  }
+
+  /* ---------- هـ) المجسم ↔ الشرائح ---------- */
+  function syncChips(){
+    var s=S(); if(!s) return;
+    var bm=document.querySelector("#modalCard .bodymap[data-f],.bodymap[data-f]");
+    if(!bm) return;
+    var chosen=String(bm.getAttribute("data-val")||"").split(",").filter(Boolean);
+    var box=document.getElementById("qd300box"); if(!box) return;
+    box.querySelectorAll("[data-qd300rm]").forEach(function(b){
+      var site=b.getAttribute("data-qd300rm");
+      if(chosen.length&&chosen.indexOf(site)<0){
+        /* الموضع أُزيل من المجسم → أزلها من الإصابات */
+        var t=window.QD299&&window.QD299; 
+        var m=mc(); var r=m?(m.getAttribute("data-round")||null):null;
+        var st=S(); if(st&&Array.isArray(st.matches)){
+          st.matches.forEach(function(mm){
+            if(r!=null&&String(mm.fx)!==String(r)) return;
+            (mm.injuries||[]).forEach(function(x){
+              var arr=String(x.bodySites||"").split(",").filter(Boolean).filter(function(q){ return q!==site; });
+              x.bodySites=arr.join(",");
+            });
+          });
+          save();
+        }
+        var host=b.closest(".qd300s"); if(host) host.remove();
+      }
+    });
+  }
+
+  function run(){
+    dedupeBoxes();
+    if(isForm()) return;
+    dedupeMeta(); dedupeStructRows();
+  }
+  function boot(){
+    fixMeta(); uniqStructures(); run();
+    try{ new MutationObserver(function(){ try{ run(); }catch(e){} }).observe(document.body,{childList:true,subtree:true}); }catch(e){}
+    setInterval(function(){ try{ run(); }catch(e){} },1100);
+    setInterval(function(){ try{ fixMeta(); uniqStructures(); }catch(e){} },6000);
+    window.addEventListener("focus",function(){ setTimeout(run,300); });
+  }
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",boot); else boot();
+  window.QD301={run:run,fixMeta:fixMeta,uniqStructures:uniqStructures,dedupeMeta:dedupeMeta};
 })();
 </script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
