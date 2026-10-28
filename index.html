@@ -2833,7 +2833,7 @@ function seasonSelect(){
 try{ window.posGroupedHTML=posGroupedHTML; }catch(e){}
 
 
-/* ================= الترقيات: الفريق الأول · فريق ٢١ · مواليد ٢٠٠٨–٢٠٠٩ ================= */
+/* ================= تصعيد اللاعبين: الفريق الأول · فريق ٢١ · مواليد ٢٠٠٨–٢٠٠٩ ================= */
 try{ if(!document.getElementById("qd-pr-css")){ var _pc=document.createElement("style"); _pc.id="qd-pr-css";
  _pc.textContent='.qd-pr-t{font-size:14.5px;font-weight:800;color:#7E0E14;margin:0}'+
  '.qd-pr-s{font-size:12px;color:#6b7280;margin:4px 0 14px}'+
@@ -7841,7 +7841,7 @@ REND.promotion=function(){
       var first=e.filter(function(x){return x.rec&&x.rec.target==="first";}).length;
       var u21=e.filter(function(x){return x.rec&&x.rec.target==="u21";}).length;
       var watch=e.filter(function(x){return !(x.rec&&x.rec.target&&x.rec.target!=="watch");}).length;
-      h+='<div class="qd-pr-t">الترقيات — الفريق الأول وفريق ٢١</div>'+
+      h+='<div class="qd-pr-t">تصعيد اللاعبين — الفريق الأول وفريق ٢١</div>'+
       '<div class="qd-pr-s">المرشّحون للانتقال إلى الفريق الأول أو فريق ٢١، إضافة إلى مواليد <b>٢٠٠٨</b> و<b>٢٠٠٩</b>. للمعسكرات والمباريات ودقائق اللعب استخدم تبويب <b>الالتحاقات</b>.</div>'+
       '<div class="qd-pr-k"><div class="c"><b>'+tot+'</b><span>إجمالي المرشّحين</span></div>'+
       '<div class="c"><b>'+first+'</b><span>الفريق الأول</span></div>'+
@@ -7932,7 +7932,7 @@ function prForm(pid){
     '<div class="field"><label class="label">ملاحظات (أداء · توصية · ملاحظة المدرب)</label><textarea class="input" rows="3" data-f="notes">'+esc(r.notes||"")+'</textarea></div>'+
     '<div class="tiny muted">اللاعب: <b>'+esc(pname(pid))+'</b> · مولود سنة '+esc(prDobYear(pp))+' · المركز '+esc(tr(pp.pos||""))+'</div>'+
     '<input type="hidden" data-f="pid" value="'+esc(pid)+'">';
-  openModal({title:"الترقيات — "+pname(pid),wide:true,body:body,
+  openModal({title:"تصعيد اللاعبين — "+pname(pid),wide:true,body:body,
     foot:'<button class="btn primary" data-act="prSave">'+svg(I.check,2.2)+' حفظ</button>'+
       '<button class="btn danger" data-act="prClear" data-id="'+esc(pid)+'">إزالة من القائمة</button>'+
       '<button class="btn ghost" data-close>إلغاء</button>'});
@@ -7990,7 +7990,7 @@ document.addEventListener("click",function(e){
       save(); closeModal(); toast("تم حفظ الالتحاق ودقائق اللعب"); REND.promotion();
     }
     else if(act==="prClear"){
-      if(!confirm("إزالة اللاعب من قائمة الترقيات؟")) return;
+      if(!confirm("إزالة اللاعب من قائمة تصعيد اللاعبين؟")) return;
       S.promo=recs.filter(function(r){return r.playerId!==id;});
       save(); closeModal(); toast("تمت الإزالة","warn"); REND.promotion();
     }
@@ -10590,7 +10590,7 @@ function plTLEvents(p){
   /* promotion follow-up */
   (S.promo||[]).filter(function(x){return x.playerId===pid && x.date;}).forEach(function(x){
     var tg=prTargetOf(x.target);
-    push(x.date,"milestone","check","gold","الترقيات — "+(tg?tg.lbl:"تحت المتابعة"),"الحالة: "+(x.status||"—"),"",""," ");
+    push(x.date,"milestone","check","gold","تصعيد اللاعبين — "+(tg?tg.lbl:"تحت المتابعة"),"الحالة: "+(x.status||"—"),"",""," ");
   });
   /* pre-season PCMA screening */
   (S.pcma||[]).filter(function(x){return x.playerId===pid;}).forEach(function(x){
@@ -11537,8 +11537,8 @@ function fxRowHtml(f){
     '</div></div>';
 }
 function fxI18nAll(){ try{ if(!STR.en)STR.en={}; if(!STR.ar)STR.ar={};
-  Object.assign(STR.en,{"nav_fixtures": "Fixtures & Season Table", "sub_fixtures": "Season fixtures, venues, weather, absences", "fx_title": "Team Fixtures — Season 2026/2027", "fx_kpi_all": "Total fixtures", "fx_kpi_home": "Home", "fx_kpi_away": "Away", "fx_kpi_next": "Remaining", "fx_round": "Round", "fx_home": "Home", "fx_away": "Away", "fx_date": "Date", "fx_time": "Kick-off", "fx_venue": "Venue", "fx_city": "City", "fx_result": "Result", "fx_notes": "Notes", "fx_logo": "Opponent logo", "fx_logo_rm": "Remove logo", "fx_logo_hint": "Click the square or pick an image for the opponent club crest (auto-compressed, stored on this device).", "fx_temp": "Temp", "fx_hum": "Humidity", "fx_wx_now": "forecast", "fx_wx_hist": "observed", "fx_wx_climate": "climate estimate", "fx_wx_climate_hint": "updates near match day", "fx_wx_load": "Fetching weather…", "fx_wx_none": "Weather unavailable — check connection", "fx_wx_all": "Refresh match weather", "fx_report": "Match injury report", "fx_edit": "Edit", "fx_cal": "Calendar", "fx_absent": "Out", "fx_filter_all": "All", "fx_filter_r1": "First half", "fx_filter_r2": "Second half", "fx_filter_next": "Remaining", "fx_ok": "Saved", "fx_missed_title": "Players missing matches through injury", "fx_missed_none": "No injury-related match absences recorded yet.", "fx_missed": "Matches missed", "fx_injury": "Injury", "fx_period": "Period", "fx_rounds": "Rounds", "fx_ongoing": "ongoing", "fx_wx_at": "at kick-off", "fx_wx_note": "Temperature and humidity are fetched automatically from Open-Meteo for the kick-off hour in the venue city; distant fixtures show a climate estimate (2023–2025).", "fx_add_report": "Add injury report", "fx_open_report": "Show injuries", "fx_hide_report": "Hide injuries", "fx_edit_report": "Edit injury report", "fx_no_report": "No injury report yet — add one now", "fx_kpi_inj": "Match injuries", "fx_order": "All fixtures listed chronologically from round 1 to round 34"});
-  Object.assign(STR.ar,{"nav_fixtures": "المباريات والجدول", "sub_fixtures": "جدول الموسم · الملاعب · الطقس · الغيابات", "fx_title": "مباريات الفريق — موسم 2026/2027", "fx_kpi_all": "إجمالي المباريات", "fx_kpi_home": "على أرضنا", "fx_kpi_away": "خارج الأرض", "fx_kpi_next": "المتبقية", "fx_round": "الجولة", "fx_home": "على أرضنا", "fx_away": "خارج الأرض", "fx_date": "التاريخ", "fx_time": "توقيت المباراة", "fx_venue": "الملعب", "fx_city": "المدينة", "fx_result": "النتيجة", "fx_notes": "ملاحظات", "fx_logo": "شعار الخصم", "fx_logo_rm": "إزالة الشعار", "fx_logo_hint": "اضغط المربّع أو اختر صورة لشعار نادي الخصم (تُضغط تلقائيًا وتُحفظ على هذا الجهاز).", "fx_temp": "الحرارة", "fx_hum": "الرطوبة", "fx_wx_now": "توقّع", "fx_wx_hist": "سجل فعلي", "fx_wx_climate": "تقدير مناخي", "fx_wx_climate_hint": "يُحدَّث عند اقتراب الموعد", "fx_wx_load": "جارٍ جلب الطقس…", "fx_wx_none": "الطقس غير متاح — تحقق من الاتصال", "fx_wx_all": "تحديث طقس المباريات", "fx_report": "تقرير إصابات المباراة", "fx_edit": "تعديل", "fx_cal": "التقويم", "fx_absent": "الغائبون", "fx_filter_all": "الكل", "fx_filter_r1": "الدور الأول", "fx_filter_r2": "الدور الثاني", "fx_filter_next": "المتبقية", "fx_ok": "تم الحفظ", "fx_missed_title": "غيابات اللاعبين بسبب الإصابة", "fx_missed_none": "لا توجد غيابات عن مباريات مسجلة حتى الآن.", "fx_missed": "مباريات فائتة", "fx_injury": "الإصابة", "fx_period": "الفترة", "fx_rounds": "الجولات", "fx_ongoing": "مستمرة", "fx_wx_at": "عند التوقيت", "fx_wx_note": "تُجلب الحرارة والرطوبة تلقائيًا من خدمة Open-Meteo لساعة انطلاق المباراة في مدينة الملعب؛ والمباريات البعيدة تُعرض لها تقديرات مناخية من 2023–2025.", "fx_add_report": "إضافة تقرير إصابات", "fx_open_report": "عرض الإصابات", "fx_hide_report": "إخفاء الإصابات", "fx_edit_report": "تعديل تقرير الإصابات", "fx_no_report": "لا يوجد تقرير إصابات — أضِفه الآن", "fx_kpi_inj": "إصابات المباريات", "fx_order": "جميع المباريات مرتّبة زمنيًا من الجولة الأولى إلى الجولة 34"});
+  Object.assign(STR.en,{"nav_fixtures": "Match reports", "sub_fixtures": "Season fixtures, venues, weather, absences", "fx_title": "Team Fixtures — Season 2026/2027", "fx_kpi_all": "Total fixtures", "fx_kpi_home": "Home", "fx_kpi_away": "Away", "fx_kpi_next": "Remaining", "fx_round": "Round", "fx_home": "Home", "fx_away": "Away", "fx_date": "Date", "fx_time": "Kick-off", "fx_venue": "Venue", "fx_city": "City", "fx_result": "Result", "fx_notes": "Notes", "fx_logo": "Opponent logo", "fx_logo_rm": "Remove logo", "fx_logo_hint": "Click the square or pick an image for the opponent club crest (auto-compressed, stored on this device).", "fx_temp": "Temp", "fx_hum": "Humidity", "fx_wx_now": "forecast", "fx_wx_hist": "observed", "fx_wx_climate": "climate estimate", "fx_wx_climate_hint": "updates near match day", "fx_wx_load": "Fetching weather…", "fx_wx_none": "Weather unavailable — check connection", "fx_wx_all": "Refresh match weather", "fx_report": "Match injury report", "fx_edit": "Edit", "fx_cal": "Calendar", "fx_absent": "Out", "fx_filter_all": "All", "fx_filter_r1": "First half", "fx_filter_r2": "Second half", "fx_filter_next": "Remaining", "fx_ok": "Saved", "fx_missed_title": "Players missing matches through injury", "fx_missed_none": "No injury-related match absences recorded yet.", "fx_missed": "Matches missed", "fx_injury": "Injury", "fx_period": "Period", "fx_rounds": "Rounds", "fx_ongoing": "ongoing", "fx_wx_at": "at kick-off", "fx_wx_note": "Temperature and humidity are fetched automatically from Open-Meteo for the kick-off hour in the venue city; distant fixtures show a climate estimate (2023–2025).", "fx_add_report": "Add injury report", "fx_open_report": "Show injuries", "fx_hide_report": "Hide injuries", "fx_edit_report": "Edit injury report", "fx_no_report": "No injury report yet — add one now", "fx_kpi_inj": "Match injuries", "fx_order": "All fixtures listed chronologically from round 1 to round 34"});
+  Object.assign(STR.ar,{"nav_fixtures": "تقارير المباريات", "sub_fixtures": "مشاركات اللاعبين · الدقائق · الإصابات · النتيجة", "fx_title": "مباريات الفريق — موسم 2026/2027", "fx_kpi_all": "إجمالي المباريات", "fx_kpi_home": "على أرضنا", "fx_kpi_away": "خارج الأرض", "fx_kpi_next": "المتبقية", "fx_round": "الجولة", "fx_home": "على أرضنا", "fx_away": "خارج الأرض", "fx_date": "التاريخ", "fx_time": "توقيت المباراة", "fx_venue": "الملعب", "fx_city": "المدينة", "fx_result": "النتيجة", "fx_notes": "ملاحظات", "fx_logo": "شعار الخصم", "fx_logo_rm": "إزالة الشعار", "fx_logo_hint": "اضغط المربّع أو اختر صورة لشعار نادي الخصم (تُضغط تلقائيًا وتُحفظ على هذا الجهاز).", "fx_temp": "الحرارة", "fx_hum": "الرطوبة", "fx_wx_now": "توقّع", "fx_wx_hist": "سجل فعلي", "fx_wx_climate": "تقدير مناخي", "fx_wx_climate_hint": "يُحدَّث عند اقتراب الموعد", "fx_wx_load": "جارٍ جلب الطقس…", "fx_wx_none": "الطقس غير متاح — تحقق من الاتصال", "fx_wx_all": "تحديث طقس المباريات", "fx_report": "تقرير إصابات المباراة", "fx_edit": "تعديل", "fx_cal": "التقويم", "fx_absent": "الغائبون", "fx_filter_all": "الكل", "fx_filter_r1": "الدور الأول", "fx_filter_r2": "الدور الثاني", "fx_filter_next": "المتبقية", "fx_ok": "تم الحفظ", "fx_missed_title": "غيابات اللاعبين بسبب الإصابة", "fx_missed_none": "لا توجد غيابات عن مباريات مسجلة حتى الآن.", "fx_missed": "مباريات فائتة", "fx_injury": "الإصابة", "fx_period": "الفترة", "fx_rounds": "الجولات", "fx_ongoing": "مستمرة", "fx_wx_at": "عند التوقيت", "fx_wx_note": "تُجلب الحرارة والرطوبة تلقائيًا من خدمة Open-Meteo لساعة انطلاق المباراة في مدينة الملعب؛ والمباريات البعيدة تُعرض لها تقديرات مناخية من 2023–2025.", "fx_add_report": "إضافة تقرير إصابات", "fx_open_report": "عرض الإصابات", "fx_hide_report": "إخفاء الإصابات", "fx_edit_report": "تعديل تقرير الإصابات", "fx_no_report": "لا يوجد تقرير إصابات — أضِفه الآن", "fx_kpi_inj": "إصابات المباريات", "fx_order": "جميع المباريات مرتّبة زمنيًا من الجولة الأولى إلى الجولة 34"});
 }catch(e){}
   if(!document.getElementById("qd-fx-css")){ var st=document.createElement("style"); st.id="qd-fx-css"; st.textContent=QD_FX_CSS; document.head.appendChild(st); } }
 REND.fixtures=function(){
@@ -14555,7 +14555,7 @@ function touch(){
 /* ---------------- permissions ---------------- */
 function can(view){
   if(!CUR) return false;
-  if(ADMIN_VIEWS.indexOf(view)>-1 && CUR.role!=="admin") return false;
+  if(ADMIN_VIEWS.indexOf(view)>-1 && view!=="access" && CUR.role!=="admin") return false;
   var v=ROLES[CUR.role].views;
   return v===null||v.indexOf(view)>-1;
 }
@@ -16431,7 +16431,7 @@ var MODS=[
  {k:"mental",ar:"الدعم النفسي",en:"Mental support",v:"mental",pid:"playerId",df:"date",grp:"core",dest:{p:1,t:1,d:1,c:1,a:1,s:1},ti:function(r){ return "استبيان نفسي"+(r.reviewed?" · مُراجَع":""); }},
  {k:"documents",ar:"الوثائق والصور",en:"Documents",v:"documents",pid:"playerId",df:"date",grp:"core",dest:{p:1,t:1,d:0,c:1,a:1,s:1},ti:function(r){ return (r.title||r.type||"وثيقة")+(r.injuryId?" · مربوطة بإصابة":""); }},
  {k:"activities",ar:"الأنشطة",en:"Activities",v:"activities",pid:"playerId",df:"date",grp:"core",dest:{p:1,t:1,d:1,c:1,a:1,s:1},ti:function(r){ return (r.context||"نشاط")+(r.duration?" · "+(r.duration+" د"):""); }},
- {k:"promo",ar:"الترقيات",en:"Promotions",v:"promotion",pid:"playerId",df:"date",grp:"team",dest:{p:1,t:1,d:1,c:0,a:1,s:1},ti:function(r){ return "ترقية إلى "+(r.target==="first"?"الفريق الأول":"فريق ٢١"); }},
+ {k:"promo",ar:"تصعيد اللاعبين",en:"Promotions",v:"promotion",pid:"playerId",df:"date",grp:"team",dest:{p:1,t:1,d:1,c:0,a:1,s:1},ti:function(r){ return "ترقية إلى "+(r.target==="first"?"الفريق الأول":"فريق ٢١"); }},
  {k:"callups",ar:"الالتحاقات",en:"Call-ups",v:"promotion",pid:"playerId",df:"matchDate",grp:"team",dest:{p:1,t:1,d:1,c:0,a:1,s:1},ti:function(r){ return "التحاق "+(r.hostTeam==="first"?"الفريق الأول":"فريق ٢١")+(r.opponent?" ضد "+r.opponent:"")+(r.minutes!=null?" · "+(r.minutes+" د"):""); }},
  {k:"daily",ar:"المتابعة اليومية",en:"Daily follow-up",v:"daily",pid:"playerId",df:"date",grp:"core",dest:{p:1,t:1,d:1,c:1,a:1,s:1},ti:function(r){ return "تقرير يومي"; }},
  {k:"matches",ar:"المباريات",en:"Matches",v:"fixtures",pid:"",df:"date",grp:"team",dest:{p:0,t:0,d:1,c:1,a:1,s:1},pids:function(r){ var o={},a=(r.injuries||[]); for(var i=0;i<a.length;i++){ if(a[i]&&a[i].playerId) o[a[i].playerId]=1; } return Object.keys(o); },ti:function(r){ return "ضد "+(r.opponent||"")+(r.result?" · "+r.result:""); }},
@@ -17818,7 +17818,7 @@ var QD_I18N={"مؤشر الجاهزية = الحالة اليومية (النو�
 
 "لا يوجد تقييم فيزيائي مسجّل بعد.":"No physical assessment recorded yet.",
 "إقرار الجاهزية والعودة للمشاركة":"Fit-to-play declaration",
-"إزالة اللاعب من قائمة الترقيات؟":"Remove player from promotions list?",
+"إزالة اللاعب من قائمة تصعيد اللاعبين؟":"Remove player from promotions list?",
 "لا توجد نتيجة قوام مسجّلة بعد.":"No posture result recorded yet.",
 "لا يوجد شيء مسجل في هذا اليوم":"Nothing recorded on this day",
 "اتفاق مع مدرب الفئة · تعليمات":"Agreement with category coach · instructions",
@@ -17856,7 +17856,7 @@ var QD_I18N={"مؤشر الجاهزية = الحالة اليومية (النو�
 "حذف نتيجة القوام هذه؟":"Delete this posture result?",
 "يحتاج تقييمًا إضافيًا":"Needs further assessment",
 "المؤشرات غير الطبيعية":"Abnormal findings",
-"الترقيات والالتحاقات":"Promotions & Call-ups",
+"تصعيد اللاعبين والالتحاقات":"Promotions & Call-ups",
 "شكاوى ما بعد التمرين":"Post-Training Complaints",
 "التقرير الطبي الشامل":"Comprehensive Medical Report",
 "التاريخ والميكانيكية":"History & Mechanism",
@@ -18114,7 +18114,7 @@ var QD_I18N={"مؤشر الجاهزية = الحالة اليومية (النو�
 "غير محدد":"Not specified",
 "لا شكاوى":"No complaints",
 "المسابقة":"Competition",
-"الترقيات":"Promotions",
+"تصعيد اللاعبين":"Promotions",
 "غير لائق":"Unfit",
 "الأمراض":"Illnesses",
 "التقويم":"Calendar",
@@ -21821,7 +21821,7 @@ try{
 /* ============================================================================
    QDABSENT v11-10 — قسم «اللاعبون غير المشاركين في تدريب اليوم»
    يُضاف كبطاقة في أعلى لوحة التحكم، ويجمع السبب من:
-     · الإصابات (S.injuries) · الأمراض (S.illnesses) · الترقيات (S.promo)
+     · الإصابات (S.injuries) · الأمراض (S.illnesses) · تصعيد اللاعبين (S.promo)
      · الالتحاقات (S.callups) · استدعاء المنتخب (S.activities)
    v11-03: تثبيت التركيب على كل مسارات إعادة الرسم + تحديث فوري بعد أي حفظ،
    وبديل للوصول إلى REND عبر جسر window.QDB.RND، ومؤشر وقت آخر تحديث.
@@ -21877,7 +21877,7 @@ try{
     refr  :{ar:"تحديث", en:"Refresh"},
     v_inj :{ar:"سجل الإصابات", en:"Injury log"},
     v_ill :{ar:"سجل الأمراض", en:"Illness log"},
-    v_pr  :{ar:"الترقيات والالتحاقات", en:"Enrollments"},
+    v_pr  :{ar:"تصعيد اللاعبين والالتحاقات", en:"Enrollments"},
     v_cu  :{ar:"الالتحاقات", en:"Enrollments"},
     v_act :{ar:"استدعاءات المنتخب", en:"Call-ups"},
     st_un :{ar:"غير قادر", en:"Unable"},
@@ -22364,7 +22364,7 @@ try{
 (function(){
 try{
   if(window.__qdI18n) return; window.__qdI18n=1; window.__qdI18nVER="v11-12";
-  var W={"لا": "No", "تم": "Done", "من": "from", "على": "on", "في": "in", "غير": "Not", "اللاعب": "Player", "لاعب": "Player", "لاعبون": "Players", "اللاعبون": "Players", "اللاعبين": "Players", "العودة": "Return", "أو": "or", "إصابة": "injury", "إصابات": "Injuries", "الإصابات": "Injuries", "بعد": "after", "حفظ": "Save", "مع": "with", "علاج": "Therapy", "العلاج": "Therapy", "تاريخ": "Date", "التاريخ": "Date", "الفريق": "Team", "فريق": "Team", "قبل": "before", "الطبي": "Medical", "طبي": "Medical", "الموسم": "Season", "ألم": "Pain", "الألم": "Pain", "كل": "All", "نادي": "Club", "مرحلة": "Phase", "المرحلة": "Phase", "سجل": "Record", "ملاحظات": "Notes", "ملاحظة": "Note", "مباراة": "Match", "المباراة": "Match", "مباريات": "matches", "المباريات": "Matches", "ملعب": "Stadium", "الملعب": "Stadium", "التقرير": "Report", "تقرير": "Report", "الحمل": "Load", "حمل": "Load", "كسر": "Fracture", "كلمة": "Password", "بيانات": "Data", "البيانات": "Data", "حذف": "Delete", "بلا": "without", "هذا": "this", "الفحص": "Screening", "فحص": "Screening", "القادسية": "Al-Qadsiah", "آخر": "Last", "نوع": "Type", "الجهاز": "Device", "التقييم": "Assessment", "تقييم": "Assessment", "تعديل": "Edit", "جلسة": "Session", "الجلسة": "Session", "جلسات": "Sessions", "تمزق": "Tear", "إلى": "to", "الأول": "First", "الأولى": "First", "فتح": "Open", "يوجد": "exists", "للعب": "to play", "التأهيل": "Rehabilitation", "تأهيل": "Rehab", "إضافة": "Add", "توجد": "exists", "طبيعي": "Normal", "توقيع": "Signature", "التوقيع": "Signature", "الرديف": "Reserve", "تسجيل": "Log", "التسجيل": "Login", "التهاب": "Inflammation", "وتر": "Tendon", "إرسال": "Send", "العملية": "Surgery", "جارٍ": "In progress", "ملف": "Profile", "الملف": "Profile", "الرباط": "Ligament", "العضلة": "Muscle", "عند": "at", "تحت": "under", "أيام": "days", "تدريب": "Training", "التدريب": "Training", "أخرى": "Other", "لم": "not", "الخبر": "Al-Khobar", "مدى": "Range", "الجاهزية": "Readiness", "تعذّر": "Could not", "القدم": "Foot", "قدم": "Foot", "التحاق": "Enrollment", "الالتحاق": "Enrollment", "الالتحاقات": "Enrollments", "الشامل": "Comprehensive", "كامل": "Full", "تنزيل": "Download", "تحميل": "Upload", "البرنامج": "Program", "معايير": "Criteria", "اسم": "Name", "الكتف": "Shoulder", "كتف": "Shoulder", "الركبة": "Knee", "ركبة": "Knee", "الزراعي": "Agricultural", "قوة": "Strength", "القوة": "Strength", "الشفاء": "Recovery", "معسكر": "Camp", "المعسكر": "Camp", "الرأس": "Head", "رأس": "Head", "الرياضي": "Sports", "رياضي": "Athletic", "عن": "about", "الحالة": "Status", "حالة": "Case", "إعادة": "Re-", "عضلي": "Muscular", "الخلفية": "Hamstring", "عضلة": "Muscle", "اليوم": "Today", "سجلات": "Records", "ما": "what", "متاح": "Available", "أكثر": "more", "تلقائيًا": "automatically", "المنتخب": "National team", "منتخب": "National team", "هل": "Is", "الصليبي": "Cruciate", "الحالية": "Current", "الحالي": "Current", "القوام": "Posture", "قوام": "Posture", "التمرين": "Training", "تمرين": "Training", "جديد": "New", "جديدة": "New", "الطبيب": "Doctor", "طبيب": "Doctor", "مرتبطة": "Linked", "مرتبط": "Linked", "عدد": "Count", "الكامل": "Full", "تثبيت": "Install", "نسبة": "Percentage", "قياس": "Measurement", "اختر": "Choose", "يوم": "day", "رابط": "Link", "الرابط": "Link", "التواء": "Sprain", "شد": "Strain", "الفخذ": "Thigh", "لائق": "Fit", "حركة": "Movement", "لكل": "per", "نتيجة": "Result", "النتيجة": "Result", "العلاجية": "Therapeutic", "العيادة": "Clinic", "عطلة": "Rest", "طباعة": "Print", "نسخة": "Copy", "جزئي": "Partial", "أضف": "Add", "خلال": "during", "متابعة": "Follow-up", "المتابعة": "follow-up", "خطر": "Risk", "الخطورة": "Severity", "الدقائق": "Minutes", "دقائق": "minutes", "دقيقة": "min", "برنامج": "Program", "الحفظ": "Saving", "مسجّلة": "recorded", "بداية": "Start", "المستخدم": "User", "مستخدم": "User", "خلع": "Dislocation", "خفيف": "Light", "الرياضة": "Sport", "عرض": "View", "واتساب": "WhatsApp", "اختبارات": "Tests", "اختبار": "Test", "بدون": "without", "داخل": "inside", "إغلاق": "Close", "استعادة": "Reset", "قادر": "able", "إجمالي": "Total", "متوسط": "Moderate", "نعم": "Yes", "فقط": "only", "التطبيق": "App", "أولًا": "First", "رقم": "No.", "محدد": "specified", "تحديث": "Refresh", "موضع": "Site", "أي": "any", "السبب": "Reason", "تشخيص": "Diagnosis", "التشخيص": "Diagnosis", "تفاصيل": "Details", "الجوال": "Mobile", "الأخصائي": "Specialist", "أخصائي": "Specialist", "خطأ": "Error", "الكاحل": "Ankle", "كاحل": "Ankle", "العضلي": "Muscular", "يدوي": "Manual", "أسبيتار": "Aspetar", "إدارة": "Management", "اليومي": "Daily", "المركز": "Position", "مركز": "position", "مدافع": "Defender", "المدافعون": "Defenders", "مهاجم": "Forward", "المهاجمون": "Forwards", "وسط": "Midfielder", "لاعبو": "Midfielders", "الوسط": "Midfield", "الحارس": "Goalkeeper", "حراس": "Goalkeepers", "المرمى": "goal", "الطول": "Height", "الوزن": "Weight", "يمنى": "Right", "يسرى": "Left", "أمامي": "Anterior", "خلفي": "Posterior", "الطبيعية": "normal", "الحاد": "Acute", "المزمن": "Chronic", "مزمن": "Chronic", "حاد": "Acute", "متوسطة": "Moderate", "شديدة": "Severe", "خفيفة": "Mild", "مثالي": "Ideal", "يحتاج": "Needs", "جيدة": "Good", "سيئة": "Poor", "صالة": "Hall", "ملاعب": "Pitches", "أرضية": "Surface", "عشب": "Grass", "الأسبوع": "Week", "أسبوع": "week", "الشهر": "Month", "شهر": "month", "الشهور": "Months", "الأيام": "Days", "السابق": "Previous", "التالي": "Next", "الحادثة": "Incident", "الحدث": "Event", "الأحداث": "Events", "مناسبة": "Occasion", "الأسبوعي": "Weekly", "الشهري": "Monthly", "السنوي": "Annual", "الكل": "All", "الكلية": "Overall", "الأشعة": "Imaging", "أشعة": "Imaging", "جراحة": "Surgery", "الجراحة": "Surgery", "عمليات": "Operations", "الجراحية": "Surgical", "جراحي": "Surgical", "تأهيلي": "Rehab", "الحالات": "Cases", "الخطة": "Plan", "خطة": "Plan", "الخط": "Line", "المسار": "Path", "مسار": "Path", "الهدف": "Target", "التقدم": "Progress", "الجولة": "Round", "جولة": "round", "الدوري": "League", "البطولة": "Tournament", "بطولة": "Tournament", "كأس": "Cup", "ودية": "Friendly", "الأهلي": "Al-Ahli", "الهلال": "Al-Hilal", "النصر": "Al-Nassr", "الاتحاد": "Al-Ittihad", "الشباب": "Al-Shabab", "الفتح": "Al-Fateh", "التعاون": "Al-Taawoun", "الرياض": "Riyadh", "جدة": "Jeddah", "الدمام": "Dammam", "بريدة": "Buraydah", "حرمة": "Harmah", "الأحساء": "Al-Ahsa", "المدينة": "City", "مدينة": "city", "المنورة": "Al-Munawwarah", "أبها": "Abha", "المجمعة": "Al-Majma'ah", "مجاني": "Free", "الإجراء": "Action", "الإجراءات": "Actions", "الطريقة": "Method", "المدة": "Duration", "مدة": "duration", "الوقت": "Time", "وقت": "time", "الساعة": "Time", "السياق": "Context", "سياق": "context", "الفئة": "Category", "التكرار": "Recurrence", "تكرار": "recurrence", "الوضع": "Status", "الوقاية": "Prevention", "وقاية": "prevention", "التوتر": "Tension", "الجودة": "Quality", "جودة": "quality", "النوم": "sleep", "المزاج": "Mood", "الشهية": "Appetite", "الإجهاد": "Load", "التعب": "Fatigue", "الإرهاق": "Fatigue", "الأداء": "Performance", "أداء": "performance", "الاستشفاء": "Recovery", "استشفاء": "recovery", "الحمولة": "Load", "اللياقة": "Fitness", "لياقة": "fitness", "بدنية": "physical", "بدني": "physical", "الجسم": "Body", "الجسمي": "Body", "الإصابة": "Injury", "الشكوى": "Complaint", "الشكاوى": "Complaints", "شكوى": "complaint", "الأمراض": "Illnesses", "المرض": "Illness", "مرض": "Illness", "القياسات": "Measurements", "العمر": "Age", "السن": "Age", "الميلاد": "birth", "مولود": "born", "التصنيف": "Category", "القائمة": "List", "قائمة": "list", "مسجّل": "recorded", "مستدعى": "Called up", "مرشّح": "Candidate", "مؤجّل": "Postponed", "معتمد": "Approved", "مرفوض": "Rejected", "قيد": "In", "المفاوضة": "negotiation", "سليم": "Healthy", "مصاب": "Injured", "مريض": "Ill", "مجروح": "Injured", "متشفٍّ": "Recovered", "المتعافي": "Recovered", "شفاء": "recovery", "جاهز": "Ready", "جاهزية": "readiness", "عادي": "Normal", "مرتفع": "High", "منخفض": "Low", "شديد": "Severe", "عاجل": "Urgent", "مهم": "Important", "تحذير": "Warning", "تنبيه": "Alert", "معلومة": "Info", "نصيحة": "Tip", "مطلوب": "Required", "اختياري": "Optional", "الأساسي": "Basic", "الأساسية": "Basic", "المتقدمة": "Advanced", "المتقدم": "Advanced", "البسيط": "Simple", "الكاملة": "Full", "الشخصية": "Personal", "المعلومات": "Info", "المستخدمون": "Users", "الصلاحيات": "Permissions", "الإعدادات": "Settings", "الخادم": "Server", "النسخ": "Backups", "الاحتياطي": "Backup", "التصدير": "Export", "الاستيراد": "Import", "التقارير": "Reports", "التحليل": "Analysis", "الإدارة": "Admin", "وزن": "weight", "طول": "height", "سن": "age", "أسبوعي": "Weekly", "شهري": "Monthly", "سنوي": "Annual", "تدريبات": "sessions", "حصة": "session", "أطباء": "Doctors", "معالج": "Therapist", "المعالج": "Therapist", "الصيدلية": "Pharmacy", "الفحوصات": "Screenings", "فحوصات": "screenings", "المخزون": "Inventory", "ضد": "vs", "د": "min", "أدلة": "Evidence", "ارتجاج": "Concussion", "والجاهزية": "& readiness", "تصنيف": "Classification", "اجتماع": "Meeting", "كلتاهما": "Both", "ي": "", "سم": "cm", "سنة": "year", "حدث": "Event", "ذكر": "Male", "ضمد": "Bandage", "نشط": "Active", "نشطة": "Active", "حرج": "Critical", "كجم": "kg", "مسح": "Reset", "بحث": "Search", "مارس": "March", "مايو": "May", "نشاط": "Activity", "أنثى": "Female", "شريك": "Partner", "حارس": "Goalkeeper", "كدمة": "Contusion", "عربي": "Arabic", "خروج": "Exit", "تبدأ": "Starts", "النمو": "Growth", "مستند": "Document", "الجنس": "Gender", "السنة": "Year", "منجزة": "Completed", "الدور": "Round", "إخفاء": "Hide", "تذكير": "Reminder", "الوطن": "Nation", "العضد": "Upper arm", "مقفلة": "Locked", "موقوف": "Suspended", "البحث": "Search", "وثيقة": "Document", "عملية": "Surgery", "تصدير": "Export", "دورات": "Rounds", "تنتهي": "Ends", "متبقٍ": "Remaining", "منخفضة": "Low", "حساسية": "Allergy", "متشافٍ": "Recovered", "مجدولة": "Scheduled", "مفتوحة": "Open", "الموعد": "Appointment", "مراقبة": "Monitoring", "الحضور": "Attendance", "الوحدة": "Module", "الليونة": "Flexibility", "العنوان": "Address", "تعليقات": "Comments", "الحرارة": "Temperature", "الرطوبة": "Humidity", "الأنشطة": "Activities", "تعارضات": "Conflicts", "إرشادات": "Guidelines", "المصادر": "Sources", "التفصيل": "Detail", "المرفقات": "Attachments", "المتبقية": "Remaining", "المسابقة": "Competition", "عمود": "Spine", "والد/والدة": "Parent", "يناير": "January", "فبراير": "February", "أبريل": "April", "يونيو": "June", "يوليو": "July", "أغسطس": "August", "سبتمبر": "September", "أكتوبر": "October", "نوفمبر": "November", "ديسمبر": "December", "الرس": "Al-Rass", "الجوف": "Al-Jouf", "الحزم": "Al-Hazem", "العلا": "Al-Ula", "محايل": "Muhayil", "الرائد": "Al-Raed", "العروبة": "Al-Orobah", "الاتفاق": "Al-Ettifaq", "الفيصلي": "Al-Faisaly", "الفيحاء": "Al-Fayha", "المصدر": "Source", "شارك": "Played", "متصل": "Online", "قفل": "Lock", "حسابي": "My account", "جدول": "Table", "بطاقة": "Card", "فترة": "Period", "ساعة": "Hour", "ثانية": "Second", "الآن": "Now", "أمس": "Yesterday", "غدًا": "Tomorrow", "الأمس": "Yesterday", "درجة": "Grade", "درجات": "Grades", "عمر": "Age", "قيمة": "Value", "أولوية": "Priority", "فئة": "Category", "المستوى": "Level", "الدرجة": "Grade", "التقدير": "Rating", "الملاحظة": "Note", "التعليق": "Comment", "الأثر": "Impact", "المكان": "Place", "الشخص": "Person", "النادي": "Club", "المدرب": "Coach", "الوالد": "Parent", "الهاتف": "Phone", "البريد": "Email", "الرقم": "Number", "الاسم": "Name", "اللقب": "Surname", "الأعراض": "Symptoms", "الدواء": "Medication", "الجرعة": "Dose", "الراحة": "Rest", "التغذية": "Nutrition", "التورم": "Swelling", "الكدمة": "Bruise", "الجرح": "Wound", "الكسر": "Fracture", "الخلع": "Dislocation", "التمزق": "Tear", "الشد": "Strain", "الالتواء": "Sprain", "الالتهاب": "Inflammation", "التيبس": "Stiffness", "الضعف": "Weakness", "التنميل": "Numbness", "الوخز": "Tingling", "الحركة": "Movement", "التوازن": "Balance", "السرعة": "Speed", "التحمل": "Endurance", "المرونة": "Flexibility", "الرشاقة": "Agility", "القفز": "Jumping", "الجري": "Running", "الركل": "Kicking", "التمرير": "Passing", "التسديد": "Shooting", "الدفاع": "Defense", "الهجوم": "Attack", "الحراسة": "Goalkeeping", "الكرة": "Ball", "الحكم": "Referee", "البطاقة": "Card", "الخطأ": "Foul", "التسلل": "Offside", "الركنية": "Corner", "الجزاء": "Penalty", "الشوط": "Half", "الكأس": "Cup", "الودية": "Friendly", "الرسمية": "Official", "التحضير": "Preparation", "السفر": "Travel", "الإقامة": "Accommodation", "الوصول": "Arrival", "المغادرة": "Departure", "الغياب": "Absence", "التأخير": "Delay", "الإذن": "Permission", "الاستئذان": "Leave request", "العقوبة": "Sanction", "الإنذار": "Warning", "الإيقاف": "Suspension", "المكافأة": "Bonus", "المستحقات": "Dues", "العقد": "Contract", "الانتقال": "Transfer", "الإعارة": "Loan", "التجديد": "Renewal", "الانتهاء": "Expiry", "الراتب": "Salary", "البدل": "Allowance", "التأمين": "Insurance", "الوثيقة": "Document", "الصورة": "Photo", "الفيديو": "Video", "المرفق": "Attachment", "الرمز": "Code", "الرقم السري": "PIN", "كلمة المرور": "Password", "الصلاحية": "Permission", "الحساب": "Account", "الإعداد": "Setting", "النسخة": "Version", "التحديث": "Update", "التحميل": "Download", "الرفع": "Upload", "الحذف": "Delete", "التعديل": "Edit", "الإضافة": "Add", "العرض": "View", "الطباعة": "Print", "الإرسال": "Send", "الاستقبال": "Receive", "الفرز": "Sort", "التصفية": "Filter", "الإجمالي": "Total", "المتوسط": "Average", "الأعلى": "Max", "الأدنى": "Min", "العدد": "Count", "المجموع": "Sum", "الفرق": "Difference", "المقارنة": "Comparison", "التغير": "Change", "التطور": "Trend", "المؤشر": "Indicator", "الرسم": "Chart", "الجدول": "Table", "الصفحة": "Page", "القسم": "Section", "النافذة": "Window", "الزر": "Button", "الحقل": "Field", "الخانة": "Cell", "العمود": "Column", "الصف": "Row", "السطر": "Line", "النقطة": "Point", "الفقرة": "Paragraph", "النص": "Text"}, P={"لا يوجد": "No data", "لا توجد": "No", "لا يوجد سجل": "No records", "لا يوجد سجل توقيعات بعد": "No signatures recorded yet", "غير قادر": "Unable", "غير لائق": "Unfit", "غير محدد": "Unspecified", "غير محدّد": "Unspecified", "غير طبيعي": "Abnormal", "يعتبر غير": "not", "الفريق الأول": "First team", "فريق ٢١": "U21 team", "مع الفريق الأول": "With the first team", "مع فريق ٢١": "With U21", "فريق 21": "U21 team", "نوع الإصابة": "Injury type", "تاريخ الإصابة": "Injury date", "تفاصيل الإصابة": "Injury details", "موضع الإصابة": "Injury site", "إصابات المباريات": "Match injuries", "إصابات هذه المباراة": "Injuries in this match", "إصابات كل مباراة على حدة": "Injuries per match", "إصابة / مباراة": "Injury / match", "إصابات الموسم": "Season injuries", "التاريخ والوقت": "Date & time", "المرحلة الحالية": "Current phase", "تم الحفظ": "Saved", "تم حذف": "Deleted", "تم الحفظ بنجاح": "Saved successfully", "الرقم الطبي": "Medical No.", "العودة للأداء": "Return to performance", "العودة للعب": "Return to play", "تاريخ العودة للعب": "Return-to-play date", "نوع الجلسة": "Session type", "جلسات العلاج": "Therapy sessions", "جلسة عيادة": "Clinic session", "جلسات العيادة": "Clinic sessions", "السجل اليومي للعيادة": "Clinic daily log", "شكاوى ما بعد التمرين": "Post-training complaints", "فحص ما قبل الموسم": "Pre-season screening", "الفحص الطبي قبل الموسم": "Pre-season medical", "مركز الترابط الشامل": "Unified linking hub", "ملف اللاعب الشامل": "Full player profile", "ملف اللاعب": "Player profile", "ملف اللاعب — ": "Player profile — ", "أيام الغياب": "Days out", "أيام منذ الإصابة": "Days since injury", "أيام الغياب (تقديري)": "Days out (estimated)", "أيام الغياب من الإصابة": "Days lost to injury", "توقيع اللاعب": "Player signature", "توقيع الأخصائي": "Clinician signature", "سجل التوقيعات": "Signature log", "إقرار موقّع": "Signed declaration", "إقرار الجاهزية والعودة للمشاركة": "Fit-to-play declaration", "الموقّع": "Signed by", "الطريقة": "Method", "الجهاز": "Device", "الطبيب المعالج": "Treating doctor", "الأخصائي المسؤول": "Responsible clinician", "الخطورة": "Severity", "الإجراء المتخذ": "Action taken", "التأهيل الحركي": "Motor rehab", "العلاج الطبيعي": "Therapy", "علاج طبيعي": "Therapy", "تأهيل": "Rehab", "إعادة تأهيل": "Rehabilitation", "برامج العلاج": "Therapy programmes", "العضلة الخلفية": "Hamstring", "العمليات الجراحية": "Surgeries", "العملية الجراحية": "Surgery", "تاريخ الشفاء": "Recovery date", "تاريخ الميلاد": "Date of birth", "العودة للرياضة": "Return to sport", "عودة للرياضة": "Return to sport", "عودة": "Return", "التقييم والفحص": "Assessment & screening", "التقييم الفيزيائي": "Physiotherapy", "الفحص البدني": "Physical screening", "قوام APECS": "APECS Posture", "اختبار العودة للملاعب": "Return-to-sport test", "اختبارات خاصة": "Special tests", "استعادة المدى والثبات": "Restore range & stability", "تحت المتابعة": "Under review", "يحتاج تقييمًا إضافيًا": "Needs further assessment", "إخفاء اللاعبين المتشافين": "Hide recovered", "إظهار اللاعبين المتشافين": "Show recovered", "عرض التقرير الشامل": "Open full report", "التقرير الطبي الشامل": "Comprehensive medical report", "تنزيل نسخة HTML": "Download HTML", "طباعة / PDF": "Print / PDF", "تصدير PDF": "Export PDF", "إنشاء التقرير": "Generate report", "إغلاق التقرير": "Close report", "إرسال على واتساب": "Send on WhatsApp", "إرسال التذكير": "Send reminder", "إرسال الموعد": "Send appointment", "إرسال رابط الاستعادة": "Send reset link", "إشعار الجميع": "Notify everyone", "اسم الفريق المنافس": "Opponent name", "الملعب — المدينة": "Venue — city", "الملعب / المدينة": "Venue / city", "اتفاق مع مدرب الفئة · تعليمات": "Agreement with the age-group coach · instructions", "أضف التفاصيل": "Add details", "أضف لاعبين أولًا.": "Add players first.", "اختر اللاعب": "Choose player", "اختر…": "Choose…", "إدخال يدوي": "Manual entry", "استيراد نسخة": "Import backup", "حفظ كلمة المرور": "Save password", "كلمة المرور": "Password", "كلمة المرور الجديدة": "New password", "تأكيد كلمة المرور": "Confirm password", "اسم المستخدم": "Username", "اسم المستخدم أو كلمة المرور غير صحيحة": "Wrong username or password", "تسجيل الدخول": "Sign in", "دخول": "Sign in", "إنشاء الحساب والدخول": "Create account & sign in", "أنشئ حساب المدير المسؤول عن النظام": "Create the system administrator account", "تسجيل الخروج": "Sign out", "حسابي": "My account", "قفل": "Lock", "متصل": "Online", "غير متصل": "Offline", "تثبيت التطبيق": "Install app", "العربية": "Arabic", "الإنجليزية": "English", "المعلومات الشخصية": "Personal details", "بيانات اللاعب": "Player data", "بيانات مساندة": "Supporting data", "الأقسام المرتبطة": "Linked sections", "الأقسام": "Sections", "المستخدمون والصلاحيات": "Users & permissions", "إضافة مستخدم": "Add user", "إضافة لاعب": "Add player", "إضافة مباراة": "Add match", "إضافة مستند": "Add document", "إضافة إصابة": "Add injury", "إضافة جلسة": "Add session", "إضافة مناسبة": "Add event", "إضافة تقرير إصابات": "Add injury report", "إعدادات الخادم": "Server settings", "استعادة كلمة المرور": "Reset password", "معلومات شخصية": "Personal info", "التاريخ الطبي": "Medical history", "الإيجابيات": "Positives", "إيجابي": "Positive", "سلبي": "Negative", "لا ينطبق": "N/A", "ملعب نادي القادسية الرديف الزراعي": "Al-Qadsiah reserve agricultural pitch", "ملعب نادي القادسية": "Al-Qadsiah Club stadium", "خارج الأرض": "Away", "على أرضنا": "Home", "أرضية الملعب": "Pitch surface", "عشب طبيعي": "Natural grass", "إحداثيات الملاعب": "Pitch coordinates", "آخر التحديثات في كل الوحدات": "Latest updates in all modules", "آخر حدث طبي": "Last medical event", "آخر تقييم": "Last assessment", "آخر حمل": "Latest load", "إجمالي السجلات": "Total records", "إجمالي اللاعبين": "Total players", "إجمالي الدقائق": "Total minutes", "متوسط الدقائق": "Average minutes", "عدد الالتحاقات": "Enrollments", "لاعبون ملتحقون": "Enrolled players", "حالات فريق ٢١": "U21 cases", "حالات الفريق الأول": "First-team cases", "ملخص دقائق اللعب مع الفئة الأعلى": "Minutes with the higher category", "محدَّدون يدويًا": "Selected manually", "التحاق جديد بمعسكر / مباراة": "New camp / match enrollment", "حفظ الالتحاق": "Save enrollment", "تعديل الالتحاق": "Edit enrollment", "حذف هذا الالتحاق بكل لاعبيه؟": "Delete this enrollment with all its players?", "التحاق — معسكر ومباراة": "Enrollment — Camp & match", "التحاق — تدريب": "Enrollment — Training", "التحاق — معسكر": "Enrollment — Camp", "التحاق — مباراة": "Enrollment — Match", "الفئة المستضيفة": "Host category", "نوع الالتحاق": "Enrollment type", "تاريخ المعسكر / الالتحاق": "Camp / enrollment date", "تاريخ المباراة": "Match date", "سفر مع الفريق": "Travel with team", "تاريخ السفر": "Travel date", "الخصم": "Opponent", "اللاعبون — حدّد من التحق وأدخل دقائق اللعب": "Players — tick who joined and enter minutes", "الدقائق تُحفظ لكل لاعب على حدة، وتظهر في ملفه وخطه الزمني وفي ملخص الدقائق.": "Minutes are stored per player and appear in his profile, timeline and the minutes summary.", "لا التحاقات مسجّلة بعد. اضغط «التحاق جديد» لتسجيل معسكر أو مباراة مع فريق ٢١ أو الفريق الأول.": "No enrollments yet. Use “New enrollment” to log a camp or match with U21 or the first team.", "سجّل التحاق اللاعبين بالفئة الأعلى (معسكر · سفر · مباراة) ودقائق مشاركة كل لاعب — تُحسب تلقائيًا في ملفه وخطه الزمني.": "Log enrollments with the higher category (camp · travel · match) and each player’s minutes — computed automatically in his profile and timeline.", "إزالة من القائمة": "Remove from list", "إزالة اللاعب من قائمة الترقيات؟": "Remove the player from promotions?", "قيد المفاوضة": "In negotiation", "مرشّحون من مواليد": "Candidates born", "مباريات فائتة": "Matches missed", "غير المشاركين في تدريب اليوم": "Not training today", "استدعاء المنتخب": "National call-up", "استدعاءات المنتخب": "National call-ups", "أُصيب في المنتخب": "Injured on national duty", "من استدعاء المنتخب": "From a national call-up", "الإصابات": "Injuries", "الأمراض": "Illnesses", "المستندات": "Documents", "التقويم": "Calendar", "الشكاوى": "Complaints", "الدعم النفسي": "Mental support", "المتابعة اليومية": "Daily follow-up", "الخط الزمني": "Timeline", "نظرة عامة": "Overview", "الأنشطة والمتابعة": "Activities & follow-up", "الحمل والوقاية": "Load & prevention", "المباريات والتقويم": "Matches & calendar", "الفحوصات والتقييم": "Screening & assessment", "التحليل والإدارة": "Analysis & admin", "اللاعبون والسجل الطبي": "Players & medical records", "الترقيات والالتحاقات": "Promotions & Enrollments", "الترقيات": "Promotions", "الطبيب": "Doctor", "حفظ التعديلات": "Save changes", "تم الحذف": "Deleted", "تم التحديث": "Updated", "تمت الإضافة": "Added", "جارٍ الحفظ…": "Saving…", "هل أنت متأكد؟": "Are you sure?", "تأكيد": "Confirm", "إلغاء": "Cancel", "إغلاق": "Close", "رجوع": "Back", "التالي": "Next", "السابق": "Previous", "تم": "Done", "كم/س": "km/h", "الطول (سم)": "Height (cm)", "الوزن (كجم)": "Weight (kg)", "معسكر ومباراة": "Camp & match", "الحمل والجاهزية": "Load & readiness", "لم يُجلب": "Not fetched", "علاج مائي": "Aquatic therapy", "الانتقال:": "Transfer:", "البريد الإلكتروني": "Email", "تقارير إصابات المباريات": "Match injury reports", "لا شيء": "None", "— لا شيء —": "— None —", "أخ/أخت": "Sibling", "الفترة": "Period", "مفعّلة": "Enabled", "تمت الإزالة": "Removed", "غير معروف": "Unknown", "عشب صناعي": "Artificial turf", "تم إشعاره": "Notified", "معدل النمو": "Growth rate", "بناء القوة": "Strength building", "جلسات الغد": "Tomorrow's sessions", "حمل ٧ أيام": "7-day load", "نطاق الحمل": "Load range", "محايل عسير": "Muhayil Asir", "حالات نشطة": "Active cases", "تقييم وفحص": "Assessment & screening", "علاج حراري": "Heat therapy", "حفظ وتشغيل": "Save & run", "تثبيت الآن": "Install now", "فتح الوحدة": "Open module", "رباط صليبي": "Cruciate ligament", "لوحة التحكم": "Dashboard", "ألم العضلات": "Muscle soreness", "اسم العائلة": "Surname", "عقوبة الحكم": "Referee sanction", "الميكانيكية": "Mechanism", "بطاقة صفراء": "Yellow card", "بطاقة حمراء": "Red card", "معسكر خارجي": "External camp", "معسكر داخلي": "Internal camp", "جلسة مجدولة": "Scheduled session", "معرّض للخطر": "At risk", "مؤشر الكتلة": "BMI", "سجلات يتيمة": "Orphan records", "سنة الميلاد": "Birth year", "لم يصدر بعد": "Not issued yet", "تعذّر الجلب": "Fetch failed", "جارٍ الجلب…": "Fetching…", "فحص كوفيد-19": "COVID-19 test", "مكان المعسكر": "Camp location", "نسبة الإنجاز": "Completion", "ارتجاج دماغي": "Concussion", "جانبي — يمين": "Lateral — right", "جانبي — يسار": "Lateral — left", "الملخص الطبي": "Medical summary", "الإيكو طبيعي": "Echo normal", "قرار اللياقة": "Fitness decision", "توصيات وقيود": "Recommendations & restrictions", "طريقة الحدوث": "Mechanism of injury", "مرتبطة بلاعب": "Linked to a player", "نسبة الترابط": "Link rate", "سياق التلامس": "Contact context", "الشفاء التام": "Full recovery", "تسجيل استدعاء": "Log call-up", "الصحة النفسية": "Mental health", "جاهزية منخفضة": "Low readiness", "السبب المحتمل": "Probable cause", "تقييمات اليوم": "Today's assessments", "لاعبون مغطّون": "Covered players", "تحفيز كهربائي": "Electrical stimulation", "لاعبون عولجوا": "Players treated", "مجموع الدقائق": "Total minutes", "ملاحظات ذاتية": "Subjective notes", "تضميد / تثبيت": "Bandage / immobilize", "علاج بالأجهزة": "Modality therapy", "الإعداد الأول": "Initial setup", "جارٍ التحميل…": "Loading…", "شعارات الخصوم": "Opponent crests", "تأكيد التوقيع": "Confirm signature", "السبب المرجّح": "Likely cause", "نتائج التصوير": "Imaging results", "تقويم الإصابات": "Injury calendar", "سياق كرة القدم": "Football context", "الفحص والتشخيص": "Examination & diagnosis", "التواء / دوران": "Sprain / rotation", "حفظ وتحميل PDF": "Save & download PDF", "الجلوس والوصول": "Sit & reach", "معلومات رياضية": "Sports info", "أحدث التقييمات": "Latest assessments", "إخفاء الإصابات": "Hide injuries", "القدم المسيطرة": "Dominant foot", "حذف هذا الفحص؟": "Delete this screening?", "عنوان المناسبة": "Event title", "الصدرية الصغرى": "Minor pectoral", "الوثائق والصور": "Documents & photos", "التوقّع الزمني": "Time projection", "العودة للتدريب": "Return to training", "الإصدار الثامن": "Release 8", "· مخزّن مسبقًا": "· Pre-stored", "تفعيل التنبيهات": "Enable alerts", "تعديل الاستدعاء": "Edit call-up", "الأشعة والتصوير": "Imaging & radiology", "التحميل المتدرج": "Progressive loading", "تقييم يومي جديد": "New daily assessment", "التحاليل طبيعية": "Labs normal", "ملاحظات موضوعية": "Objective notes", "حقن / إبر صينية": "Injections / dry needling", "علاج بالتمرينات": "Exercise therapy", "تم تصدير النسخة": "Backup exported", "كلمة مرور جديدة": "New password", "لا نتائج مطابقة": "No matching results", "النمو والقياسات": "Growth & measurements", "المنطقة المصابة": "Injured area", "وصف الميكانيكية": "Mechanism description", "التشخيص السريري": "Clinical diagnosis", "العودة المتوقعة": "Expected return", "التدريب الجماعي": "Group training", "ملتحق بفريق آخر": "With another team", "فحص القلب (PCMA)": "Cardiac screening (PCMA)", "ملاحظات اختيارية": "Optional notes", "شدة الألم (0-10)": "Pain intensity (0-10)", "التنبيهات مفعّلة": "Alerts enabled", "لا يوجد رقم هاتف": "No phone number", "حذف هذا التقييم؟": "Delete this assessment?", "حضوري على الجهاز": "In-person on device", "نتائج غير طبيعية": "Abnormal results", "الوسائل العلاجية": "Therapeutic modalities", "جلسة عيادة جديدة": "New clinic session", "أكثر موضع تعرضًا": "Most affected site", "الفحوصات الدورية": "Periodic screenings", "الاستبيان اليومي": "Daily wellness", "نسبة الحمل (٧:٢٨)": "Load ratio (7:28)", "تاريخ إصابات سابق": "Previous injury history", "FIFA 11+ و Nordic": "FIFA 11+ and Nordic", "عن بُعد من الجوال": "Remote from mobile", "تخطيط القلب طبيعي": "ECG normal", "الوسائل المستخدمة": "Modalities used", "قادر على التدريب؟": "Able to train?", "لا تقارير مباريات": "No match reports", "الموجات التصادمية": "Shockwave", "ملف نسخة غير صالح": "Invalid backup file", "نسيت كلمة المرور؟": "Forgot password?", "البيانات المساندة": "Supporting data", "القدرة على التدريب": "Ability to train", "التذكير قبل الجلسة": "Reminder before session", "فائتة بسبب الإصابة": "Missed through injury", "الفحوصات المنافسية": "Competition screenings", "متوسط انخفاض الألم": "Average pain reduction", "رجوع لتسجيل الدخول": "Back to sign in", "تحقّق وإصلاح الربط": "Check & repair links", "التوقيع الإلكتروني": "E-signature", "الفترة من": "Period from", "الفترة إلى": "Period to", "التحاق بـ": "Enrollment with", "شفاء تام": "Fully recovered", "ألم العضلات المتأخر": "Delayed muscle soreness", "الحمل الأسبوعي": "Weekly load", "وحدة حمل": "Load unit", "قياس نمو": "Growth measurement", "نمو سريع": "Rapid growth", "قرار المشاركة": "Participation decision", "جاهز للمشاركة": "Fit to play", "غير جاهز": "Not ready", "سلامة اللاعب": "Player safety", "الوقاية من الإصابات": "Injury prevention", "برنامج الوقاية": "Prevention programme", "العودة الآمنة": "Safe return", "تصريح طبي": "Medical clearance", "ملاحظات المدرب": "Coach notes", "خطة العلاج": "Treatment plan", "خطة التأهيل": "Rehab plan", "موعد المتابعة": "Follow-up appointment", "تاريخ الفحص": "Screening date", "نوع الفحص": "Screening type", "نتيجة الفحص": "Screening result", "ملف الطبيب": "Doctor profile", "تقرير الجلسة": "Session report", "مدة الجلسة": "Session duration", "شدة الإصابة": "Injury severity", "عمر الإصابة": "Injury age", "مدة الشفاء": "Recovery time", "آلام يشتكي منها اللاعب بعد التمرين": "Pain the player reports after training", "سجل يومي للجلسات العلاجية داخل العيادة": "Daily log of therapy sessions in the clinic", "كل الإصابات والجلسات والمناسبات في تقويم واحد": "All injuries, sessions and events in one calendar", "من يستطيع الدخول وما المسموح له": "Who can sign in and what they may do", "متابعة حمل التدريب والجاهزية اليومية والنمو والبلوغ": "Track training load, daily readiness, growth and maturation", "لا توجد بيانات بعد — ابدأ بتسجيل الجاهزية أو الحمل.": "No data yet — start by logging readiness or load.", "١ = الأسوأ، ٥ = الأفضل": "1 = worst, 5 = best", "الجهد المُدرَك (١-١٠)": "Perceived exertion (1–10)", "أجب بنعم أو لا لكل بند من بنود الفحص": "Answer yes or no for every screening item", "التزام برامج الوقاية": "Prevention programme compliance", "نمو سريع — خفّض الحمل": "Rapid growth — reduce load", "تُحسب تلقائيًا من إدخالاتك": "Computed automatically from your entries", "بروتوكولات مرحلية ومعايير العودة": "Staged protocols and return criteria", "المتصفح منع التنبيهات": "The browser blocked notifications", "عيادة نادي القادسية": "Al-Qadsiah Club clinic", "زوج/زوجة": "Spouse", "والد/والدة": "Parent", "ابن/ابنة": "Child", "لا توجد إصابات مسجّلة لهذا اللاعب": "No injuries recorded for this player", "الإفراج الطبي والتوقيع": "Medical clearance and signature", "لم يتم العثور على الإصابة": "Injury not found", "هل تعرض اللاعب لإصابة أثناء الاستدعاء؟": "Did the player suffer an injury during the call-up?", "رفع تقرير طبي من المنتخب": "Upload a medical report from the national team", "بداية التأهيل الحركي": "Motor rehab start", "توقيع إقرار الجاهزية على الجوال": "Sign the fit-to-play declaration on mobile", "تاريخ الخروج من المستشفى": "Hospital discharge date", "إجهاد مفرط غير محدد": "Unspecified overuse", "التواء الكاحل الجانبي": "Lateral ankle sprain", "ملف البرنامج غير صالح": "Invalid programme file", "تم حفظ بيانات الترقية": "Promotion data saved", "حدّد لاعبًا واحدًا على الأقل": "Select at least one player", "تم حفظ الالتحاق ودقائق اللعب": "Enrollment and minutes saved", "لا شكاوى": "No complaints", "تذكير بموعد جلسة قريب": "Reminder of an upcoming session", "لا يوجد تقييم فيزيائي مسجّل بعد.": "No physiotherapy assessment recorded yet.", "ارفع التقرير (PDF / صورة / أي ملف)": "Upload the report (PDF / image / any file)", "صور القوام (٥ اتجاهات)": "Posture photos (5 views)", "لعبة كرة القدم": "Football", "بطولة الدوري": "League season", "مباراة ودية": "Friendly match", "تصنيف الفئة": "Age category", "الفئة العمرية": "Age group", "فترة الاستدعاء": "Call-up period", "الفترة المحددة": "Specified period", "بدون تاريخ نهاية": "No end date", "يشمل يوم البداية": "Includes the start day", "احسب المدة تلقائيًا": "Compute duration automatically", "عدد الأيام": "Days", "مدة النشاط": "Activity duration", "دقائق اللعب": "Minutes played", "اللاعبون الملتحقون": "Enrolled players", "يحسب تلقائيًا": "Computed automatically", "يُحسب تلقائيًا": "Computed automatically", "غير محسوب": "Not computed", "الرجاء المحاولة مرة أخرى": "Please try again", "حدث خطأ غير متوقع": "An unexpected error occurred", "تم النسخ": "Copied", "لم يتم الحفظ": "Not saved", "توجد تغييرات غير محفوظة": "You have unsaved changes", "تابع بدون حفظ": "Continue without saving", "سيتم حذف السجل نهائيًا": "The record will be deleted permanently", "لا يمكن التراجع": "This cannot be undone", "بتأكيدك تُنشئ سجلًا جديدًا": "Confirming creates a new record", "اضغط للتأكيد": "Click to confirm", "الكل مطابق": "All matching", "تصفية": "Filter", "ترتيب": "Sort", "تصاعدي": "Ascending", "تنازلي": "Descending", "العمود": "Column", "الصفوف": "Rows", "إظهار": "Show", "إخفاء الكل": "Hide all", "توسيع": "Expand", "مطبوع": "Printed", "رقم الصفحة": "Page number", "عدد الصفحات": "Pages", "التذييل": "Footer", "شعار النادي": "Club crest", "اسم النادي": "Club name", "اسم الفريق": "Team name", "المدرب": "Coach", "مدرب الفريق": "Head coach", "المدير الفني": "Technical director", "الطاقم الطبي": "Medical staff", "أخصائي التغذية": "Nutritionist", "أخصائي اللياقة": "Fitness coach", "طبيب الفريق": "Team doctor", "التقرير الشهري": "Monthly report", "التقرير السنوي": "Annual report", "تقرير المباراة": "Match report", "تقرير الإصابة": "Injury report", "تقرير الجاهزية": "Readiness report", "تقرير الحمل": "Load report", "تحليل البيانات": "Data analysis", "مؤشرات الأداء": "KPIs", "الرسوم البيانية": "Charts", "النسب المئوية": "Percentages", "المقارنة": "Comparison", "الاتجاهات": "Trends", "الخلاصة": "Summary", "التوصيات": "Recommendations", "الخطة العلاجية": "Treatment plan", "المرحلة التالية": "Next phase", "المرحلة السابقة": "Previous phase", "مكتملة": "Completed", "قيد التنفيذ": "In progress", "لم تبدأ بعد": "Not started yet", "المدة المتبقية": "Time remaining", "المتبقي للعودة": "Remaining to return", "الأيام المتوقعة": "Expected days", "التاريخ المتوقع": "Expected date", "التقدير": "Estimate", "الملاحظة": "Note", "التعليق": "Comment", "أضف ملاحظة": "Add a note", "أضف تعليقًا": "Add a comment", "لا ملاحظات": "No notes", "الحفظ التلقائي": "Autosave", "حفظ تلقائي": "Autosave", "منع التعديل": "Editing locked", "قابل للتعديل": "Editable", "الحقول المطلوبة": "Required fields", "أكمل الحقول": "Complete the fields", "حقل مطلوب": "Required field", "قيمة غير صالحة": "Invalid value", "تاريخ غير صالح": "Invalid date", "الرجاء إدخال التاريخ": "Please enter the date", "الرجاء اختيار لاعب": "Please choose a player", "الرجاء اختيار الفئة": "Please choose the category", "تم الاستيراد": "Imported", "تم التصدير": "Exported", "فشل الاستيراد": "Import failed", "فشل التصدير": "Export failed", "لا توجد بيانات للتصدير": "No data to export", "نطاق التاريخ": "Date range", "من تاريخ": "From date", "إلى تاريخ": "To date", "هذا الشهر": "This month", "هذا الأسبوع": "This week", "اليوم الحالي": "Today", "أمس": "Yesterday", "غدًا": "Tomorrow", "آخر ٧ أيام": "Last 7 days", "آخر ٣٠ يومًا": "Last 30 days", "منذ البداية": "From the start", "شارك": "Played", "تعديل التحاق —": "Edit enrollment —", "ملاحظات": "Notes", "ملاحظة": "Note", "المركز · الميلاد": "Position · birth", "الدقائق": "Minutes", "مباراة": "Match", "معسكر": "Camp", "تدريب": "Training", "سفر": "Travel", "ضد": "vs", "دقيقة": "min", "يوم": "day", "لاعبًا": "players"}, RX=[["^(\\d+)\\s*لاعبًا$", ""], ["^(\\d+)\\s*لاعبين$", ""], ["^(\\d+)\\s*لاعب$", ""], ["^(\\d+)\\s*دقيقة$", ""], ["^(\\d+)\\s*يوم$", ""], ["^(\\d+)\\s*أيام$", ""], ["^لاعبًا\\s*(\\d+)$", ""], ["^دقيقة\\s*(\\d+)$", ""], ["^المباراة:\\s*(.+)$", ""], ["^المعسكر:\\s*(.+)$", ""], ["^ضد\\s+(.+)$", ""], ["^سفر\\s*(.*)$", ""], ["^الترقيات\\s*—\\s*(.*)$", ""], ["^(\\d+)\\s*/\\s*(\\d+)$", ""]];
+  var W={"لا": "No", "تم": "Done", "من": "from", "على": "on", "في": "in", "غير": "Not", "اللاعب": "Player", "لاعب": "Player", "لاعبون": "Players", "اللاعبون": "Players", "اللاعبين": "Players", "العودة": "Return", "أو": "or", "إصابة": "injury", "إصابات": "Injuries", "الإصابات": "Injuries", "بعد": "after", "حفظ": "Save", "مع": "with", "علاج": "Therapy", "العلاج": "Therapy", "تاريخ": "Date", "التاريخ": "Date", "الفريق": "Team", "فريق": "Team", "قبل": "before", "الطبي": "Medical", "طبي": "Medical", "الموسم": "Season", "ألم": "Pain", "الألم": "Pain", "كل": "All", "نادي": "Club", "مرحلة": "Phase", "المرحلة": "Phase", "سجل": "Record", "ملاحظات": "Notes", "ملاحظة": "Note", "مباراة": "Match", "المباراة": "Match", "مباريات": "matches", "المباريات": "Matches", "ملعب": "Stadium", "الملعب": "Stadium", "التقرير": "Report", "تقرير": "Report", "الحمل": "Load", "حمل": "Load", "كسر": "Fracture", "كلمة": "Password", "بيانات": "Data", "البيانات": "Data", "حذف": "Delete", "بلا": "without", "هذا": "this", "الفحص": "Screening", "فحص": "Screening", "القادسية": "Al-Qadsiah", "آخر": "Last", "نوع": "Type", "الجهاز": "Device", "التقييم": "Assessment", "تقييم": "Assessment", "تعديل": "Edit", "جلسة": "Session", "الجلسة": "Session", "جلسات": "Sessions", "تمزق": "Tear", "إلى": "to", "الأول": "First", "الأولى": "First", "فتح": "Open", "يوجد": "exists", "للعب": "to play", "التأهيل": "Rehabilitation", "تأهيل": "Rehab", "إضافة": "Add", "توجد": "exists", "طبيعي": "Normal", "توقيع": "Signature", "التوقيع": "Signature", "الرديف": "Reserve", "تسجيل": "Log", "التسجيل": "Login", "التهاب": "Inflammation", "وتر": "Tendon", "إرسال": "Send", "العملية": "Surgery", "جارٍ": "In progress", "ملف": "Profile", "الملف": "Profile", "الرباط": "Ligament", "العضلة": "Muscle", "عند": "at", "تحت": "under", "أيام": "days", "تدريب": "Training", "التدريب": "Training", "أخرى": "Other", "لم": "not", "الخبر": "Al-Khobar", "مدى": "Range", "الجاهزية": "Readiness", "تعذّر": "Could not", "القدم": "Foot", "قدم": "Foot", "التحاق": "Enrollment", "الالتحاق": "Enrollment", "الالتحاقات": "Enrollments", "الشامل": "Comprehensive", "كامل": "Full", "تنزيل": "Download", "تحميل": "Upload", "البرنامج": "Program", "معايير": "Criteria", "اسم": "Name", "الكتف": "Shoulder", "كتف": "Shoulder", "الركبة": "Knee", "ركبة": "Knee", "الزراعي": "Agricultural", "قوة": "Strength", "القوة": "Strength", "الشفاء": "Recovery", "معسكر": "Camp", "المعسكر": "Camp", "الرأس": "Head", "رأس": "Head", "الرياضي": "Sports", "رياضي": "Athletic", "عن": "about", "الحالة": "Status", "حالة": "Case", "إعادة": "Re-", "عضلي": "Muscular", "الخلفية": "Hamstring", "عضلة": "Muscle", "اليوم": "Today", "سجلات": "Records", "ما": "what", "متاح": "Available", "أكثر": "more", "تلقائيًا": "automatically", "المنتخب": "National team", "منتخب": "National team", "هل": "Is", "الصليبي": "Cruciate", "الحالية": "Current", "الحالي": "Current", "القوام": "Posture", "قوام": "Posture", "التمرين": "Training", "تمرين": "Training", "جديد": "New", "جديدة": "New", "الطبيب": "Doctor", "طبيب": "Doctor", "مرتبطة": "Linked", "مرتبط": "Linked", "عدد": "Count", "الكامل": "Full", "تثبيت": "Install", "نسبة": "Percentage", "قياس": "Measurement", "اختر": "Choose", "يوم": "day", "رابط": "Link", "الرابط": "Link", "التواء": "Sprain", "شد": "Strain", "الفخذ": "Thigh", "لائق": "Fit", "حركة": "Movement", "لكل": "per", "نتيجة": "Result", "النتيجة": "Result", "العلاجية": "Therapeutic", "العيادة": "Clinic", "عطلة": "Rest", "طباعة": "Print", "نسخة": "Copy", "جزئي": "Partial", "أضف": "Add", "خلال": "during", "متابعة": "Follow-up", "المتابعة": "follow-up", "خطر": "Risk", "الخطورة": "Severity", "الدقائق": "Minutes", "دقائق": "minutes", "دقيقة": "min", "برنامج": "Program", "الحفظ": "Saving", "مسجّلة": "recorded", "بداية": "Start", "المستخدم": "User", "مستخدم": "User", "خلع": "Dislocation", "خفيف": "Light", "الرياضة": "Sport", "عرض": "View", "واتساب": "WhatsApp", "اختبارات": "Tests", "اختبار": "Test", "بدون": "without", "داخل": "inside", "إغلاق": "Close", "استعادة": "Reset", "قادر": "able", "إجمالي": "Total", "متوسط": "Moderate", "نعم": "Yes", "فقط": "only", "التطبيق": "App", "أولًا": "First", "رقم": "No.", "محدد": "specified", "تحديث": "Refresh", "موضع": "Site", "أي": "any", "السبب": "Reason", "تشخيص": "Diagnosis", "التشخيص": "Diagnosis", "تفاصيل": "Details", "الجوال": "Mobile", "الأخصائي": "Specialist", "أخصائي": "Specialist", "خطأ": "Error", "الكاحل": "Ankle", "كاحل": "Ankle", "العضلي": "Muscular", "يدوي": "Manual", "أسبيتار": "Aspetar", "إدارة": "Management", "اليومي": "Daily", "المركز": "Position", "مركز": "position", "مدافع": "Defender", "المدافعون": "Defenders", "مهاجم": "Forward", "المهاجمون": "Forwards", "وسط": "Midfielder", "لاعبو": "Midfielders", "الوسط": "Midfield", "الحارس": "Goalkeeper", "حراس": "Goalkeepers", "المرمى": "goal", "الطول": "Height", "الوزن": "Weight", "يمنى": "Right", "يسرى": "Left", "أمامي": "Anterior", "خلفي": "Posterior", "الطبيعية": "normal", "الحاد": "Acute", "المزمن": "Chronic", "مزمن": "Chronic", "حاد": "Acute", "متوسطة": "Moderate", "شديدة": "Severe", "خفيفة": "Mild", "مثالي": "Ideal", "يحتاج": "Needs", "جيدة": "Good", "سيئة": "Poor", "صالة": "Hall", "ملاعب": "Pitches", "أرضية": "Surface", "عشب": "Grass", "الأسبوع": "Week", "أسبوع": "week", "الشهر": "Month", "شهر": "month", "الشهور": "Months", "الأيام": "Days", "السابق": "Previous", "التالي": "Next", "الحادثة": "Incident", "الحدث": "Event", "الأحداث": "Events", "مناسبة": "Occasion", "الأسبوعي": "Weekly", "الشهري": "Monthly", "السنوي": "Annual", "الكل": "All", "الكلية": "Overall", "الأشعة": "Imaging", "أشعة": "Imaging", "جراحة": "Surgery", "الجراحة": "Surgery", "عمليات": "Operations", "الجراحية": "Surgical", "جراحي": "Surgical", "تأهيلي": "Rehab", "الحالات": "Cases", "الخطة": "Plan", "خطة": "Plan", "الخط": "Line", "المسار": "Path", "مسار": "Path", "الهدف": "Target", "التقدم": "Progress", "الجولة": "Round", "جولة": "round", "الدوري": "League", "البطولة": "Tournament", "بطولة": "Tournament", "كأس": "Cup", "ودية": "Friendly", "الأهلي": "Al-Ahli", "الهلال": "Al-Hilal", "النصر": "Al-Nassr", "الاتحاد": "Al-Ittihad", "الشباب": "Al-Shabab", "الفتح": "Al-Fateh", "التعاون": "Al-Taawoun", "الرياض": "Riyadh", "جدة": "Jeddah", "الدمام": "Dammam", "بريدة": "Buraydah", "حرمة": "Harmah", "الأحساء": "Al-Ahsa", "المدينة": "City", "مدينة": "city", "المنورة": "Al-Munawwarah", "أبها": "Abha", "المجمعة": "Al-Majma'ah", "مجاني": "Free", "الإجراء": "Action", "الإجراءات": "Actions", "الطريقة": "Method", "المدة": "Duration", "مدة": "duration", "الوقت": "Time", "وقت": "time", "الساعة": "Time", "السياق": "Context", "سياق": "context", "الفئة": "Category", "التكرار": "Recurrence", "تكرار": "recurrence", "الوضع": "Status", "الوقاية": "Prevention", "وقاية": "prevention", "التوتر": "Tension", "الجودة": "Quality", "جودة": "quality", "النوم": "sleep", "المزاج": "Mood", "الشهية": "Appetite", "الإجهاد": "Load", "التعب": "Fatigue", "الإرهاق": "Fatigue", "الأداء": "Performance", "أداء": "performance", "الاستشفاء": "Recovery", "استشفاء": "recovery", "الحمولة": "Load", "اللياقة": "Fitness", "لياقة": "fitness", "بدنية": "physical", "بدني": "physical", "الجسم": "Body", "الجسمي": "Body", "الإصابة": "Injury", "الشكوى": "Complaint", "الشكاوى": "Complaints", "شكوى": "complaint", "الأمراض": "Illnesses", "المرض": "Illness", "مرض": "Illness", "القياسات": "Measurements", "العمر": "Age", "السن": "Age", "الميلاد": "birth", "مولود": "born", "التصنيف": "Category", "القائمة": "List", "قائمة": "list", "مسجّل": "recorded", "مستدعى": "Called up", "مرشّح": "Candidate", "مؤجّل": "Postponed", "معتمد": "Approved", "مرفوض": "Rejected", "قيد": "In", "المفاوضة": "negotiation", "سليم": "Healthy", "مصاب": "Injured", "مريض": "Ill", "مجروح": "Injured", "متشفٍّ": "Recovered", "المتعافي": "Recovered", "شفاء": "recovery", "جاهز": "Ready", "جاهزية": "readiness", "عادي": "Normal", "مرتفع": "High", "منخفض": "Low", "شديد": "Severe", "عاجل": "Urgent", "مهم": "Important", "تحذير": "Warning", "تنبيه": "Alert", "معلومة": "Info", "نصيحة": "Tip", "مطلوب": "Required", "اختياري": "Optional", "الأساسي": "Basic", "الأساسية": "Basic", "المتقدمة": "Advanced", "المتقدم": "Advanced", "البسيط": "Simple", "الكاملة": "Full", "الشخصية": "Personal", "المعلومات": "Info", "المستخدمون": "Users", "الصلاحيات": "Permissions", "الإعدادات": "Settings", "الخادم": "Server", "النسخ": "Backups", "الاحتياطي": "Backup", "التصدير": "Export", "الاستيراد": "Import", "التقارير": "Reports", "التحليل": "Analysis", "الإدارة": "Admin", "وزن": "weight", "طول": "height", "سن": "age", "أسبوعي": "Weekly", "شهري": "Monthly", "سنوي": "Annual", "تدريبات": "sessions", "حصة": "session", "أطباء": "Doctors", "معالج": "Therapist", "المعالج": "Therapist", "الصيدلية": "Pharmacy", "الفحوصات": "Screenings", "فحوصات": "screenings", "المخزون": "Inventory", "ضد": "vs", "د": "min", "أدلة": "Evidence", "ارتجاج": "Concussion", "والجاهزية": "& readiness", "تصنيف": "Classification", "اجتماع": "Meeting", "كلتاهما": "Both", "ي": "", "سم": "cm", "سنة": "year", "حدث": "Event", "ذكر": "Male", "ضمد": "Bandage", "نشط": "Active", "نشطة": "Active", "حرج": "Critical", "كجم": "kg", "مسح": "Reset", "بحث": "Search", "مارس": "March", "مايو": "May", "نشاط": "Activity", "أنثى": "Female", "شريك": "Partner", "حارس": "Goalkeeper", "كدمة": "Contusion", "عربي": "Arabic", "خروج": "Exit", "تبدأ": "Starts", "النمو": "Growth", "مستند": "Document", "الجنس": "Gender", "السنة": "Year", "منجزة": "Completed", "الدور": "Round", "إخفاء": "Hide", "تذكير": "Reminder", "الوطن": "Nation", "العضد": "Upper arm", "مقفلة": "Locked", "موقوف": "Suspended", "البحث": "Search", "وثيقة": "Document", "عملية": "Surgery", "تصدير": "Export", "دورات": "Rounds", "تنتهي": "Ends", "متبقٍ": "Remaining", "منخفضة": "Low", "حساسية": "Allergy", "متشافٍ": "Recovered", "مجدولة": "Scheduled", "مفتوحة": "Open", "الموعد": "Appointment", "مراقبة": "Monitoring", "الحضور": "Attendance", "الوحدة": "Module", "الليونة": "Flexibility", "العنوان": "Address", "تعليقات": "Comments", "الحرارة": "Temperature", "الرطوبة": "Humidity", "الأنشطة": "Activities", "تعارضات": "Conflicts", "إرشادات": "Guidelines", "المصادر": "Sources", "التفصيل": "Detail", "المرفقات": "Attachments", "المتبقية": "Remaining", "المسابقة": "Competition", "عمود": "Spine", "والد/والدة": "Parent", "يناير": "January", "فبراير": "February", "أبريل": "April", "يونيو": "June", "يوليو": "July", "أغسطس": "August", "سبتمبر": "September", "أكتوبر": "October", "نوفمبر": "November", "ديسمبر": "December", "الرس": "Al-Rass", "الجوف": "Al-Jouf", "الحزم": "Al-Hazem", "العلا": "Al-Ula", "محايل": "Muhayil", "الرائد": "Al-Raed", "العروبة": "Al-Orobah", "الاتفاق": "Al-Ettifaq", "الفيصلي": "Al-Faisaly", "الفيحاء": "Al-Fayha", "المصدر": "Source", "شارك": "Played", "متصل": "Online", "قفل": "Lock", "حسابي": "My account", "جدول": "Table", "بطاقة": "Card", "فترة": "Period", "ساعة": "Hour", "ثانية": "Second", "الآن": "Now", "أمس": "Yesterday", "غدًا": "Tomorrow", "الأمس": "Yesterday", "درجة": "Grade", "درجات": "Grades", "عمر": "Age", "قيمة": "Value", "أولوية": "Priority", "فئة": "Category", "المستوى": "Level", "الدرجة": "Grade", "التقدير": "Rating", "الملاحظة": "Note", "التعليق": "Comment", "الأثر": "Impact", "المكان": "Place", "الشخص": "Person", "النادي": "Club", "المدرب": "Coach", "الوالد": "Parent", "الهاتف": "Phone", "البريد": "Email", "الرقم": "Number", "الاسم": "Name", "اللقب": "Surname", "الأعراض": "Symptoms", "الدواء": "Medication", "الجرعة": "Dose", "الراحة": "Rest", "التغذية": "Nutrition", "التورم": "Swelling", "الكدمة": "Bruise", "الجرح": "Wound", "الكسر": "Fracture", "الخلع": "Dislocation", "التمزق": "Tear", "الشد": "Strain", "الالتواء": "Sprain", "الالتهاب": "Inflammation", "التيبس": "Stiffness", "الضعف": "Weakness", "التنميل": "Numbness", "الوخز": "Tingling", "الحركة": "Movement", "التوازن": "Balance", "السرعة": "Speed", "التحمل": "Endurance", "المرونة": "Flexibility", "الرشاقة": "Agility", "القفز": "Jumping", "الجري": "Running", "الركل": "Kicking", "التمرير": "Passing", "التسديد": "Shooting", "الدفاع": "Defense", "الهجوم": "Attack", "الحراسة": "Goalkeeping", "الكرة": "Ball", "الحكم": "Referee", "البطاقة": "Card", "الخطأ": "Foul", "التسلل": "Offside", "الركنية": "Corner", "الجزاء": "Penalty", "الشوط": "Half", "الكأس": "Cup", "الودية": "Friendly", "الرسمية": "Official", "التحضير": "Preparation", "السفر": "Travel", "الإقامة": "Accommodation", "الوصول": "Arrival", "المغادرة": "Departure", "الغياب": "Absence", "التأخير": "Delay", "الإذن": "Permission", "الاستئذان": "Leave request", "العقوبة": "Sanction", "الإنذار": "Warning", "الإيقاف": "Suspension", "المكافأة": "Bonus", "المستحقات": "Dues", "العقد": "Contract", "الانتقال": "Transfer", "الإعارة": "Loan", "التجديد": "Renewal", "الانتهاء": "Expiry", "الراتب": "Salary", "البدل": "Allowance", "التأمين": "Insurance", "الوثيقة": "Document", "الصورة": "Photo", "الفيديو": "Video", "المرفق": "Attachment", "الرمز": "Code", "الرقم السري": "PIN", "كلمة المرور": "Password", "الصلاحية": "Permission", "الحساب": "Account", "الإعداد": "Setting", "النسخة": "Version", "التحديث": "Update", "التحميل": "Download", "الرفع": "Upload", "الحذف": "Delete", "التعديل": "Edit", "الإضافة": "Add", "العرض": "View", "الطباعة": "Print", "الإرسال": "Send", "الاستقبال": "Receive", "الفرز": "Sort", "التصفية": "Filter", "الإجمالي": "Total", "المتوسط": "Average", "الأعلى": "Max", "الأدنى": "Min", "العدد": "Count", "المجموع": "Sum", "الفرق": "Difference", "المقارنة": "Comparison", "التغير": "Change", "التطور": "Trend", "المؤشر": "Indicator", "الرسم": "Chart", "الجدول": "Table", "الصفحة": "Page", "القسم": "Section", "النافذة": "Window", "الزر": "Button", "الحقل": "Field", "الخانة": "Cell", "العمود": "Column", "الصف": "Row", "السطر": "Line", "النقطة": "Point", "الفقرة": "Paragraph", "النص": "Text"}, P={"لا يوجد": "No data", "لا توجد": "No", "لا يوجد سجل": "No records", "لا يوجد سجل توقيعات بعد": "No signatures recorded yet", "غير قادر": "Unable", "غير لائق": "Unfit", "غير محدد": "Unspecified", "غير محدّد": "Unspecified", "غير طبيعي": "Abnormal", "يعتبر غير": "not", "الفريق الأول": "First team", "فريق ٢١": "U21 team", "مع الفريق الأول": "With the first team", "مع فريق ٢١": "With U21", "فريق 21": "U21 team", "نوع الإصابة": "Injury type", "تاريخ الإصابة": "Injury date", "تفاصيل الإصابة": "Injury details", "موضع الإصابة": "Injury site", "إصابات المباريات": "Match injuries", "إصابات هذه المباراة": "Injuries in this match", "إصابات كل مباراة على حدة": "Injuries per match", "إصابة / مباراة": "Injury / match", "إصابات الموسم": "Season injuries", "التاريخ والوقت": "Date & time", "المرحلة الحالية": "Current phase", "تم الحفظ": "Saved", "تم حذف": "Deleted", "تم الحفظ بنجاح": "Saved successfully", "الرقم الطبي": "Medical No.", "العودة للأداء": "Return to performance", "العودة للعب": "Return to play", "تاريخ العودة للعب": "Return-to-play date", "نوع الجلسة": "Session type", "جلسات العلاج": "Therapy sessions", "جلسة عيادة": "Clinic session", "جلسات العيادة": "Clinic sessions", "السجل اليومي للعيادة": "Clinic daily log", "شكاوى ما بعد التمرين": "Post-training complaints", "فحص ما قبل الموسم": "Pre-season screening", "الفحص الطبي قبل الموسم": "Pre-season medical", "مركز الترابط الشامل": "Unified linking hub", "ملف اللاعب الشامل": "Full player profile", "ملف اللاعب": "Player profile", "ملف اللاعب — ": "Player profile — ", "أيام الغياب": "Days out", "أيام منذ الإصابة": "Days since injury", "أيام الغياب (تقديري)": "Days out (estimated)", "أيام الغياب من الإصابة": "Days lost to injury", "توقيع اللاعب": "Player signature", "توقيع الأخصائي": "Clinician signature", "سجل التوقيعات": "Signature log", "إقرار موقّع": "Signed declaration", "إقرار الجاهزية والعودة للمشاركة": "Fit-to-play declaration", "الموقّع": "Signed by", "الطريقة": "Method", "الجهاز": "Device", "الطبيب المعالج": "Treating doctor", "الأخصائي المسؤول": "Responsible clinician", "الخطورة": "Severity", "الإجراء المتخذ": "Action taken", "التأهيل الحركي": "Motor rehab", "العلاج الطبيعي": "Therapy", "علاج طبيعي": "Therapy", "تأهيل": "Rehab", "إعادة تأهيل": "Rehabilitation", "برامج العلاج": "Therapy programmes", "العضلة الخلفية": "Hamstring", "العمليات الجراحية": "Surgeries", "العملية الجراحية": "Surgery", "تاريخ الشفاء": "Recovery date", "تاريخ الميلاد": "Date of birth", "العودة للرياضة": "Return to sport", "عودة للرياضة": "Return to sport", "عودة": "Return", "التقييم والفحص": "Assessment & screening", "التقييم الفيزيائي": "Physiotherapy", "الفحص البدني": "Physical screening", "قوام APECS": "APECS Posture", "اختبار العودة للملاعب": "Return-to-sport test", "اختبارات خاصة": "Special tests", "استعادة المدى والثبات": "Restore range & stability", "تحت المتابعة": "Under review", "يحتاج تقييمًا إضافيًا": "Needs further assessment", "إخفاء اللاعبين المتشافين": "Hide recovered", "إظهار اللاعبين المتشافين": "Show recovered", "عرض التقرير الشامل": "Open full report", "التقرير الطبي الشامل": "Comprehensive medical report", "تنزيل نسخة HTML": "Download HTML", "طباعة / PDF": "Print / PDF", "تصدير PDF": "Export PDF", "إنشاء التقرير": "Generate report", "إغلاق التقرير": "Close report", "إرسال على واتساب": "Send on WhatsApp", "إرسال التذكير": "Send reminder", "إرسال الموعد": "Send appointment", "إرسال رابط الاستعادة": "Send reset link", "إشعار الجميع": "Notify everyone", "اسم الفريق المنافس": "Opponent name", "الملعب — المدينة": "Venue — city", "الملعب / المدينة": "Venue / city", "اتفاق مع مدرب الفئة · تعليمات": "Agreement with the age-group coach · instructions", "أضف التفاصيل": "Add details", "أضف لاعبين أولًا.": "Add players first.", "اختر اللاعب": "Choose player", "اختر…": "Choose…", "إدخال يدوي": "Manual entry", "استيراد نسخة": "Import backup", "حفظ كلمة المرور": "Save password", "كلمة المرور": "Password", "كلمة المرور الجديدة": "New password", "تأكيد كلمة المرور": "Confirm password", "اسم المستخدم": "Username", "اسم المستخدم أو كلمة المرور غير صحيحة": "Wrong username or password", "تسجيل الدخول": "Sign in", "دخول": "Sign in", "إنشاء الحساب والدخول": "Create account & sign in", "أنشئ حساب المدير المسؤول عن النظام": "Create the system administrator account", "تسجيل الخروج": "Sign out", "حسابي": "My account", "قفل": "Lock", "متصل": "Online", "غير متصل": "Offline", "تثبيت التطبيق": "Install app", "العربية": "Arabic", "الإنجليزية": "English", "المعلومات الشخصية": "Personal details", "بيانات اللاعب": "Player data", "بيانات مساندة": "Supporting data", "الأقسام المرتبطة": "Linked sections", "الأقسام": "Sections", "المستخدمون والصلاحيات": "Users & permissions", "إضافة مستخدم": "Add user", "إضافة لاعب": "Add player", "إضافة مباراة": "Add match", "إضافة مستند": "Add document", "إضافة إصابة": "Add injury", "إضافة جلسة": "Add session", "إضافة مناسبة": "Add event", "إضافة تقرير إصابات": "Add injury report", "إعدادات الخادم": "Server settings", "استعادة كلمة المرور": "Reset password", "معلومات شخصية": "Personal info", "التاريخ الطبي": "Medical history", "الإيجابيات": "Positives", "إيجابي": "Positive", "سلبي": "Negative", "لا ينطبق": "N/A", "ملعب نادي القادسية الرديف الزراعي": "Al-Qadsiah reserve agricultural pitch", "ملعب نادي القادسية": "Al-Qadsiah Club stadium", "خارج الأرض": "Away", "على أرضنا": "Home", "أرضية الملعب": "Pitch surface", "عشب طبيعي": "Natural grass", "إحداثيات الملاعب": "Pitch coordinates", "آخر التحديثات في كل الوحدات": "Latest updates in all modules", "آخر حدث طبي": "Last medical event", "آخر تقييم": "Last assessment", "آخر حمل": "Latest load", "إجمالي السجلات": "Total records", "إجمالي اللاعبين": "Total players", "إجمالي الدقائق": "Total minutes", "متوسط الدقائق": "Average minutes", "عدد الالتحاقات": "Enrollments", "لاعبون ملتحقون": "Enrolled players", "حالات فريق ٢١": "U21 cases", "حالات الفريق الأول": "First-team cases", "ملخص دقائق اللعب مع الفئة الأعلى": "Minutes with the higher category", "محدَّدون يدويًا": "Selected manually", "التحاق جديد بمعسكر / مباراة": "New camp / match enrollment", "حفظ الالتحاق": "Save enrollment", "تعديل الالتحاق": "Edit enrollment", "حذف هذا الالتحاق بكل لاعبيه؟": "Delete this enrollment with all its players?", "التحاق — معسكر ومباراة": "Enrollment — Camp & match", "التحاق — تدريب": "Enrollment — Training", "التحاق — معسكر": "Enrollment — Camp", "التحاق — مباراة": "Enrollment — Match", "الفئة المستضيفة": "Host category", "نوع الالتحاق": "Enrollment type", "تاريخ المعسكر / الالتحاق": "Camp / enrollment date", "تاريخ المباراة": "Match date", "سفر مع الفريق": "Travel with team", "تاريخ السفر": "Travel date", "الخصم": "Opponent", "اللاعبون — حدّد من التحق وأدخل دقائق اللعب": "Players — tick who joined and enter minutes", "الدقائق تُحفظ لكل لاعب على حدة، وتظهر في ملفه وخطه الزمني وفي ملخص الدقائق.": "Minutes are stored per player and appear in his profile, timeline and the minutes summary.", "لا التحاقات مسجّلة بعد. اضغط «التحاق جديد» لتسجيل معسكر أو مباراة مع فريق ٢١ أو الفريق الأول.": "No enrollments yet. Use “New enrollment” to log a camp or match with U21 or the first team.", "سجّل التحاق اللاعبين بالفئة الأعلى (معسكر · سفر · مباراة) ودقائق مشاركة كل لاعب — تُحسب تلقائيًا في ملفه وخطه الزمني.": "Log enrollments with the higher category (camp · travel · match) and each player’s minutes — computed automatically in his profile and timeline.", "إزالة من القائمة": "Remove from list", "إزالة اللاعب من قائمة تصعيد اللاعبين؟": "Remove the player from promotions?", "قيد المفاوضة": "In negotiation", "مرشّحون من مواليد": "Candidates born", "مباريات فائتة": "Matches missed", "غير المشاركين في تدريب اليوم": "Not training today", "استدعاء المنتخب": "National call-up", "استدعاءات المنتخب": "National call-ups", "أُصيب في المنتخب": "Injured on national duty", "من استدعاء المنتخب": "From a national call-up", "الإصابات": "Injuries", "الأمراض": "Illnesses", "المستندات": "Documents", "التقويم": "Calendar", "الشكاوى": "Complaints", "الدعم النفسي": "Mental support", "المتابعة اليومية": "Daily follow-up", "الخط الزمني": "Timeline", "نظرة عامة": "Overview", "الأنشطة والمتابعة": "Activities & follow-up", "الحمل والوقاية": "Load & prevention", "المباريات والتقويم": "Matches & calendar", "الفحوصات والتقييم": "Screening & assessment", "التحليل والإدارة": "Analysis & admin", "اللاعبون والسجل الطبي": "Players & medical records", "تصعيد اللاعبين والالتحاقات": "Promotions & Enrollments", "تصعيد اللاعبين": "Promotions", "الطبيب": "Doctor", "حفظ التعديلات": "Save changes", "تم الحذف": "Deleted", "تم التحديث": "Updated", "تمت الإضافة": "Added", "جارٍ الحفظ…": "Saving…", "هل أنت متأكد؟": "Are you sure?", "تأكيد": "Confirm", "إلغاء": "Cancel", "إغلاق": "Close", "رجوع": "Back", "التالي": "Next", "السابق": "Previous", "تم": "Done", "كم/س": "km/h", "الطول (سم)": "Height (cm)", "الوزن (كجم)": "Weight (kg)", "معسكر ومباراة": "Camp & match", "الحمل والجاهزية": "Load & readiness", "لم يُجلب": "Not fetched", "علاج مائي": "Aquatic therapy", "الانتقال:": "Transfer:", "البريد الإلكتروني": "Email", "تقارير إصابات المباريات": "Match injury reports", "لا شيء": "None", "— لا شيء —": "— None —", "أخ/أخت": "Sibling", "الفترة": "Period", "مفعّلة": "Enabled", "تمت الإزالة": "Removed", "غير معروف": "Unknown", "عشب صناعي": "Artificial turf", "تم إشعاره": "Notified", "معدل النمو": "Growth rate", "بناء القوة": "Strength building", "جلسات الغد": "Tomorrow's sessions", "حمل ٧ أيام": "7-day load", "نطاق الحمل": "Load range", "محايل عسير": "Muhayil Asir", "حالات نشطة": "Active cases", "تقييم وفحص": "Assessment & screening", "علاج حراري": "Heat therapy", "حفظ وتشغيل": "Save & run", "تثبيت الآن": "Install now", "فتح الوحدة": "Open module", "رباط صليبي": "Cruciate ligament", "لوحة التحكم": "Dashboard", "ألم العضلات": "Muscle soreness", "اسم العائلة": "Surname", "عقوبة الحكم": "Referee sanction", "الميكانيكية": "Mechanism", "بطاقة صفراء": "Yellow card", "بطاقة حمراء": "Red card", "معسكر خارجي": "External camp", "معسكر داخلي": "Internal camp", "جلسة مجدولة": "Scheduled session", "معرّض للخطر": "At risk", "مؤشر الكتلة": "BMI", "سجلات يتيمة": "Orphan records", "سنة الميلاد": "Birth year", "لم يصدر بعد": "Not issued yet", "تعذّر الجلب": "Fetch failed", "جارٍ الجلب…": "Fetching…", "فحص كوفيد-19": "COVID-19 test", "مكان المعسكر": "Camp location", "نسبة الإنجاز": "Completion", "ارتجاج دماغي": "Concussion", "جانبي — يمين": "Lateral — right", "جانبي — يسار": "Lateral — left", "الملخص الطبي": "Medical summary", "الإيكو طبيعي": "Echo normal", "قرار اللياقة": "Fitness decision", "توصيات وقيود": "Recommendations & restrictions", "طريقة الحدوث": "Mechanism of injury", "مرتبطة بلاعب": "Linked to a player", "نسبة الترابط": "Link rate", "سياق التلامس": "Contact context", "الشفاء التام": "Full recovery", "تسجيل استدعاء": "Log call-up", "الصحة النفسية": "Mental health", "جاهزية منخفضة": "Low readiness", "السبب المحتمل": "Probable cause", "تقييمات اليوم": "Today's assessments", "لاعبون مغطّون": "Covered players", "تحفيز كهربائي": "Electrical stimulation", "لاعبون عولجوا": "Players treated", "مجموع الدقائق": "Total minutes", "ملاحظات ذاتية": "Subjective notes", "تضميد / تثبيت": "Bandage / immobilize", "علاج بالأجهزة": "Modality therapy", "الإعداد الأول": "Initial setup", "جارٍ التحميل…": "Loading…", "شعارات الخصوم": "Opponent crests", "تأكيد التوقيع": "Confirm signature", "السبب المرجّح": "Likely cause", "نتائج التصوير": "Imaging results", "تقويم الإصابات": "Injury calendar", "سياق كرة القدم": "Football context", "الفحص والتشخيص": "Examination & diagnosis", "التواء / دوران": "Sprain / rotation", "حفظ وتحميل PDF": "Save & download PDF", "الجلوس والوصول": "Sit & reach", "معلومات رياضية": "Sports info", "أحدث التقييمات": "Latest assessments", "إخفاء الإصابات": "Hide injuries", "القدم المسيطرة": "Dominant foot", "حذف هذا الفحص؟": "Delete this screening?", "عنوان المناسبة": "Event title", "الصدرية الصغرى": "Minor pectoral", "الوثائق والصور": "Documents & photos", "التوقّع الزمني": "Time projection", "العودة للتدريب": "Return to training", "الإصدار الثامن": "Release 8", "· مخزّن مسبقًا": "· Pre-stored", "تفعيل التنبيهات": "Enable alerts", "تعديل الاستدعاء": "Edit call-up", "الأشعة والتصوير": "Imaging & radiology", "التحميل المتدرج": "Progressive loading", "تقييم يومي جديد": "New daily assessment", "التحاليل طبيعية": "Labs normal", "ملاحظات موضوعية": "Objective notes", "حقن / إبر صينية": "Injections / dry needling", "علاج بالتمرينات": "Exercise therapy", "تم تصدير النسخة": "Backup exported", "كلمة مرور جديدة": "New password", "لا نتائج مطابقة": "No matching results", "النمو والقياسات": "Growth & measurements", "المنطقة المصابة": "Injured area", "وصف الميكانيكية": "Mechanism description", "التشخيص السريري": "Clinical diagnosis", "العودة المتوقعة": "Expected return", "التدريب الجماعي": "Group training", "ملتحق بفريق آخر": "With another team", "فحص القلب (PCMA)": "Cardiac screening (PCMA)", "ملاحظات اختيارية": "Optional notes", "شدة الألم (0-10)": "Pain intensity (0-10)", "التنبيهات مفعّلة": "Alerts enabled", "لا يوجد رقم هاتف": "No phone number", "حذف هذا التقييم؟": "Delete this assessment?", "حضوري على الجهاز": "In-person on device", "نتائج غير طبيعية": "Abnormal results", "الوسائل العلاجية": "Therapeutic modalities", "جلسة عيادة جديدة": "New clinic session", "أكثر موضع تعرضًا": "Most affected site", "الفحوصات الدورية": "Periodic screenings", "الاستبيان اليومي": "Daily wellness", "نسبة الحمل (٧:٢٨)": "Load ratio (7:28)", "تاريخ إصابات سابق": "Previous injury history", "FIFA 11+ و Nordic": "FIFA 11+ and Nordic", "عن بُعد من الجوال": "Remote from mobile", "تخطيط القلب طبيعي": "ECG normal", "الوسائل المستخدمة": "Modalities used", "قادر على التدريب؟": "Able to train?", "لا تقارير مباريات": "No match reports", "الموجات التصادمية": "Shockwave", "ملف نسخة غير صالح": "Invalid backup file", "نسيت كلمة المرور؟": "Forgot password?", "البيانات المساندة": "Supporting data", "القدرة على التدريب": "Ability to train", "التذكير قبل الجلسة": "Reminder before session", "فائتة بسبب الإصابة": "Missed through injury", "الفحوصات المنافسية": "Competition screenings", "متوسط انخفاض الألم": "Average pain reduction", "رجوع لتسجيل الدخول": "Back to sign in", "تحقّق وإصلاح الربط": "Check & repair links", "التوقيع الإلكتروني": "E-signature", "الفترة من": "Period from", "الفترة إلى": "Period to", "التحاق بـ": "Enrollment with", "شفاء تام": "Fully recovered", "ألم العضلات المتأخر": "Delayed muscle soreness", "الحمل الأسبوعي": "Weekly load", "وحدة حمل": "Load unit", "قياس نمو": "Growth measurement", "نمو سريع": "Rapid growth", "قرار المشاركة": "Participation decision", "جاهز للمشاركة": "Fit to play", "غير جاهز": "Not ready", "سلامة اللاعب": "Player safety", "الوقاية من الإصابات": "Injury prevention", "برنامج الوقاية": "Prevention programme", "العودة الآمنة": "Safe return", "تصريح طبي": "Medical clearance", "ملاحظات المدرب": "Coach notes", "خطة العلاج": "Treatment plan", "خطة التأهيل": "Rehab plan", "موعد المتابعة": "Follow-up appointment", "تاريخ الفحص": "Screening date", "نوع الفحص": "Screening type", "نتيجة الفحص": "Screening result", "ملف الطبيب": "Doctor profile", "تقرير الجلسة": "Session report", "مدة الجلسة": "Session duration", "شدة الإصابة": "Injury severity", "عمر الإصابة": "Injury age", "مدة الشفاء": "Recovery time", "آلام يشتكي منها اللاعب بعد التمرين": "Pain the player reports after training", "سجل يومي للجلسات العلاجية داخل العيادة": "Daily log of therapy sessions in the clinic", "كل الإصابات والجلسات والمناسبات في تقويم واحد": "All injuries, sessions and events in one calendar", "من يستطيع الدخول وما المسموح له": "Who can sign in and what they may do", "متابعة حمل التدريب والجاهزية اليومية والنمو والبلوغ": "Track training load, daily readiness, growth and maturation", "لا توجد بيانات بعد — ابدأ بتسجيل الجاهزية أو الحمل.": "No data yet — start by logging readiness or load.", "١ = الأسوأ، ٥ = الأفضل": "1 = worst, 5 = best", "الجهد المُدرَك (١-١٠)": "Perceived exertion (1–10)", "أجب بنعم أو لا لكل بند من بنود الفحص": "Answer yes or no for every screening item", "التزام برامج الوقاية": "Prevention programme compliance", "نمو سريع — خفّض الحمل": "Rapid growth — reduce load", "تُحسب تلقائيًا من إدخالاتك": "Computed automatically from your entries", "بروتوكولات مرحلية ومعايير العودة": "Staged protocols and return criteria", "المتصفح منع التنبيهات": "The browser blocked notifications", "عيادة نادي القادسية": "Al-Qadsiah Club clinic", "زوج/زوجة": "Spouse", "والد/والدة": "Parent", "ابن/ابنة": "Child", "لا توجد إصابات مسجّلة لهذا اللاعب": "No injuries recorded for this player", "الإفراج الطبي والتوقيع": "Medical clearance and signature", "لم يتم العثور على الإصابة": "Injury not found", "هل تعرض اللاعب لإصابة أثناء الاستدعاء؟": "Did the player suffer an injury during the call-up?", "رفع تقرير طبي من المنتخب": "Upload a medical report from the national team", "بداية التأهيل الحركي": "Motor rehab start", "توقيع إقرار الجاهزية على الجوال": "Sign the fit-to-play declaration on mobile", "تاريخ الخروج من المستشفى": "Hospital discharge date", "إجهاد مفرط غير محدد": "Unspecified overuse", "التواء الكاحل الجانبي": "Lateral ankle sprain", "ملف البرنامج غير صالح": "Invalid programme file", "تم حفظ بيانات الترقية": "Promotion data saved", "حدّد لاعبًا واحدًا على الأقل": "Select at least one player", "تم حفظ الالتحاق ودقائق اللعب": "Enrollment and minutes saved", "لا شكاوى": "No complaints", "تذكير بموعد جلسة قريب": "Reminder of an upcoming session", "لا يوجد تقييم فيزيائي مسجّل بعد.": "No physiotherapy assessment recorded yet.", "ارفع التقرير (PDF / صورة / أي ملف)": "Upload the report (PDF / image / any file)", "صور القوام (٥ اتجاهات)": "Posture photos (5 views)", "لعبة كرة القدم": "Football", "بطولة الدوري": "League season", "مباراة ودية": "Friendly match", "تصنيف الفئة": "Age category", "الفئة العمرية": "Age group", "فترة الاستدعاء": "Call-up period", "الفترة المحددة": "Specified period", "بدون تاريخ نهاية": "No end date", "يشمل يوم البداية": "Includes the start day", "احسب المدة تلقائيًا": "Compute duration automatically", "عدد الأيام": "Days", "مدة النشاط": "Activity duration", "دقائق اللعب": "Minutes played", "اللاعبون الملتحقون": "Enrolled players", "يحسب تلقائيًا": "Computed automatically", "يُحسب تلقائيًا": "Computed automatically", "غير محسوب": "Not computed", "الرجاء المحاولة مرة أخرى": "Please try again", "حدث خطأ غير متوقع": "An unexpected error occurred", "تم النسخ": "Copied", "لم يتم الحفظ": "Not saved", "توجد تغييرات غير محفوظة": "You have unsaved changes", "تابع بدون حفظ": "Continue without saving", "سيتم حذف السجل نهائيًا": "The record will be deleted permanently", "لا يمكن التراجع": "This cannot be undone", "بتأكيدك تُنشئ سجلًا جديدًا": "Confirming creates a new record", "اضغط للتأكيد": "Click to confirm", "الكل مطابق": "All matching", "تصفية": "Filter", "ترتيب": "Sort", "تصاعدي": "Ascending", "تنازلي": "Descending", "العمود": "Column", "الصفوف": "Rows", "إظهار": "Show", "إخفاء الكل": "Hide all", "توسيع": "Expand", "مطبوع": "Printed", "رقم الصفحة": "Page number", "عدد الصفحات": "Pages", "التذييل": "Footer", "شعار النادي": "Club crest", "اسم النادي": "Club name", "اسم الفريق": "Team name", "المدرب": "Coach", "مدرب الفريق": "Head coach", "المدير الفني": "Technical director", "الطاقم الطبي": "Medical staff", "أخصائي التغذية": "Nutritionist", "أخصائي اللياقة": "Fitness coach", "طبيب الفريق": "Team doctor", "التقرير الشهري": "Monthly report", "التقرير السنوي": "Annual report", "تقرير المباراة": "Match report", "تقرير الإصابة": "Injury report", "تقرير الجاهزية": "Readiness report", "تقرير الحمل": "Load report", "تحليل البيانات": "Data analysis", "مؤشرات الأداء": "KPIs", "الرسوم البيانية": "Charts", "النسب المئوية": "Percentages", "المقارنة": "Comparison", "الاتجاهات": "Trends", "الخلاصة": "Summary", "التوصيات": "Recommendations", "الخطة العلاجية": "Treatment plan", "المرحلة التالية": "Next phase", "المرحلة السابقة": "Previous phase", "مكتملة": "Completed", "قيد التنفيذ": "In progress", "لم تبدأ بعد": "Not started yet", "المدة المتبقية": "Time remaining", "المتبقي للعودة": "Remaining to return", "الأيام المتوقعة": "Expected days", "التاريخ المتوقع": "Expected date", "التقدير": "Estimate", "الملاحظة": "Note", "التعليق": "Comment", "أضف ملاحظة": "Add a note", "أضف تعليقًا": "Add a comment", "لا ملاحظات": "No notes", "الحفظ التلقائي": "Autosave", "حفظ تلقائي": "Autosave", "منع التعديل": "Editing locked", "قابل للتعديل": "Editable", "الحقول المطلوبة": "Required fields", "أكمل الحقول": "Complete the fields", "حقل مطلوب": "Required field", "قيمة غير صالحة": "Invalid value", "تاريخ غير صالح": "Invalid date", "الرجاء إدخال التاريخ": "Please enter the date", "الرجاء اختيار لاعب": "Please choose a player", "الرجاء اختيار الفئة": "Please choose the category", "تم الاستيراد": "Imported", "تم التصدير": "Exported", "فشل الاستيراد": "Import failed", "فشل التصدير": "Export failed", "لا توجد بيانات للتصدير": "No data to export", "نطاق التاريخ": "Date range", "من تاريخ": "From date", "إلى تاريخ": "To date", "هذا الشهر": "This month", "هذا الأسبوع": "This week", "اليوم الحالي": "Today", "أمس": "Yesterday", "غدًا": "Tomorrow", "آخر ٧ أيام": "Last 7 days", "آخر ٣٠ يومًا": "Last 30 days", "منذ البداية": "From the start", "شارك": "Played", "تعديل التحاق —": "Edit enrollment —", "ملاحظات": "Notes", "ملاحظة": "Note", "المركز · الميلاد": "Position · birth", "الدقائق": "Minutes", "مباراة": "Match", "معسكر": "Camp", "تدريب": "Training", "سفر": "Travel", "ضد": "vs", "دقيقة": "min", "يوم": "day", "لاعبًا": "players"}, RX=[["^(\\d+)\\s*لاعبًا$", ""], ["^(\\d+)\\s*لاعبين$", ""], ["^(\\d+)\\s*لاعب$", ""], ["^(\\d+)\\s*دقيقة$", ""], ["^(\\d+)\\s*يوم$", ""], ["^(\\d+)\\s*أيام$", ""], ["^لاعبًا\\s*(\\d+)$", ""], ["^دقيقة\\s*(\\d+)$", ""], ["^المباراة:\\s*(.+)$", ""], ["^المعسكر:\\s*(.+)$", ""], ["^ضد\\s+(.+)$", ""], ["^سفر\\s*(.*)$", ""], ["^تصعيد اللاعبين\\s*—\\s*(.*)$", ""], ["^(\\d+)\\s*/\\s*(\\d+)$", ""]];
   function isEN(){
     try{ var q=window.QDB; if(q&&typeof q.LANG==="function"){ var v=q.LANG(); if(v!=null) return String(v).indexOf("en")===0; } }catch(e){}
     try{ var l=localStorage.getItem("qd_lang"); if(l) return String(l).indexOf("en")===0; }catch(e){}
@@ -23987,7 +23987,7 @@ try{
     documents:"documents", mental:"mental", treatments:"therapy" };
   var ARNAME={ injuries:"الإصابات", illnesses:"الأمراض", therapies:"العلاج الرياضي", session:"الجلسات",
     physio:"العلاج الطبيعي", loads:"الحمل", wellness:"الجاهزية", growth:"النمو", callups:"الالتحاقات",
-    promo:"الترقيات", activities:"الأنشطة", complaints:"شكاوى بعد التدريب", posture:"القوام",
+    promo:"تصعيد اللاعبين", activities:"الأنشطة", complaints:"شكاوى بعد التدريب", posture:"القوام",
     pcma:"الفحص الطبي", screenings:"الفحوصات", matches:"المباريات", events:"الأحداث",
     documents:"المستندات", mental:"الحالة النفسية", treatments:"العلاجات" };
   var ENNAME={ injuries:"Injuries", illnesses:"Illnesses", therapies:"Therapy", session:"Clinic sessions",
@@ -24539,7 +24539,7 @@ try{
 try{
   if(window.__qdNav) return; window.__qdNav=1;
   var VER="v11-52";
-  var AR={"nav_dashboard": "الرئيسية", "sub_dashboard": "نظرة عامة على الفريق", "nav_players": "اللاعبون", "sub_players": "بيانات اللاعب وحالته الطبية", "nav_link": "ملف اللاعب", "sub_link": "الملف الكامل: بياناته وإصاباته ومبارياته", "nav_injuries": "الإصابات", "sub_injuries": "تسجيل الإصابات ومتابعتها", "nav_illnesses": "الأمراض", "sub_illnesses": "الأمراض والحالات الطبية", "nav_complaints": "شكاوى بعد التمرين", "sub_complaints": "آلام يشتكي منها اللاعب بعد التمرين", "nav_clinic": "سجل العيادة", "sub_clinic": "جلسات العلاج داخل العيادة", "nav_therapy": "العلاج الرياضي", "sub_therapy": "جلسات التأهيل والعلاج اليدوي", "nav_promotion": "المشاركات", "sub_promotion": "المعسكرات والمباريات ودقائق اللعب", "nav_screening": "الفحص الطبي", "sub_screening": "الفحص الطبي واللياقة قبل الموسم", "nav_physio": "التقييم الفيزيائي", "sub_physio": "التقييم الفيزيائي لكل لاعب", "nav_posture": "القوام", "sub_posture": "نتيجة القوام مع صور الاتجاهات الخمسة", "nav_proto": "برامج العلاج", "sub_proto": "المراحل ومعايير العودة للملاعب", "nav_load": "الأحمال والجاهزية", "sub_load": "الأحمال · الجاهزية · النمو", "nav_daily": "التقييم اليومي", "sub_daily": "فحص الجاهزية اليومي", "nav_activities": "الاستدعاءات", "sub_activities": "فترات الاستدعاء والمعسكرات والمنافسات", "nav_documents": "المستندات", "sub_documents": "الأشعة والتقارير الطبية", "nav_mental": "الصحة النفسية", "sub_mental": "فحص الحالة النفسية للاعب", "nav_fixtures": "المباريات والترتيب", "sub_fixtures": "جدول المباريات وترتيب الدوري", "nav_calendar": "تقويم الإصابات", "sub_calendar": "كل الإصابات والجلسات في تقويم واحد", "nav_reports": "التقارير", "sub_reports": "الإحصائيات والتقارير القابلة للطباعة", "nav_settings": "الإعدادات", "sub_settings": "بيانات النادي والمستخدمون والنسخ الاحتياطي", "grp_overview": "الرئيسية", "grp_medical": "اللاعبون والسجل الطبي", "grp_assess": "الفحص والتقييم", "grp_follow": "المتابعة اليومية", "grp_match": "المباريات", "grp_admin": "الإدارة"}, EN={"nav_dashboard": "Home", "sub_dashboard": "Team health overview", "nav_players": "Players", "sub_players": "Player details and medical status", "nav_link": "Player file", "sub_link": "Full file: details, injuries and matches", "nav_injuries": "Injuries", "sub_injuries": "Record and follow up injuries", "nav_illnesses": "Illnesses", "sub_illnesses": "Illnesses and medical conditions", "nav_complaints": "Complaints after training", "sub_complaints": "Pain reported after training", "nav_clinic": "Clinic log", "sub_clinic": "Treatment sessions inside the clinic", "nav_therapy": "Sports therapy", "sub_therapy": "Rehabilitation and manual therapy sessions", "nav_promotion": "Appearances", "sub_promotion": "Camps, matches and minutes played", "nav_screening": "Medical check", "sub_screening": "Pre-season medical and fitness clearance", "nav_physio": "Physical assessment", "sub_physio": "Physiotherapy assessment per player", "nav_posture": "Posture", "sub_posture": "Posture result with the 5-direction photos", "nav_proto": "Treatment plans", "sub_proto": "Phases and return-to-play criteria", "nav_load": "Load & readiness", "sub_load": "Load · readiness · growth", "nav_daily": "Daily check", "sub_daily": "Daily wellness and readiness check", "nav_activities": "Call-ups", "sub_activities": "Call-up periods, camps and competitions", "nav_documents": "Documents", "sub_documents": "Medical imaging and reports", "nav_mental": "Mental health", "sub_mental": "Player mental-health screening", "nav_fixtures": "Fixtures & table", "sub_fixtures": "Match schedule and league table", "nav_calendar": "Injury calendar", "sub_calendar": "All injuries and sessions on one calendar", "nav_reports": "Reports", "sub_reports": "Statistics and printable reports", "nav_settings": "Settings", "sub_settings": "Club data, users and backup", "grp_overview": "HOME", "grp_medical": "PLAYERS & MEDICAL", "grp_assess": "CHECK-UPS", "grp_follow": "DAILY FOLLOW-UP", "grp_match": "MATCHES", "grp_admin": "ADMIN"};
+  var AR={"nav_dashboard": "الرئيسية", "sub_dashboard": "نظرة عامة على الفريق", "nav_players": "اللاعبون", "sub_players": "بيانات اللاعب وحالته الطبية", "nav_link": "ملف اللاعب", "sub_link": "الملف الكامل: بياناته وإصاباته ومبارياته", "nav_injuries": "الإصابات", "sub_injuries": "تسجيل الإصابات ومتابعتها", "nav_illnesses": "الأمراض", "sub_illnesses": "الأمراض والحالات الطبية", "nav_complaints": "شكاوى بعد التمرين", "sub_complaints": "آلام يشتكي منها اللاعب بعد التمرين", "nav_clinic": "سجل العيادة", "sub_clinic": "جلسات العلاج داخل العيادة", "nav_therapy": "العلاج الرياضي", "sub_therapy": "جلسات التأهيل والعلاج اليدوي", "nav_promotion": "المشاركات", "sub_promotion": "المعسكرات والمباريات ودقائق اللعب", "nav_screening": "الفحص الطبي", "sub_screening": "الفحص الطبي واللياقة قبل الموسم", "nav_physio": "التقييم الفيزيائي", "sub_physio": "التقييم الفيزيائي لكل لاعب", "nav_posture": "القوام", "sub_posture": "نتيجة القوام مع صور الاتجاهات الخمسة", "nav_proto": "برامج العلاج", "sub_proto": "المراحل ومعايير العودة للملاعب", "nav_load": "الأحمال والجاهزية", "sub_load": "الأحمال · الجاهزية · النمو", "nav_daily": "التقييم اليومي", "sub_daily": "فحص الجاهزية اليومي", "nav_activities": "الاستدعاءات", "sub_activities": "فترات الاستدعاء والمعسكرات والمنافسات", "nav_documents": "المستندات", "sub_documents": "الأشعة والتقارير الطبية", "nav_mental": "الصحة النفسية", "sub_mental": "فحص الحالة النفسية للاعب", "nav_fixtures": "تقارير المباريات", "sub_fixtures": "مشاركات اللاعبين · الدقائق · الإصابات · النتيجة", "nav_calendar": "تقويم الإصابات", "sub_calendar": "كل الإصابات والجلسات في تقويم واحد", "nav_reports": "التقارير", "sub_reports": "الإحصائيات والتقارير القابلة للطباعة", "nav_settings": "الإعدادات", "sub_settings": "بيانات النادي والمستخدمون والنسخ الاحتياطي", "grp_overview": "الرئيسية", "grp_medical": "اللاعبون والسجل الطبي", "grp_assess": "الفحص والتقييم", "grp_follow": "المتابعة اليومية", "grp_match": "المباريات", "grp_admin": "الإدارة"}, EN={"nav_dashboard": "Home", "sub_dashboard": "Team health overview", "nav_players": "Players", "sub_players": "Player details and medical status", "nav_link": "Player file", "sub_link": "Full file: details, injuries and matches", "nav_injuries": "Injuries", "sub_injuries": "Record and follow up injuries", "nav_illnesses": "Illnesses", "sub_illnesses": "Illnesses and medical conditions", "nav_complaints": "Complaints after training", "sub_complaints": "Pain reported after training", "nav_clinic": "Clinic log", "sub_clinic": "Treatment sessions inside the clinic", "nav_therapy": "Sports therapy", "sub_therapy": "Rehabilitation and manual therapy sessions", "nav_promotion": "Appearances", "sub_promotion": "Promotion of players between age groups", "nav_screening": "Medical check", "sub_screening": "Pre-season medical and fitness clearance", "nav_physio": "Physical assessment", "sub_physio": "Physiotherapy assessment per player", "nav_posture": "Posture", "sub_posture": "Posture result with the 5-direction photos", "nav_proto": "Treatment plans", "sub_proto": "Phases and return-to-play criteria", "nav_load": "Load & readiness", "sub_load": "Load · readiness · growth", "nav_daily": "Daily check", "sub_daily": "Daily wellness and readiness check", "nav_activities": "Call-ups", "sub_activities": "Call-up periods, camps and competitions", "nav_documents": "Documents", "sub_documents": "Medical imaging and reports", "nav_mental": "Mental health", "sub_mental": "Player mental-health screening", "nav_fixtures": "Match reports", "sub_fixtures": "Match schedule and league table", "nav_calendar": "Injury calendar", "sub_calendar": "All injuries and sessions on one calendar", "nav_reports": "Reports", "sub_reports": "Statistics and printable reports", "nav_settings": "Settings", "sub_settings": "Club data, users and backup", "grp_overview": "HOME", "grp_medical": "PLAYERS & MEDICAL", "grp_assess": "CHECK-UPS", "grp_follow": "DAILY FOLLOW-UP", "grp_match": "MATCHES", "grp_admin": "ADMIN"};
   function put(L,map){ if(!L) return; for(var k in map){ if(Object.prototype.hasOwnProperty.call(map,k)) L[k]=map[k]; } }
   try{ put(STR.ar,AR); put(STR.en,EN); }catch(e){ try{ window.QDNAV_ERR=String(e); }catch(x){} }
   try{ if(window.QDB){ if(window.QDB.STR){ put(window.QDB.STR.ar,AR); put(window.QDB.STR.en,EN); } } }catch(e){}
@@ -35142,7 +35142,7 @@ tr:hover .qde-ndate{color:#7E0E14}
 
   function badge(){
     try{ var b=document.getElementById("qdrBadge"); if(!b) return;
-      var w="v11-346 · READ-FIX";
+      var w="v11-351 · USERS-MATCH-REPORTS";
       if(b.textContent!==w+" · BTN-OK") b.textContent=w+" · BTN-OK"; }catch(e){}
   }
 
@@ -36123,7 +36123,7 @@ tr:hover .qde-ndate{color:#7E0E14}
     documents:{g:["الأداء والجاهزية","Performance"],t:["المستندات","Documents"],s:["الملفات والتقارير المرفقة","Attached files and reports"],
       k:function(){ var a=S("documents"); return [[a.length,L("مستندات","Documents")],[0,"—"],[0,"—"],[0,"—"]]; }},
     mental:{g:["الأداء والجاهزية","Performance"],t:["الصحة النفسية","Mental health"],s:["متابعة الحالة النفسية","Psychological monitoring"],k:function(){ return [[S("mental").length,L("سجلات","Records")],[0,"—"],[0,"—"],[0,"—"]]; }},
-    fixtures:{g:["الأداء والجاهزية","Performance"],t:["المباريات القادمة","Fixtures"],s:["جدول المباريات","Match schedule"],k:function(){ return [[S("fixtures").length,L("مباريات","Fixtures")],[0,"—"],[0,"—"],[0,"—"]]; }},
+    fixtures:{g:["الأداء والجاهزية","Performance"],t:["تقارير المباريات","Match reports"],s:["مشاركات · دقائق · إصابات","Appearances · minutes · injuries"],k:function(){ return [[S("fixtures").length,L("مباريات","Fixtures")],[0,"—"],[0,"—"],[0,"—"]]; }},
     matches:{g:["الملف الطبي","Clinical"],t:["تقارير إصابات المباريات","Match injury reports"],s:["إصابات كل مباراة على حدة","Injuries per match"],k:function(){ return [[S("matches").length,L("مباريات","Matches")],[0,"—"],[0,"—"],[0,"—"]]; }},
     calendar:{g:["الملف الطبي","Clinical"],t:["تقويم الإصابات","Injury calendar"],s:["كل الإصابات والجلسات في تقويم","All injuries and sessions on one calendar"],k:function(){ return [[S("injuries").length,L("إصابات","Injuries")],[S("sessions").length,L("جلسات","Sessions")],[0,"—"],[0,"—"]]; }},
     reports:{g:["التقارير والإدارة","Reports & admin"],t:["التقارير","Reports"],s:["تقارير شهرية وسنوية وتقارير المباريات","Monthly, annual and match reports"],
@@ -36131,7 +36131,7 @@ tr:hover .qde-ndate{color:#7E0E14}
     settings:{g:["التقارير والإدارة","Reports & admin"],t:["الإعدادات","Settings"],s:["الهوية · البيانات · المستخدمون","Brand · data · users"],k:function(){ return [[0,"—"],[0,"—"],[0,"—"],[0,"—"]]; }},
     access:{g:["التقارير والإدارة","Reports & admin"],t:["المستخدمون والصلاحيات","Users & access"],s:["من يستطيع الدخول وما المسموح له","Who can sign in and what they see"],k:function(){ return [[S("users").length,L("مستخدمون","Users")],[0,"—"],[0,"—"],[0,"—"]]; }},
     screening:{g:["الأداء والجاهزية","Performance"],t:["فحص ما قبل الموسم","Pre-season screening"],s:["فحوصات ما قبل الموسم","Pre-season screening"],k:function(){ return [[S("screenings").length,L("فحوصات","Screenings")],[0,"—"],[0,"—"],[0,"—"]]; }},
-    promotion:{g:["الأداء والجاهزية","Performance"],t:["الترقيات","Promotions"],s:["ترقية اللاعبين بين الفئات","Player promotions"],k:function(){ return [[0,"—"],[0,"—"],[0,"—"],[0,"—"]]; }},
+    promotion:{g:["الأداء والجاهزية","Performance"],t:["تصعيد اللاعبين","Player call-ups"],s:["ترقية اللاعبين بين الفئات","Player promotions"],k:function(){ return [[0,"—"],[0,"—"],[0,"—"],[0,"—"]]; }},
     link:{g:["التقارير والإدارة","Reports & admin"],t:["ترابط الأقسام","Data links"],s:["فحص وإصلاح الروابط بين السجلات","Check and repair record links"],k:function(){ return [[S("injuries").length,L("إصابات","Injuries")],[S("therapies").length,L("علاج","Therapy")],[0,"—"],["✓",L("فحص","Check")]]; }}
   };
 
@@ -43946,7 +43946,7 @@ tr:hover .qde-ndate{color:#7E0E14}
     players:["اللاعبون","Players"],dashboard:["لوحة التحكم","Dashboard"],injuries:["الإصابات","Injuries"],
     illnesses:["الأمراض","Illnesses"],therapy:["العلاج الرياضي","Therapy"],sessions:["الجلسات","Sessions"],
     proto:["برامج العلاج","Programmes"],documents:["المستندات","Documents"],fixtures:["المباريات","Fixtures"],
-    settings:["الإعدادات","Settings"],access:["المستخدمون","Users"],promotion:["الترقيات","Promotions"],
+    settings:["الإعدادات","Settings"],access:["المستخدمون","Users"],promotion:["تصعيد اللاعبين","Player call-ups"],
     screening:["الفحص قبل الموسم","Screening"],weekly:["البرنامج الأسبوعي","Weekly plan"],link:["ملف اللاعب الشامل","Full profile"],
     clinic:["العيادة اليومية","Clinic"],physio:["التقييم الفيزيائي","Physio"],posture:["قوام APECS","Posture"],
     mental:["الصحة النفسية","Mental"],daily:["التقييم اليومي","Daily"],activities:["الاستدعاءات","Call-ups"],
@@ -44192,12 +44192,12 @@ tr:hover .qde-ndate{color:#7E0E14}
   var LBL={
     dashboard:["لوحة التحكم","Dashboard"], injuries:["الإصابات","Injuries"], illnesses:["الأمراض","Illnesses"],
     complaints:["الشكاوى","Complaints"], clinic:["العيادة اليومية","Daily clinic"], therapy:["العلاج الرياضي","Therapy"],
-    promotion:["الترقيات","Promotions"], players:["اللاعبون","Players"], link:["ملف اللاعب الشامل","Player profile"],
+    promotion:["تصعيد اللاعبين","Player call-ups"], players:["اللاعبون","Players"], link:["ملف اللاعب الشامل","Player profile"],
     calendar:["تقويم الإصابات","Injury calendar"], matches:["المباريات","Matches"],
     load:["الحمل والجاهزية","Load & readiness"], physio:["التقييم الفيزيائي","Physio"], posture:["قوام APECS","Posture"],
     proto:["برامج العلاج","Programmes"], screening:["الفحص قبل الموسم","Screening"], daily:["التقييم اليومي","Daily assessment"],
     wellness:["الاستبيان اليومي","Daily check-in"], mental:["الصحة النفسية","Mental"],
-    activities:["الاستدعاءات","Call-ups"], documents:["المستندات","Documents"], fixtures:["جدول المباريات","Fixtures"],
+    activities:["الاستدعاءات","Call-ups"], documents:["المستندات","Documents"], fixtures:["تقارير المباريات","Match reports"],
     reports:["التقارير","Reports"], clinical:["القيادة الطبية","Clinical"],
     settings:["الإعدادات","Settings"], access:["المستخدمون","Users"], cloud:["المزامنة السحابية","Cloud sync"],
     weekly:["البرنامج الأسبوعي","Weekly plan"], refs:["المراجع العلمية","References"]
@@ -47216,6 +47216,7 @@ tr:hover .qde-ndate{color:#7E0E14}
   function pname(p){ return [p.first,p.last,p.name].filter(Boolean).join(" ").trim(); }
   function matchName(raw){
     var n=norm(raw); if(!n) return null;
+    try{ if(window.QD349){ var r349=window.QD349.match(raw); if(r349&&r349.p) return {p:r349.p,score:r349.score||95,how:r349.how||""}; } }catch(e){}
     var ps=players(), best=null, bestScore=0;
     ps.forEach(function(p){
       var full=norm(pname(p)), first=norm(p.first||""), last=norm(p.last||"");
@@ -47320,16 +47321,17 @@ tr:hover .qde-ndate{color:#7E0E14}
 
   /* ---------- تعرّف على الأعمدة ---------- */
   var COLS={
-    player:["player","player name","name","athlete","اللاعب","الاسم","اسم اللاعب"],
+    player:["player display name","display name","player name","athlete","player","name","اللاعب","اسم اللاعب","الاسم"],
+    pid:["player custom id","custom id","player id"],
     date:["date","day","session date","التاريخ","اليوم"],
     td:["total distance","totaldistance","total dist","td","distance","المسافة","المسافة الكلية","اجمالي المسافة"],
-    hsr:["hsr","high speed running","high speed","hsr distance","الجري السريع","مسافة الجري السريع"],
-    sprint:["sprint","sprint distance","sprints","العدو","مسافة العدو"],
+    hsr:["high speed running","hsr distance","hsr","high speed","الجري السريع","مسافة الجري السريع"],
+    sprint:["sprints","sprint count","sprint distance","sprint","العدو","مسافة العدو"],
     maxSpeed:["max speed","vmax","top speed","peak speed","اقصى سرعة","أقصى سرعة"],
-    playerLoad:["player load","playerload","pl","load","الحمل","حمل اللاعب"],
+    playerLoad:["player load","playerload","dynamic stress load","dsl","pl","load","الحمل","حمل اللاعب"],
     accel:["accel","acc","accelerations","number of accelerations","التسارع","التسارعات"],
     decel:["decel","dec","decelerations","التباطؤ","التباطؤات"],
-    duration:["duration","minutes","min","time","المدة","الدقائق"],
+    duration:["total time","session time","duration","minutes","min","time","المدة","الدقائق"],
     dpm:["m/min","m per min","distance per minute","dist/min","متر/دقيقة"]
   };
   function detectCols(head){
@@ -47339,13 +47341,18 @@ tr:hover .qde-ndate{color:#7E0E14}
       for(var i=0;i<head.length;i++){
         if(used[i]) continue;
         var h=norm(head[i]);
+        if(key==="td"&&/(per min|\/min|per minute)/.test(h)) continue;
+        if(key==="player"&&/(custom id|player id|playerid)/.test(h)) continue;
+        if(key==="hsr"&&/(per min|\/min)/.test(h)) continue;
+        if(key==="sprint"&&/distance/.test(h)) continue;
         for(var c=0;c<cands.length;c++){
           var cand=norm(cands[c]);
           if(h===cand||h.indexOf(cand)===0||cand.indexOf(h)===0&&h.length>2){ map[key]=i; used[i]=1; return; }
         }
       }
     });
-    return map;
+        if(map.player==null){ for(var j=0;j<head.length;j++){ var hj=norm(head[j]); if(hj.indexOf("player")===0&&!/(custom id|player id|playerid)/.test(hj)&&hj.indexOf("name")>-1){ map.player=j; break; } } }
+return map;
   }
   function toNum(v){ var n=Number(String(v==null?"":v).replace(/[^\d.\-]/g,"")); return isFinite(n)?n:null; }
 
@@ -47703,6 +47710,7 @@ tr:hover .qde-ndate{color:#7E0E14}
 
   async function handleFile(file){
     pending=null; lastImport=null;
+    try{ window.__QD349file=file; window.__QD349reparse=function(){ return handleFile(file); }; }catch(e){}
     msg("q320msg","جارٍ قراءة الملف…","warn");
     var rows=null;
     try{
@@ -47716,7 +47724,7 @@ tr:hover .qde-ndate{color:#7E0E14}
     var head=rows[0].map(function(x){ return String(x||""); });
     var map=detectCols(head);
     if(map.player==null||map.date==null){ msg("q320msg","لم أجد عمودي «اللاعب» و«التاريخ». الأعمدة الموجودة: "+head.slice(0,8).join(" · "),"bad"); return; }
-    var parsed=[], unmatched={}, matched=0;
+    var parsed=[], unmatched={}, matched=0; try{ window.__QD349unm=unmatched; }catch(e){}
     for(var r=1;r<rows.length;r++){
       var row=rows[r]; if(!row) continue;
       var nm=row[map.player], dt=row[map.date];
@@ -47730,9 +47738,9 @@ tr:hover .qde-ndate{color:#7E0E14}
         sprint:map.sprint!=null?toNum(row[map.sprint]):null, maxSpeed:map.maxSpeed!=null?toNum(row[map.maxSpeed]):null,
         playerLoad:map.playerLoad!=null?toNum(row[map.playerLoad]):null,
         accel:map.accel!=null?toNum(row[map.accel]):null, decel:map.decel!=null?toNum(row[map.decel]):null,
-        duration:map.duration!=null?toNum(row[map.duration]):null, src:"xlsx"});
+        duration:map.duration!=null?(window.QD349&&window.QD349.dur?window.QD349.dur(row[map.duration]):toNum(row[map.duration])):null, src:"xlsx"});
     }
-    pending=parsed;
+    pending=parsed; try{ window.__QD349parsed=parsed; }catch(e){}
     var cols=Object.keys(map).map(function(k){ return k; });
     var h='<div class="q320card" style="margin-top:12px"><h3>مراجعة الاستيراد</h3>'+
       '<p class="h">تم التعرّف على '+cols.length+' عمودًا ('+cols.join(" · ")+') · صفوف مقروءة '+parsed.length+' · لاعبون مطابقون '+matched+'.</p>'+
@@ -47743,9 +47751,11 @@ tr:hover .qde-ndate{color:#7E0E14}
       (Object.keys(unmatched).length?'<p class="q320mini" style="margin-top:9px;color:#B45309">أسماء لم تُطابق ('+Object.keys(unmatched).length+'): '+esc(Object.keys(unmatched).slice(0,8).join(" · "))+' — أضفهم في «اللاعبون» بنفس الاسم ثم أعد الرفع.</p>':'')+
       '<div class="q320row"><button class="q320go" id="q320commit"'+(parsed.length?'':' disabled')+'>حفظ '+parsed.length+' سجلًا</button><button class="q320go gh" id="q320cancel">إلغاء</button></div></div>';
     document.getElementById("q320prev").innerHTML=h;
+    try{ if(window.QD349) setTimeout(window.QD349.renderBox,60); }catch(e){}
     msg("q320msg","الملف جاهز للمراجعة قبل الحفظ.","ok");
     var c=document.getElementById("q320commit");
     if(c) c.onclick=function(){
+      if(window.QD349) try{ window.QD349.stamp(pending||[]); }catch(e){}
       var n=addGps(pending||[]);
       msg("q320msg","تم حفظ "+n+" سجل GPS وربطها باللاعبين.","ok");
       pending=null; setTimeout(render,700);
@@ -47939,7 +47949,13 @@ tr:hover .qde-ndate{color:#7E0E14}
     "create policy wellness_read_auth on wellness as permissive for select to authenticated using (true);",
     "grant usage on schema public to anon;",
     "grant insert on table wellness to anon;",
-    "grant usage, select on sequence wellness_id_seq to anon;"
+    "grant usage, select on sequence wellness_id_seq to anon;",
+    "-- مساحة تخزين صور اللاعبين (لتقصير رابط الاستبيان)",
+    "insert into storage.buckets (id,name,public) values ('players','players',true) on conflict (id) do nothing;",
+    "drop policy if exists players_read on storage.objects;",
+    "drop policy if exists players_write on storage.objects;",
+    "create policy players_read on storage.objects for select to anon using (bucket_id='players');",
+    "create policy players_write on storage.objects for insert to anon with check (bucket_id='players');"
   ].join("\n");
 
   function mount(){
@@ -48686,6 +48702,953 @@ tr:hover .qde-ndate{color:#7E0E14}
     var rs=history.replaceState;
     history.replaceState=function(a,b,u){ try{ if(u && String(u).indexOf("qdsv")<0) return; }catch(e){} return rs.apply(history,arguments); };
   }catch(e){}
+})();
+</script>
+
+<script>
+/* QD347 · PHOTO-BOARD v11-347 — رفع صور اللاعبين بسرعة + تخزينها على Supabase Storage */
+(function(){
+  var $=function(i){ return document.getElementById(i); };
+  function esc(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+  function S(){ try{ return window.__QDAPP.S; }catch(e){ return {}; } }
+  function players(){ var a=(S().players||[]).filter(function(p){ return p&&!p.deleted; }); return a; }
+  function nm(p){ return ((p.first||"")+" "+(p.last||"")).trim()||p.id; }
+  function save(){ try{ if(window.__QDAPP&&window.__QDAPP.save) window.__QDAPP.save(); }catch(e){} }
+  function cfg(){ try{ var o=JSON.parse(localStorage.getItem("qd321_cfg")||"null"); if(o&&o.url) return o; }catch(e){}
+    try{ if(typeof window.cfg==="function"){ var c=window.cfg(); if(c&&c.url) return c; } }catch(e){}
+    try{ var m=JSON.parse(localStorage.getItem("qd_cfg")||"null"); if(m&&m.url) return m; }catch(e){}
+    return null; }
+  function hdr(key,extra){
+    var h={"apikey":key};
+    if(/^eyJ/.test(String(key||""))) h.Authorization="Bearer "+key;
+    if(extra) for(var k in extra) h[k]=extra[k];
+    return h;
+  }
+  var BUCKET="players";
+
+  function compress(file,cb){
+    var fr=new FileReader();
+    fr.onload=function(){
+      var im=new Image();
+      im.onload=function(){
+        try{
+          var max=420, s=Math.min(1,max/Math.max(im.width||max,im.height||max));
+          var cv=document.createElement("canvas");
+          cv.width=Math.max(1,Math.round((im.width||max)*s));
+          cv.height=Math.max(1,Math.round((im.height||max)*s));
+          cv.getContext("2d").drawImage(im,0,0,cv.width,cv.height);
+          cb(cv.toDataURL("image/jpeg",0.78));
+        }catch(e){ cb(fr.result); }
+      };
+      im.onerror=function(){ cb(fr.result); };
+      im.src=fr.result;
+    };
+    fr.readAsDataURL(file);
+  }
+  function b64toBlob(durl){
+    var p=durl.split(","), m=/:(.*?);/.exec(p[0]), bm=atob(p[1]), n=bm.length, u=new Uint8Array(n);
+    for(var i=0;i<n;i++) u[i]=bm.charCodeAt(i);
+    return new Blob([u],{type:(m&&m[1])||"image/jpeg"});
+  }
+  function upload(pid,dataUrl,cb){
+    var c=cfg();
+    if(!c||!c.url||!c.key) return cb(null,"no-cfg");
+    var path=String(pid).replace(/[^a-zA-Z0-9_-]/g,"")+"-"+Date.now()+".jpg";
+    var url=c.url.replace(/\/$/,"")+"/storage/v1/object/"+BUCKET+"/"+path;
+    fetch(url,{method:"POST",headers:hdr(c.key,{"Content-Type":"image/jpeg","x-upsert":"true"}),body:b64toBlob(dataUrl)})
+      .then(function(r){
+        if(!r.ok) return r.text().then(function(t){ cb(null,r.status+":"+String(t).slice(0,120)); });
+        cb(c.url.replace(/\/$/,"")+"/storage/v1/object/public/"+BUCKET+"/"+path,null);
+      })
+      .catch(function(e){ cb(null,String(e&&e.message||e)); });
+  }
+
+  var CSS=
+   '#qd347btn{position:fixed;left:16px;bottom:210px;z-index:9999;border:0;border-radius:999px;padding:10px 16px;font:900 12.5px inherit;background:#7C3AED;color:#fff;box-shadow:0 8px 24px rgba(124,58,237,.45);cursor:pointer;white-space:nowrap}'+
+   '#qd347{position:fixed;inset:0;z-index:2147483500;display:none;background:rgba(10,10,12,.6);padding:14px;overflow:auto}'+
+   '#qd347.on{display:block}'+
+   '#qd347c{background:#fff;max-width:1080px;margin:0 auto;border-radius:16px;overflow:hidden;font-family:system-ui,Tahoma,sans-serif;color:#17171c}'+
+   '#qd347h{background:#0C1118;color:#fff;padding:13px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}'+
+   '#qd347h b{font:900 14px system-ui}#qd347h span{font:700 10.5px system-ui;opacity:.6}'+
+   '.q347grid{padding:14px;display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:10px}'+
+   '.q347card{border:1px solid #E6E6EC;border-radius:12px;padding:8px;text-align:center;background:#fff;position:relative}'+
+   '.q347card.miss{border-color:#FCA5A5;background:#FFF7F7}'+
+   '.q347ph{width:100%;aspect-ratio:1;border-radius:10px;background:#F1F1F5;display:grid;place-items:center;overflow:hidden;font:900 20px system-ui;color:#9A9AA6}'+
+   '.q347ph img{width:100%;height:100%;object-fit:cover}'+
+   '.q347n{font:800 10.5px system-ui;margin-top:6px;line-height:1.3;height:27px;overflow:hidden}'+
+   '.q347card button{border:0;border-radius:8px;padding:6px 8px;font:900 10px system-ui;cursor:pointer;margin-top:5px;width:100%}'+
+   '.q347up{background:#111;color:#fff}.q347del{background:#F3F4F6;color:#6B7280;margin-top:4px!important}'+
+   '.q347bar{padding:0 14px 14px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}'+
+   '.q347kpi{background:#F8FAFC;border:1px solid #E6E6EC;border-radius:10px;padding:7px 11px;font:800 11px system-ui}'+
+   '.q347note{margin:0 14px 14px;background:#FFFBEB;border:1px solid #FDE68A;border-radius:10px;padding:9px 11px;font:700 10.5px system-ui;color:#7C4A03;line-height:1.8}'+
+   '.q347toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:#111;color:#fff;padding:9px 15px;border-radius:10px;font:900 11.5px system-ui;z-index:2147483600;opacity:0;transition:.2s}'+
+   '.q347toast.on{opacity:1}';
+
+  function mount(){
+    if(!$("qd347css")){ var st=document.createElement("style"); st.id="qd347css"; st.textContent=CSS; document.head.appendChild(st); }
+    if(!$("qd347btn")){
+      var b=document.createElement("button"); b.id="qd347btn"; b.type="button"; b.textContent="🖼 صور اللاعبين";
+      b.onclick=open; document.body.appendChild(b);
+    }
+    if(!$("qd347")){
+      var h=document.createElement("div"); h.id="qd347";
+      h.innerHTML='<div id="qd347c"><div id="qd347h"><b>🖼 صور اللاعبين</b><span>اضغط «رفع صورة» أو أفلت صورة على البطاقة — تُضغط وتُحفظ تلقائيًا</span>'+
+        '<button id="qd347x" style="margin-inline-start:auto;background:transparent;border:1px solid rgba(255,255,255,.35);color:#fff;border-radius:8px;padding:5px 10px;font:900 11px system-ui;cursor:pointer">✕</button></div>'+
+        '<div id="qd347b"></div></div>';
+      document.body.appendChild(h);
+      $("qd347x").onclick=function(){ h.classList.remove("on"); };
+      h.addEventListener("click",function(e){ if(e.target===h) h.classList.remove("on"); });
+    }
+  }
+  function toast(m){
+    var t=$("q347t");
+    if(!t){ t=document.createElement("div"); t.className="q347toast"; t.id="q347t"; document.body.appendChild(t); }
+    t.textContent=m; t.classList.add("on");
+    clearTimeout(t.__h); t.__h=setTimeout(function(){ t.classList.remove("on"); },2200);
+  }
+  function open(){ mount(); $("qd347").classList.add("on"); render(); }
+
+  function render(){
+    var ps=players().slice().sort(function(a,b){ return (a.photo?1:0)-(b.photo?1:0) || nm(a).localeCompare(nm(b)); });
+    var withP=players().filter(function(p){ return p && p.photo; }).length;
+    var box=$("qd347b"); if(!box) return;
+    if(!ps.length){ box.innerHTML='<div class="q347note" style="margin:14px">لا لاعبين بعد. أضف اللاعبين من شاشة «اللاعبين» ثم عد إلى هنا.</div>'; return; }
+    box.innerHTML='<div class="q347bar">'+
+        '<div class="q347kpi">لديهم صورة: <b>'+withP+'</b> / '+ps.length+'</div>'+
+        '<div class="q347kpi">بدون صورة: <b style="color:#B5121B">'+(ps.length-withP)+'</b></div>'+
+        '<input id="q347q" placeholder="ابحث…" style="flex:1;min-width:140px;border:1px solid #E6E6EC;border-radius:9px;padding:8px 10px;font:800 11.5px system-ui">'+
+      '</div>'+
+      '<div class="q347grid" id="q347g">'+ps.map(card).join("")+'</div>'+
+      '<div class="q347note">الصور تُضغط تلقائيًا (420 بكسل) وتُرفع إلى مساحة تخزين Supabase، فيبقى رابط الاستبيان قصيرًا وتظهر الصور لكل لاعب. إن لم تُضبط المساحة، تُحفظ الصورة داخل ملف اللاعب ويعمل الرابط لكنه يصبح أطول.</div>';
+    wire();
+    var q=$("q347q"); if(q) q.oninput=function(){ filter(q.value); };
+  }
+  function card(p){
+    var ph=p.photo?'<img src="'+esc(p.photo)+'" alt="">':esc((nm(p)[0]||"?").toUpperCase());
+    return '<div class="q347card'+(p.photo?"":" miss")+'" data-pid="'+esc(p.id)+'" data-name="'+esc(nm(p).toLowerCase())+'">'+
+      '<div class="q347ph">'+ph+'</div>'+
+      '<div class="q347n">'+esc(nm(p))+'</div>'+
+      '<button class="q347up" data-up="'+esc(p.id)+'">رفع صورة</button>'+
+      (p.photo?'<button class="q347del" data-del="'+esc(p.id)+'">إزالة</button>':'')+
+      '<input type="file" accept="image/*" capture="environment" data-file="'+esc(p.id)+'" style="display:none">'+
+    '</div>';
+  }
+  function setPhoto(pid,val){
+    var arr=S().players||[];
+    for(var i=0;i<arr.length;i++){ if(String(arr[i].id)===String(pid)){ arr[i].photo=val; break; } }
+    save();
+  }
+  function wire(){
+    document.querySelectorAll("[data-up]").forEach(function(b){
+      b.onclick=function(){ var inp=document.querySelector('[data-file="'+b.getAttribute("data-up")+'"]'); if(inp) inp.click(); };
+    });
+    document.querySelectorAll("[data-file]").forEach(function(inp){
+      inp.onchange=function(){ if(inp.files&&inp.files[0]) handle(inp.getAttribute("data-file"),inp.files[0]); };
+      var cardEl=inp.closest(".q347card");
+      if(cardEl){
+        cardEl.ondragover=function(e){ e.preventDefault(); cardEl.style.outline="2px dashed #7C3AED"; };
+        cardEl.ondragleave=function(){ cardEl.style.outline=""; };
+        cardEl.ondrop=function(e){ e.preventDefault(); cardEl.style.outline=""; if(e.dataTransfer.files&&e.dataTransfer.files[0]) handle(cardEl.getAttribute("data-pid"),e.dataTransfer.files[0]); };
+      }
+    });
+    document.querySelectorAll("[data-del]").forEach(function(b){
+      b.onclick=function(){ setPhoto(b.getAttribute("data-del"),""); render(); toast("أُزيلت الصورة"); };
+    });
+  }
+  function filter(q){
+    q=String(q||"").toLowerCase();
+    document.querySelectorAll("#q347g .q347card").forEach(function(c){
+      c.style.display=(!q||String(c.getAttribute("data-name")||"").indexOf(q)>-1)?"":"none";
+    });
+  }
+  function handle(pid,file){
+    if(!/^image\//.test(file.type||"")){ toast("الملف ليس صورة"); return; }
+    toast("جارٍ المعالجة…");
+    compress(file,function(dataUrl){
+      upload(pid,dataUrl,function(publicUrl,err){
+        if(publicUrl){ setPhoto(pid,publicUrl); render(); toast("✓ حُفظت على التخزين السحابي"); }
+        else { setPhoto(pid,dataUrl); render(); toast("حُفظت داخل الملف (التخزين غير مضبوط: "+(err||"")+")"); }
+      });
+    });
+  }
+
+  window.QD347={open:open,refresh:render};
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",mount,{once:true}); else mount();
+  setTimeout(mount,1400);
+})();
+</script>
+
+
+<script>
+/* QD348 · PHOTO-BATCH v11-348 — رفع صور أكثر من لاعب مرة واحدة، مع مطابقة تلقائية بالاسم أو رقم القميص */
+(function(){
+  var $=function(i){ return document.getElementById(i); };
+  function esc(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+  function S(){ try{ return window.__QDAPP.S; }catch(e){ return {}; } }
+  function players(){ return (S().players||[]).filter(function(p){ return p&&!p.deleted; }); }
+  function nm(p){ return ((p.first||"")+" "+(p.last||"")).trim()||p.id; }
+  function pnum(p){ return p.num||p.no||p.shirt||p.number||""; }
+  function save(){ try{ if(window.__QDAPP&&window.__QDAPP.save) window.__QDAPP.save(); }catch(e){} }
+  function cfg(){ try{ var o=JSON.parse(localStorage.getItem("qd321_cfg")||"null"); if(o&&o.url) return o; }catch(e){}
+    try{ if(typeof window.cfg==="function"){ var c=window.cfg(); if(c&&c.url) return c; } }catch(e){}
+    try{ var m=JSON.parse(localStorage.getItem("qd_cfg")||"null"); if(m&&m.url) return m; }catch(e){}
+    return null; }
+  function hdr(key,extra){
+    var h={"apikey":key};
+    if(/^eyJ/.test(String(key||""))) h.Authorization="Bearer "+key;
+    if(extra) for(var k in extra) h[k]=extra[k];
+    return h;
+  }
+  var BUCKET="players";
+
+  /* ---------- تطبيع عربي للمطابقة ---------- */
+  function ar(s){
+    return String(s==null?"":s).toLowerCase()
+      .replace(/[\u0623\u0625\u0622\u0671]/g,"\u0627")
+      .replace(/\u0649/g,"\u064a").replace(/\u0626/g,"\u064a")
+      .replace(/\u0624/g,"\u0648").replace(/\u0629/g,"\u0647")
+      .replace(/[\u064b-\u0652\u0640]/g,"")
+      .replace(/[^\u0621-\u064aa-z0-9]+/g," ")
+      .replace(/\s+/g," ").trim();
+  }
+  function matchFile(name,ps){
+    var base=String(name||"").replace(/\.[a-z0-9]{2,5}$/i,"");
+    var nums=(base.match(/(?:^|\D)(\d{1,2})(?:\D|$)/g)||[]).map(function(x){ return x.replace(/\D/g,""); });
+    for(var i=0;i<nums.length;i++){
+      var same=ps.filter(function(p){ return String(pnum(p))===nums[i]; });
+      if(same.length===1) return {pid:same[0].id,how:"رقم "+nums[i]};
+    }
+    var nb=" "+ar(base)+" ";
+    var best=null,bs=0;
+    ps.forEach(function(p){
+      var toks=ar(nm(p)).split(" ").filter(function(t){ return t.length>1; });
+      if(!toks.length) return;
+      var hit=0; toks.forEach(function(t){ if(nb.indexOf(" "+t+" ")>-1||nb.indexOf(t)>-1&&t.length>3) hit+=t.length; });
+      var score=hit/toks.length;
+      if(hit>0&&score>bs){ bs=score; best=p; }
+    });
+    if(best&&bs>=3) return {pid:best.id,how:"تشابه الاسم"};
+    return null;
+  }
+
+  /* ---------- ضغط ورفع ---------- */
+  function compress(file,cb){
+    var fr=new FileReader();
+    fr.onload=function(){
+      var im=new Image();
+      im.onload=function(){
+        try{
+          var max=420, s=Math.min(1,max/Math.max(im.width||max,im.height||max));
+          var cv=document.createElement("canvas");
+          cv.width=Math.max(1,Math.round((im.width||max)*s));
+          cv.height=Math.max(1,Math.round((im.height||max)*s));
+          cv.getContext("2d").drawImage(im,0,0,cv.width,cv.height);
+          cb(cv.toDataURL("image/jpeg",0.78));
+        }catch(e){ cb(fr.result); }
+      };
+      im.onerror=function(){ cb(fr.result); };
+      im.src=fr.result;
+    };
+    fr.readAsDataURL(file);
+  }
+  function b64toBlob(durl){
+    var p=durl.split(","), m=/:(.*?);/.exec(p[0]), bm=atob(p[1]), n=bm.length, u=new Uint8Array(n);
+    for(var i=0;i<n;i++) u[i]=bm.charCodeAt(i);
+    return new Blob([u],{type:(m&&m[1])||"image/jpeg"});
+  }
+  function upload(pid,dataUrl,cb){
+    var c=cfg();
+    if(!c||!c.url||!c.key) return cb(null,"لا يوجد مشروع مضبوط");
+    var path=String(pid).replace(/[^a-zA-Z0-9_-]/g,"")+"-"+Date.now()+".jpg";
+    var url=c.url.replace(/\/$/,"")+"/storage/v1/object/"+BUCKET+"/"+path;
+    fetch(url,{method:"POST",headers:hdr(c.key,{"Content-Type":"image/jpeg","x-upsert":"true"}),body:b64toBlob(dataUrl)})
+      .then(function(r){
+        if(!r.ok) return r.text().then(function(t){ cb(null,r.status+": "+String(t).slice(0,110)); });
+        cb(c.url.replace(/\/$/,"")+"/storage/v1/object/public/"+BUCKET+"/"+path,null);
+      })
+      .catch(function(e){ cb(null,String(e&&e.message||e)); });
+  }
+  function setPhoto(pid,val){
+    var arr=S().players||[];
+    for(var i=0;i<arr.length;i++){ if(String(arr[i].id)===String(pid)){ arr[i].photo=val; return; } }
+  }
+
+  var CSS=
+   '#qd348btn{position:fixed;left:16px;bottom:262px;z-index:9999;border:0;border-radius:999px;padding:10px 16px;font:900 12.5px inherit;background:#0E7C86;color:#fff;box-shadow:0 8px 24px rgba(14,124,134,.42);cursor:pointer;white-space:nowrap}'+
+   '#qd348{position:fixed;inset:0;z-index:2147483550;display:none;background:rgba(10,10,12,.62);padding:14px;overflow:auto}'+
+   '#qd348.on{display:block}'+
+   '#qd348c{background:#fff;max-width:960px;margin:0 auto;border-radius:16px;overflow:hidden;font-family:system-ui,Tahoma,sans-serif;color:#17171c}'+
+   '#qd348h{background:#0C1118;color:#fff;padding:13px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}'+
+   '#qd348h b{font:900 14px system-ui}#qd348h span{font:700 10.5px system-ui;opacity:.62}'+
+   '#qd348b{padding:14px}'+
+   '.q348drop{border:2px dashed #CBD5E1;border-radius:14px;padding:22px;text-align:center;background:#F8FAFC;cursor:pointer}'+
+   '.q348drop.hot{border-color:#0E7C86;background:#ECFDF5}'+
+   '.q348drop b{display:block;font:900 13px system-ui;margin-bottom:5px}'+
+   '.q348drop small{font:700 10.5px system-ui;color:#64748B;line-height:1.9;display:block}'+
+   '.q348rows{margin-top:12px;display:flex;flex-direction:column;gap:7px;max-height:340px;overflow:auto}'+
+   '.q348row{display:flex;align-items:center;gap:9px;border:1px solid #E6E6EC;border-radius:10px;padding:7px 9px;background:#fff}'+
+   '.q348row.bad{border-color:#FCA5A5;background:#FFF7F7}'+
+   '.q348row.ok{border-color:#BBF7D0;background:#F7FEF9}'+
+   '.q348thumb{width:38px;height:38px;border-radius:8px;object-fit:cover;background:#F1F1F5;flex:0 0 auto}'+
+   '.q348fn{font:800 10.5px system-ui;flex:1;min-width:80px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#475569}'+
+   '.q348row select{border:1px solid #E2E8F0;border-radius:8px;padding:6px 8px;font:800 10.5px system-ui;max-width:210px;background:#fff}'+
+   '.q348how{font:900 9.5px system-ui;color:#0E7C86;white-space:nowrap}'+
+   '.q348bar{margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}'+
+   '.q348btn{border:0;border-radius:10px;padding:10px 16px;font:900 12px system-ui;cursor:pointer;background:#0E7C86;color:#fff}'+
+   '.q348btn.ghost{background:#F1F5F9;color:#475569}'+
+   '.q348prog{flex:1;min-width:120px;height:9px;border-radius:99px;background:#E2E8F0;overflow:hidden}'+
+   '.q348prog i{display:block;height:100%;width:0;background:#0E7C86;transition:.2s}'+
+   '.q348msg{margin-top:10px;font:800 11px system-ui;color:#334155;line-height:1.9}'+
+   '.q348msg.bad{color:#B5121B}';
+
+  function mount(){
+    if(!$("qd348css")){ var st=document.createElement("style"); st.id="qd348css"; st.textContent=CSS; document.head.appendChild(st); }
+    if(!$("qd348btn")){
+      var b=document.createElement("button"); b.id="qd348btn"; b.type="button"; b.textContent="⚡ رفع صور جماعية";
+      b.onclick=open; document.body.appendChild(b);
+    }
+    if(!$("qd348")){
+      var h=document.createElement("div"); h.id="qd348";
+      h.innerHTML='<div id="qd348c"><div id="qd348h"><b>⚡ رفع صور جماعية</b><span>اختر كل صور اللاعبين مرة واحدة — تُطابق تلقائيًا بالاسم أو رقم القميص</span>'+
+        '<button id="qd348x" style="margin-inline-start:auto;background:transparent;border:1px solid rgba(255,255,255,.35);color:#fff;border-radius:8px;padding:5px 10px;font:900 11px system-ui;cursor:pointer">✕</button></div>'+
+        '<div id="qd348b"></div></div>';
+      document.body.appendChild(h);
+      $("qd348x").onclick=function(){ h.classList.remove("on"); };
+      h.addEventListener("click",function(e){ if(e.target===h) h.classList.remove("on"); });
+    }
+  }
+  function msg(t,bad){ var m=$("q348msg"); if(m){ m.textContent=t; m.className="q348msg"+(bad?" bad":""); } }
+  function open(){ mount(); $("qd348").classList.add("on"); if(!$("q348drop")) render(); }
+
+  var ITEMS=[];
+  function render(){
+    var ps=players().slice().sort(function(a,b){ return nm(a).localeCompare(nm(b),"ar"); });
+    var opts=ps.map(function(p){ return '<option value="'+esc(p.id)+'">'+esc(nm(p))+(pnum(p)?(" · #"+esc(pnum(p))):"")+'</option>'; }).join("");
+    $("qd348b").innerHTML=
+      '<div class="q348drop" id="q348drop"><b>اسحب صور اللاعبين هنا أو اضغط للاختيار</b>'+
+      '<small>يمكن اختيار 36 صورة أو أكثر في وقت واحد</small>'+
+      '<small>التسمية المقترحة: <b>9.jpg</b> لرقم القميص، أو <b>محمد-عايد.jpg</b> — وتُطابق تلقائيًا</small>'+
+      '<input type="file" id="q348in" accept="image/*" multiple style="display:none"></div>'+
+      '<div class="q348rows" id="q348rows"></div>'+
+      '<div class="q348bar"><button class="q348btn" id="q348go">⬆ رفع الكل</button>'+
+      '<button class="q348btn ghost" id="q348clr">مسح القائمة</button>'+
+      '<div class="q348prog"><i id="q348pi"></i></div></div>'+
+      '<div class="q348msg" id="q348msg"></div>'+
+      '<input type="hidden" id="q348opts" value="'+esc(opts)+'">';
+    var drop=$("q348drop"), inp=$("q348in");
+    drop.onclick=function(){ inp.click(); };
+    drop.ondragover=function(e){ e.preventDefault(); drop.classList.add("hot"); };
+    drop.ondragleave=function(){ drop.classList.remove("hot"); };
+    drop.ondrop=function(e){ e.preventDefault(); drop.classList.remove("hot"); if(e.dataTransfer.files&&e.dataTransfer.files.length) add(e.dataTransfer.files); };
+    inp.onchange=function(){ if(inp.files&&inp.files.length) add(inp.files); inp.value=""; };
+    $("q348go").onclick=run;
+    $("q348clr").onclick=function(){ ITEMS=[]; render(); msg(""); };
+    drawRows();
+  }
+  function add(files){
+    var ps=players().slice().sort(function(a,b){ return nm(a).localeCompare(nm(b),"ar"); });
+    var used={};
+    ITEMS.forEach(function(it){ if(it.pid) used[it.pid]=1; });
+    for(var i=0;i<files.length;i++){
+      var f=files[i];
+      if(!/^image\//.test(f.type||"")) continue;
+      var m=matchFile(f.name,ps);
+      var pid=(m&&!used[m.pid])?m.pid:"";
+      if(pid) used[pid]=1;
+      ITEMS.push({file:f,pid:pid,how:(m&&pid)?m.how:"حدّد اللاعب",url:URL.createObjectURL(f)});
+    }
+    drawRows();
+    var auto=ITEMS.filter(function(x){ return x.pid; }).length;
+    msg("الصور: "+ITEMS.length+" · طُوبقت تلقائيًا: "+auto+" · تحتاج تحديدًا: "+(ITEMS.length-auto));
+  }
+  function drawRows(){
+    var box=$("q348rows"); if(!box) return;
+    var ps=players().slice().sort(function(a,b){ return nm(a).localeCompare(nm(b),"ar"); });
+    var opts='<option value="">— اختر اللاعب —</option>'+ps.map(function(p){ return '<option value="'+esc(p.id)+'">'+esc(nm(p))+(pnum(p)?(" · #"+esc(pnum(p))):"")+'</option>'; }).join("");
+    box.innerHTML=ITEMS.map(function(it,i){
+      return '<div class="q348row '+(it.pid?"ok":"bad")+'">'+
+        '<img class="q348thumb" src="'+esc(it.url)+'" alt="">'+
+        '<div class="q348fn">'+esc(it.file.name)+'</div>'+
+        '<span class="q348how">'+esc(it.how||"")+'</span>'+
+        '<select data-i="'+i+'">'+opts+'</select></div>';
+    }).join("")||'<div class="q348msg">لم تُضف صور بعد.</div>';
+    box.querySelectorAll("select").forEach(function(s){
+      var i=+s.getAttribute("data-i");
+      s.value=ITEMS[i].pid||"";
+      s.onchange=function(){
+        var v=s.value;
+        if(v) ITEMS.forEach(function(o,j){ if(j!==i&&o.pid===v) o.pid=""; });
+        ITEMS[i].pid=v; ITEMS[i].how=v?"يدوي":"حدّد اللاعب";
+        drawRows();
+      };
+    });
+  }
+  function run(){
+    var todo=ITEMS.filter(function(x){ return x.pid; });
+    if(!todo.length){ msg("لا صور مطابقة. حدّد اللاعب لكل صورة أو أعد التسمية.",1); return; }
+    if(!cfg()){ msg("مشروع Supabase غير مضبوط داخل النظام — لن تُرفع الصور إلى التخزين. اضبطه من «جوال اللاعب» أولاً.",1); return; }
+    var done=0,bad=0,i=0;
+    msg("جارٍ الرفع… 0 / "+todo.length);
+    $("q348go").disabled=true; $("q348go").style.opacity=".6";
+    (function next(){
+      if(i>=todo.length){
+        save();
+        $("q348go").disabled=false; $("q348go").style.opacity="1";
+        msg("تم: رُفعت "+(done-bad)+" صورة"+(bad?(" · فشل "+bad):"")+(ITEMS.length>todo.length?(" · بقيت "+(ITEMS.length-todo.length)+" صورة بدون لاعب"):""));
+        if(window.QD347&&window.QD347.refresh) try{ window.QD347.refresh(); }catch(e){}
+        return;
+      }
+      var it=todo[i];
+      compress(it.file,function(dataUrl){
+        upload(it.pid,dataUrl,function(publicUrl,err){
+          if(publicUrl){ setPhoto(it.pid,publicUrl); done++; it.done=true; }
+          else { bad++; it.err=err; }
+          i++;
+          var pct=Math.round(i/todo.length*100);
+          if($("q348pi")) $("q348pi").style.width=pct+"%";
+          msg("جارٍ الرفع… "+i+" / "+todo.length+(err?(" · آخر خطأ: "+err):""));
+          next();
+        });
+      });
+    })();
+  }
+  window.QD348={open:open,matchFile:matchFile};
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",mount,{once:true}); else mount();
+  setTimeout(mount,1600);
+})();
+</script>
+
+
+<script>
+/* QD349 · GPS-DAILY v11-349 — مطابقة أسماء تقرير GPS اليومي (إنجليزي) مع قائمة اللاعبين (عربي) + تحقق وذاكرة ربط دائمة */
+(function(){
+  var $=function(i){ return document.getElementById(i); };
+  function esc(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+  function S(){ try{ return window.__QDAPP.S; }catch(e){ return {}; } }
+  function players(){ return (S().players||[]).filter(function(p){ return p&&!p.deleted; }); }
+  function byId(id){ var a=players(); for(var i=0;i<a.length;i++){ if(String(a[i].id)===String(id)) return a[i]; } return null; }
+  function nm(p){ return ((p.first||"")+" "+(p.last||"")).trim()||String(p.id); }
+  function save(){ try{ if(window.__QDAPP&&window.__QDAPP.save) window.__QDAPP.save(); }catch(e){} }
+
+  function norm(s){
+    return String(s==null?"":s).toLowerCase()
+      .replace(/[\u064B-\u0652\u0670\u0640]/g,"")
+      .replace(/[\u0623\u0625\u0622\u0671]/g,"\u0627").replace(/\u0649/g,"\u064A")
+      .replace(/\u0629/g,"\u0647").replace(/\u0624/g,"\u0648").replace(/\u0626/g,"\u064A")
+      .replace(/[^\w\u0600-\u06FF]+/g," ").replace(/\s+/g," ").trim();
+  }
+  var AR={"ا":"a","ب":"b","ت":"t","ث":"th","ج":"j","ح":"h","خ":"kh","د":"d","ذ":"dh","ر":"r","ز":"z","س":"s","ش":"sh","ص":"s","ض":"d","ط":"t","ظ":"z","ع":"a","غ":"gh","ف":"f","ق":"q","ك":"k","ل":"l","م":"m","ن":"n","ه":"h","و":"w","ي":"y","ء":"","ة":"h","ى":"a","ئ":"y","ؤ":"w"};
+  function ar2lat(s){
+    var out="", t=String(s||"");
+    for(var i=0;i<t.length;i++){ var c=t.charAt(i); out+=(AR[c]!==undefined?AR[c]:c); }
+    return out;
+  }
+  function skel(s){ return ar2lat(String(s||"")).replace(/[^a-z0-9]/g,"").replace(/(.)\1+/g,"$1"); }
+  function skelNoAl(s){
+    return String(s||"").split(/\s+/).map(function(t){
+      var l=ar2lat(t).replace(/[^a-z0-9]/g,"");
+      if(l.length>4&&l.indexOf("al")===0) l=l.slice(2);
+      return l;
+    }).join("").replace(/(.)\1+/g,"$1");
+  }
+  function lev(a,b){
+    if(a===b) return 0;
+    var m=a.length,n=b.length; if(!m) return n; if(!n) return m;
+    var prev=new Array(n+1),cur=new Array(n+1),i,j;
+    for(j=0;j<=n;j++) prev[j]=j;
+    for(i=1;i<=m;i++){
+      cur[0]=i;
+      for(j=1;j<=n;j++) cur[j]=Math.min(prev[j]+1,cur[j-1]+1,prev[j-1]+(a.charAt(i-1)===b.charAt(j-1)?0:1));
+      var t=prev; prev=cur; cur=t;
+    }
+    return prev[n];
+  }
+  function sim(a,b){ if(!a||!b) return 0; return 1-lev(a,b)/Math.max(a.length,b.length); }
+
+  function mem(){ try{ return JSON.parse(localStorage.getItem("qd349_map")||"{}")||{}; }catch(e){ return {}; } }
+
+  function score(raw,p){
+    var n=norm(raw), ar=norm(nm(p));
+    if(p.gpsId&&norm(p.gpsId)===n) return {s:1,how:"معرّف GPS"};
+    if(p.gpsName&&norm(p.gpsName)===n) return {s:1,how:"اسم محفوظ"};
+    if(ar===n) return {s:1,how:"اسم مطابق"};
+    var s=Math.max(sim(skel(ar),skel(n)), sim(skelNoAl(ar),skelNoAl(n)));
+    var v1=skel(ar).replace(/[aeiouy]/g,""), v2=skel(n).replace(/[aeiouy]/g,"");
+    if(v1.length>3&&v2.length>3) s=Math.max(s,sim(v1,v2)*0.97);
+    return s>0?{s:s,how:"نطق "+Math.round(s*100)+"%"}:{s:0,how:""};
+  }
+  function best(raw){
+    var b=null,bp=-1,bh="";
+    players().forEach(function(p){ var r=score(raw,p); if(r.s>bp){ bp=r.s; b=p; bh=r.how; } });
+    return b?{p:b,score:bp,how:bh}:null;
+  }
+  function match(raw){
+    var n=norm(raw); if(!n) return null;
+    var o=mem(); if(o[n]){ var p=byId(o[n]); if(p) return {p:p,score:100,how:"ربط محفوظ"}; }
+    var b=best(raw);
+    if(b&&b.score>=0.62) return {p:b.p,score:Math.round(b.score*100),how:b.how};
+    return null;
+  }
+  function dur(v){
+    if(v==null||v==="") return null;
+    var s=String(v).trim();
+    var m=/^(\d{1,3}):(\d{2}):(\d{2})/.exec(s);
+    if(m) return +(Number(m[1])*60+Number(m[2])+Number(m[3])/60).toFixed(1);
+    m=/^(\d{1,3}):(\d{2})$/.exec(s);
+    if(m) return +(Number(m[1])+Number(m[2])/60).toFixed(1);
+    var n=Number(s); if(!isFinite(n)) return null; if(n>0&&n<1) return +(n*1440).toFixed(1); return n;
+  }
+
+  var TH_LOW=0.85;
+  function items(){
+    var unm=window.__QD349unm||{}, out=[], seen={};
+    (window.__QD349parsed||[]).forEach(function(x){
+      if(!x.raw) return;
+      var p=byId(x.playerId); if(!p) return;
+      var r=score(x.raw,p);
+      seen[norm(x.raw)]=1;
+      out.push({raw:x.raw,pid:x.playerId,sc:Math.round(r.s*100),how:r.how,file:x.playerName});
+    });
+    Object.keys(unm).forEach(function(k){ if(!seen[norm(k)]) out.push({raw:k,pid:"",sc:0,how:"",file:""}); });
+    out.sort(function(a,b){ return a.sc-b.sc; });
+    return out;
+  }
+  function rowHtml(it,opts){
+    var cls=it.sc>=90?"ok":(it.sc>=70?"mid":"bad");
+    return '<div class="q349row" data-raw="'+esc(it.raw)+'">'+
+      '<span class="q349nm">'+esc(it.raw)+'</span>'+
+      '<span class="q349sc '+cls+'">'+(it.sc?it.sc+"%":"—")+'</span>'+
+      '<select>'+'<option value="">— اختر —</option>'+opts+'</select>'+
+      '<span class="q349tick">'+(it.pid?"✓":"")+'</span></div>';
+  }
+  function renderBox(){
+    var prev=document.getElementById("q320prev"); if(!prev) return;
+    var its=items(), prevBox=prev.querySelector(".q349box");
+    if(prevBox) prevBox.remove();
+    if(!its.length) return;
+    var bad=its.filter(function(i){ return i.sc<TH_LOW*100; });
+    var opts=players().slice().sort(function(a,b){ return nm(a).localeCompare(nm(b),"ar"); })
+      .map(function(p){ return '<option value="'+esc(p.id)+'">'+esc(nm(p))+(p.num?(" · #"+esc(p.num)):""); })
+    var h;
+    if(!bad.length){
+      h='<div class="q349box ok"><div class="q349hd"><b>✓ كل الأسماء مطابقة بثقة عالية ('+its.length+')</b>'+
+        '<span>لا حاجة لأي إجراء — احفظ السجلات. اضغط «عرض الكل» للتعديل اليدوي.</span></div>'+
+        '<button class="q349go gh" id="q349show">عرض الكل للتعديل</button></div>';
+      prev.insertAdjacentHTML("beforeend",h);
+      document.getElementById("q349show").onclick=function(){ drawAll(prev,its,opts); };
+      return;
+    }
+    drawAll(prev,its,opts,bad.length);
+  }
+  function drawAll(prev,its,opts,focusN){
+    var b=prev.querySelector(".q349box"); if(b) b.remove();
+    var ps=players().slice().sort(function(a,b2){ return nm(a).localeCompare(nm(b2),"ar"); });
+    var opt='<option value="">— اختر —</option>'+ps.map(function(p){ return '<option value="'+esc(p.id)+'">'+esc(nm(p))+(p.num?(" · #"+esc(p.num)):""); }).join("");
+    var rows=its.map(function(it){ return rowHtml(it,opt); }).join("");
+    prev.insertAdjacentHTML("beforeend",
+      '<div class="q349box"><div class="q349hd"><b>تحقّق من مطابقة الأسماء ('+its.length+' اسم)</b>'+
+      '<span>'+(focusN?("يوجد "+focusN+" اسمًا بثقة منخفضة — راجعها أولًا. "):"")+'الربط يُحفظ دائمًا، فلن تتكرر هذه المراجعة في الأيام القادمة.</span></div>'+
+      '<div class="q349list">'+rows+'</div>'+
+      '<div class="q349bar"><button class="q349go" id="q349apply">🔗 احفظ الربط وأعد القراءة</button>'+
+      '<span class="q349hint">الأسماء الإنجليزية تُطابق تلقائيًا بالاسم العربي.</span></div></div>');
+    var box=prev.querySelector(".q349box");
+    box.querySelectorAll(".q349row").forEach(function(r){
+      var raw=r.getAttribute("data-raw"), sel=r.querySelector("select");
+      var cur=null;
+      its.forEach(function(it){ if(it.raw===raw) cur=it; });
+      if(cur&&cur.pid) sel.value=cur.pid;
+      else { var bb=best(raw); if(bb&&bb.score>=0.45) sel.value=String(bb.p.id); }
+      sel.onchange=function(){ r.querySelector(".q349tick").textContent=sel.value?"✓":""; };
+    });
+    var ap=box.querySelector("#q349apply"); if(ap) ap.onclick=apply;
+  }
+  function apply(){
+    var map=mem(), n=0, miss=0;
+    document.querySelectorAll(".q349row").forEach(function(r){
+      var raw=r.getAttribute("data-raw"), pid=r.querySelector("select").value;
+      if(!pid){ miss++; return; }
+      var p=byId(pid); if(!p){ miss++; return; }
+      map[norm(raw)]=String(pid); p.gpsName=raw; n++;
+    });
+    try{ localStorage.setItem("qd349_map",JSON.stringify(map)); }catch(e){}
+    save();
+    var m=$("q320msg");
+    if(m){ m.textContent="حُفظ ربط "+n+" اسمًا"+(miss?(" · بقي "+miss+" بدون ربط"):"")+" — أُعيد قراءة الملف."; m.className="q320msg on ok"; }
+    if(window.__QD349reparse){ try{ window.__QD349reparse(); }catch(e){} }
+  }
+  function stamp(list){
+    (list||[]).forEach(function(x){
+      var p=byId(x.playerId); if(!p||!x.raw) return;
+      if(norm(x.raw)!==norm(nm(p))) p.gpsName=x.raw;
+    });
+    save();
+  }
+
+  var CSS=
+   '.q349box{margin-top:12px;border:1px solid #F0DDB6;background:#FFFCF3;border-radius:13px;padding:12px}'+
+   '.q349box.ok{border-color:#CFE7D6;background:#F6FDF8}'+
+   '.q349hd b{display:block;font:900 12.5px system-ui;color:#8A5A00}'+
+   '.q349box.ok .q349hd b{color:#15803D}'+
+   '.q349hd span{display:block;font:700 10.5px system-ui;color:#8A6A33;margin-top:3px;line-height:1.7}'+
+   '.q349list{margin-top:9px;display:flex;flex-direction:column;gap:5px;max-height:330px;overflow:auto}'+
+   '.q349row{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid #EFE7D6;border-radius:9px;padding:5px 8px}'+
+   '.q349nm{font:800 10.5px system-ui;flex:1;min-width:80px;color:#3A3A44;direction:ltr;text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}'+
+   '.q349sc{font:900 9.5px system-ui;color:#9A8A6A;min-width:34px;text-align:center}'+
+   '.q349sc.ok{color:#15803D}.q349sc.mid{color:#B45309}.q349sc.bad{color:#B5121B}'+
+   '.q349row select{border:1px solid #E6E0D2;border-radius:8px;padding:5px 7px;font:800 10.5px system-ui;max-width:200px;background:#fff}'+
+   '.q349tick{font:900 11px system-ui;color:#15803D;min-width:10px}'+
+   '.q349bar{margin-top:10px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}'+
+   '.q349go{border:0;border-radius:9px;padding:9px 15px;font:900 11.5px system-ui;background:#8E1015;color:#fff;cursor:pointer;margin-top:6px}'+
+   '.q349go.gh{background:#fff;border:1px solid #E0DBD4;color:#5B6472}'+
+   '.q349hint{font:700 10px system-ui;color:#8A6A33}';
+
+  function watch(){
+    var prev=document.getElementById("q320prev");
+    if(!prev) return;
+    if(!prev.__q349w){
+      prev.__q349w=1;
+      new MutationObserver(function(){ setTimeout(renderBox,60); }).observe(prev,{childList:true});
+    }
+    if(prev.querySelector(".q349box")) return;
+    if((window.__QD349parsed&&window.__QD349parsed.length)||Object.keys(window.__QD349unm||{}).length) renderBox();
+  }
+  setInterval(watch,800);
+
+  window.QD349={match:match,stamp:stamp,best:best,dur:dur,renderBox:renderBox,
+    score:function(r,pid){ var p=byId(pid); return p?score(r,p):null; }};
+})();
+</script>
+
+
+<script>
+/* QD350 · MATCH-REPORTS v11-350 — إعادة بناء قسم «المباريات والجدول» بالكامل إلى «تقارير المباريات» */
+(function(){
+  var $=function(i){ return document.getElementById(i); };
+  function esc(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,'&quot;'); }
+  function S(){ try{ return window.__QDAPP.S; }catch(e){ return {}; } }
+  function save(){ try{ if(window.__QDAPP&&window.__QDAPP.save) return window.__QDAPP.save(); }catch(e){}
+    try{ if(typeof window.save==="function") return window.save(); }catch(e){}
+    try{ localStorage.setItem("qd_app_v1",JSON.stringify(S())); }catch(e){} }
+  function players(){ return (S().players||[]).filter(function(p){ return p&&!p.deleted; }); }
+  function nm(p){ return ((p.first||"")+" "+(p.last||"")).trim()||String(p.id); }
+  function pnum(p){ return p.num||p.no||p.shirt||p.number||""; }
+  function ms(){ if(!S().matches) S().matches=[]; return S().matches; }
+  function uid(){ return "m"+Date.now().toString(36)+Math.random().toString(36).slice(2,6); }
+  function d2(s){ var t=String(s||"").slice(0,10).split("-"); return t.length===3?(t[2]+"/"+t[1]):String(s||"—"); }
+  function today(){ var d=new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+
+  function rep(m){ if(!m.rep) m.rep={}; var r=m.rep;
+    if(!r.part||typeof r.part!=="object") r.part={};
+    if(!Array.isArray(r.inj)) r.inj=[];
+    return r; }
+  function partN(m){ return Object.keys(rep(m).part||{}).length; }
+  function minsN(m){ var r=rep(m),s=0; for(var k in r.part) s+=Number(r.part[k])||0; return s; }
+  function done(m){ var r=rep(m); return Object.keys(r.part).length>=11 && (r.gf!=null||r.ga!=null||m.result); }
+  function status(m){ if(!Object.keys(rep(m).part).length) return {k:"none",t:"بدون تقرير",c:"#B5121B",bg:"#FDECEC"};
+    if(!done(m)) return {k:"part",t:"ناقص",c:"#B45309",bg:"#FFF7E8"};
+    return {k:"ok",t:"مكتمل",c:"#15803D",bg:"#E8F5EC"}; }
+
+  var FILTER="all", Q="";
+  function list(){
+    var a=ms().slice().sort(function(x,y){ return String(y.date||"").localeCompare(String(x.date||""))||(Number(y.round)||0)-(Number(x.round)||0); });
+    if(FILTER==="ok") a=a.filter(function(m){ return status(m).k==="ok"; });
+    if(FILTER==="part") a=a.filter(function(m){ return status(m).k==="part"; });
+    if(FILTER==="none") a=a.filter(function(m){ return status(m).k==="none"; });
+    if(Q){ var q=Q.toLowerCase(); a=a.filter(function(m){ return String(m.opponent||"").toLowerCase().indexOf(q)>-1||String(m.round||"").indexOf(q)>-1||String(m.date||"").indexOf(q)>-1; }); }
+    return a;
+  }
+  function kpi(){
+    var A=ms(), ok=0,part=0,none=0,inj=0,mins=0,pcount=0;
+    A.forEach(function(m){ var st=status(m).k; if(st==="ok") ok++; else if(st==="part") part++; else none++;
+      inj+=rep(m).inj.length; mins+=minsN(m); pcount+=partN(m); });
+    return '<div class="q350k">'+
+      k('<b>'+A.length+'</b>','مباريات مسجّلة')+
+      k('<b style="color:#15803D">'+ok+'</b>','تقارير مكتملة')+
+      k('<b style="color:#B45309">'+part+'</b>','تقارير ناقصة')+
+      k('<b style="color:#B5121B">'+none+'</b>','بدون تقرير')+
+      k('<b>'+pcount+'</b>','مشاركة لاعب')+
+      k('<b>'+mins.toLocaleString("en")+'</b>','إجمالي الدقائق')+
+      k('<b style="color:#B5121B">'+inj+'</b>','إصابات في المباريات')+
+    '</div>';
+  }
+  function k(v,l){ return '<div class="q350kc"><i>'+l+'</i>'+v+'</div>'; }
+
+  function card(m){
+    var st=status(m), r=rep(m), pn=partN(m), mn=minsN(m);
+    var res=(r.gf!=null||r.ga!=null)?(Number(r.gf||0)+' - '+Number(r.ga||0)):(m.result||"—");
+    return '<div class="q350row" data-m="'+esc(m.id)+'">'+
+      '<div class="q350r1"><span class="q350rd">ج'+(m.round||"—")+'</span>'+
+        '<div class="q350op"><b>'+esc(m.opponent||"خصم غير محدد")+'</b><s>'+d2(m.date)+' · '+((m.home===false)?"خارج الأرض":"على أرضنا")+'</s></div>'+
+        '<span class="q350st" style="background:'+st.bg+';color:'+st.c+'">'+st.t+'</span>'+
+        '<span class="q350res">'+esc(res)+'</span></div>'+
+      '<div class="q350r2">'+
+        '<span>👥 المشاركون <b>'+pn+'</b></span>'+
+        '<span>⏱ الدقائق <b>'+mn+'</b></span>'+
+        '<span>🩹 الإصابات <b style="color:'+(r.inj.length?"#B5121B":"#6E7683")+'">'+r.inj.length+'</b></span>'+
+        '<span class="q350sp"></span>'+
+        '<button class="q350b" data-open="'+esc(m.id)+'">'+((pn||r.gf!=null)?"تعديل التقرير":"إضافة تقرير")+'</button>'+
+        '<button class="q350b gh" data-del="'+esc(m.id)+'">حذف</button></div>'+
+      (r.notes?'<div class="q350note">'+esc(r.notes)+'</div>':'')+
+    '</div>';
+  }
+
+  function body(){
+    var A=list(), tot=ms().length;
+    var h='<div class="q350w" data-q350="1">'+
+      '<div class="q350hd"><div class="q350ic">📋</div><div><b>تقارير المباريات</b>'+
+      '<span>مشاركة كل لاعب · دقائق اللعب · الإصابات · النتيجة — تُحفظ فورًا في ملف الفريق</span></div>'+
+      '<button class="q350add" id="q350add">+ مباراة جديدة</button></div>'+
+      kpi()+
+      '<div class="q350bar">'+
+        '<div class="q350tabs">'+
+          tab("all","الكل ("+tot+")")+tab("ok","مكتملة")+tab("part","ناقصة")+tab("none","بدون تقرير")+
+        '</div>'+
+        '<input id="q350q" class="q350in" placeholder="ابحث بالخصم أو الجولة أو التاريخ…" value="'+esc(Q)+'">'+
+        '<button class="q350b gh" id="q350csv">⬇ تصدير CSV</button>'+
+      '</div>'+
+      (A.length?('<div class="q350list">'+A.map(card).join("")+'</div>'):'<div class="q350empty"><b>لا توجد مباريات هنا</b><span>أضف مباراة أولى ثم املأ تقريرها: من شارك، كم دقيقة لعب، ومن أُصيب.</span><button class="q350add" id="q350add2">+ إضافة مباراة</button></div>')+
+      '<div class="q350foot">التقرير يُعدّ «مكتملًا» عند تسجيل 11 مشاركًا أو أكثر مع النتيجة. كل تعديل يُحفظ مباشرة في النسخة الاحتياطية السحابية.</div>'+
+    '</div>';
+    return h;
+  }
+  function tab(k2,t){ return '<button class="q350tab'+(FILTER===k2?" on":"")+'" data-f="'+k2+'">'+t+'</button>'; }
+
+  function render(){
+    var el=$("v-fixtures");
+    if(!el){ var main=document.querySelector("main"); if(main){ el=document.createElement("section"); el.className="view"; el.id="v-fixtures"; main.appendChild(el); } }
+    if(!el) return;
+    try{ if(typeof current!=="undefined" && current==="fixtures") el.classList.add("active"); }catch(e){}
+    el.innerHTML=body();
+    wire(el);
+    try{ if(typeof renderNav==="function") renderNav(); }catch(e){}
+  }
+  function wire(el){
+    var add=$("q350add")||$("q350add2");
+    if(add) add.onclick=function(){ editor(null); };
+    el.querySelectorAll("[data-f]").forEach(function(b){ b.onclick=function(){ FILTER=b.getAttribute("data-f"); render(); }; });
+    var q=$("q350q"); if(q){ q.oninput=function(){ Q=q.value; var p=q.selectionStart; render(); var n=$("q350q"); if(n){ n.focus(); try{ n.setSelectionRange(p,p); }catch(e){} } }; }
+    el.querySelectorAll("[data-open]").forEach(function(b){ b.onclick=function(){ editor(b.getAttribute("data-open")); }; });
+    el.querySelectorAll("[data-del]").forEach(function(b){ b.onclick=function(){
+      var id=b.getAttribute("data-del"), m=ms().filter(function(x){ return String(x.id)===String(id); })[0];
+      if(!m) return;
+      if(!confirm("حذف مباراة «"+(m.opponent||"")+"» وتقريرها نهائيًا؟")) return;
+      var i=ms().indexOf(m); if(i>-1) ms().splice(i,1);
+      save(); render(); toast("حُذفت المباراة");
+    }; });
+    var cs=$("q350csv"); if(cs) cs.onclick=csv;
+  }
+  function toast(t){
+    try{ if(typeof window.toast==="function") return window.toast(t); }catch(e){}
+    var d=$("q350t"); if(!d){ d=document.createElement("div"); d.id="q350t"; d.style.cssText="position:fixed;bottom:26px;left:50%;transform:translateX(-50%);background:#111;color:#fff;padding:9px 16px;border-radius:10px;font:900 12px system-ui;z-index:2147483647"; document.body.appendChild(d); }
+    d.textContent=t; d.style.opacity="1"; clearTimeout(d.__h); d.__h=setTimeout(function(){ d.style.opacity="0"; },1800);
+  }
+
+  /* ---------- المحرّر ---------- */
+  var CURM=null;
+  function editor(id){
+    var m=null;
+    if(id) m=ms().filter(function(x){ return String(x.id)===String(id); })[0];
+    var isNew=!m;
+    if(!m){ m={id:uid(),opponent:"",round:"",date:today(),home:true,venue:"",result:"",rep:{part:{},inj:[],gf:null,ga:null,notes:""}}; }
+    rep(m); CURM=m;
+    var ps=players().slice().sort(function(a,b){ return nm(a).localeCompare(nm(b),"ar"); });
+    var r=rep(m);
+    var rows=ps.map(function(p){
+      var pid=String(p.id), on=r.part[pid]!=null, mi=on?r.part[pid]:"";
+      var inj=r.inj.filter(function(x){ return String(x.playerId)===pid; })[0];
+      return '<tr data-pid="'+esc(pid)+'">'+
+        '<td class="c"><input type="checkbox" class="q350chk"'+(on?" checked":"")+'></td>'+
+        '<td><b>'+esc(nm(p))+'</b>'+(pnum(p)?' <s>#'+esc(pnum(p))+'</s>':'')+'</td>'+
+        '<td><input type="number" min="0" max="130" class="q350min" value="'+(on?esc(mi):"")+'" placeholder="دقائق"></td>'+
+        '<td><select class="q350inj"><option value="">—</option>'+INJ_OPTS(inj&&inj.type)+'</select></td>'+
+        '<td><input type="number" min="1" max="130" class="q350im" value="'+(inj?esc(inj.minute||""):"")+'" placeholder="د"></td>'+
+      '</tr>';
+    }).join("");
+    var box=$("q350modal"); if(box) box.remove();
+    box=document.createElement("div"); box.id="q350modal";
+    box.innerHTML='<div class="q350mc">'+
+      '<div class="q350mh"><b>'+(isNew?"مباراة جديدة":"تقرير المباراة")+'</b><span>'+esc(m.opponent||"—")+'</span>'+
+        '<button id="q350mx" class="q350b gh" style="margin-inline-start:auto">✕</button></div>'+
+      '<div class="q350mb">'+
+        '<div class="q350grid">'+
+          fld("الخصم","opponent",esc(m.opponent||""),"text")+
+          fld("الجولة","round",esc(m.round||""),"number")+
+          fld("التاريخ","date",esc(String(m.date||"").slice(0,10)),"date")+
+          fld("الملعب","venue",esc(m.venue||""),"text")+
+          fld("أهدافنا","gf",r.gf!=null?esc(r.gf):"","number")+
+          fld("أهدافهم","ga",r.ga!=null?esc(r.ga):"","number")+
+          '<label class="q350f"><i>الأرض</i><select id="f_home"><option value="1"'+(m.home!==false?" selected":"")+'>على أرضنا</option><option value="0"'+(m.home===false?" selected":"")+'>خارج الأرض</option></select></label>'+
+        '</div>'+
+        '<div class="q350sh"><b>المشاركون والدقائق</b>'+
+          '<span id="q350cnt">'+Object.keys(r.part).length+' مشاركًا</span>'+
+          '<button class="q350b gh" id="q350all" type="button">تحديد الكل</button>'+
+          '<button class="q350b gh" id="q350none" type="button">إلغاء الكل</button></div>'+
+        '<div class="q350tw"><table class="q350t"><thead><tr><th class="c">لعب</th><th>اللاعب</th><th>الدقائق</th><th>إصابة</th><th>د</th></tr></thead><tbody>'+
+        (rows||'<tr><td colspan="5" style="padding:16px;text-align:center;color:#6E7683">لا يوجد لاعبون في الكشف.</td></tr>')+
+        '</tbody></table></div>'+
+        '<label class="q350f w"><i>ملاحظات التقرير</i><textarea id="f_notes" rows="2" placeholder="ملخص المباراة، تغييرات، ملاحظات طبية…">'+esc(r.notes||"")+'</textarea></label>'+
+      '</div>'+
+      '<div class="q350mf"><button class="q350b" id="q350save">حفظ التقرير</button>'+
+        '<button class="q350b gh" id="q350cancel">إلغاء</button>'+
+        '<span id="q350msg" class="q350msg"></span></div></div>';
+    document.body.appendChild(box);
+    $("q350mx").onclick=$("q350cancel").onclick=function(){ box.remove(); };
+    $("q350all").onclick=function(){ box.querySelectorAll(".q350chk").forEach(function(c){ c.checked=true; var tr=c.closest("tr"); var mi=tr.querySelector(".q350min"); if(!mi.value) mi.value=90; }); sync(); };
+    $("q350none").onclick=function(){ box.querySelectorAll(".q350chk").forEach(function(c){ c.checked=false; }); sync(); };
+    function sync(){
+      var n=0; box.querySelectorAll(".q350chk").forEach(function(c){ if(c.checked) n++; });
+      $("q350cnt").textContent=n+" مشاركًا";
+    }
+    box.querySelectorAll(".q350chk").forEach(function(c){ c.onchange=function(){ var tr=c.closest("tr"); var mi=tr.querySelector(".q350min"); if(c.checked&&!mi.value) mi.value=90; sync(); }; });
+    $("q350save").onclick=function(){
+      var opp=box.querySelector("#f_opponent").value.trim();
+      if(!opp){ $("q350msg").textContent="اكتب اسم الخصم."; $("q350msg").style.color="#B5121B"; return; }
+      m.opponent=opp;
+      m.round=box.querySelector("#f_round").value.trim();
+      m.date=box.querySelector("#f_date").value||today();
+      m.venue=box.querySelector("#f_venue").value.trim();
+      m.home=box.querySelector("#f_home").value==="1";
+      var r2=rep(m); r2.part={}; r2.inj=[];
+      var gf=box.querySelector("#f_gf").value, ga=box.querySelector("#f_ga").value;
+      r2.gf=gf===""?null:Number(gf); r2.ga=ga===""?null:Number(ga);
+      r2.notes=box.querySelector("#f_notes").value.trim();
+      box.querySelectorAll("tbody tr[data-pid]").forEach(function(tr){
+        var pid=tr.getAttribute("data-pid");
+        if(tr.querySelector(".q350chk").checked){ r2.part[pid]=Number(tr.querySelector(".q350min").value)||0; }
+        var it=tr.querySelector(".q350inj").value, im=tr.querySelector(".q350im").value;
+        if(it) r2.inj.push({playerId:pid,type:it,minute:im?Number(im):null});
+      });
+      r2.ts=Date.now();
+      if(r2.gf!=null||r2.ga!=null){ m.result=Number(r2.gf||0)+"-"+Number(r2.ga||0); m.gf=r2.gf; m.ga=r2.ga; }
+      if(isNew) ms().push(m);
+      save(); box.remove(); render(); toast("حُفظ التقرير ✓");
+      try{ if(window.QD320&&window.QD320.refresh) window.QD320.refresh(); }catch(e){}
+    };
+    sync();
+  }
+  function fld(l,id,v,t){ return '<label class="q350f"><i>'+l+'</i><input id="f_'+id+'" type="'+t+'" value="'+v+'"></label>'; }
+  var INJ_T=["إصابة عضلية","شد عضلي","التواء","كدمة","إجهاد","إصابة أربطة","شرخ","ارتجاج","أخرى"];
+  function INJ_OPTS(cur){ return INJ_T.map(function(t){ return '<option'+(cur===t?" selected":"")+'>'+esc(t)+'</option>'; }).join(""); }
+
+  function csv(){
+    var A=ms().slice().sort(function(a,b){ return String(a.date||"").localeCompare(String(b.date||"")); });
+    var head=["الجولة","التاريخ","الخصم","الأرض","النتيجة","المشاركون","إجمالي الدقائق","الإصابات","ملاحظات"];
+    var lines=[head.join(",")];
+    A.forEach(function(m){ var r=rep(m);
+      lines.push([m.round||"",m.date||"",q(m.opponent||""),(m.home===false?"خارج الأرض":"على أرضنا"),(m.result||""),partN(m),minsN(m),r.inj.length,q(r.notes||"")].join(",")); });
+    var blob=new Blob(["\ufeff"+lines.join("\r\n")],{type:"text/csv;charset=utf-8"});
+    var a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download="match-reports.csv"; a.click();
+    toast("صُدّر ملف CSV");
+  }
+  function q(s){ s=String(s||"").replace(/"/g,'""'); return /[",\n]/.test(s)?('"'+s+'"'):s; }
+
+  /* ---------- الأنماط ---------- */
+  var CSS=
+   '#v-fixtures .q350w{max-width:1180px;margin:0 auto;padding:14px 14px 70px;font-family:system-ui,Tahoma,sans-serif;color:#151A21;direction:rtl}'+
+   '.q350hd{display:flex;align-items:center;gap:12px;background:linear-gradient(135deg,#0F172A,#232B3A);color:#fff;border-radius:16px;padding:16px 18px;margin-bottom:12px}'+
+   '.q350ic{width:44px;height:44px;border-radius:13px;background:linear-gradient(150deg,#fff,#F3ECDD);color:#8E1015;display:grid;place-items:center;font-size:19px;flex:none}'+
+   '.q350hd b{display:block;font:900 16px inherit}.q350hd span{display:block;font:700 11px inherit;color:#AEB8C7;margin-top:3px;line-height:1.6}'+
+   '.q350add{margin-inline-start:auto;background:#B5121B;color:#fff;border:0;border-radius:11px;padding:10px 16px;font:900 12px inherit;cursor:pointer;white-space:nowrap}'+
+   '.q350k{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:8px;margin-bottom:12px}'+
+   '.q350kc{background:#fff;border:1px solid #E4E0D6;border-radius:12px;padding:9px 11px}'+
+   '.q350kc i{display:block;font:800 9.5px inherit;color:#6E7683;font-style:normal;margin-bottom:3px}'+
+   '.q350kc b{font:900 19px inherit}'+
+   '.q350bar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:11px}'+
+   '.q350tabs{display:flex;gap:6px;flex-wrap:wrap}'+
+   '.q350tab{border:1px solid #E0DBD4;background:#fff;border-radius:999px;padding:7px 13px;font:900 11px inherit;color:#5B6472;cursor:pointer}'+
+   '.q350tab.on{background:#8E1015;border-color:#8E1015;color:#fff}'+
+   '.q350in{flex:1;min-width:150px;border:1px solid #E4E0D6;border-radius:10px;padding:9px 11px;font:700 12px inherit;outline:0}'+
+   '.q350list{display:flex;flex-direction:column;gap:8px}'+
+   '.q350row{background:#fff;border:1px solid #E4E0D6;border-radius:13px;padding:11px 13px}'+
+   '.q350r1{display:flex;align-items:center;gap:10px;flex-wrap:wrap}'+
+   '.q350rd{background:#0F172A;color:#F3ECDD;border-radius:8px;padding:5px 9px;font:900 11px inherit;white-space:nowrap}'+
+   '.q350op{flex:1;min-width:120px}.q350op b{display:block;font:900 13.5px inherit}'+
+   '.q350op s{text-decoration:none;font:700 10.5px inherit;color:#6E7683}'+
+   '.q350st{border-radius:999px;padding:3px 10px;font:900 10px inherit;white-space:nowrap}'+
+   '.q350res{font:900 15px inherit;color:#0F172A;background:#F7F5F0;border-radius:9px;padding:4px 11px;direction:ltr}'+
+   '.q350r2{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:9px;font:800 10.5px inherit;color:#5B6472}'+
+   '.q350r2 b{color:#0F172A}'+
+   '.q350sp{flex:1}'+
+   '.q350b{border:0;border-radius:9px;padding:7px 13px;font:900 11px inherit;background:#8E1015;color:#fff;cursor:pointer}'+
+   '.q350b.gh{background:#fff;border:1px solid #E0DBD4;color:#5B6472}'+
+   '.q350note{margin-top:8px;background:#FBFAF7;border:1px dashed #E3DCCB;border-radius:9px;padding:7px 10px;font:700 10.5px inherit;color:#5B6472;line-height:1.7}'+
+   '.q350empty{background:#fff;border:1px dashed #D9D3C4;border-radius:14px;padding:30px;text-align:center}'+
+   '.q350empty b{display:block;font:900 14px inherit;margin-bottom:5px}'+
+   '.q350empty span{display:block;font:700 11px inherit;color:#6E7683;margin-bottom:12px}'+
+   '.q350foot{margin-top:12px;font:700 10px inherit;color:#8A8F99;text-align:center;line-height:1.8}'+
+   '#q350modal{position:fixed;inset:0;z-index:2147483647;background:rgba(10,10,12,.62);display:flex;align-items:flex-start;justify-content:center;padding:16px;overflow:auto}'+
+   '.q350mc{background:#fff;border-radius:16px;width:100%;max-width:900px;font-family:system-ui,Tahoma,sans-serif;direction:rtl;overflow:hidden}'+
+   '.q350mh{background:#0C1118;color:#fff;padding:13px 16px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}'+
+   '.q350mh b{font:900 14px inherit}.q350mh span{font:700 11px inherit;opacity:.6}'+
+   '.q350mb{padding:14px;max-height:70vh;overflow:auto}'+
+   '.q350grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:9px;margin-bottom:12px}'+
+   '.q350f{display:block}.q350f i{display:block;font:800 10px inherit;color:#6E7683;font-style:normal;margin-bottom:4px}'+
+   '.q350f input,.q350f select,.q350f textarea{width:100%;border:1px solid #E4E0D6;border-radius:9px;padding:8px 10px;font:700 12px inherit;box-sizing:border-box;outline:0;background:#fff}'+
+   '.q350f.w{display:block;margin-top:10px}'+
+   '.q350sh{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:4px 0 8px}'+
+   '.q350sh b{font:900 12.5px inherit}.q350sh span{font:800 10.5px inherit;color:#8E1015;background:#FDF2F2;border-radius:999px;padding:3px 9px}'+
+   '.q350tw{border:1px solid #EDE7DA;border-radius:11px;overflow:auto;max-height:340px}'+
+   '.q350t{width:100%;border-collapse:collapse;font:700 11.5px inherit}'+
+   '.q350t th{position:sticky;top:0;background:#F7F5F0;color:#5B6472;font:900 10px inherit;padding:7px 8px;text-align:start;border-bottom:1px solid #E4E0D6;white-space:nowrap}'+
+   '.q350t td{padding:4px 8px;border-bottom:1px solid #F4F1EA}'+
+   '.q350t td.c,.q350t th.c{width:34px;text-align:center}'+
+   '.q350t s{text-decoration:none;font:800 9.5px inherit;color:#9AA0AA}'+
+   '.q350t input[type=number]{width:64px;border:1px solid #E4E0D6;border-radius:7px;padding:4px 6px;font:800 11px inherit;text-align:center}'+
+   '.q350t input[type=checkbox]{width:16px;height:16px;accent-color:#8E1015}'+
+   '.q350t select{border:1px solid #E4E0D6;border-radius:7px;padding:3px 5px;font:800 10.5px inherit;max-width:130px}'+
+   '.q350mf{padding:11px 14px;border-top:1px solid #EDE7DA;display:flex;gap:9px;align-items:center;flex-wrap:wrap;background:#FBFAF7}'+
+   '.q350msg{font:800 11px inherit;color:#B5121B}';
+
+  function mount(){
+    if(!$("q350css")){ var st=document.createElement("style"); st.id="q350css"; st.textContent=CSS; document.head.appendChild(st); }
+    try{ if(window.STR&&STR.ar){ STR.ar.nav_fixtures="تقارير المباريات"; STR.ar.sub_fixtures="مشاركات اللاعبين · الدقائق · الإصابات · النتيجة"; } }catch(e){}
+    try{ if(window.STR&&STR.en){ STR.en.nav_fixtures="Match reports"; STR.en.sub_fixtures="Appearances · minutes · injuries · result"; } }catch(e){}
+  }
+  function hook(){
+    mount();
+    if(typeof window.REND==="object"||typeof REND!=="undefined"){
+      try{ REND.fixtures=render; REND.matches=render; }catch(e){}
+    }
+    var el=$("v-fixtures");
+    if(el&&el.getAttribute("data-q350watch")!=="1"){
+      el.setAttribute("data-q350watch","1");
+      new MutationObserver(function(){
+        var wrap=el.querySelector(".q350w");
+        if(!wrap){ if(el.innerHTML.trim()) render(); return; }
+        Array.prototype.slice.call(el.children).forEach(function(c){ if(c!==wrap) c.remove(); });
+      }).observe(el,{childList:true});
+    }
+  }
+  try{ if(typeof REND==="object"){ REND.fixtures=render; REND.matches=render; } }catch(e){}
+  mount();
+  var tries=0, iv=setInterval(function(){ tries++; hook(); if(tries>40) clearInterval(iv); },250);
+  setTimeout(hook,1200); setTimeout(hook,3000);
+  document.addEventListener("click",function(e){
+    var t=e.target;
+    if(t&&t.closest&&t.closest('[data-view="fixtures"]')){ setTimeout(render,60); }
+  },true);
+  window.QD350={render:render,editor:editor};
+})();
+</script>
+
+
+<script>
+/* QD351 · NAV-FIX v11-351 — تسمية «تصعيد اللاعبين» في القائمة + تثبيت فتح «المستخدمون» */
+(function(){
+  function fix(){
+    var b=document.querySelector('#nav [data-view="promotion"]');
+    if(b){ var s=b.querySelector("span:not(.cnt)"); if(s&&s.textContent.trim()!=="تصعيد اللاعبين") s.textContent="تصعيد اللاعبين"; }
+    var a=document.querySelector('#nav [data-view="access"]');
+    if(a){ var t=a.querySelector("span:not(.cnt)"); if(t&&/Users|الصلاحيات/.test(t.textContent)) t.textContent="المستخدمون"; }
+    var f=document.querySelector('#nav [data-view="fixtures"]');
+    if(f){ var u=f.querySelector("span:not(.cnt)"); if(u&&u.textContent.trim()!=="تقارير المباريات") u.textContent="تقارير المباريات"; }
+  }
+  function watch(){
+    var n=document.getElementById("nav"); if(!n||n.__q351) return;
+    n.__q351=1; new MutationObserver(function(){ setTimeout(fix,10); }).observe(n,{childList:true,subtree:true});
+  }
+  try{ if(window.STR&&STR.ar){ STR.ar.nav_promotion="تصعيد اللاعبين"; STR.ar.sub_promotion="تصعيد اللاعبين بين الفئات السنية"; } }catch(e){}
+  setInterval(function(){ watch(); fix(); },700); setTimeout(fix,300);
 })();
 </script>
 
