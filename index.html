@@ -35139,7 +35139,7 @@ tr:hover .qde-ndate{color:#7E0E14}
 
   function badge(){
     try{ var b=document.getElementById("qdrBadge"); if(!b) return;
-      var w="v11-335 · LINK-LITE";
+      var w="v11-337 · NET-SCAN";
       if(b.textContent!==w+" · BTN-OK") b.textContent=w+" · BTN-OK"; }catch(e){}
   }
 
@@ -47846,17 +47846,17 @@ tr:hover .qde-ndate{color:#7E0E14}
   function shrink(ph,cb){
     if(!ph) return cb("");
     if(!/^data:image/i.test(ph)) return cb(ph);
-    if(ph.length<=2600) return cb(ph);
+    if(ph.length<=1600) return cb(ph);
     try{
       var img=new Image();
       img.onload=function(){
         try{
-          var s=Math.min(1,96/Math.max(img.width||96,img.height||96));
+          var s=Math.min(1,72/Math.max(img.width||72,img.height||72));
           var cv=document.createElement("canvas");
           cv.width=Math.max(1,Math.round((img.width||96)*s));
           cv.height=Math.max(1,Math.round((img.height||96)*s));
           cv.getContext("2d").drawImage(img,0,0,cv.width,cv.height);
-          cb(cv.toDataURL("image/jpeg",0.55));
+          cb(cv.toDataURL("image/jpeg",0.45));
         }catch(e){ cb(""); }
       };
       img.onerror=function(){ cb(""); };
@@ -47929,6 +47929,7 @@ tr:hover .qde-ndate{color:#7E0E14}
         '<div style="display:flex;gap:7px;margin-top:7px;flex-wrap:wrap">'+
           '<button id="q321sav" style="flex:1;border:0;border-radius:9px;padding:9px 12px;background:#4338CA;color:#fff;font:900 11.5px inherit;cursor:pointer">حفظ المشروع</button>'+
           '<button id="q321test" style="flex:1;border:0;border-radius:9px;padding:9px 12px;background:#0F766E;color:#fff;font:900 11.5px inherit;cursor:pointer">اختبار الاتصال</button>'+
+          '<button id="q321raw" style="border:1px solid #C7D2FE;border-radius:9px;padding:9px 12px;background:#fff;color:#3730A3;font:900 11px inherit;cursor:pointer">فتح رابط الفحص</button>'+
         '</div>'+
         '<div id="q321smsg" style="font:800 10.5px inherit;color:#3730A3;margin-top:6px;min-height:14px"></div>'+
         '<div id="q321tlog" style="display:none;margin-top:7px;background:#0C1118;color:#E5E7EB;border-radius:9px;padding:9px;font:600 10px ui-monospace,monospace;line-height:1.85;direction:rtl;text-align:right"></div>'+
@@ -47963,7 +47964,7 @@ tr:hover .qde-ndate{color:#7E0E14}
       buildCfgAsync(withPhotos,function(o){
         var base=location.href.replace(/[#?].*$/,"").replace(/index\.html$/,"")+"survey.html";
         var l=base+"#c="+encodeURIComponent("QDP1."+b64(JSON.stringify(o)));
-        if(l.length>52000 && withPhotos){
+        if(l.length>62000 && withPhotos){
           buildCfgAsync(false,function(o2){
             var l2=base+"#c="+encodeURIComponent("QDP1."+b64(JSON.stringify(o2)));
             if(ta) ta.value=l2;
@@ -47978,6 +47979,27 @@ tr:hover .qde-ndate{color:#7E0E14}
     setLink(true);
     (function(){
       var sb=$("q321sav"); if(!sb) return;
+      (function autofill(){
+        try{
+          var cur=JSON.parse(localStorage.getItem("qd321_cfg")||"null");
+          if(cur&&cur.url){ return; }
+          var src=null;
+          try{ if(typeof window.cfg==="function") src=window.cfg(); }catch(e){}
+          if(!src||!src.url){
+            var m=JSON.parse(localStorage.getItem("qd_cfg")||"null");
+            if(m&&m.url) src=m;
+          }
+          if(!src||!src.url){
+            var raw=localStorage.getItem("qd_cfg_v10")||localStorage.getItem("qdcfg")||"";
+            try{ var j=JSON.parse(raw); if(j&&j.url) src=j; }catch(e){}
+          }
+          if(src&&src.url){
+            $("q321url").value=src.url;
+            if(src.key) $("q321key").value=src.key;
+            $("q321smsg").textContent="عُبّئ المشروع تلقائيًا من إعدادات البرنامج — راجع القيم ثم اضغط «حفظ المشروع».";
+          }
+        }catch(e){}
+      })();
       sb.onclick=function(){
         var u=String(($("q321url")||{}).value||"").trim(), k=String(($("q321key")||{}).value||"").trim();
         if(!/\.supabase\.co/.test(u)||k.length<20){ $("q321smsg").textContent="أدخل رابط المشروع والمفتاح كاملًا."; return; }
@@ -47987,6 +48009,12 @@ tr:hover .qde-ndate{color:#7E0E14}
         setLink(true);
       };
       var tb=$("q321test"); if(tb) tb.onclick=function(){ runTest(); };
+      var rb=$("q321raw"); if(rb) rb.onclick=function(){
+        var u=String(($("q321url")||{}).value||"").trim().replace(/\/$/,"");
+        var k=String(($("q321key")||{}).value||"").trim();
+        if(!u) return;
+        window.open(u+"/rest/v1/wellness?select=id&limit=1&apikey="+encodeURIComponent(k),"qdraw","noopener");
+      };
     })();
 
     function logLine(t,cls){
@@ -47994,6 +48022,34 @@ tr:hover .qde-ndate{color:#7E0E14}
       box.style.display="block";
       var c=cls==="ok"?"#34C759":(cls==="bad"?"#FF6B6B":(cls==="warn"?"#FFC400":"#E5E7EB"));
       box.innerHTML+='<div style="color:'+c+'">'+t+'</div>';
+    }
+    function netScan(u){
+      logLine("تشخيص الشبكة…","");
+      logLine("   المتصفح متصل: "+(navigator.onLine?"نعم":"لا — الجهاز بلا إنترنت"),navigator.onLine?"ok":"bad");
+      logLine("   فتح رابط الفحص في تبويب: "+u+"/rest/v1/wellness?select=id","");
+      var done=false;
+      var health=u+"/auth/v1/health";
+      var to=setTimeout(function(){ if(!done){ done=true; finish("timeout"); } },6000);
+      fetch(health,{cache:"no-store"}).then(function(r){ return r.text().then(function(t){ return {st:r.status,txt:String(t).slice(0,160)}; }); })
+        .catch(function(e){ return {err:String(e&&e.message||e)}; })
+        .then(function(o){
+          if(done) return; done=true; clearTimeout(to);
+          if(o&&o.st===200){ logLine("   خدمة المصادقة تستجيب ✓ — المشروع غير موقوف","ok"); finish("reach"); }
+          else if(o&&o.err){ logLine("   ✕ لا وصول إلى نطاق المشروع: "+o.err,"bad"); finish("blocked"); }
+          else { logLine("   استجابة غير معتادة من المشروع: "+(o&&o.st)+" · "+((o&&o.txt)||""),"warn"); finish("odd"); }
+        });
+      function finish(kind){
+        if(kind==="blocked"||kind==="timeout"){
+          logLine("الاحتمالات بالترتيب:","");
+          logLine("   ١ المشروع موقوف (Paused) في Supabase — افتح لوحة Supabase: إن ظهر شريط «Paused» اضغط Restore.","bad");
+          logLine("   ٢ مانع إعلانات/حماية شبكة يحجب *.supabase.co — جرّب متصفحًا آخر أو شبكة أخرى.","");
+          logLine("   ٣ سياسة CSP للموقع تمنع الاتصال الخارجي (نادر مع استضافة عادية).","");
+          logLine("   ٤ اكتب «/rest/v1/wellness?select=id» بعد رابط المشروع في تبويب جديد واقرأ رسالة الخطأ الخام.","");
+        } else if(kind==="odd"){
+          logLine("   المشروع يستجيب لكن REST يرفض — الأرجح جدول غير موجود أو مشروع موقوف جزئيًا.","warn");
+          logLine("   افتح: "+u+"/rest/v1/wellness?select=id&apikey=YOUR_KEY في تبويب جديد.","");
+        }
+      }
     }
     function runTest(){
       var u=String(($("q321url")||{}).value||"").trim().replace(/\/$/,"");
@@ -48017,7 +48073,7 @@ tr:hover .qde-ndate{color:#7E0E14}
         return r.text().then(function(t){ logLine("   "+String(t).slice(0,160),"warn"); });
       }).catch(function(err){
         logLine("✕ فشل الوصول إلى الخادم: "+String(err&&err.message||err),"bad");
-        logLine("   تحقق من الرابط أو من حجب الشبكة/مانع الإعلانات.","");
+        netScan(u);
       }).then(function(st){
         if(st===null) return null;
         logLine("٤ فحص الإدراج (سجل اختبار سيُحذف فورًا)…","");
