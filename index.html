@@ -35139,7 +35139,7 @@ tr:hover .qde-ndate{color:#7E0E14}
 
   function badge(){
     try{ var b=document.getElementById("qdrBadge"); if(!b) return;
-      var w="v11-313 · SAVE-SAFE";
+      var w="v11-314 · SAVE-FIX";
       if(b.textContent!==w+" · BTN-OK") b.textContent=w+" · BTN-OK"; }catch(e){}
   }
 
@@ -47062,8 +47062,19 @@ tr:hover .qde-ndate{color:#7E0E14}
   function persist(){ try{ if(window.__QDAPP&&window.__QDAPP.save){ window.__QDAPP.save(); return; } }catch(e){}
     try{ if(typeof window.save==="function") window.save(); }catch(e){} }
   function toast(m,k){ try{ if(typeof window.toast==="function") window.toast(m,k); }catch(e){} }
-  function closeM(){ try{ if(typeof window.closeModal==="function"){ window.closeModal(); return; } }catch(e){}
-    var mc=document.getElementById("modalCard"); if(mc){ mc.style.display="none"; } }
+  function closeM(){
+    try{ if(typeof window.closeModal==="function") window.closeModal(); }catch(e){}
+    try{
+      var m=document.getElementById("modalCard");
+      if(m){ m.classList.remove("open","show","on"); m.style.display="none"; m.style.visibility="hidden"; }
+      Array.prototype.forEach.call(document.querySelectorAll(".modal-overlay,.modal-backdrop,.overlay,.modal"),function(o){
+        if(o.id==="modalCard") return;
+        try{ o.classList.remove("open","show","on"); o.style.display="none"; }catch(e){}
+      });
+      document.body.classList.remove("modal-open"); document.documentElement.classList.remove("modal-open");
+      document.body.style.overflow="";
+    }catch(e){}
+  }
   function refresh(){ try{ var v=window.current||"injuries"; if(typeof window.showView==="function") window.showView(v); }catch(e){} }
 
   function setDeep(obj,key,val){
@@ -47084,43 +47095,70 @@ tr:hover .qde-ndate{color:#7E0E14}
     });
     return v;
   }
+  var MAP={playerId:["playerId"],date:["date"],type:["type"],typeOther:["typeOther"],cause:["cause"],
+    mechanism:["mechanism"],mechNotes:["mechNotes"],bodySites:["bodySites"],
+    diagnosis:["exam","diagnosis"],causeGuess:["exam","causeGuess"],comments:["exam","comments"],
+    c_from:["contact","fromContact"],c_object:["contact","object"],c_player:["contact","player"],c_notes:["contact","notes"],
+    r_yes:["recurrence","recurrent"],r_date:["recurrence","dateReturn"],
+    f_who:["football","withWho"],f_ctx:["football","context"],f_surf:["football","surface"],f_min:["football","minutes"],f_notes:["football","notes"],
+    s_type:["sanction","type"],s_off:["sanction","offender"],s_own:["sanction","own"],s_opp:["sanction","opp"],
+    ability:["signoff","ability"],
+    rp_exp:["plan","expDays"],rp_physio:["plan","physioStart"],rp_med:["plan","medStart"],rp_rtp:["plan","rtpDate"],
+    rp_group:["plan","groupDate"],rp_healed:["plan","healedDate"],rp_rehab:["plan","rehabSpec"],rp_fit:["plan","fitSpec"],
+    rp_fitdate:["plan","fitnessStart"],rp_team:["plan","teamDate"],
+    surg:["plan","surgery"],sdate:["plan","surgDate"],sdisch:["plan","surgDischarge"],surgnotes:["plan","surgNotes"],
+    imgdone:["plan","imgDone"],imgtype:["plan","imgType"],imgdate:["plan","imgDate"],imgnotes:["plan","imgNotes"],
+    stage_now:["plan","stageNow"]};
+  var STGKEY={st_rp_ph_assess:"rp_ph_assess",st_rp_ph_imaging:"rp_ph_imaging",st_rp_ph_surgery:"rp_ph_surgery",
+    st_rp_ph_physio:"rp_ph_physio",st_rp_ph_medrehab:"rp_ph_medrehab",st_rp_ph_motor:"rp_ph_motor",
+    st_rp_ph_team:"rp_ph_team",st_rp_ph_rtp:"rp_ph_rtp",st_rp_ph_healed:"rp_ph_healed",
+    st_rp_ph_preop:"rp_ph_preop",st_rp_ph_preop_physio:"rp_ph_preop_physio",st_rp_ph_postop_physio:"rp_ph_postop_physio"};
+  function valOf(el){
+    if(!el) return undefined;
+    if(el.classList.contains("opts")||el.classList.contains("pain-grid")||el.classList.contains("bodymap")) return el.getAttribute("data-val")||"";
+    if(el.tagName==="INPUT"&&el.type==="checkbox") return el.checked?"YES":"NO";
+    return el.value;
+  }
+  function uniq(a){ var o=[]; String(a||"").split(/[,،]/).map(function(x){ return x.trim(); }).forEach(function(x){ if(x&&o.indexOf(x)<0) o.push(x); }); return o.join(","); }
+  function statusOf(a){ var v=String(a||"").toUpperCase();
+    if(v==="YES"||v==="FULL") return "full"; if(v==="PARTIAL") return "partial";
+    if(v==="NO") return "unable"; if(v==="ILL"||v==="ILLNESS") return "illness"; return null; }
   function saveEdit(root,id){
-    if(window.__qd313) return false;   /* QD313 يحل مكانه */
     var s=S(); if(!s) return false;
     var rec=(s.injuries||[]).filter(function(x){ return String(x.id)===String(id); })[0];
     if(!rec){ toast("لم يُعثر على سجل الإصابة","bad"); return false; }
     ["contact","recurrence","football","sanction","exam","signoff","plan"].forEach(function(k){
-      if(!rec[k]||typeof rec[k]!=="object") rec[k]={}; });
-    var v=collectAll(root), n=0;
-    Object.keys(v).forEach(function(k){
-      if(k.indexOf("__")===0||k==="__id"||k==="__tid") return;
-      var val=v[k];
-      if(k==="bodySites"){ val=String(val||"").split(",").map(function(x){return x.trim();}).filter(Boolean); val=val.filter(function(x,i,a){ return a.indexOf(x)===i; }).join(","); }
-      if(rec[k]!==undefined){ rec[k]=val; n++; return; }
-      if(setDeep(rec,k,val)) n++;
+      if(!rec[k]||typeof rec[k]!=="object"||Array.isArray(rec[k])) rec[k]={}; });
+    var n=0, log=(rec.plan.stageLog&&Array.isArray(rec.plan.stageLog))?rec.plan.stageLog:[];
+    Object.keys(MAP).forEach(function(f){
+      var el=root.querySelector('[data-f="'+f+'"]'); if(!el) return;
+      var v=valOf(el); if(v===undefined||v===null) return;
+      if(f==="bodySites") v=uniq(v);
+      var path=MAP[f];
+      if(path.length===1){ if(rec[path[0]]!==v){ rec[path[0]]=v; n++; } }
+      else { if(rec[path[0]][path[1]]!==v){ rec[path[0]][path[1]]=v; n++; } }
     });
-    /* ربط الحقول المتداخلة المعروفة (كما يقرأها التقرير) */
-    var MAP={diagnosis:["exam","diagnosis"],causeGuess:["exam","causeGuess"],comments:["exam","comments"],
-             fromContact:["contact","fromContact"],object:["contact","object"],player:["contact","player"],c_notes:["contact","notes"],
-             recurrent:["recurrence","recurrent"],dateReturn:["recurrence","dateReturn"],
-             withWho:["football","withWho"],context:["football","context"],surface:["football","surface"],minutes:["football","minutes"],f_notes:["football","notes"],
-             s_type:["sanction","type"],s_off:["sanction","offender"],s_own:["sanction","own"],s_opp:["sanction","opp"],
-             ability:["signoff","ability"],expDays:["plan","expDays"],physioStart:["plan","physioStart"],medStart:["plan","medStart"],
-             rtpDate:["plan","rtpDate"],groupDate:["plan","groupDate"],healedDate:["plan","healedDate"],surgery:["plan","surgery"],surgDate:["plan","surgDate"],
-             stageNow:["plan","stageNow"],exp_days:["plan","expDays"]};
-    Object.keys(MAP).forEach(function(k){
-      if(v[k]===undefined) return;
-      var path=MAP[k]; rec[path[0]]=rec[path[0]]||{}; rec[path[0]][path[1]]=v[k]; n++;
+    Object.keys(STGKEY).forEach(function(f){
+      var el=root.querySelector('[data-f="'+f+'"]'); if(!el) return;
+      var d=String(valOf(el)||"").slice(0,10); if(!d) return;
+      var k=STGKEY[f], found=false;
+      log.forEach(function(e){ if(e&&e.k===k){ if(!e.date) e.date=d; found=true; } });
+      if(!found) log.push({k:k,date:d});
+      n++;
     });
-    if(v.__id) rec.id=id;
+    if(log.length){ rec.plan.stageLog=log.sort(function(a,b){ return String(a.date||"").localeCompare(String(b.date||"")); });
+      var last=rec.plan.stageLog[rec.plan.stageLog.length-1];
+      if(last&&last.k&&!rec.plan.stageNow) rec.plan.stageNow=last.k; }
+    var ab=root.querySelector('[data-f="ability"]'); var st=ab?statusOf(ab.getAttribute("data-val")):null;
+    if(st) rec.status=st;
+    if(rec.status==="cleared") rec.plan.healedDate=rec.plan.healedDate||String(rec.date||"").slice(0,10);
     rec.edited=new Date().toISOString();
-    try{
-      var pl=(s.players||[]).filter(function(p){ return String(p.id)===String(rec.playerId); })[0];
-      if(pl){ var st=String(rec.status||""); pl.status=(st==="cleared"?"سليم":"مصاب"); }
-    }catch(e){}
+    try{ var pl=(s.players||[]).filter(function(x){ return String(x.id)===String(rec.playerId); })[0];
+      if(pl) pl.status=(rec.status==="cleared"?"سليم":"مصاب"); }catch(e){}
     persist();
     try{ if(window.QD304&&window.QD304.sweep) window.QD304.sweep(); }catch(e){}
-    closeM(); refresh();
+    closeM();
+    refresh();
     toast("تم حفظ التعديل ("+n+" حقلًا)","ok");
     return true;
   }
@@ -47130,7 +47168,6 @@ tr:hover .qde-ndate{color:#7E0E14}
   document.addEventListener("click",function(e){
     var t=e.target&&e.target.closest?e.target.closest('[data-act="saveInjury"]'):null;
     if(!t) return;
-    if(window.__qd313) return;                          /* QD313 يتولى الحفظ */
     var root=document.getElementById("modalCard"); if(!root) return;
     var hid=root.querySelector('[data-f="__id"]');
     var id=hid&&hid.value; if(!id) return;              /* إصابة جديدة: نترك المعالج الأصلي */
@@ -47141,183 +47178,7 @@ tr:hover .qde-ndate{color:#7E0E14}
 })();
 </script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
-<script>
-/*!
- * QD312 · NO-QUICK — حذف زر «التحديث السريع» (⚡) فقط
- *  يبقى زر التعديل الواحد (يفتح نموذج الإصابة الأصلي)، ويُزال زر ⚡ من صفوف السجل
- *  ومن داخل ملف الإصابة. لا يمسّ أي وظيفة أخرى.
- */
-(function(){
-  if(window.__qd312) return; window.__qd312=1;
-  var KILL='[data-quick],.qd308b:not(.main),.qd306b,[data-qd306]';
-  function isQuick(el){
-    if(!el) return false;
-    if(el.hasAttribute&&el.hasAttribute("data-quick")) return true;
-    var t=(el.textContent||"");
-    if(t.indexOf("\u26A1")>-1) return true;
-    if(el.classList&&(el.classList.contains("qd306b")||el.classList.contains("qd308b"))) return !el.classList.contains("main");
-    return false;
-  }
-  function sweep(){
-    try{
-      Array.prototype.forEach.call(document.querySelectorAll(KILL),function(el){ if(el&&!el.classList.contains("main")) el.remove(); });
-      /* أي زر يحمل كلمة «تحديث الحالة» داخل النافذة أو الصفوف */
-      Array.prototype.forEach.call(document.querySelectorAll('button'),function(el){
-        var t=(el.textContent||"").trim();
-        if(t.indexOf("\u26A1")>-1 || /تحديث الحالة/.test(t)) el.remove();
-      });
-    }catch(e){}
-  }
-  var CSS='.qd308b[data-quick],.qd306b,[data-quick]{display:none !important}';
-  try{ var st=document.createElement("style"); st.id="qd312css"; st.textContent=CSS; document.head.appendChild(st); }catch(e){}
-  sweep();
-  setInterval(sweep,700);
-  try{ new MutationObserver(function(){ clearTimeout(window.__qd312t); window.__qd312t=setTimeout(sweep,120); })
-        .observe(document.body,{childList:true,subtree:true}); }catch(e){}
-  window.QD312={sweep:sweep};
-})();
-</script>
-<script>
-/*!
- * QD313 · SAVE-SAFE — حفظ تعديل الإصابة بحقول معروفة فقط (بلا تلويث السجل)
- *  يستبدل الجسر السابق: لا يكتب أي حقل مجهول في السجل، يحدّث المسارات المعروفة فقط،
- *  ينظّف المفاتيح الدخيلة التي خلّفها الجسر القديم، ويُعيد رسم الشاشة بأمان.
- */
-(function(){
-  if(window.__qd313) return; window.__qd313=1;
-  function S(){ try{ var a=window.__QDAPP; if(a&&a.S) return a.S; }catch(e){} return null; }
-  function persist(){ try{ if(window.__QDAPP&&window.__QDAPP.save){ window.__QDAPP.save(); return; } }catch(e){}
-    try{ if(typeof window.save==="function") window.save(); }catch(e){} }
-  function toast(m,k){ try{ if(typeof window.toast==="function") window.toast(m,k); }catch(e){} }
-  function closeM(){
-    try{ if(typeof window.closeModal==="function") window.closeModal(); }catch(e){}
-    try{
-      ["modalCard"].forEach(function(id){ var m=document.getElementById(id); if(m){ m.classList.remove("open","show"); m.style.display="none"; } });
-      Array.prototype.forEach.call(document.querySelectorAll(".modal-overlay,.modal-backdrop,.overlay,[data-modal]"),function(o){
-        if(o.contains(document.getElementById("modalCard"))||o.classList.contains("modal-overlay")){ o.style.display="none"; }
-      });
-      document.documentElement.classList.remove("modal-open"); document.body.classList.remove("modal-open");
-      document.body.style.overflow="";
-    }catch(e){}
-  }
-  function safeRender(){
-    var views=["injuries"];
-    try{ if(typeof window.renderNav==="function") window.renderNav(); }catch(e){}
-    for(var i=0;i<views.length;i++){
-      try{ if(typeof window.showView==="function"){ window.showView(views[i]); return true; } }catch(e){}
-      try{ if(window.QD221&&typeof window.QD221.render==="function"){ window.QD221.render(); return true; } }catch(e){}
-    }
-    return false;
-  }
-  var KNOWN=["id","playerId","date","type","typeOther","bodySites","cause","mechanism","mechNotes",
-    "contact","recurrence","football","sanction","exam","signoff","plan","status","treatments",
-    "history","created","edited","returnDate","pain","structures","severity","acute"];
-  var MAP={
-    playerId:["playerId"], date:["date"], type:["type"], typeOther:["typeOther"], cause:["cause"],
-    mechanism:["mechanism"], mechNotes:["mechNotes"], bodySites:["bodySites"],
-    diagnosis:["exam","diagnosis"], causeGuess:["exam","causeGuess"], comments:["exam","comments"],
-    c_from:["contact","fromContact"], c_object:["contact","object"], c_player:["contact","player"], c_notes:["contact","notes"],
-    r_yes:["recurrence","recurrent"], r_date:["recurrence","dateReturn"],
-    f_who:["football","withWho"], f_ctx:["football","context"], f_surf:["football","surface"], f_min:["football","minutes"], f_notes:["football","notes"],
-    s_type:["sanction","type"], s_off:["sanction","offender"], s_own:["sanction","own"], s_opp:["sanction","opp"],
-    ability:["signoff","ability"],
-    rp_exp:["plan","expDays"], rp_physio:["plan","physioStart"], rp_med:["plan","medStart"], rp_rtp:["plan","rtpDate"],
-    rp_group:["plan","groupDate"], rp_healed:["plan","healedDate"], rp_rehab:["plan","rehabSpec"], rp_fit:["plan","fitSpec"],
-    rp_fitdate:["plan","fitnessStart"], rp_team:["plan","teamDate"],
-    surg:["plan","surgery"], sdate:["plan","surgDate"], sdisch:["plan","surgDischarge"], surgnotes:["plan","surgNotes"],
-    imgdone:["plan","imgDone"], imgtype:["plan","imgType"], imgdate:["plan","imgDate"], imgnotes:["plan","imgNotes"],
-    stage_now:["plan","stageNow"], stage_date:["plan","stageDate"],
-    st_rp_ph_assess:["plan","stageLogEntry"], st_rp_ph_imaging:["plan","stageLogEntry"], st_rp_ph_physio:["plan","stageLogEntry"],
-    st_rp_ph_medrehab:["plan","stageLogEntry"], st_rp_ph_motor:["plan","stageLogEntry"], st_rp_ph_team:["plan","stageLogEntry"],
-    st_rp_ph_rtp:["plan","stageLogEntry"], st_rp_ph_healed:["plan","stageLogEntry"], st_rp_ph_surgery:["plan","stageLogEntry"],
-    st_rp_ph_preop:["plan","stageLogEntry"], st_rp_ph_preop_physio:["plan","stageLogEntry"], st_rp_ph_postop_physio:["plan","stageLogEntry"]
-  };
-  var STGKEY={st_rp_ph_assess:"rp_ph_assess",st_rp_ph_imaging:"rp_ph_imaging",st_rp_ph_surgery:"rp_ph_surgery",
-    st_rp_ph_physio:"rp_ph_physio",st_rp_ph_medrehab:"rp_ph_medrehab",st_rp_ph_motor:"rp_ph_motor",
-    st_rp_ph_team:"rp_ph_team",st_rp_ph_rtp:"rp_ph_rtp",st_rp_ph_healed:"rp_ph_healed",
-    st_rp_ph_preop:"rp_ph_preop",st_rp_ph_preop_physio:"rp_ph_preop_physio",st_rp_ph_postop_physio:"rp_ph_postop_physio"};
-  function val(el){
-    if(!el) return undefined;
-    if(el.classList.contains("opts")||el.classList.contains("pain-grid")||el.classList.contains("bodymap")) return el.getAttribute("data-val")||"";
-    if(el.tagName==="INPUT"&&el.type==="checkbox") return el.checked?"YES":"NO";
-    return el.value;
-  }
-  function uniqSites(v){
-    var a=String(v||"").split(/[,،]/).map(function(x){ return x.trim(); }).filter(Boolean);
-    var out=[]; a.forEach(function(x){ if(out.indexOf(x)<0) out.push(x); });
-    return out.join(",");
-  }
-  function abilityStatus(a){
-    var s=String(a||"").toUpperCase();
-    if(s==="YES"||s==="FULL") return "full";
-    if(s==="PARTIAL") return "partial";
-    if(s==="NO") return "unable";
-    if(s==="ILL"||s==="ILLNESS") return "illness";
-    return null;
-  }
-  function save(root,id){
-    var s=S(); if(!s) return false;
-    var rec=(s.injuries||[]).filter(function(x){ return String(x.id)===String(id); })[0];
-    if(!rec){ toast("لم يُعثر على سجل الإصابة","bad"); return false; }
-    ["contact","recurrence","football","sanction","exam","signoff","plan"].forEach(function(k){
-      if(!rec[k]||typeof rec[k]!=="object"||Array.isArray(rec[k])) rec[k]={}; });
-    var n=0, stageLog=(rec.plan.stageLog&&Array.isArray(rec.plan.stageLog))?rec.plan.stageLog:[];
-    Object.keys(MAP).forEach(function(f){
-      var el=root.querySelector('[data-f="'+f+'"]'); if(!el) return;
-      var v=val(el); if(v===undefined||v===null) return;
-      if(f==="bodySites") v=uniqSites(v);
-      var path=MAP[f];
-      if(path[1]==="stageLogEntry"){
-        var d=String(v||"").slice(0,10); if(!d) return;
-        var k=STGKEY[f]; if(!k) return;
-        var found=false; stageLog.forEach(function(e){ if(e&&e.k===k){ if(!e.date) e.date=d; found=true; } });
-        if(!found) stageLog.push({k:k,date:d});
-        n++; return;
-      }
-      if(path.length===1){ if(rec[path[0]]!==v){ rec[path[0]]=v; n++; } }
-      else { if(rec[path[0]][path[1]]!==v){ rec[path[0]][path[1]]=v; n++; } }
-    });
-    if(stageLog.length){ rec.plan.stageLog=stageLog.sort(function(a,b){ return String(a.date||"").localeCompare(String(b.date||"")); });
-      var last=rec.plan.stageLog[rec.plan.stageLog.length-1];
-      if(last&&last.k&&!rec.plan.stageNow){ rec.plan.stageNow=last.k; }
-    }
-    var ab=root.querySelector('[data-f="ability"]'); var st=ab?abilityStatus(ab.getAttribute("data-val")):null;
-    if(st) rec.status=st;
-    if(rec.status==="cleared"){ rec.plan.healedDate=rec.plan.healedDate||String(rec.date||"").slice(0,10); }
-    /* تنظيف المفاتيح الدخيلة التي خلّفها الجسر القديم */
-    Object.keys(rec).forEach(function(k){
-      if(KNOWN.indexOf(k)>-1) return;
-      if(/^(st_rp_|rp_|c_|r_|f_|s_|img|surg|diagnosis|causeGuess|comments|expDays|physioStart|medStart|rtpDate|groupDate|healedDate|stage_now|ability$|typeOther$)/.test(k)) delete rec[k];
-    });
-    rec.edited=new Date().toISOString();
-    try{ var pl=(s.players||[]).filter(function(x){ return String(x.id)===String(rec.playerId); })[0];
-      if(pl) pl.status=(rec.status==="cleared"?"سليم":"مصاب"); }catch(e){}
-    try{ persist(); }catch(e){}
-    try{ if(window.QD304&&window.QD304.sweep) window.QD304.sweep(); }catch(e){}
-    closeM();
-    try{ safeRender(); }catch(e){}
-    toast("تم حفظ التعديل ("+n+" حقلًا)","ok");
-    return true;
-  }
-  window.QD313={save:save};
-
-  /* اعتراض الحفظ في وضع التعديل فقط — بأمان، وبلا مساس بوضع «إصابة جديدة» */
-  document.addEventListener("click",function(e){
-    var t=e.target&&e.target.closest?e.target.closest('[data-act="saveInjury"]'):null;
-    if(!t) return;
-    var root=document.getElementById("modalCard"); if(!root) return;
-    var hid=root.querySelector('[data-f="__id"]'); var id=hid&&hid.value;
-    if(!id) return;
-    if(!root.querySelector('[data-f="playerId"]')) return;
-    e.preventDefault(); e.stopPropagation(); e.stopImmediatePropagation();
-    try{ save(root,id); }
-    catch(err){ try{ toast("تعذّر الحفظ: "+String(err).slice(0,60),"bad"); }catch(x){} }
-  },true);
-
-  /* تعطيل الجسر القديم QD310 حتى لا يكتب حقولًا مجهولة */
-  try{ if(window.QD310){ window.QD310.saveEdit=function(){ return false; }; } }catch(e){}
-})();
-</script>
+<style id="qd314css">.qd308b[data-quick],[data-quick],.qd306b{display:none !important}</style>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 </body>
 </html>
