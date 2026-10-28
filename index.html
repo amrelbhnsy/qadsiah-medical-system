@@ -35139,7 +35139,7 @@ tr:hover .qde-ndate{color:#7E0E14}
 
   function badge(){
     try{ var b=document.getElementById("qdrBadge"); if(!b) return;
-      var w="v11-337 · NET-SCAN";
+      var w="v11-340 · KEYS-LINK";
       if(b.textContent!==w+" · BTN-OK") b.textContent=w+" · BTN-OK"; }catch(e){}
   }
 
@@ -47930,6 +47930,8 @@ tr:hover .qde-ndate{color:#7E0E14}
           '<button id="q321sav" style="flex:1;border:0;border-radius:9px;padding:9px 12px;background:#4338CA;color:#fff;font:900 11.5px inherit;cursor:pointer">حفظ المشروع</button>'+
           '<button id="q321test" style="flex:1;border:0;border-radius:9px;padding:9px 12px;background:#0F766E;color:#fff;font:900 11.5px inherit;cursor:pointer">اختبار الاتصال</button>'+
           '<button id="q321raw" style="border:1px solid #C7D2FE;border-radius:9px;padding:9px 12px;background:#fff;color:#3730A3;font:900 11px inherit;cursor:pointer">فتح رابط الفحص</button>'+
+          '<button id="q321own" style="border:1px solid #99F6E4;border-radius:9px;padding:9px 12px;background:#F0FDFA;color:#115E59;font:900 11px inherit;cursor:pointer">استخدام مشروع البرنامج الحالي</button>'+
+          '<button id="q321keys" style="border:1px solid #C7D2FE;border-radius:9px;padding:9px 12px;background:#EEF2FF;color:#3730A3;font:900 11px inherit;cursor:pointer">فتح مفاتيح هذا المشروع</button>'+
         '</div>'+
         '<div id="q321smsg" style="font:800 10.5px inherit;color:#3730A3;margin-top:6px;min-height:14px"></div>'+
         '<div id="q321tlog" style="display:none;margin-top:7px;background:#0C1118;color:#E5E7EB;border-radius:9px;padding:9px;font:600 10px ui-monospace,monospace;line-height:1.85;direction:rtl;text-align:right"></div>'+
@@ -48009,6 +48011,21 @@ tr:hover .qde-ndate{color:#7E0E14}
         setLink(true);
       };
       var tb=$("q321test"); if(tb) tb.onclick=function(){ runTest(); };
+      var kb=$("q321keys"); if(kb) kb.onclick=function(){
+        var r=refOf(String(($("q321url")||{}).value||"").trim());
+        if(!r){ $("q321smsg").textContent="أدخل رابط المشروع أولًا."; return; }
+        window.open("https://supabase.com/dashboard/project/"+r+"/settings/api-keys","qdkeys","noopener");
+      };
+      var ob=$("q321own"); if(ob) ob.onclick=function(){
+        var src=null;
+        try{ if(typeof window.cfg==="function") src=window.cfg(); }catch(e){}
+        if((!src||!src.url)){ try{ src=JSON.parse(localStorage.getItem("qd_cfg")||"null"); }catch(e){} }
+        if(!src||!src.url){ $("q321smsg").textContent="لم أجد إعدادات سحابية محفوظة في البرنامج."; return; }
+        $("q321url").value=src.url;
+        $("q321key").value=src.key||"";
+        $("q321ref").textContent=refOf(src.url)||"—";
+        $("q321smsg").textContent="عُبّئ مشروع البرنامج الحالي — اضغط «اختبار الاتصال» للتأكد قبل الحفظ.";
+      };
       var rb=$("q321raw"); if(rb) rb.onclick=function(){
         var u=String(($("q321url")||{}).value||"").trim().replace(/\/$/,"");
         var k=String(($("q321key")||{}).value||"").trim();
@@ -48061,14 +48078,26 @@ tr:hover .qde-ndate{color:#7E0E14}
       var isPub=/^sb_publishable_/.test(k);
       if(!isPub && k.length<40){ logLine("✕ المفتاح قصير جدًا ("+k.length+" حرفًا) — إمّا نسخت جزءًا ناقصًا، أو نسخت مفتاحًا آخر. المطلوب: sb_publishable_… أو anon public (يبدأ بـ eyJ).","bad"); return; }
       if(/^sb_secret_|^service_role|"role":"service_role"/.test(k)){ logLine("✕ هذا مفتاح سري (secret/service_role) — لا يُستخدم في المتصفح. استخدم المفتاح العام Publishable/anon.","bad"); return; }
-      logLine("٢ المفتاح: "+(isPub?"Publishable (مفتاح عام حديث)":"Legacy anon/JWT")+" · طوله "+k.length+" حرفًا ✓","ok");
+      logLine("٢ المفتاح: "+(isPub?"Publishable":"Legacy anon/JWT")+" · طوله "+k.length+" حرفًا · بصمته: "+k.slice(0,18)+"…"+k.slice(-4),"ok");
       var root=u+"/rest/v1/wellness";
       
       logLine("٣ فحص الجدول…","");
       fetch(root+"?select=id&limit=1",{headers:hdr(k)}).then(function(r){
         if(r.status===200){ logLine("   الجدول موجود وقراءته مسموحة ✓","ok"); return "read"; }
         if(r.status===404){ logLine("   ✕ الجدول غير موجود في هذا المشروع (404) — نفّذ سكربت SQL هنا، أو المرجع لا يطابق المشروع.","bad"); return null; }
-        if(r.status===401||r.status===403){ logLine("   الجدول موجود لكن القراءة ممنوعة ("+r.status+") — طبيعي: سياسة القراءة للمسجّلين فقط.","warn"); return "noread"; }
+        if(r.status===401||r.status===403){
+          return r.text().then(function(t){
+            var m=String(t||"");
+            if(/Invalid API key|invalid api key|another Supabase project/i.test(m)){
+              logLine("   ✕ المفتاح لا يخص هذا المشروع — المفتاح من مشروع، والرابط من مشروع آخر.","bad");
+              logLine("   افتح: supabase.com/dashboard/project/"+refOf(u)+"/settings/api-keys","bad");
+              logLine("   أو اضغط زر «فتح مفاتيح هذا المشروع» في الأعلى.","bad");
+              return null;
+            }
+            logLine("   الجدول موجود والقراءة ممنوعة ("+r.status+") — طبيعي: القراءة للمسجّلين فقط.","warn");
+            return "noread";
+          });
+        }
         logLine("   استجابة غير متوقعة: "+r.status,"warn");
         return r.text().then(function(t){ logLine("   "+String(t).slice(0,160),"warn"); });
       }).catch(function(err){
