@@ -35139,7 +35139,7 @@ tr:hover .qde-ndate{color:#7E0E14}
 
   function badge(){
     try{ var b=document.getElementById("qdrBadge"); if(!b) return;
-      var w="v11-330 · ASSESS-MERGE";
+      var w="v11-335 · LINK-LITE";
       if(b.textContent!==w+" · BTN-OK") b.textContent=w+" · BTN-OK"; }catch(e){}
   }
 
@@ -47821,28 +47821,61 @@ tr:hover .qde-ndate{color:#7E0E14}
   var $=function(i){ return document.getElementById(i); };
   function esc(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
   function st(){ try{ return window.__QDAPP.S; }catch(e){ return null; } }
-  function cfg(){ try{ if(window.__qdCFG) return window.__qdCFG; }catch(e){}
+  function ovr(){ try{ var o=JSON.parse(localStorage.getItem("qd321_cfg")||"null"); if(o&&o.url&&o.key) return o; }catch(e){} return null; }
+  function cfg(){ var o=ovr(); if(o) return {url:o.url,key:o.key};
+    try{ if(window.__qdCFG) return window.__qdCFG; }catch(e){}
     try{ var c=JSON.parse(localStorage.getItem("qd_cfg")||"null"); if(c&&c.url) return c; }catch(e){}
     try{ if(typeof window.cfg==="function") return window.cfg(); }catch(e){}
     return null; }
   function pname(p){ return ((p&&p.first)||"")+" "+((p&&p.last)||""); }
   function pnum(p){ return (p&&(p.num||p.no||p.shirt||p.number))||""; }
 
+    function hdr(key,extra){ var h={"apikey":key}; if(/^eyJ/.test(String(key||""))) h.Authorization="Bearer "+key; if(extra) for(var x in extra) h[x]=extra[x]; return h; }
+  function refOf(u){ var m=String(u||"").match(/\/\/([^.\/]+)\.supabase/); return m?m[1]:""; }
   function b64(str){ return btoa(unescape(encodeURIComponent(str))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,""); }
 
   function buildCfg(withPhotos){
     var S=st()||{}, c=cfg()||{};
     var players=(S.players||[]).filter(function(p){ return p && !p.deleted; }).map(function(p){
-      var ph=String(p.photo||"");
-      if(!withPhotos || ph.length>60000) ph="";
+      var ph=withPhotos?String(p.photo||""):"";
       return {id:p.id,n:pname(p).trim(),num:pnum(p),ph:ph};
     });
     return {u:c.url||"",k:c.key||"",t:"wellness",p:players};
   }
+  /* تصغير صورة اللاعب إلى مصغّرة صغيرة قبل وضعها في الرابط */
+  function shrink(ph,cb){
+    if(!ph) return cb("");
+    if(!/^data:image/i.test(ph)) return cb(ph);
+    if(ph.length<=2600) return cb(ph);
+    try{
+      var img=new Image();
+      img.onload=function(){
+        try{
+          var s=Math.min(1,96/Math.max(img.width||96,img.height||96));
+          var cv=document.createElement("canvas");
+          cv.width=Math.max(1,Math.round((img.width||96)*s));
+          cv.height=Math.max(1,Math.round((img.height||96)*s));
+          cv.getContext("2d").drawImage(img,0,0,cv.width,cv.height);
+          cb(cv.toDataURL("image/jpeg",0.55));
+        }catch(e){ cb(""); }
+      };
+      img.onerror=function(){ cb(""); };
+      img.src=ph;
+    }catch(e){ cb(""); }
+  }
   function makeLink(withPhotos){
-    var o=buildCfg(withPhotos);
-    var base=location.href.replace(/[#?].*$/,"").replace(/index\.html$/,"")+"survey.html";
+    var o=buildCfg(withPhotos), base=location.href.replace(/[#?].*$/,"").replace(/index\.html$/,"")+"survey.html";
     return base+"#c="+encodeURIComponent("QDP1."+b64(JSON.stringify(o)));
+  }
+  function buildCfgAsync(withPhotos,cb){
+    var base=buildCfg(withPhotos);
+    if(!withPhotos) return cb(base);
+    var list=base.p.slice(), out=[], i=0;
+    (function step(){
+      if(i>=list.length) { base.p=out; return cb(base); }
+      var p=list[i++];
+      shrink(p.ph,function(small){ out.push({id:p.id,n:p.n,num:p.num,ph:small||""}); step(); });
+    })();
   }
   var SQL=[
     "-- 1) جدول إجابات الجوال (مرة واحدة فقط في Supabase)",
@@ -47854,8 +47887,13 @@ tr:hover .qde-ndate{color:#7E0E14}
     "  client_ts timestamptz, source text, created_at timestamptz default now()",
     ");",
     "alter table wellness enable row level security;",
-    "create policy if not exists wellness_insert_anon on wellness for insert to anon with check (true);",
-    "create policy if not exists wellness_read_auth on wellness for select to authenticated using (true);"
+    "drop policy if exists wellness_insert_anon on wellness;",
+    "drop policy if exists wellness_read_auth on wellness;",
+    "create policy wellness_insert_anon on wellness as permissive for insert to anon with check (true);",
+    "create policy wellness_read_auth on wellness as permissive for select to authenticated using (true);",
+    "grant usage on schema public to anon;",
+    "grant insert on table wellness to anon;",
+    "grant usage, select on sequence wellness_id_seq to anon;"
   ].join("\n");
 
   function mount(){
@@ -47881,6 +47919,20 @@ tr:hover .qde-ndate{color:#7E0E14}
       '<button id="q321x" style="border:0;background:#F1F1F4;border-radius:9px;width:32px;height:32px;font-size:15px;cursor:pointer">✕</button></div>'+
       '<div style="font:700 11.5px inherit;color:'+(c&&c.url?"#0F766E":"#B5121B")+';margin-bottom:10px">'+
         (c&&c.url?("السحابة: "+esc(c.url)+" · اللاعبون: "+n):"⚠ لا يوجد اتصال سحابي مضبوط — الرابط سيُبنى بدون مصدر بيانات، والإرسال لن يعمل حتى تضبط Supabase.")+'</div>'+
+      '<div style="background:#EEF2FF;border:1px solid #C7D2FE;border-radius:12px;padding:11px;margin-bottom:10px">'+
+        '<b style="font:900 11.5px inherit">مشروع Supabase المستخدم</b>'+
+        '<div style="font:800 10.5px inherit;color:#4338CA;margin:3px 0 6px">المرجع الحالي: <span dir="ltr" id="q321ref">'+(refOf(c&&c.url)||"غير محدد")+'</span> — يجب أن يطابق المرجع في رابط لوحة Supabase عندك (بعد dashboard/project/).</div>'+
+        '<div style="display:grid;grid-template-columns:1fr;gap:6px">'+
+          '<input id="q321url" dir="ltr" placeholder="https://xxxx.supabase.co" value="'+esc((c&&c.url)||"")+'" style="font:700 11px ui-monospace,monospace;direction:ltr;text-align:left;border:1px solid #C7D2FE;border-radius:9px;padding:8px;background:#fff">'+
+          '<input id="q321key" dir="ltr" placeholder="anon key" value="'+esc((c&&c.key)||"")+'" style="font:700 11px ui-monospace,monospace;direction:ltr;text-align:left;border:1px solid #C7D2FE;border-radius:9px;padding:8px;background:#fff">'+
+        '</div>'+
+        '<div style="display:flex;gap:7px;margin-top:7px;flex-wrap:wrap">'+
+          '<button id="q321sav" style="flex:1;border:0;border-radius:9px;padding:9px 12px;background:#4338CA;color:#fff;font:900 11.5px inherit;cursor:pointer">حفظ المشروع</button>'+
+          '<button id="q321test" style="flex:1;border:0;border-radius:9px;padding:9px 12px;background:#0F766E;color:#fff;font:900 11.5px inherit;cursor:pointer">اختبار الاتصال</button>'+
+        '</div>'+
+        '<div id="q321smsg" style="font:800 10.5px inherit;color:#3730A3;margin-top:6px;min-height:14px"></div>'+
+        '<div id="q321tlog" style="display:none;margin-top:7px;background:#0C1118;color:#E5E7EB;border-radius:9px;padding:9px;font:600 10px ui-monospace,monospace;line-height:1.85;direction:rtl;text-align:right"></div>'+
+      '</div>'+
       '<div style="background:#F7F7F9;border:1px solid #E6E6EA;border-radius:12px;padding:11px;margin-bottom:10px">'+
         '<label style="font:800 11.5px inherit;display:block;margin-bottom:5px">رابط الاستبيان (يُرسل للاعب مرة واحدة)</label>'+
         '<textarea id="q321link" readonly style="width:100%;min-height:74px;font:600 10.5px ui-monospace,monospace;direction:ltr;text-align:left;border:1px solid #DCDCE2;border-radius:9px;padding:9px;background:#fff"></textarea>'+
@@ -47905,12 +47957,98 @@ tr:hover .qde-ndate{color:#7E0E14}
     h.appendChild(box);
 
     function setLink(withPhotos){
-      var l=makeLink(withPhotos);
-      $("q321link").value=l;
-      $("q321sz").textContent="طول الرابط: "+l.length+" حرف"+(l.length>7000?" — طويل جدًا لبعض التطبيقات، استخدم النسخة بدون صور":"");
-      return l;
+      var ta=$("q321link"), sz=$("q321sz");
+      if(sz) sz.textContent="جارٍ تجهيز الرابط…";
+      if(ta) ta.value="";
+      buildCfgAsync(withPhotos,function(o){
+        var base=location.href.replace(/[#?].*$/,"").replace(/index\.html$/,"")+"survey.html";
+        var l=base+"#c="+encodeURIComponent("QDP1."+b64(JSON.stringify(o)));
+        if(l.length>52000 && withPhotos){
+          buildCfgAsync(false,function(o2){
+            var l2=base+"#c="+encodeURIComponent("QDP1."+b64(JSON.stringify(o2)));
+            if(ta) ta.value=l2;
+            if(sz) sz.textContent="الرابط بالصور طويل جدًا ("+l.length+" حرفًا) — استُخدمت نسخة الأسماء فقط ("+l2.length+" حرفًا). الصور لا تزال تظهر عند اللاعب إن كان الرابط قصيرًا.";
+          });
+          return;
+        }
+        if(ta) ta.value=l;
+        if(sz) sz.textContent="طول الرابط: "+l.length+" حرفًا · لاعبون: "+o.p.length+(l.length>7000?" — طويل لبعض التطبيقات، استخدم «نسخة بدون صور»":"");
+      });
     }
     setLink(true);
+    (function(){
+      var sb=$("q321sav"); if(!sb) return;
+      sb.onclick=function(){
+        var u=String(($("q321url")||{}).value||"").trim(), k=String(($("q321key")||{}).value||"").trim();
+        if(!/\.supabase\.co/.test(u)||k.length<20){ $("q321smsg").textContent="أدخل رابط المشروع والمفتاح كاملًا."; return; }
+        try{ localStorage.setItem("qd321_cfg",JSON.stringify({url:u.replace(/\/$/,""),key:k})); }catch(e){}
+        $("q321ref").textContent=refOf(u)||"—";
+        $("q321smsg").textContent="حُفظ المشروع ✓ — الرابط أُعيد توليده بالمرجع "+(refOf(u)||"");
+        setLink(true);
+      };
+      var tb=$("q321test"); if(tb) tb.onclick=function(){ runTest(); };
+    })();
+
+    function logLine(t,cls){
+      var box=$("q321tlog"); if(!box) return;
+      box.style.display="block";
+      var c=cls==="ok"?"#34C759":(cls==="bad"?"#FF6B6B":(cls==="warn"?"#FFC400":"#E5E7EB"));
+      box.innerHTML+='<div style="color:'+c+'">'+t+'</div>';
+    }
+    function runTest(){
+      var u=String(($("q321url")||{}).value||"").trim().replace(/\/$/,"");
+      var k=String(($("q321key")||{}).value||"").trim();
+      var box=$("q321tlog"); if(box){ box.innerHTML=""; box.style.display="block"; }
+      logLine("تشخيص الاتصال — "+new Date().toLocaleTimeString("ar-SA"),"");
+      if(!/\.supabase\.co$/.test(u)){ logLine("✕ رابط المشروع غير صحيح — يجب أن ينتهي بـ .supabase.co","bad"); return; }
+      logLine("١ المرجع: "+(refOf(u)||"—"),"");
+      var isPub=/^sb_publishable_/.test(k);
+      if(!isPub && k.length<40){ logLine("✕ المفتاح قصير جدًا ("+k.length+" حرفًا) — إمّا نسخت جزءًا ناقصًا، أو نسخت مفتاحًا آخر. المطلوب: sb_publishable_… أو anon public (يبدأ بـ eyJ).","bad"); return; }
+      if(/^sb_secret_|^service_role|"role":"service_role"/.test(k)){ logLine("✕ هذا مفتاح سري (secret/service_role) — لا يُستخدم في المتصفح. استخدم المفتاح العام Publishable/anon.","bad"); return; }
+      logLine("٢ المفتاح: "+(isPub?"Publishable (مفتاح عام حديث)":"Legacy anon/JWT")+" · طوله "+k.length+" حرفًا ✓","ok");
+      var root=u+"/rest/v1/wellness";
+      
+      logLine("٣ فحص الجدول…","");
+      fetch(root+"?select=id&limit=1",{headers:hdr(k)}).then(function(r){
+        if(r.status===200){ logLine("   الجدول موجود وقراءته مسموحة ✓","ok"); return "read"; }
+        if(r.status===404){ logLine("   ✕ الجدول غير موجود في هذا المشروع (404) — نفّذ سكربت SQL هنا، أو المرجع لا يطابق المشروع.","bad"); return null; }
+        if(r.status===401||r.status===403){ logLine("   الجدول موجود لكن القراءة ممنوعة ("+r.status+") — طبيعي: سياسة القراءة للمسجّلين فقط.","warn"); return "noread"; }
+        logLine("   استجابة غير متوقعة: "+r.status,"warn");
+        return r.text().then(function(t){ logLine("   "+String(t).slice(0,160),"warn"); });
+      }).catch(function(err){
+        logLine("✕ فشل الوصول إلى الخادم: "+String(err&&err.message||err),"bad");
+        logLine("   تحقق من الرابط أو من حجب الشبكة/مانع الإعلانات.","");
+      }).then(function(st){
+        if(st===null) return null;
+        logLine("٤ فحص الإدراج (سجل اختبار سيُحذف فورًا)…","");
+        var probe={player_id:"__conn_test__",player_name:"اختبار الاتصال",date:new Date().toISOString().slice(0,10),
+          sleep:3,fatigue:3,soreness:3,stress:3,mood:3,sleep_hours:8,areas:"",note:"حذف تلقائي",readiness:0,
+          client_ts:new Date().toISOString(),source:"conn-test"};
+        return fetch(root,{method:"POST",headers:hdr(k,{"Content-Type":"application/json","Prefer":"return=representation"}),body:JSON.stringify(probe)})
+          .then(function(r){
+            if(r.ok||r.status===201){
+              logLine("   ✓ الإدراج مقبول — الجوال سيتمكن من الإرسال.","ok");
+              return r.text().then(function(t){
+                var id=null; try{ var j=JSON.parse(t); id=j&&j[0]&&j[0].id; }catch(e){}
+                if(id==null){ logLine("   (تعذّر حذف سجل الاختبار — احذفه يدويًا: player_id = __conn_test__)","warn"); return; }
+                return fetch(root+"?id=eq."+id,{method:"DELETE",headers:hdr(k)}).then(function(d){
+                  logLine(d.ok?"   ✓ حُذف سجل الاختبار.":"   (تعذّر الحذف — احذفه من Table Editor)","ok");
+                });
+              });
+            }
+            return r.text().then(function(t){
+              var m=String(t||"");
+              logLine("   ✕ الإدراج مرفوض ("+r.status+")","bad");
+              if(/42501|row-level security/i.test(m)) logLine('   السبب: صلاحية أو سياسة — نفّذ: grant insert on table wellness to anon; ثم السياسة wellness_insert_anon',"bad");
+              else if(/42P01|does not exist/i.test(m)) logLine("   السبب: الجدول غير موجود في هذا المشروع — نفّذ سكربت SQL هنا.","bad");
+              else if(/23502|not-null/i.test(m)) logLine("   السبب: عمود مطلوب ناقص — أعد إنشاء الجدول من السكربت الحالي.","bad");
+              logLine("   "+m.slice(0,240),"");
+            });
+          });
+      }).then(function(){
+        var done=$("q321smsg"); if(done) done.textContent="انتهى التشخيص — اقرأ السجل أعلاه.";
+      });
+    }
     $("q321x").onclick=function(){ h.remove(); };
     $("q321ph").onclick=function(){ setLink(false); $("q321msg").textContent="نسخة بدون صور (أخف بكثير — الأسماء فقط)."; };
     $("q321cp").onclick=function(){ var t=$("q321link"); t.select(); try{ document.execCommand("copy"); $("q321msg").textContent="تم نسخ الرابط ✓"; }catch(e){ $("q321msg").textContent="انسخ يدويًا."; } };
@@ -47925,7 +48063,7 @@ tr:hover .qde-ndate{color:#7E0E14}
     var m=$("q321msg"); var c=cfg();
     if(!c||!c.url||!c.key){ if(m) m.textContent="✕ لا يوجد اتصال سحابي."; return; }
     if(m) m.textContent="جارٍ السحب…";
-    fetch(c.url.replace(/\/$/,"")+"/rest/v1/wellness?select=*&order=created_at.desc&limit=200",{headers:{apikey:c.key,Authorization:"Bearer "+c.key}})
+    fetch(c.url.replace(/\/$/,"")+"/rest/v1/wellness?select=*&order=created_at.desc&limit=200",{headers:hdr(c.key)})
       .then(function(r){ if(!r.ok) throw new Error("HTTP "+r.status); return r.json(); })
       .then(function(rows){
         if(!Array.isArray(rows)) throw new Error("شكل غير متوقع");
