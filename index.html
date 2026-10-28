@@ -35137,7 +35137,7 @@ tr:hover .qde-ndate{color:#7E0E14}
 
   function badge(){
     try{ var b=document.getElementById("qdrBadge"); if(!b) return;
-      var w="v11-308b · EDIT-FULL";
+      var w="v11-308c · EDIT-FULL";
       if(b.textContent!==w+" · BTN-OK") b.textContent=w+" · BTN-OK"; }catch(e){}
   }
 
@@ -46956,38 +46956,40 @@ tr:hover .qde-ndate{color:#7E0E14}
   }
   window.QD308_actEdit=actEdit;
   /* فتح ملف الإصابة الأصلي من أي مصدر متاح في الشاشة الحالية */
-  function openViaFile(id){
-    var sels=['[data-qc224="report"][data-i="'+id+'"]','[data-act="openInjury"][data-id="'+id+'"]',
-              '[data-rep][data-id="'+id+'"]','[data-repdl][data-id="'+id+'"]','[data-reph][data-id="'+id+'"]'];
-    for(var i=0;i<sels.length;i++){
-      var el=document.querySelector(sels[i]);
-      if(el){ try{ el.click(); }catch(e){}
-        var n=0;
-        (function go(){
-          var ed=detailBtn(id);
-          if(ed){ try{ ed.click(); }catch(e){} return; }
-          var mc=document.getElementById("modalCard");
-          if(mc&&mc.querySelector('[data-f="type"]')&&mc.querySelector('[data-act="saveInjury"]')) return;
-          if(n++<16) return setTimeout(go,120);
-          try{ if(window.QD306&&window.QD306.open) window.QD306.open(id); }catch(e){}
-        })();
-        return true;
-      }
-    }
-    return false;
+  /* النموذج الكامل = مسار «تعديل» الأصلي (openInjuryForm) — بلا أي زر «تقرير» */
+  function probeFire(act,id){
+    var b=document.createElement("button");
+    b.type="button"; b.tabIndex=-1;
+    b.style.cssText="position:fixed;left:-9999px;top:-9999px;width:1px;height:1px;opacity:0";
+    b.setAttribute("data-act",act); if(id) b.setAttribute("data-id",id);
+    document.body.appendChild(b);
+    try{ b.click(); }catch(e){}
+    setTimeout(function(){ try{ b.remove(); }catch(e){} },80);
+  }
+  function fullFormOpen(){
+    var mc=document.getElementById("modalCard");
+    if(!mc) return false;
+    return !!(mc.querySelector('[data-act="saveInjury"]')&&mc.querySelector('[data-f="type"]'));
   }
   function openFull(id){
-    if(actEdit(id)) return true;
-    if(openViaFile(id)) return true;
-    /* المسار الأصلية للنموذج الكامل: نفس مسار زر «تعديل» داخل ملف الإصابة */
-    var probe=document.createElement("button");
-    probe.type="button"; probe.tabIndex=-1;
-    probe.style.cssText="position:fixed;left:-9999px;top:-9999px;width:1px;height:1px;opacity:0";
-    probe.setAttribute("data-act","editInjury"); probe.setAttribute("data-id",id);
-    document.body.appendChild(probe);
-    try{ probe.click(); }catch(e){}
-    setTimeout(function(){ try{ probe.remove(); }catch(e){} },60);
-    /* تحقق: إن لم يظهر النموذج الكامل، افتح عبر ملف الإصابة ثم زر التعديل */
+    /* ١) المسار الأصلي المباشر: editInjury ← openInjuryForm (النموذج الكامل بكل حقوله) */
+    probeFire("editInjury",id);
+    setTimeout(function(){
+      if(fullFormOpen()) return;
+      /* ٢) عبر ملف الإصابة ثم زر «تعديل» الأصلي داخله */
+      probeFire("openInjury",id);
+      setTimeout(function(){
+        if(fullFormOpen()) return;
+        var mc=document.getElementById("modalCard");
+        var ed=mc&&mc.querySelector('[data-act="editInjury"][data-id="'+id+'"]');
+        if(ed){ try{ ed.click(); }catch(e){} }
+        setTimeout(function(){
+          if(fullFormOpen()) return;
+          /* ٣) خطة أخيرة: التحديث السريع (لا يفتح أي تقرير) */
+          try{ if(window.QD306&&window.QD306.open) window.QD306.open(id); }catch(e){}
+        },700);
+      },450);
+    },750);
     return true;
   }
   window.QD308={openFull:openFull};
