@@ -49741,6 +49741,9 @@ return map;
   function jset(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); return true; }catch(e){ return false; } }
 
   var PRESETS={
+    /* QD372 · OWNER-ROLE — كان «المالك» غائبًا عن هذه القائمة، فلم يكن ممكنًا
+       إسناده لأي حساب، ومعه لم تظهر لوحة المالك لأحد. */
+    owner:{t:"المالك",d:"صلاحيات كاملة بلا قيود + لوحة المالك ومصفوفة صلاحيات الأقسام",p:{edit:1,del:1,dl:1,mnu:1},c:"#C9971A"},
     admin:{t:"مدير كامل",d:"تعديل · حذف · إضافة تقارير · إدارة المستخدمين",p:{edit:1,del:1,dl:1,mnu:1},c:"#B5121B"},
     clinician:{t:"طبيب الفريق",d:"كل البيانات الطبية تعديلًا وإضافة وحذفًا — بلا إدارة مستخدمين",p:{edit:1,del:1,dl:1,mnu:0},c:"#0E7490"},
     physioLead:{t:"مشرف العلاج الطبيعي",d:"الجلسات والتأهيل والبرامج والتقارير تعديلًا كاملًا — بلا إدارة مستخدمين",p:{edit:1,del:1,dl:1,mnu:0},c:"#7C3AED"},
@@ -50907,7 +50910,14 @@ return map;
   function users(){ var a=jget(LS,null); return Array.isArray(a)?a.filter(function(u){ return u&&u.user; }):[]; }
   function cur(){ try{ var id=sessionStorage.getItem(SS); if(!id) return null;
       var u=users().filter(function(x){ return x.id===id; })[0]; return (u&&u.active!==false)?u:null; }catch(e){ return null; } }
-  function isOwner(u){ u=u||cur(); return !!(u&&(u.role==="owner"||u.owner===true)); }
+  function isOwner(u){ u=u||cur(); if(!u) return false;
+    if(u.role==="owner"||u.owner===true) return true;
+    /* QD372 · احتياطي: لا يوجد أي حساب بدور «المالك» في النظام (كما كان عندك)،
+       وبدونه لا تظهر لوحة المالك لأحد. عندها يُعامل «مدير كامل» كمالك
+       حتى يُسنَد الدور صراحةً من قسم المستخدمين. */
+    try{ return u.role==="admin" && !users().some(function(x){ return x&&(x.role==="owner"||x.owner===true); }); }
+    catch(e){ return false; }
+  }
   function hash(pw,salt){ var s=String(salt||"")+"|"+String(pw||"");
     if(window.crypto&&crypto.subtle&&crypto.subtle.digest){
       return crypto.subtle.digest("SHA-256",new TextEncoder().encode(s)).then(function(b){
