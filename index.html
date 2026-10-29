@@ -5818,66 +5818,8 @@ function s3MkBtn(id,txt,fn,ghost){
   return b;
 }
 function s3Panel(err,final){
-  try{
-    var root=document.getElementById("qdCloud"); if(!root) return false;
-    var qc=root.querySelector(".qc"); if(!qc) return false;
-    var old=document.getElementById("s3Panel"); if(old&&old.parentNode) old.parentNode.removeChild(old);
-    var box=document.createElement("div"); box.id="s3Panel";
-    box.style.cssText="margin-top:10px;padding-top:10px;border-top:1px dashed #d9dee6;text-align:center";
-    var st=document.createElement("div"); st.id="s3State";
-    st.style.cssText="font-size:11.5px;color:#5b6472;line-height:1.7;margin-bottom:2px";
-    st.textContent=s3T("محاولة ","Attempt ")+s3Tries+s3T(" — إن استمرّ الفشل اضغط إعادة المحاولة"," — if it keeps failing press Retry");
-    box.appendChild(st);
-    var res=document.createElement("div"); res.id="s3Res";
-    res.style.cssText="font-size:11px;color:#5b6472;line-height:1.7;word-break:break-word;margin-bottom:2px";
-    res.textContent=s3LastRes||(s3T("مضيف الخادم: ","Server host: ")+s3Host(s3CfgUrl()));
-    if(s3LastRes&&s3LastCol) res.style.color=s3LastCol;
-    box.appendChild(res);
-    if(err){
-      var wh=document.createElement("div"); wh.id="s3Why";
-      wh.style.cssText="font-size:10.5px;color:#8a929e;line-height:1.6;word-break:break-word";
-      wh.textContent=String((err&&err.message)||err).slice(0,120);
-      box.appendChild(wh);
-    }
-    box.appendChild(s3MkBtn("s3Retry",s3T("إعادة المحاولة الآن","Retry now"),function(){
-      s3Tries=0; s3Final=false; s3Probed=false; s3LastRes=""; s3LastCol="";
-      var el=document.getElementById("s3Res"); if(el) el.textContent=s3T("جارٍ إعادة المحاولة…","Retrying…");
-      try{ if(typeof ME!=="undefined"&&ME&&typeof afterAuth==="function"){ afterAuth(ME); return; } }catch(e){}
-      try{ location.reload(); }catch(e){}
-    },false));
-    box.appendChild(s3MkBtn("s3Test",s3T("اختبار الاتصال","Test connection"),function(){
-      var el=document.getElementById("s3Res"); if(el){ el.textContent=s3T("جارٍ الاختبار…","Testing…"); el.style.color="#5b6472"; }
-      s3Probe(function(o){ s3ShowRes(o); });
-    },true));
-    box.appendChild(s3MkBtn("s3Reset",s3T("إعادة ضبط إعدادات الخادم","Reset server settings"),function(){ s3ResetCfg(); },true));
-    if(final){
-      box.appendChild(s3MkBtn("s3Local",s3T("الدخول الآن بالبيانات المحلية","Enter now with local data"),function(){
-        var q=s3T("الدخول بالبيانات المحلية في هذا المتصفح بلا مزامنة سحابية؟\n\nستُزامن بياناتك تلقائيًّا عند عودة الاتصال.",
-                  "Open with this browser\u2019s local data without cloud sync?\n\nYour data syncs automatically when the connection returns.");
-        try{ if(typeof confirm==="function"&&!confirm(q)) return; }catch(e){}
-        var me={id:"local",username:"local",name:s3T("مستخدم محلي","Local user"),role:"admin",local:true};
-        try{ ME=me; window.__qdME=me; window.__qdLocalMode=1; }catch(e){}
-        try{ if(typeof load==="function") S=load(); }catch(e){}
-        try{ if(typeof _qd9boot==="function") _qd9boot(); }catch(e){}
-        try{ if(window.QD9&&typeof window.QD9.enterExternal==="function") window.QD9.enterExternal({id:"local",username:"local",name:me.name,role:"admin"}); }catch(e){}
-        try{ if(typeof hideOverlay==="function") hideOverlay(); }catch(e){}
-        try{ if(typeof accountButton==="function") accountButton(); }catch(e){}
-        try{ ready=true; }catch(e){}
-      },true));
-      var w=document.createElement("div");
-      w.style.cssText="font-size:10.5px;color:#8a929e;line-height:1.6;margin-top:6px";
-      w.textContent=s3T("الوضع المحلي يعرض بيانات هذا المتصفح فقط.","Local mode shows this browser\u2019s data only.");
-      box.appendChild(w);
-    }
-    var b=qc.querySelector(".qc-b");
-    if(b) b.appendChild(box); else qc.appendChild(box);
-    s3Clean();
-    if(!s3Probed&&!s3Busy){
-      s3Probed=true; s3Busy=true;
-      s3Probe(function(o){ s3Busy=false; s3ShowRes(o); });
-    }
-    return true;
-  }catch(e){ try{ window.QDS3_ERR=String((e&&e.stack)||e); }catch(x){} return false; }
+  /* QD381: أُلغيت هذه الطبقة — شاشة دخول واحدة */
+  return;
 }
 function s3ClearT(){ try{ LOAD_RETRY_T=null; }catch(e){} try{ if(window.LOAD_RETRY_T) window.LOAD_RETRY_T=null; }catch(e){} }
 function s3Wrap(){
@@ -6025,56 +5967,8 @@ function s4Local(){
   return true;
 }
 function s4Panel(err,final){
-  try{
-    var root=document.getElementById("qdCloud"); if(!root) return false;
-    var qc=root.querySelector(".qc"); if(!qc) return false;
-    var old=document.getElementById("s4Panel"); if(old&&old.parentNode) old.parentNode.removeChild(old);
-    var box=document.createElement("div"); box.id="s4Panel";
-    box.style.cssText="margin-top:10px;padding-top:10px;border-top:1px dashed #d9dee6;text-align:center";
-    var res=document.createElement("div"); res.id="s4Res";
-    res.style.cssText="font-size:11px;color:"+(s4Col||"#5b6472")+";line-height:1.7;word-break:break-word;margin-bottom:2px";
-    res.textContent=s4Res||(s4T("مضيف الخادم: ","Server host: ")+s4Host(s4CfgUrl()));
-    box.appendChild(res);
-    var lib=document.createElement("div"); lib.id="s4Lib";
-    lib.style.cssText="font-size:10.5px;color:#8a929e;line-height:1.6";
-    lib.textContent=s4LibTxt();
-    box.appendChild(lib);
-    if(err){
-      var wh=document.createElement("div"); wh.id="s4Why";
-      wh.style.cssText="font-size:10.5px;color:#8a929e;line-height:1.6;word-break:break-word";
-      wh.textContent=String((err&&err.message)||err).slice(0,110);
-      box.appendChild(wh);
-    }
-    var st=document.createElement("div"); st.id="s4State";
-    st.style.cssText="font-size:11px;color:#5b6472;line-height:1.7;margin-top:5px";
-    st.textContent=final?s4T("توقّفت المحاولات التلقائية — اختر ما يناسبك:","Automatic retries stopped — choose:")
-                       :s4T("محاولة ","Attempt ")+s4Tries+s4T(" من ","of ")+S4_MAX;
-    box.appendChild(st);
-    box.appendChild(s4Btn("s4Retry",s4T("إعادة المحاولة الآن","Retry now"),function(){
-      s4Tries=0; s4Done=false; s4Probed=false; s4Res=""; s4Col="";
-      var el=document.getElementById("s4Res"); if(el) el.textContent=s4T("جارٍ إعادة المحاولة…","Retrying…");
-      try{ if(typeof ME!=="undefined"&&ME&&typeof afterAuth==="function"){ afterAuth(ME); return; } }catch(e){}
-      try{ location.reload(); }catch(e){}
-    },false));
-    box.appendChild(s4Btn("s4Test",s4T("اختبار الاتصال","Test connection"),function(){
-      var el=document.getElementById("s4Res"); if(el){ el.textContent=s4T("جارٍ الاختبار…","Testing…"); el.style.color="#5b6472"; }
-      s4Probe(function(o){ s4Show(o); });
-    },true));
-    box.appendChild(s4Btn("s4Reset",s4T("إعادة ضبط إعدادات الخادم","Reset server settings"),function(){ s4Reset(); },true));
-    box.appendChild(s4Btn("s4Local",s4T("الدخول الآن بالبيانات المحلية","Enter now with local data"),function(){ s4Local(); },true));
-    var w=document.createElement("div");
-    w.style.cssText="font-size:10.5px;color:#8a929e;line-height:1.6;margin-top:6px";
-    w.textContent=s4T("الوضع المحلي يعرض بيانات هذا المتصفح فقط — بلا مزامنة حتى يعود الاتصال.","Local mode shows this browser\u2019s data only — no sync until the connection returns.");
-    box.appendChild(w);
-    var b=qc.querySelector(".qc-b");
-    if(b) b.appendChild(box); else qc.appendChild(box);
-    s4Clean(); s4Mirror();
-    if(!s4Probed&&!s4Busy){
-      s4Probed=true; s4Busy=true;
-      s4Probe(function(o){ s4Busy=false; s4Show(o); });
-    }
-    return true;
-  }catch(e){ try{ window.QDS4_ERR=String((e&&e.stack)||e); }catch(x){} return false; }
+  /* QD381: أُلغيت هذه الطبقة — شاشة دخول واحدة */
+  return;
 }
 function s4ClearT(){ try{ LOAD_RETRY_T=null; }catch(e){} try{ if(window.LOAD_RETRY_T) window.LOAD_RETRY_T=null; }catch(e){} }
 function s4Wrap(){
@@ -6260,19 +6154,8 @@ function qdupAuto(){
 }
 /* زر دائم على شاشة الدخول/التحميل */
 function qdupBtn(){
-  try{
-    var root=document.getElementById("qdCloud"); if(!root) return false;
-    if(document.getElementById("qdupBtn")) return true;
-    var qc=root.querySelector(".qc"); if(!qc) return false;
-    var b=document.createElement("button");
-    b.type="button"; b.id="qdupBtn";
-    b.textContent=qdupT("تحديث التطبيق (إن ظهرت شاشة قديمة)","Update the app (if an old screen appears)");
-    b.style.cssText="width:100%;padding:10px;margin-top:8px;border:1px solid #d9dee6;border-radius:10px;background:#fff;color:#5b6472;font-weight:800;cursor:pointer;font-family:inherit;font-size:12px";
-    b.onclick=function(){ qdupForce(); };
-    var host=qc.querySelector(".qc-b");
-    if(host) host.appendChild(b); else qc.appendChild(b);
-    return true;
-  }catch(e){ return false; }
+  /* QD381: أُلغيت هذه الطبقة — شاشة دخول واحدة */
+  return;
 }
 function qdupObserve(){
   try{
@@ -6547,14 +6430,8 @@ function qfBox(){
   }catch(e){ return null; }
 }
 function qfShow(force){
-  try{
-    if(qfReady()) return false;
-    if(!qfOv()) return false;
-    if(qfEntry(qfKind())) return false;
-    if(!force&&Date.now()-QF_T0<QF_WAIT) return false;
-    QF_ON=true;
-    return !!qfBox();
-  }catch(e){ return false; }
+  /* QD381: أُلغيت هذه الطبقة — شاشة دخول واحدة */
+  return;
 }
 function qfTick(){
   try{
@@ -50655,6 +50532,524 @@ return map;
          else setTimeout(function(){ pull(false); },1200); }catch(e){}
 
     window.QD376={pull:pull,push:push,apply:apply,url:URL};
+  }catch(e){}
+})();
+</script>
+
+<script>
+/* QD377 · USERS-CLOUD — الحسابات (أسماء المستخدمين · كلمات المرور المشفّرة · الأدوار)
+   في جدول Supabase مشترك بين الأجهزة. ينسخ السحابة إلى نفس مفتاح qd356_users
+   الذي يقرأه نظام الدخول، فلا يتغيّر أي كود قديم. */
+(function(){
+  try{
+    if(window.__qd377) return; window.__qd377=1;
+    var URL="https://tkvjdnwhwjdemkmipwgb.supabase.co";
+    var KEY="sb_publishable_I9GLQdzF-cYHk3MdkXvxbg_M2UfXwqY";
+    var TAB="qd_users", ROW="qd356-users", LS="qd356_users", RK="qd377_rev";
+    var lastPushed="", lastRev=0, pulling=false, warned=false;
+
+    function $(i){ return document.getElementById(i); }
+    function hdr(){ var h={apikey:KEY,"Content-Type":"application/json"}; if(/^eyJ/.test(KEY)) h.Authorization="Bearer "+KEY; return h; }
+    function localArr(){ try{ var v=localStorage.getItem(LS); var a=v?JSON.parse(v):null; return Array.isArray(a)?a:null; }catch(e){ return null; } }
+    function localRev(){ return Number(localStorage.getItem(RK)||0)||0; }
+    function norm(a){ return JSON.stringify((a||[]).map(function(u){ return {id:u.id,user:u.user,name:u.name||"",role:u.role||"viewer",salt:u.salt||"",hash:u.hash||"",active:u.active!==false,owner:!!u.owner}; }).sort(function(x,y){ return String(x.id).localeCompare(String(y.id)); })); }
+    function say(m,bad){
+      var d=$("q377t");
+      if(!d){ d=document.createElement("div"); d.id="q377t";
+        d.style.cssText="position:fixed;bottom:64px;left:50%;transform:translateX(-50%);background:#0B1118;color:#6EE7A8;border:1px solid rgba(110,231,168,.5);padding:9px 16px;border-radius:11px;font:900 11.5px system-ui;z-index:2147483600;direction:rtl;transition:.2s;max-width:88vw;text-align:center";
+        document.body.appendChild(d); }
+      d.style.color=bad?"#FF9B9B":"#6EE7A8";
+      d.style.borderColor=bad?"rgba(255,120,120,.5)":"rgba(110,231,168,.5)";
+      d.textContent=m; d.style.opacity="1"; clearTimeout(d.__h);
+      d.__h=setTimeout(function(){ d.style.opacity="0"; },3200);
+    }
+
+    function apply(arr,rev){
+      try{
+        localStorage.setItem(LS, JSON.stringify(arr));
+        localStorage.setItem(RK, String(rev));
+        lastRev=Number(rev)||0; lastPushed=norm(arr);
+        /* أعد رسم جدول المستخدمين إن كانت اللوحة مفتوحة */
+        try{ if($("q375p")&&window.QD375&&QD375.panel){ var o=$("q375p"); if(o) o.remove(); QD375.panel(); } }catch(e){}
+        /* ونظام الدخول: إن حُذف الحساب الجاري أو أُوقف، أخرجه */
+        try{
+          var sid=sessionStorage.getItem("qd356_session");
+          if(sid){ var u=(arr||[]).filter(function(x){ return String(x.id)===String(sid); })[0];
+            if(!u||u.active===false){ sessionStorage.removeItem("qd356_session"); try{ location.reload(); }catch(e){} } }
+        }catch(e){}
+      }catch(e){}
+    }
+
+    function pull(silent){
+      if(pulling) return; pulling=true;
+      fetch(URL+"/rest/v1/"+TAB+"?id=eq."+encodeURIComponent(ROW)+"&select=data,rev",{headers:hdr(),cache:"no-store"})
+        .then(function(r){
+          if(r.status===404) throw new Error("NO_TABLE");
+          if(!r.ok) return r.text().then(function(t){ throw new Error("HTTP "+r.status+" "+String(t).slice(0,90)); });
+          return r.json();
+        })
+        .then(function(rows){
+          if(!Array.isArray(rows)||!rows.length){
+            /* الجدول موجود لكن فارغ: ارفع الموجود محليًا */
+            push(true); return;
+          }
+          var R=rows[0]||{}, rev=Number(R.rev)||0, data=R.data;
+          if(!Array.isArray(data)) return;
+          if(rev>localRev()){
+            var before=norm(localArr());
+            apply(data,rev);
+            if(!silent && norm(data)!==before) say("✓ استُلمت الحسابات من السحابة");
+          } else { lastRev=Math.max(lastRev,rev); lastPushed=norm(data); }
+        })
+        .catch(function(e){
+          if(String(e.message)==="NO_TABLE"){
+            if(!warned){ warned=true;
+              try{ console.warn("QD377: جدول qd_users غير موجود — شغّل qd_users_setup.sql. الحسابات محلية الآن."); }catch(x){}
+            }
+            return;
+          }
+          try{ console.warn("QD377 pull:",e.message); }catch(x){}
+        })
+        .then(function(){ pulling=false; });
+    }
+
+    function push(force){
+      var a=localArr(); if(!a) return;
+      var json=norm(a);
+      if(json===lastPushed && !force) return;
+      var rev=Math.max(Date.now(), lastRev+1);
+      fetch(URL+"/rest/v1/"+TAB+"?on_conflict=id",{
+        method:"POST",
+        headers:Object.assign(hdr(),{Prefer:"resolution=merge-duplicates,return=minimal"}),
+        body:JSON.stringify([{id:ROW,data:a,rev:rev}])
+      }).then(function(r){
+        if(r.ok){ lastPushed=json; lastRev=rev; try{ localStorage.setItem(RK,String(rev)); }catch(e){} }
+        else return r.text().then(function(t){ try{ console.warn("QD377 push HTTP "+r.status+": "+String(t).slice(0,140)); }catch(x){} });
+      }).catch(function(e){ try{ console.warn("QD377 push:",e.message); }catch(x){} });
+    }
+
+    /* مراقبة تغيّر الحسابات محليًا (إضافة/تعديل/حذف من أي واجهة) */
+    try{ setInterval(function(){ try{ push(false); }catch(e){} }, 2500); }catch(e){}
+    try{ setInterval(function(){ try{ pull(true); }catch(e){} }, 20000); }catch(e){}
+    try{ window.addEventListener("focus",function(){ pull(true); }); }catch(e){}
+    try{ document.addEventListener("visibilitychange",function(){ if(!document.hidden) pull(true); }); }catch(e){}
+    try{
+      if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",function(){ setTimeout(function(){ pull(false); },1600); });
+      else setTimeout(function(){ pull(false); },1600);
+    }catch(e){}
+
+    window.QD377={pull:pull,push:push,url:URL};
+  }catch(e){}
+})();
+</script>
+
+<script>
+/* QD378 · I18N-FIX — إكمال الترجمة: عناصر القائمة كانت تسقط إلى العربية
+   لأن مفاتيحها غير موجودة في قاموس الإنجليزية أصلًا. */
+(function(){
+  try{
+    if(window.__qd378) return; window.__qd378=1;
+
+    var ADD_EN={
+      nav_link:"Player file",        sub_link:"Full profile: details, injuries and matches",
+      nav_promotion:"Appearances",   sub_promotion:"Camps, matches and minutes played",
+      nav_screening:"Medical check", sub_screening:"Pre-season medical and fitness clearance",
+      nav_daily:"Daily check",       sub_daily:"Daily wellness and readiness check",
+      nav_fixtures:"Match reports",  sub_fixtures:"Match reports: minutes, injuries, results",
+      nav_documents:"Documents",     sub_documents:"Imaging and medical reports",
+      nav_complaints:"Training complaints", sub_complaints:"Pain reported after training",
+      nav_clinic:"Clinic log",       sub_clinic:"Treatment sessions inside the clinic",
+      nav_posture:"Posture",         sub_posture:"Posture result with the 5-direction photos",
+      nav_mental:"Mental health",    sub_mental:"Player mental-health screening",
+      nav_calendar:"Injury calendar",sub_calendar:"All injuries and sessions on one calendar",
+      nav_reports:"Reports",         sub_reports:"Statistics and printable reports",
+      nav_settings:"Settings",       sub_settings:"Club data, users and backup",
+      nav_illnesses:"Illnesses",     sub_illnesses:"Illnesses and medical conditions",
+      nav_activities:"Call-ups",     sub_activities:"Call-up periods, camps and competitions",
+      grp_overview:"HOME", grp_medical:"PLAYERS & MEDICAL", grp_assess:"CHECK-UPS",
+      grp_follow:"DAILY FOLLOW-UP", grp_match:"MATCHES", grp_admin:"ADMIN"
+    };
+    var ADD_AR={
+      nav_link:"ملف اللاعب",        sub_link:"الملف الكامل: بياناته وإصاباته ومبارياته",
+      nav_promotion:"المشاركات",    sub_promotion:"المعسكرات والمباريات ودقائق اللعب",
+      nav_screening:"الفحص الطبي",  sub_screening:"الفحص الطبي واللياقة قبل الموسم",
+      nav_daily:"التقييم اليومي",   sub_daily:"فحص الجاهزية اليومي",
+      nav_fixtures:"تقارير المباريات", sub_fixtures:"مشاركات اللاعبين · الدقائق · الإصابات · النتيجة",
+      nav_complaints:"شكاوى بعد التمرين", sub_complaints:"آلام يشتكي منها اللاعب بعد التمرين",
+      nav_clinic:"سجل العيادة",     sub_clinic:"جلسات العلاج داخل العيادة",
+      nav_posture:"القوام",         sub_posture:"نتيجة القوام مع صور الاتجاهات الخمسة",
+      nav_mental:"الصحة النفسية",   sub_mental:"فحص الحالة النفسية للاعب",
+      nav_calendar:"تقويم الإصابات",sub_calendar:"كل الإصابات والجلسات في تقويم واحد",
+      nav_reports:"التقارير",       sub_reports:"الإحصائيات والتقارير القابلة للطباعة",
+      nav_settings:"الإعدادات",     sub_settings:"بيانات النادي والمستخدمون والنسخ الاحتياطي",
+      nav_activities:"الاستدعاءات", sub_activities:"فترات الاستدعاء والمعسكرات والمنافسات"
+    };
+
+    function inject(){
+      try{ if(typeof STR!=="undefined"&&STR){ STR.en=Object.assign({},STR.en||{},ADD_EN); STR.ar=Object.assign({},STR.ar||{},ADD_AR); } }catch(e){}
+      /* القواميس الأخرى المستخدمة في الواجهة */
+      try{
+        ["QDB","QDI","QD","QDICT"].forEach(function(n){
+          var o=window[n]; if(!o) return;
+          if(o.en&&typeof o.en==="object") Object.assign(o.en,ADD_EN);
+          if(o.ar&&typeof o.ar==="object") Object.assign(o.ar,ADD_AR);
+          if(o.DICT&&o.DICT.en) Object.assign(o.DICT.en,ADD_EN);
+        });
+      }catch(e){}
+    }
+
+    /* خريطة تعريب ← إنجليزي للنصوص المكتوبة مباشرة في HTML بلا مفاتيح */
+    var MAP={
+      "لوحة التحكم":"Dashboard","اللاعبون":"Players","ملف اللاعب":"Player file","الإصابات":"Injuries",
+      "الأمراض":"Illnesses","شكاوى بعد التمرين":"Training complaints","سجل العيادة":"Clinic log",
+      "العلاج الرياضي":"Sports therapy","المشاركات":"Appearances","الفحص الطبي":"Medical check",
+      "التقييم الفيزيائي":"Physical assessment","القوام":"Posture","برامج العلاج":"Treatment plans",
+      "الأحمال والجاهزية":"Load & readiness","التقييم اليومي":"Daily check","الاستدعاءات":"Call-ups",
+      "المستندات":"Documents","الصحة النفسية":"Mental health","تقارير المباريات":"Match reports",
+      "تقويم الإصابات":"Injury calendar","التقارير":"Reports","الإعدادات":"Settings",
+      "التأهيل":"Rehabilitation","التغذية":"Nutrition","العيادة والملف الطبي":"CLINIC & MEDICAL FILE",
+      "نظرة عامة":"OVERVIEW","المتابعة اليومية":"DAILY FOLLOW-UP","المباريات":"MATCHES","الإدارة":"ADMIN",
+      "اللاعبون والسجل الطبي":"PLAYERS & MEDICAL","الفحص والتقييم":"CHECK-UPS","الرئيسية":"HOME",
+      "المستخدمون والصلاحيات":"Users & permissions","المستخدمون":"Users","مركز الحالة":"Status centre"
+    };
+    function isEn(){ try{ return (typeof LANG!=="undefined")?String(LANG).indexOf("en")===0:false; }catch(e){ return false; } }
+    function sweep(root){
+      try{
+        if(!isEn()) return;
+        root=root||document;
+        var w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT,{acceptNode:function(n){
+          if(!n.nodeValue||!n.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
+          return /[\u0600-\u06FF]/.test(n.nodeValue)?NodeFilter.FILTER_ACCEPT:NodeFilter.FILTER_REJECT;
+        }});
+        var hits=[],n2;
+        while((n2=w.nextNode())) hits.push(n2);
+        hits.forEach(function(tn){
+          var raw=tn.nodeValue, key=raw.trim().replace(/\s+/g," "), en=MAP[key];
+          if(en) tn.nodeValue=raw.replace(key,en);
+        });
+      }catch(e){}
+    }
+    function targets(){ return ['#nav','#sidebar','.grp','#pgTitle','#pgSub','.topbar','#q374p','#q375p'].map(function(q){ return document.querySelector(q); }).filter(Boolean); }
+
+    var t=null;
+    function run(){ if(t) clearTimeout(t); t=setTimeout(function(){
+      try{
+        inject();
+        if(isEn()) targets().forEach(function(el){ sweep(el); });
+      }catch(e){}
+    },40); }
+
+    try{ if(window.MutationObserver){ new MutationObserver(run).observe(document.body,{childList:true,subtree:true}); } }catch(e){}
+    try{
+      if(typeof setLang==="function"){
+        var _sl=setLang;
+        var wrap=function(l){
+          var r=_sl.apply(this,arguments);
+          try{ inject(); setTimeout(run,10); setTimeout(function(){ try{ if(typeof renderNav==="function") renderNav(); }catch(e){} },30); }catch(e){}
+          return r;
+        };
+        wrap.__qd378=1;
+        setLang=wrap; try{ window.setLang=wrap; window.__setLang=wrap; }catch(e){}
+      }
+    }catch(e){}
+    try{ document.addEventListener("click",function(e){ if(e.target&&e.target.closest&&e.target.closest("#langBtn,[data-lang]")) setTimeout(run,120); },true); }catch(e){}
+    try{ if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",run); else run(); }catch(e){}
+    window.QD378={sweep:sweep,inject:inject,run:run};
+  }catch(e){}
+})();
+</script>
+
+<script>
+/* QD379 · NO-FLOAT — الحل النهائي للأزرار: لا شيء يطفو فوق المحتوى.
+   كل زر كان عائمًا (التأهيل · التغذية · مركز الحالة · الأدوات · المالك · الإصدار)
+   يُنقل كما هو — بمعالجه — إلى قسم «الأدوات» داخل الشريط الجانبي. */
+(function(){
+  try{
+    if(window.__qd379) return; window.__qd379=1;
+    var IDS=["qd320btn","qd330btn","qd347btn","qd348btn","qd375btn","q369btn","qd246btn","qd270btn"];
+    function $(i){ return document.getElementById(i); }
+    function isAr(){ try{ var l=localStorage.getItem("qd_lang"); return l?String(l).indexOf("en")!==0:true; }catch(e){ return true; } }
+    function T(a,e){ return isAr()?a:e; }
+
+    function css(){
+      if($("qd379css")) return;
+      var st=document.createElement("style"); st.id="qd379css";
+      st.textContent=
+      /* البوب-أب القديم يُلغى كليًا */
+      '#qd374btn,#qd374p{display:none!important}'+
+      /* أي زر عائم على الحافة يُخفى فورًا حتى يُنقل — لا وميض */
+      '#qd320btn,#qd330btn,#qd347btn,#qd348btn,#qd246btn,#qd270btn{display:none!important}'+
+      /* قسم الأدوات داخل الشريط الجانبي */
+      '#qd379tools{margin:10px 8px 4px;border-top:1px solid rgba(255,255,255,.1);padding-top:8px}'+
+      '#qd379tools .hd{font:900 9.5px system-ui;color:#7E8C84;letter-spacing:.4px;padding:0 6px 6px;text-transform:uppercase}'+
+      '#qd379tools .row{margin:3px 0}'+
+      '#qd379tools button{position:static!important;left:auto!important;right:auto!important;bottom:auto!important;top:auto!important;'+
+        'display:flex!important;align-items:center!important;gap:8px!important;justify-content:flex-start!important;'+
+        'width:100%!important;height:auto!important;min-height:34px;margin:0!important;padding:8px 11px!important;'+
+        'border:1px solid rgba(255,255,255,.1)!important;border-radius:10px!important;background:rgba(255,255,255,.045)!important;'+
+        'color:#D7E0DA!important;font:800 11.5px system-ui!important;box-shadow:none!important;transform:none!important;'+
+        'white-space:normal!important;line-height:1.35!important;text-align:start!important;cursor:pointer}'+
+      '#qd379tools button:hover{background:rgba(227,176,25,.14)!important;border-color:rgba(227,176,25,.4)!important;color:#fff!important}'+
+      '#qd379tools button i,#qd379tools button span:first-child{font-style:normal}'+
+      /* شارة الإصدار: تُخفى من فوق المحتوى */
+      '.q379ver{position:fixed!important;left:auto!important;right:auto!important;top:auto!important;bottom:auto!important;'+
+        'display:inline-block!important;margin:6px 8px 0!important;padding:3px 8px!important;border-radius:7px!important;'+
+        'background:rgba(255,255,255,.05)!important;color:#6F7C74!important;font:900 9px system-ui!important;'+
+        'border:1px solid rgba(255,255,255,.08)!important;box-shadow:none!important;opacity:1!important;pointer-events:none;z-index:0!important}';
+      document.head.appendChild(st);
+    }
+
+    function navBox(){
+      var nav=$("nav")||document.querySelector("#sidebar .nav,#sidebar nav");
+      var sb=$("sidebar");
+      if(!nav||!sb) return null;
+      var box=$("qd379tools");
+      if(!box){
+        box=document.createElement("div"); box.id="qd379tools";
+        box.innerHTML='<div class="hd">'+T("الأدوات","TOOLS")+'</div>';
+        if(nav.parentNode===sb) nav.appendChild(box); else sb.appendChild(box);
+      }
+      return box;
+    }
+
+    function move(el,label){
+      try{
+        if(!el||el.getAttribute("data-q379")==="1") return;
+        var box=navBox(); if(!box) return;
+        var row=document.createElement("div"); row.className="row";
+        box.appendChild(row); row.appendChild(el);
+        el.setAttribute("data-q379","1");
+        el.style.cssText="";
+        var t=String(label||"").replace(/[\u{1F300}-\u{1FAFF}\u2600-\u27BF]/gu,"").replace(/\s+/g," ").trim()
+              ||String(el.textContent||"").replace(/[\u{1F300}-\u{1FAFF}\u2600-\u27BF]/gu,"").replace(/\s+/g," ").trim();
+        if(t) el.title=t;
+        /* منع أي نمط سابق يعيده عائمًا */
+        el.classList.add("q379moved");
+      }catch(e){}
+    }
+
+    function hideVersion(){
+      try{
+        var all=document.body.children;
+        for(var i=0;i<all.length;i++){
+          var e=all[i]; if(!e||e.nodeType!==1||e.id==="qd379tools") continue;
+          if(e.getAttribute("data-q379")==="1") continue;
+          var tx=String(e.textContent||"").slice(0,40);
+          if(/^\s*v11-\d{2,4}/.test(tx)){
+            var cs=getComputedStyle(e);
+            if(cs.position==="fixed"||cs.position==="sticky"){
+              e.className=(e.className||"")+" q379ver";
+              var box=navBox(); if(box){ box.appendChild(e); e.setAttribute("data-q379","1"); }
+            }
+          }
+        }
+      }catch(e){}
+    }
+
+    function scan(){
+      try{
+        if(document.hidden) return;
+        css();
+        IDS.forEach(function(id){
+          var e=$(id);
+          if(e && e.getAttribute("data-q379")!=="1"){
+            /* زر المالك يبقى خارج الشريط إن كانت اللوحة مغلقة لحساب غير مالك */
+            move(e);
+          }
+        });
+        /* أزرار التأهيل/التغذية وغيرها المرسومة بـdata-q361 */
+        var q=document.querySelectorAll('button[data-q361],button[data-q375crown]');
+        for(var i=0;i<q.length;i++) move(q[i]);
+        /* أي زر عائم متبقٍّ على الحافة (شبكة أمان) */
+        var kids=document.body.children;
+        for(var j=0;j<kids.length;j++){
+          var k=kids[j];
+          if(!k||k.nodeType!==1||k.id==="qd379tools"||k.id==="qd379css") continue;
+          if(k.getAttribute&&k.getAttribute("data-q379")==="1") continue;
+          if(k.tagName!=="BUTTON") continue;
+          var cs2=getComputedStyle(k);
+          if(cs2.position!=="fixed") continue;
+          var r=k.getBoundingClientRect();
+          if(r.width<20||r.height<14) continue;
+          if(r.top<40) continue;                      /* لا نلمس أزرار الأعلى */
+          if(/close|q369p|q375p|q374/i.test(k.id||"")) continue;
+          move(k);
+        }
+        hideVersion();
+      }catch(e){}
+    }
+
+    try{ setInterval(scan,1200); }catch(e){}
+    try{ document.addEventListener("DOMContentLoaded",function(){ setTimeout(scan,300); }); }catch(e){}
+    if(document.readyState!=="loading") setTimeout(scan,300);
+    window.QD379={scan:scan};
+  }catch(e){}
+})();
+</script>
+
+<script>
+/* QD380 · LOGIN-SLIM — شاشة الدخول: زر واحد بدل خمسة.
+   الخيارات الثانوية (إعدادات الخادم · تحديث التطبيق · الدخول المحلي المكرّر)
+   تُطوى خلف رابط صغير «⋯ خيارات» بدل أن تُعرض كلها دائمًا. */
+(function(){
+  try{
+    if(window.__qd380) return; window.__qd380=1;
+    var EXTRA=[/إعدادات الخادم/,/Server settings/i,/تحديث التطبيق/,/Update the app/i,
+               /الدخول الآن بالبيانات المحلية/,/Enter now with this device data/i,
+               /الدخول بالبيانات المحلية/,/Enter with local data/i,
+               /فتح إعدادات الخادم/,/Open server settings/i];
+    function isAr(){ try{ var l=localStorage.getItem("qd_lang"); return l?String(l).indexOf("en")!==0:true; }catch(e){ return true; } }
+    function T(a,e){ return isAr()?a:e; }
+
+    function css(){
+      if(document.getElementById("qd380css")) return;
+      var st=document.createElement("style"); st.id="qd380css";
+      st.textContent=
+      '#qd380more{background:none;border:0;color:#8B93A1;font:800 11.5px system-ui;padding:9px 4px;cursor:pointer;display:block;margin:2px auto 0}'+
+      '#qd380more:hover{color:#B5121B}'+
+      '#qd380box{display:none;margin-top:6px;padding-top:8px;border-top:1px dashed #E3E3E3}'+
+      '#qd380box.on{display:block}'+
+      '#qd380box button,#qd380box a{margin-top:7px!important}';
+      document.head.appendChild(st);
+    }
+
+    function loginRoots(){
+      var out=[];
+      ["qdl2Box","rsBox","lgnBox","qdlogin"].forEach(function(id){ var e=document.getElementById(id); if(e) out.push(e); });
+      if(!out.length){
+        var bs=document.querySelectorAll('input[type="password"]');
+        for(var i=0;i<bs.length;i++){
+          var f=bs[i].closest("form")||bs[i].closest('div[class*="card"],div[style*="max-width"]')||bs[i].parentElement.parentElement;
+          if(f) out.push(f);
+        }
+      }
+      return out;
+    }
+
+    function slim(){
+      try{
+        css();
+        if(document.querySelector(".app,.topbar,#sidebar")&&getComputedStyle(document.querySelector(".topbar")||document.body).display!=="none"){
+          var bar=document.querySelector(".topbar");
+          if(bar&&bar.getBoundingClientRect().height>10){ var b=document.getElementById("qd380box"); if(b) b.classList.remove("on"); return; }
+        }
+        loginRoots().forEach(function(root){
+          if(!root||root.getAttribute("data-q380")==="1") return;
+          var btns=[].slice.call(root.querySelectorAll("button"));
+          var extras=[];
+          btns.forEach(function(b){
+            var t=String(b.textContent||"").replace(/\s+/g," ").trim();
+            if(!t) return;
+            for(var i=0;i<EXTRA.length;i++){ if(EXTRA[i].test(t)){ extras.push(b); return; } }
+          });
+          if(extras.length<2) return;
+          var box=document.createElement("div"); box.id="qd380box";
+          var more=document.createElement("button"); more.id="qd380more"; more.type="button";
+          more.textContent=T("⋯ خيارات إضافية","⋯ More options");
+          extras.forEach(function(b){ b.style.width="100%"; box.appendChild(b); });
+          var host=extras[0].parentNode||root;
+          host.appendChild(more); host.appendChild(box);
+          more.onclick=function(e){ e.preventDefault(); e.stopPropagation();
+            var on=!box.classList.contains("on"); box.classList.toggle("on",on);
+            more.textContent=on?T("✕ إخفاء الخيارات","✕ Hide options"):T("⋯ خيارات إضافية","⋯ More options");
+          };
+          root.setAttribute("data-q380","1");
+        });
+      }catch(e){}
+    }
+    try{ setInterval(slim,900); }catch(e){}
+    if(document.readyState!=="loading") setTimeout(slim,400);
+    try{ document.addEventListener("DOMContentLoaded",function(){ setTimeout(slim,300); }); }catch(e){}
+    window.QD380={slim:slim};
+  }catch(e){}
+})();
+</script>
+
+<script>
+/* QD381 · ONE-LOGIN — شاشة دخول واحدة: اسم المستخدم · كلمة المرور · دخول · نسيت كلمة المرور.
+   تلغي كل أزرار الطبقات القديمة من أي شاشة دخول، وتضيف رابط الاستعادة. */
+(function(){
+  try{
+    if(window.__qd381) return; window.__qd381=1;
+    function $(i){ return document.getElementById(i); }
+    function isAr(){ try{ var l=localStorage.getItem("qd_lang"); return l?String(l).indexOf("en")!==0:true; }catch(e){ return true; } }
+    function T(a,e){ return isAr()?a:e; }
+    var KEEP=[/^\s*دخول\s*$/,/^\s*sign in\s*$/i,/^\s*تسجيل الدخول\s*$/,/^\s*login\s*$/i];
+
+    function css(){
+      if($("qd381css")) return;
+      var st=document.createElement("style"); st.id="qd381css";
+      st.textContent=
+      '#qd381fg{display:block;width:100%;box-sizing:border-box;text-align:center;background:none;border:0;color:#B5121B;'+
+      'font:800 12px system-ui;padding:11px 6px 2px;cursor:pointer;text-decoration:underline;text-underline-offset:3px}'+
+      '#qd381fg:hover{opacity:.75}'+
+      '#qd381m{position:fixed;inset:0;z-index:2147483645;background:rgba(8,10,14,.72);display:flex;align-items:center;justify-content:center;padding:18px;direction:rtl}'+
+      '#qd381m .c{width:min(94vw,420px);background:#fff;border-radius:18px;padding:20px 20px 16px;box-shadow:0 30px 80px rgba(0,0,0,.45);font-family:system-ui,Tahoma,sans-serif}'+
+      '#qd381m h3{margin:0 0 8px;font:900 15px system-ui;color:#B5121B}'+
+      '#qd381m p{margin:0 0 12px;font:700 12px/1.9 system-ui;color:#454B54}'+
+      '#qd381m b{color:#111}'+
+      '#qd381m .ok{width:100%;padding:12px;border:0;border-radius:12px;background:#B5121B;color:#fff;font:900 13px system-ui;cursor:pointer}';
+      document.head.appendChild(st);
+    }
+
+    function gateRooms(){
+      var out=[];
+      ["qdl2Box","rsBox","qdl2","lgnBox","qdlogin","loginBox"].forEach(function(id){ var e=$(id); if(e) out.push(e); });
+      if(!out.length){
+        var pw=document.querySelectorAll('input[type="password"]');
+        for(var i=0;i<pw.length;i++){
+          var f=pw[i].closest("form")||pw[i].closest('div[style*="max-width"]')||pw[i].parentElement.parentElement;
+          if(f) out.push(f);
+        }
+      }
+      return out;
+    }
+
+    function clean(){
+      css();
+      gateRooms().forEach(function(root){
+        if(!root) return;
+        var btns=[].slice.call(root.querySelectorAll("button"));
+        var primary=null;
+        btns.forEach(function(b){
+          var t=String(b.textContent||"").replace(/\s+/g," ").trim();
+          if(!t) return;
+          var keep=KEEP.some(function(r){ return r.test(t); });
+          if(keep){ if(!primary) primary=b; return; }
+          if(b.id==="qd381fg") return;
+          /* كل ما ليس زر الدخول الأساسي يُحذف من الشاشة */
+          if(b.parentNode) b.parentNode.removeChild(b);
+        });
+        if(primary && !$("qd381fg")){
+          var a=document.createElement("button"); a.id="qd381fg"; a.type="button";
+          a.textContent=T("نسيت كلمة المرور؟","Forgot your password?");
+          a.onclick=function(e){ e.preventDefault(); e.stopPropagation(); help(); };
+          primary.parentNode.insertBefore(a, primary.nextSibling);
+        }
+      });
+    }
+
+    function help(){
+      css();
+      var old=$("qd381m"); if(old) old.remove();
+      var d=document.createElement("div"); d.id="qd381m";
+      d.innerHTML='<div class="c"><h3>🔑 '+T("استعادة كلمة المرور","Password recovery")+'</h3>'+
+        '<p>'+T("كلمات المرور محفوظة مشفّرة ولا يمكن استخراجها نصًّا — لذلك لا توجد استعادة تلقائية.",
+                 "Passwords are stored as hashes and cannot be recovered as text — there is no automatic reset.")+'</p>'+
+        '<p>'+T("تُغيَّر كلمة المرور من <b>لوحة المالك › المستخدمون › كلمة مرور</b>، أو من شاشة الدخول بحساب المالك.",
+                 "A password is changed from <b>Owner panel › Users › Password</b>, or by signing in with the owner account.")+'</p>'+
+        '<p>'+T("إن فقدت حساب المالك نفسه: افتح <b>الإعدادات › نسخ احتياطي</b> على جهاز يعمل فيه الحساب، أو استعد نسخة احتياطية.",
+                 "If the owner account itself is lost: open <b>Settings › Backup</b> on a device where it still works, or restore a backup.")+'</p>'+
+        '<button class="ok" id="qd381mc">'+T("حسنًا","OK")+'</button></div>';
+      document.documentElement.appendChild(d);
+      $("qd381mc").onclick=function(){ d.remove(); };
+      d.onclick=function(e){ if(e.target===d) d.remove(); };
+    }
+
+    try{ setInterval(clean,800); }catch(e){}
+    if(document.readyState!=="loading") setTimeout(clean,500);
+    try{ document.addEventListener("DOMContentLoaded",function(){ setTimeout(clean,400); }); }catch(e){}
+    window.QD381={clean:clean,help:help};
   }catch(e){}
 })();
 </script>
