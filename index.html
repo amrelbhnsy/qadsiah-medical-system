@@ -49708,6 +49708,7 @@ return map;
       '<input id="g_p" type="password" placeholder="كلمة المرور" dir="ltr" autocomplete="current-password" style="width:100%;box-sizing:border-box;border:1px solid #E4E0D6;border-radius:10px;padding:11px;font:800 13px inherit;margin-bottom:8px;outline:0">'+
       '<button id="g_go" style="width:100%;border:0;border-radius:10px;padding:11px;background:#B5121B;color:#fff;font:900 13px inherit;cursor:pointer">دخول</button>'+
       '<div id="g_m" style="margin-top:9px;font:800 11px inherit;color:#B5121B;min-height:14px"></div>'+
+      '<button id="g_rec" type="button" style="width:100%;margin-top:6px;border:1.5px dashed #B5121B;background:#FFF5F5;color:#B5121B;border-radius:10px;padding:10px;font:900 11.5px inherit;cursor:pointer">🔑 استعادة / إنشاء حساب المالك</button>'+
       '<div style="margin-top:10px;font:700 10px inherit;color:#9AA0AA;line-height:1.8">إدارة الحسابات من قسم «المستخدمون». نسيت كلمة المرور؟ يغيّرها مدير النظام من نفس القسم.</div></div>';
     document.body.appendChild(d);
     function go(){
@@ -49723,6 +49724,8 @@ return map;
     }
     $("g_go").onclick=go;
     $("g_p").onkeydown=function(e){ if(e.key==="Enter") go(); };
+    try{ var gr=$("g_rec"); if(gr) gr.onclick=function(ev){ ev.preventDefault(); ev.stopPropagation();
+      if(window.QD383&&QD383.form) QD383.form(""); }; }catch(e){}
     setTimeout(function(){ try{ $("g_u").focus(); }catch(e){} },120);
   }
   function logout(){
@@ -51289,6 +51292,44 @@ return map;
     if(document.readyState!=="loading") setTimeout(tick,500);
     try{ document.addEventListener("DOMContentLoaded",function(){ setTimeout(tick,400); }); }catch(e){}
     window.QD383={form:form};
+  }catch(e){}
+})();
+</script>
+
+<script>
+/* QD384 · AUTO-UPDATE — ينهي خدمة الكاش القديمة مرة واحدة فقط.
+   كان زر «تحديث التطبيق» هو ما يمسح الكاش، وقد حُذف مع تبسيط شاشة الدخول.
+   هذه الوحدة تُلغي Service Worker وتحذف كاشات الصفحة (دون مسّ localStorage،
+   فلا تُفقد بيانات اللاعبين) ثم تعيد التحميل مرة واحدة. */
+(function(){
+  try{
+    if(window.__qd384) return; window.__qd384=1;
+    var FLAG="qd384_sw_done", VER="384";
+    var done=false; try{ done=localStorage.getItem(FLAG)===VER; }catch(e){}
+    if(done) return;
+    var jobs=[];
+    try{
+      if("serviceWorker" in navigator && navigator.serviceWorker.getRegistrations){
+        jobs.push(navigator.serviceWorker.getRegistrations().then(function(rs){
+          return Promise.all(rs.map(function(r){ return r.unregister(); }));
+        }).catch(function(){}));
+      }
+    }catch(e){}
+    try{
+      if(window.caches&&caches.keys){
+        jobs.push(caches.keys().then(function(ks){
+          return Promise.all(ks.map(function(k){ return caches.delete(k); }));
+        }).catch(function(){}));
+      }
+    }catch(e){}
+    Promise.all(jobs).then(function(){
+      try{ localStorage.setItem(FLAG,VER); }catch(e){}
+      /* أعِد التحميل فقط إن كان هناك Service Worker يتحكم بالصفحة */
+      try{
+        var hadSW = !!(navigator.serviceWorker && navigator.serviceWorker.controller);
+        if(hadSW){ location.reload(); }
+      }catch(e){}
+    }).catch(function(){ try{ localStorage.setItem(FLAG,VER); }catch(e){} });
   }catch(e){}
 })();
 </script>
