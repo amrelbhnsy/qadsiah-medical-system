@@ -52275,6 +52275,119 @@ return map;
   }catch(e){}
 })();
 </script>
+
+<script>
+/* QD395 · FULL-I18N — ترجمة كامل الواجهة لا القائمة فقط.
+   يبني قاموسًا عكسيًّا من STR (عربي ⇒ إنجليزي) ويمرّ على كل نصوص الصفحة،
+   فالنوافذ والأقسام والجداول تُترجم أيضًا. */
+(function(){
+  try{
+    if(window.__qd395) return; window.__qd395=1;
+    function isEn(){ try{ var l=localStorage.getItem("qd_lang"); return l?String(l).indexOf("en")===0:false; }catch(e){ return false; } }
+    var REV=null, EXTRA=null;
+
+    function build(){
+      REV={}; EXTRA={};
+      try{
+        var ar=(typeof STR!=="undefined"&&STR.ar)||{}, en=(typeof STR!=="undefined"&&STR.en)||{};
+        Object.keys(ar).forEach(function(k){
+          var a=String(ar[k]||"").trim(), e=String(en[k]||"").trim();
+          if(a&&e&&a!==e&&/[\u0600-\u06FF]/.test(a)&&!REV[a]) REV[a]=e;
+        });
+      }catch(e){}
+      /* ما لم يوجد في القاموس — مأخوذ من الشاشات الفعلية */
+      var X={
+        "لوحة الجاهزية اليوم":"Readiness dashboard",
+        "جاهزون":"Ready","حذر / خطر":"Caution / risk",
+        "لديهم استبيان":"With wellness","لديهم حمل ACWR":"With ACWR load",
+        "السبب الرئيسي":"Main reason","الويلنس":"Wellness","الفحص الشامل":"Full screening",
+        "الوقاية والتأهيل":"Prevention & rehab","الصحة النفسية":"Mental health",
+        "الأدلة والحسابات":"Evidence & scores","الجاهزية اليومية":"Daily readiness",
+        "اللاعبون — مرتبون من الأدنى":"Players — lowest first",
+        "الدرجة = 40% ويلنس + 30% حمل + 30% إتاحة طبية . إصابة نشطة تحدّ الدرجة بـ 25":
+          "Score = 40% wellness + 30% load + 30% medical availability. An active injury caps the score at 25.",
+        "تفصيل":"Details","تعديل":"Edit","حذف":"Delete","إضافة":"Add","حفظ":"Save","إغلاق":"Close",
+        "محرك حساب مبني على الدراسات":"Calculation engine built on the literature",
+        "أقسام مدمجة في":"sections merged into",
+        "مصدر واحد للقراءة اليومية":"a single source for daily reading",
+        "دُمج فيها":"Merged into it","الاستبيان اليومي":"Daily wellness",
+        "الحمل والجاهزية":"Load & readiness","التقييم اليومي":"Daily assessment",
+        "مشرف أخصائي":"Specialist supervisor","مدير كامل":"Full admin",
+        "المالك — صلاحيات كاملة":"Owner — full permissions",
+        "قاعدة محلية · حفظ تلقائي":"Local database · auto-saved",
+        "المستخدمون والصلاحيات":"Users & permissions","قسم":"section","قسمًا":"sections"
+      };
+      Object.keys(X).forEach(function(k){ EXTRA[k]=X[k]; });
+    }
+    function lookup(t){
+      if(!REV) build();
+      if(EXTRA[t]) return EXTRA[t];
+      if(REV[t]) return REV[t];
+      return null;
+    }
+    function sweep(){
+      if(!isEn()) return;
+      try{
+        if(!REV) build();
+        var w=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT,{acceptNode:function(n){
+          if(!n.nodeValue||!n.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
+          var p=n.parentNode;
+          if(!p) return NodeFilter.FILTER_REJECT;
+          if(/^(SCRIPT|STYLE|TEXTAREA|OPTION)$/.test(p.tagName)) return NodeFilter.FILTER_REJECT;
+          if(p.isContentEditable) return NodeFilter.FILTER_REJECT;
+          return /[\u0600-\u06FF]/.test(n.nodeValue)?NodeFilter.FILTER_ACCEPT:NodeFilter.FILTER_REJECT;
+        }});
+        var hits=[],n2;
+        while((n2=w.nextNode())) hits.push(n2);
+        for(var i=0;i<hits.length;i++){
+          var tn=hits[i], raw=tn.nodeValue;
+          var key=raw.replace(/\s+/g," ").trim();
+          var en=lookup(key);
+          if(en){ tn.nodeValue=raw.replace(key,en); continue; }
+          /* «36 لاعبًا» ⇒ «36 players» */
+          var m=key.match(/^(\d+)\s*(لاعب|لاعبًا|لاعبين|إصابة|إصابات|جلسة|جلسات|مباراة|مباريات|يوم|أيام)$/);
+          if(m){
+            var mp={لاعب:"players",لاعبًا:"players",لاعبين:"players",إصابة:"injuries",إصابات:"injuries",
+                    جلسة:"sessions",جلسات:"sessions",مباراة:"matches",مباريات:"matches",يوم:"days",أيام:"days"};
+            tn.nodeValue=raw.replace(key,m[1]+" "+mp[m[2]]);
+          }
+        }
+        /* placeholders */
+        document.querySelectorAll("input[placeholder]").forEach(function(el){
+          var ph=el.getAttribute("placeholder")||"";
+          if(!/[\u0600-\u06FF]/.test(ph)) return;
+          var t=lookup(ph.replace(/\s+/g," ").trim());
+          if(t) el.setAttribute("placeholder",t);
+        });
+      }catch(e){}
+    }
+    function dir(){
+      try{
+        var en=isEn();
+        document.documentElement.dir = en?"ltr":"rtl";
+        document.documentElement.lang = en?"en":"ar";
+        /* النوافذ المبنية بـdirection:rtl تصبح ltr */
+        document.querySelectorAll('[style*="direction: rtl"],[style*="direction:rtl"]').forEach(function(el){
+          el.style.direction = en?"ltr":"rtl";
+        });
+      }catch(e){}
+    }
+    function all(){ dir(); sweep(); }
+    try{ setInterval(all,1100); }catch(e){}
+    if(document.readyState!=="loading") setTimeout(all,300);
+    try{ document.addEventListener("DOMContentLoaded",function(){ setTimeout(all,300); }); }catch(e){}
+    try{ if(window.MutationObserver){ new MutationObserver(function(){ try{ if(isEn()) all(); }catch(e){} }).observe(document.body,{childList:true,subtree:true}); } }catch(e){}
+    try{
+      if(typeof setLang==="function"){
+        var _s=setLang;
+        var w2=function(l){ build(); var r=_s.apply(this,arguments); setTimeout(all,30); setTimeout(all,300); return r; };
+        setLang=w2; try{ window.setLang=w2; window.__setLang=w2; }catch(e){}
+      }
+    }catch(e){}
+    window.QD395={sweep:sweep,dir:dir,rebuild:function(){ REV=null; build(); }};
+  }catch(e){}
+})();
+</script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 </body>
 </html>
