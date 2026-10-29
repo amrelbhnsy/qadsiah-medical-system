@@ -51013,28 +51013,9 @@ return map;
     }
 
     function clean(){
-      css();
-      gateRooms().forEach(function(root){
-        if(!root) return;
-        var btns=[].slice.call(root.querySelectorAll("button"));
-        var primary=null;
-        btns.forEach(function(b){
-          var t=String(b.textContent||"").replace(/\s+/g," ").trim();
-          if(!t) return;
-          var keep=KEEP.some(function(r){ return r.test(t); });
-          if(keep){ if(!primary) primary=b; return; }
-          if(b.id==="qd381fg"||b.id==="qd382boot"||b.id==="qd382banner") return;
-          /* كل ما ليس زر الدخول الأساسي يُحذف من الشاشة */
-          if(b.parentNode) b.parentNode.removeChild(b);
-        });
-        if(primary && !$("qd381fg")){
-          var a=document.createElement("button"); a.id="qd381fg"; a.type="button";
-          a.textContent=T("نسيت كلمة المرور؟","Forgot your password?");
-          a.onclick=function(e){ e.preventDefault(); e.stopPropagation(); help(); };
-          primary.parentNode.insertBefore(a, primary.nextSibling);
-        }
-      });
-    }
+      /* QD385: أوقفت — كانت تحذف زر الاستعادة من شاشة الدخول */
+      return;
+}
 
     function help(){
       css();
@@ -51213,6 +51194,7 @@ return map;
     function form(preUser){
       css();
       var old=$("qd383m"); if(old) old.remove();
+      try{ var ob=$("qd383err"); if(ob&&ob.parentNode) ob.parentNode.removeChild(ob); }catch(e){}
       var list=users(), existing=preUser||"";
       var d=document.createElement("div"); d.id="qd383m";
       d.innerHTML='<div class="c"><div class="h">👑 '+T("إنشاء / استعادة حساب المالك","Create / recover owner account")+
@@ -51283,9 +51265,24 @@ return map;
       }catch(e){}
     }
 
+    function injectBtn(){
+      try{
+        if($("qd383err")||$("qd383m")) return;
+        var pw=document.querySelector('input[type="password"]'); if(!pw) return;
+        var card=pw.closest("form")||pw.parentElement&&pw.parentElement.parentElement;
+        if(!card||card.querySelector('input[type="password"]')!==pw) card=pw.parentElement;
+        if(!card) return;
+        var b=document.createElement("button"); b.id="qd383err"; b.type="button";
+        b.style.cssText="width:100%;margin-top:10px;border:1.5px dashed #B5121B;background:#FFF5F5;color:#B5121B;border-radius:10px;padding:10px;font:900 11.5px system-ui,Tahoma,sans-serif;cursor:pointer;direction:rtl";
+        b.textContent=T("🔑 استعادة / إنشاء حساب المالك","🔑 Create / recover owner account");
+        b.onclick=function(ev){ ev.preventDefault(); ev.stopPropagation(); form(""); };
+        card.appendChild(b);
+      }catch(e){}
+    }
     function tick(){
       css();
       if(forced() && !$("qd383m")) { form(""); return; }
+      injectBtn();
       hookErrors();
     }
     try{ setInterval(tick,900); }catch(e){}
@@ -51330,6 +51327,102 @@ return map;
         if(hadSW){ location.reload(); }
       }catch(e){}
     }).catch(function(){ try{ localStorage.setItem(FLAG,VER); }catch(e){} });
+  }catch(e){}
+})();
+</script>
+
+<script>
+/* QD385 · USERS-NAV — قسم «المستخدمون» لم يكن داخل مصفوفة NAV أصلًا،
+   فكان showView("access") يسقط إلى NAV[0] ويُظهر «لوحة التحكم» — أي أنه «لا يفتح».
+   هذه الوحدة تضيفه إلى NAV فعليًا وتضمن وجود قسمه ومحتواه. */
+(function(){
+  try{
+    if(window.__qd385) return; window.__qd385=1;
+    function $(i){ return document.getElementById(i); }
+    function isAr(){ try{ var l=localStorage.getItem("qd_lang"); return l?String(l).indexOf("en")!==0:true; }catch(e){ return true; } }
+    function T(a,e){ return isAr()?a:e; }
+
+    function ensureI18n(){
+      try{ if(typeof STR!=="undefined"&&STR){
+        STR.ar=STR.ar||{}; STR.en=STR.en||{};
+        STR.ar.nav_access="المستخدمون"; STR.en.nav_access="Users";
+        STR.ar.sub_access="من يستطيع الدخول وما المسموح له"; STR.en.sub_access="Who can sign in and what they may do";
+        STR.ar.grp_admin=STR.ar.grp_admin||"الإدارة"; STR.en.grp_admin=STR.en.grp_admin||"ADMIN";
+      } }catch(e){}
+      try{ if(typeof window.QD378==="object"&&QD378.inject) QD378.inject(); }catch(e){}
+    }
+
+    function navArr(){
+      try{ if(window.__QDAPP&&Array.isArray(window.__QDAPP.NAV)) return window.__QDAPP.NAV; }catch(e){}
+      try{ if(typeof NAV!=="undefined") return NAV; }catch(e){}
+      return null;
+    }
+
+    function ensureNav(){
+      var nav=navArr(); if(!nav) return false;
+      if(!nav.some(function(n){ return n&&n.id==="access"; })){
+        nav.push({id:"access",label:"nav_access",icon:"settings",sub:"sub_access",grp:"grp_admin"});
+      }
+      return true;
+    }
+
+    function ensureSection(){
+      try{
+        if($("v-access")) return;
+        var main=document.querySelector("main")||document.querySelector(".main")||document.querySelector("#main");
+        if(!main) return;
+        var sec=document.createElement("section"); sec.className="view"; sec.id="v-access";
+        main.appendChild(sec);
+      }catch(e){}
+    }
+
+    function paint(){
+      try{
+        ensureI18n(); ensureSection();
+        if(ensureNav()){
+          try{ if(typeof renderNav==="function") renderNav(); }catch(e){}
+        }
+        /* زر القائمة: إن لم يُرسم، أضفه يدويًا في نهاية الشريط */
+        var n=$("nav");
+        if(n && !n.querySelector('[data-view="access"]')){
+          var b=document.createElement("button"); b.className="nav-item"; b.setAttribute("data-view","access");
+          b.innerHTML='<span>'+T("المستخدمون","Users")+'</span>';
+          n.appendChild(b);
+        }
+        /* محتوى القسم: استخدم عارض نظام الحسابات الرسمي */
+        var v=$("v-access");
+        if(v && (v.innerText||"").trim().length<20){
+          try{
+            if(window.QD356&&QD356.render){ QD356.render(); }
+            else if(typeof REND==="object"&&REND.access){ REND.access(); }
+          }catch(e){}
+        }
+      }catch(e){}
+    }
+
+    /* اعترض النقر: إن كان القسم غير مسجّل في NAV، افتحه مباشرة بدل السقوط إلى لوحة التحكم */
+    document.addEventListener("click",function(e){
+      var t=e.target;
+      if(!t||!t.closest) return;
+      var b=t.closest('[data-view="access"]');
+      if(!b) return;
+      try{
+        ensureNav(); ensureSection();
+        if(typeof showView==="function") showView("access");
+        else{
+          var v=$("v-access"); if(v){ document.querySelectorAll(".view").forEach(function(x){ x.classList.remove("active"); }); v.classList.add("active"); }
+        }
+        try{ if(window.QD356&&QD356.render) QD356.render(); }catch(x){}
+        try{ var nv=$("#nav"); if(nv) nv.querySelectorAll(".nav-item").forEach(function(x){ x.classList.toggle("active",x===b); }); }catch(x){}
+        try{ if(typeof $==="function"){ var pt=$("#pgTitle"), ps=$("#pgSub"); if(pt) pt.textContent=T("المستخدمون","Users"); if(ps) ps.textContent=T("من يستطيع الدخول وما المسموح له","Who can sign in and what they may do"); } }catch(x){}
+        try{ document.getElementById("sidebar").classList.remove("open"); }catch(x){}
+      }catch(x){}
+    },true);
+
+    try{ setInterval(paint,1500); }catch(e){}
+    if(document.readyState!=="loading") setTimeout(paint,600);
+    try{ document.addEventListener("DOMContentLoaded",function(){ setTimeout(paint,500); }); }catch(e){}
+    window.QD385={paint:paint};
   }catch(e){}
 })();
 </script>
