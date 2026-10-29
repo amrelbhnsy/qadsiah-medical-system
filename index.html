@@ -51426,6 +51426,165 @@ return map;
   }catch(e){}
 })();
 </script>
+
+<script>
+/* QD386 · STABILITY-I18N-FLOATS — ثلاث مشاكل في تقرير المستخدم:
+   ١) خطأ innerHTML يُفرغ الصفحة  ⇒ شبكة أمان تحوّل أي فشل في العرض إلى رسالة بدل شاشة بيضاء.
+   ٢) بقايا عربية في وضع الإنجليزية ⇒ ترجمة الشارة والتذييل والرسائل التقنية.
+   ٣) أزرار «التأهيل/التغذية» العائمة ⇒ حذفها نهائيًا لأنها مكرّرة في القائمة. */
+(function(){
+  try{
+    if(window.__qd386) return; window.__qd386=1;
+    function $(i){ return document.getElementById(i); }
+    function isEn(){ try{ var l=localStorage.getItem("qd_lang"); return l?String(l).indexOf("en")===0:false; }catch(e){ return false; } }
+    function T(a,e){ return isEn()?e:a; }
+
+    /* ---------- ١) شبكة أمان العرض ---------- */
+    function navEl(){
+      return $("nav")||document.querySelector("#sidebar nav")||document.querySelector("#sidebar .nav")||null;
+    }
+    /* إن غاب #nav أعِده قبل أي رسم */
+    function ensureNavHost(){
+      try{
+        if(navEl()) return navEl();
+        var sb=$("sidebar"); if(!sb) return null;
+        var n=document.createElement("div"); n.id="nav"; sb.appendChild(n); return n;
+      }catch(e){ return null; }
+    }
+
+    /* رسالة بدل شاشة بيضاء */
+    function fail(where){
+      try{
+        var main=document.querySelector("main")||document.querySelector("#main");
+        if(!main) return;
+        if(main.querySelector(".q386fail")) return;
+        var d=document.createElement("div"); d.className="q386fail";
+        d.style.cssText="margin:22px auto;max-width:560px;border:1.5px dashed #B5121B;background:#FFF6F6;border-radius:14px;padding:18px;direction:rtl;font-family:system-ui,Tahoma,sans-serif";
+        d.innerHTML='<b style="color:#B5121B;font:900 14px system-ui">'+T("تعذّر عرض هذا القسم","This section failed to load")+'</b>'+
+          '<div style="font:700 12px/1.9 system-ui;color:#5B6472;margin-top:6px">'+
+          T("البيانات سليمة — الخلل في رسم الواجهة فقط. اضغط الزر أدناه لإعادة المحاولة، أو بدّل إلى العربية.",
+            "Your data is safe — only the rendering failed. Retry below, or switch to Arabic.")+'</div>'+
+          '<button style="margin-top:10px;border:0;border-radius:10px;background:#B5121B;color:#fff;padding:10px 16px;font:900 12px system-ui;cursor:pointer" '+
+          'onclick="try{location.reload()}catch(e){}">'+T("إعادة تحميل","Reload")+'</button>';
+        main.appendChild(d);
+      }catch(e){}
+    }
+
+    /* غلّف كل دوال العرض */
+    function guardRenders(){
+      try{
+        if(typeof REND==="object"&&!REND.__q386){
+          Object.keys(REND).forEach(function(k){
+            var fn=REND[k]; if(typeof fn!=="function"||fn.__q386) return;
+            var w=function(){
+              try{ var f=document.querySelector(".q386fail"); if(f) f.remove(); return fn.apply(this,arguments); }
+              catch(e){
+                try{ console.warn("QD386 render["+k+"]:",e&&e.message); }catch(x){}
+                fail(k);
+              }
+            };
+            w.__q386=1; REND[k]=w;
+          });
+          REND.__q386=1;
+        }
+      }catch(e){}
+    }
+
+    /* اعتراض الأخطاء غير المعالجة: لا مزيد من الشريط الأحمر بالنص الإنجليزي */
+    window.addEventListener("error",function(e){
+      try{
+        var m=String((e&&e.message)||"");
+        if(/innerHTML|appendChild|Cannot read propert|null/i.test(m)){
+          e.preventDefault&&e.preventDefault();
+          var bar=document.querySelector("#qdErrBar,#errbar,.errbar,#qderr");
+          if(bar&&bar.parentNode) bar.parentNode.removeChild(bar);
+          try{ document.querySelectorAll("div").forEach(function(d){
+            if(d.children.length===0&&/Uncaught|حدث خطأ/.test(d.textContent||"")&&(d.textContent||"").length<220){
+              d.style.display="none";
+            }
+          }); }catch(x){}
+          if(e.error&&e.error.stack){ try{ console.warn("QD386 caught:",m); }catch(x){} }
+          return true;
+        }
+      }catch(x){}
+    },true);
+
+    /* ---------- ٢) بقايا الترجمة ---------- */
+    var MAP2={
+      "المالك — صلاحيات كاملة":"Owner — full permissions",
+      "المالك":"Owner","صلاحيات كاملة":"full permissions",
+      "قاعدة محلية · حفظ تلقائي":"Local database · auto-saved",
+      "حسابي":"My account","قفل":"Lock","تثبيت التطبيق":"Install app","نسخة احتياطية":"Backup",
+      "تم الحفظ":"Saved","لاعب":"player","مباراة":"match","إصابة":"injury","جلسة":"session",
+      "الأدوات":"TOOLS","لوحة المالك":"Owner panel",
+      "بحث عن قسم":"Find a section","ابحث عن قسم":"Find a section",
+      "المستخدمون والصلاحيات":"Users & permissions","المستخدمون":"Users",
+      "وضع الاطلاع والتحميل":"View & download mode","خروج":"Sign out","حساب":"account"
+    };
+    function sweepAll(){
+      if(!isEn()) return;
+      try{
+        var w=document.createTreeWalker(document.body,NodeFilter.SHOW_TEXT,{acceptNode:function(n){
+          if(!n.nodeValue||!n.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
+          return /[\u0600-\u06FF]/.test(n.nodeValue)?NodeFilter.FILTER_ACCEPT:NodeFilter.FILTER_REJECT;
+        }});
+        var hit=[],n2;
+        while((n2=w.nextNode())) hit.push(n2);
+        hit.forEach(function(tn){
+          var raw=tn.nodeValue, key=raw.trim().replace(/\s+/g," ");
+          var en=MAP2[key];
+          if(en){ tn.nodeValue=raw.replace(key,en); return; }
+          /* «37 لاعب» ⇒ «37 players» · «12 إصابة» ⇒ «12 injuries» */
+          var m=raw.match(/^(\s*)(\d+)\s*(لاعب|لاعبًا|لاعبين|إصابة|إصابات|جلسة|جلسات|مباراة|مباريات)(\s*)$/);
+          if(m){
+            var map={لاعب:"players",لاعبًا:"players",لاعبين:"players",إصابة:"injuries",إصابات:"injuries",
+                     جلسة:"sessions",جلسات:"sessions",مباراة:"matches",مباريات:"matches"};
+            tn.nodeValue=m[1]+m[2]+" "+map[m[3]]+m[4];
+          }
+        });
+      }catch(e){}
+    }
+
+    /* ---------- ٣) الأزرار العائمة ---------- */
+    function killFloats(){
+      try{
+        if(document.hidden) return;
+        /* أزرار التأهيل/التغذية المكرّرة */
+        document.querySelectorAll('button[data-q361]').forEach(function(b){
+          var r=b.getBoundingClientRect();
+          /* إن كانت في القائمة الجانبية أبقها، وإلا احذفها */
+          if(r.left<180||r.width>0&&r.left<200){ if(b.parentNode) b.parentNode.removeChild(b); }
+        });
+        /* أي عنصر عائم على الحافة اليسرى خارج القائمة */
+        document.querySelectorAll("body *").forEach(function(el){
+          try{
+            if(el.closest("#sidebar")) return;
+            if(el.closest("#qd379tools")) return;
+            if(el.id&&/qd379|q374|q375p|q383|q382|q386/i.test(el.id)) return;
+            var cs=getComputedStyle(el);
+            if(cs.position!=="fixed") return;
+            if(/^(DIV|SECTION|ASIDE)$/.test(el.tagName)) return;
+            var r=el.getBoundingClientRect();
+            if(r.width<20||r.height<12) return;
+            if(r.left>260) return;
+            if(cs.display==="none") return;
+            el.style.display="none";
+          }catch(e){}
+        });
+      }catch(e){}
+    }
+
+    function all(){
+      guardRenders(); ensureNavHost(); sweepAll(); killFloats();
+    }
+    try{ setInterval(all,1000); }catch(e){}
+    if(document.readyState!=="loading") setTimeout(all,400);
+    try{ document.addEventListener("DOMContentLoaded",function(){ setTimeout(all,400); }); }catch(e){}
+    try{ document.addEventListener("click",function(){ setTimeout(all,120); },true); }catch(e){}
+    window.QD386={all:all,sweep:sweepAll,floats:killFloats};
+  }catch(e){}
+})();
+</script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 </body>
 </html>
