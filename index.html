@@ -51585,6 +51585,494 @@ return map;
   }catch(e){}
 })();
 </script>
+
+<script>
+/* QD387 · ABSENT-GROUP — زر واحد: إرسال قائمة «لم يشاركوا في تدريب اليوم»
+   إلى جروب الواتساب لمن كان غيابه أقل من ١٠ أيام، مع نافذة تعديل قبل الإرسال. */
+(function(){
+  try{
+    if(window.__qd387) return; window.__qd387=1;
+    var GRPKEY="qd_wa_group", LIM=10;
+    function $(i){ return document.getElementById(i); }
+    function isEn(){ try{ var l=localStorage.getItem("qd_lang"); return l?String(l).indexOf("en")===0:false; }catch(e){ return false; } }
+    function T(a,e){ return isEn()?e:a; }
+    function toast(m){
+      try{ if(typeof window.toast==="function") return window.toast(m); }catch(e){}
+      var d=$("qd387t"); if(!d){ d=document.createElement("div"); d.id="qd387t";
+        d.style.cssText="position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#0B1118;color:#E3B019;border:1px solid rgba(227,176,25,.5);padding:10px 18px;border-radius:11px;font:900 12px system-ui;z-index:2147483647;direction:rtl";
+        document.body.appendChild(d); }
+      d.textContent=m; d.style.opacity="1"; clearTimeout(d.__h);
+      d.__h=setTimeout(function(){ d.style.opacity="0"; },2600);
+    }
+
+    /* ---------- البيانات ---------- */
+    function absent(){
+      try{ if(window.QD248&&QD248.absentList) return QD248.absentList()||[]; }catch(e){}
+      return [];
+    }
+    function eligible(){
+      return absent().filter(function(p){ return p && p.days<LIM; }).sort(function(a,b){ return a.days-b.days; });
+    }
+    function reasonAr(p){
+      var m={inj:"إصابة",ill:"مرض",team:"مع فريق آخر",nt:"استدعاء منتخب"};
+      return (p.reasons||[]).map(function(r){ return m[r]||r; }).join(" + ");
+    }
+    function reasonEn(p){
+      var m={inj:"injury",ill:"illness",team:"with another team",nt:"national call-up"};
+      return (p.reasons||[]).map(function(r){ return m[r]||r; }).join(" + ");
+    }
+    function todayLabel(){
+      try{ var d=new Date(); return d.toLocaleDateString(isEn()?"en-GB":"ar-EG",{day:"2-digit",month:"short",year:"numeric"}); }catch(e){ return ""; }
+    }
+
+    function build(list){
+      var h="";
+      if(isEn()){
+        h+="*Al-Qadsiah U18 — Medical*\n";
+        h+="Players not training today ("+todayLabel()+")\n\n";
+        list.forEach(function(p,i){ h+=(i+1)+") "+p.name+" — "+reasonEn(p)+" · day "+p.days+"\n"; });
+        h+="\nTotal: "+list.length+" players.\n";
+        h+="Please coordinate with the medical team before returning to training.\n— Medical staff";
+      } else {
+        h+="*القادسية تحت ١٨ — الجهاز الطبي*\n";
+        h+="لاعبون لم يشاركوا في تدريب اليوم ("+todayLabel()+")\n\n";
+        list.forEach(function(p,i){ h+=(i+1)+") "+p.name+" — "+reasonAr(p)+" · اليوم "+p.days+"\n"; });
+        h+="\nالإجمالي: "+list.length+" لاعبًا.\n";
+        h+="يُرجى التنسيق مع الجهاز الطبي قبل عودة اللاعب للتدريب.\n— الجهاز الطبي";
+      }
+      return h;
+    }
+
+    /* ---------- النافذة ---------- */
+    function css(){
+      if($("qd387css")) return;
+      var st=document.createElement("style"); st.id="qd387css";
+      st.textContent=
+      '#qd387m{position:fixed;inset:0;z-index:2147483640;background:rgba(8,10,14,.72);display:flex;align-items:flex-start;justify-content:center;padding:20px 14px;overflow:auto;direction:rtl}'+
+      '#qd387m .c{width:min(96vw,620px);margin:auto;background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 30px 90px rgba(0,0,0,.5);font-family:system-ui,Tahoma,sans-serif}'+
+      '#qd387m .h{background:linear-gradient(120deg,#0F172A,#243343);color:#fff;padding:14px 18px;display:flex;align-items:center;gap:9px}'+
+      '#qd387m .h b{font:900 14px system-ui}#qd387m .h span{font:800 10.5px system-ui;color:#AEB8C7}'+
+      '#qd387m .b{padding:14px 18px}'+
+      '#qd387m h5{margin:0 0 7px;font:900 11.5px system-ui;color:#5B6472}'+
+      '#qd387m .pl{max-height:168px;overflow:auto;border:1px solid #E7E4DC;border-radius:11px;padding:6px}'+
+      '#qd387m .pl label{display:flex;align-items:center;gap:8px;padding:6px 7px;border-radius:8px;font:800 11.5px system-ui;color:#1B2432;cursor:pointer}'+
+      '#qd387m .pl label:hover{background:#FBF8F1}'+
+      '#qd387m .pl input{accent-color:#B5121B;width:15px;height:15px}'+
+      '#qd387m .pl i{font-style:normal;color:#8A8F98;font:800 10.5px system-ui;margin-inline-start:auto}'+
+      '#qd387m textarea{width:100%;box-sizing:border-box;min-height:160px;border:1px solid #E7E4DC;border-radius:11px;padding:11px;font:700 12px/1.8 system-ui;direction:rtl;outline:0;resize:vertical}'+
+      '#qd387m .row{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}'+
+      '#qd387m .row button{border:0;border-radius:10px;padding:10px 14px;font:900 12px system-ui;cursor:pointer}'+
+      '#qd387m .g{background:#1FA855;color:#fff}#qd387m .k{background:#0F172A;color:#fff}'+
+      '#qd387m .o{background:#F1F2F4;color:#454B54}'+
+      '#qd387m input[type=text]{width:100%;box-sizing:border-box;border:1px solid #E7E4DC;border-radius:10px;padding:9px 11px;font:700 11.5px system-ui;direction:ltr;margin-top:6px}';
+      document.head.appendChild(st);
+    }
+
+    function open(){
+      css();
+      var list=eligible();
+      if(!list.length){ toast(T("لا يوجد لاعب بغياب أقل من ١٠ أيام اليوم","No player with absence under 10 days today")); return; }
+      var old=$("qd387m"); if(old) old.remove();
+      var d=document.createElement("div"); d.id="qd387m";
+      d.innerHTML='<div class="c"><div class="h"><b>📤 '+T("إرسال إلى جروب الواتساب","Send to WhatsApp group")+'</b>'+
+        '<span>'+T("غياب أقل من ١٠ أيام","absence under 10 days")+' · '+list.length+'</span></div>'+
+        '<div class="b">'+
+        '<h5>'+T("اللاعبون المشمولون — أزل علامة من لا تريده","Included players — untick any to exclude")+'</h5>'+
+        '<div class="pl" id="qd387pl">'+list.map(function(p,i){
+            return '<label><input type="checkbox" data-i="'+i+'" checked> '+p.name+' <i>'+reasonAr(p)+' · '+p.days+' '+T("يوم","d")+'</i></label>';
+          }).join("")+'</div>'+
+        '<h5 style="margin-top:12px">'+T("نص الرسالة — عدّله كما تريد","Message text — edit as needed")+'</h5>'+
+        '<textarea id="qd387tx"></textarea>'+
+        '<h5 style="margin-top:12px">'+T("رابط الجروب (مرة واحدة)","Group link (saved once)")+'</h5>'+
+        '<input type="text" id="qd387gl" placeholder="https://chat.whatsapp.com/..." value="'+String(localStorage.getItem(GRPKEY)||"").replace(/"/g,"&quot;")+'">'+
+        '<div class="row"><button class="g" id="qd387go">'+T("فتح الجروب وإرسال","Open group & send")+'</button>'+
+        '<button class="k" id="qd387cp">'+T("نسخ النص","Copy text")+'</button>'+
+        '<button class="o" id="qd387close">'+T("إغلاق","Close")+'</button></div>'+
+        '</div></div>';
+      document.documentElement.appendChild(d);
+
+      function picked(){
+        var out=[], cb=d.querySelectorAll("#qd387pl input");
+        for(var i=0;i<cb.length;i++){ if(cb[i].checked) out.push(list[Number(cb[i].getAttribute("data-i"))]); }
+        return out;
+      }
+      function refresh(){ $("qd387tx").value=build(picked()); }
+      d.querySelectorAll("#qd387pl input").forEach(function(cb){ cb.onchange=refresh; });
+      refresh();
+      $("qd387close").onclick=function(){ d.remove(); };
+      $("qd387cp").onclick=function(){ try{ navigator.clipboard.writeText($("qd387tx").value); toast(T("تم النسخ","Copied")); }catch(e){ $("qd387tx").select(); document.execCommand("copy"); toast(T("تم النسخ","Copied")); } };
+      $("qd387go").onclick=function(){
+        var link=$("qd387gl").value.trim(), txt=$("qd387tx").value;
+        if(link){ try{ localStorage.setItem(GRPKEY,link); }catch(e){} }
+        var url="https://wa.me/?text="+encodeURIComponent(txt);
+        if(/^https?:\/\/chat\.whatsapp\.com\//i.test(link)){
+          /* رابط جروب: يفتح الجروب ثم يُلصق النص يدويًا */
+          try{ window.open(link,"_blank"); }catch(e){}
+          try{ navigator.clipboard.writeText(txt); }catch(e){}
+          toast(T("فُتح الجروب ونُسخ النص — الصقه في الرسالة","Group opened and text copied — paste it in"));
+          setTimeout(function(){ try{ window.open(url,"_blank"); }catch(e){} },1200);
+        } else {
+          window.open(url,"_blank");
+          toast(T("اختر الجروب ثم الصق النص","Choose the group then paste the text"));
+        }
+      };
+    }
+
+    /* ---------- زر في بطاقة الغائبين ---------- */
+    function inject(){
+      try{
+        if(document.hidden) return;
+        var host=null;
+        var all=document.querySelectorAll("div,section");
+        for(var i=0;i<all.length;i++){
+          var t=all[i].textContent||"";
+          if(/لم يشاركوا في تدريب اليوم|Not training today|غير المشاركين/.test(t) && t.length<3000){
+            host=all[i]; break;
+          }
+        }
+        if(!host) return;
+        if(host.querySelector("#qd387btn")) return;
+        var b=document.createElement("button"); b.id="qd387btn"; b.type="button";
+        b.style.cssText="border:0;border-radius:10px;padding:9px 14px;background:#1FA855;color:#fff;font:900 11.5px system-ui,Tahoma,sans-serif;cursor:pointer;margin:2px 0 2px 6px;box-shadow:0 4px 12px rgba(31,168,85,.28)";
+        b.textContent=T("📤 جروب — غياب أقل من ١٠ أيام","📤 Group — absence < 10 days");
+        b.style.display="none";
+        b.onclick=function(e){ e.preventDefault(); e.stopPropagation(); open(); };
+        host.insertBefore(b,host.firstChild&&host.firstChild.nextSibling?host.firstChild.nextSibling:host.firstChild);
+      }catch(e){}
+    }
+    try{ setInterval(inject,1500); }catch(e){}
+    if(document.readyState!=="loading") setTimeout(inject,900);
+    try{ document.addEventListener("DOMContentLoaded",function(){ setTimeout(inject,800); }); }catch(e){}
+    window.QD387={open:open,eligible:eligible,build:build};
+  }catch(e){}
+})();
+</script>
+
+<script>
+/* QD388 · WA-API — إرسال آلي عبر WhatsApp Cloud API بدل النسخ واللصق.
+   الإعداد يُحفظ في جدول qd_wa؛ التوكن يبقى سرًّا في Supabase ولا يدخل المتصفح. */
+(function(){
+  try{
+    if(window.__qd388) return; window.__qd388=1;
+    var URLBASE="https://tkvjdnwhjdemkmipwgb.supabase.co";
+    var KEY="sb_publishable_I9GLQdzF-cYHk3MdkXvxbg_M2UfXwqY";
+    var TAB="qd_wa", ROW="cfg", LS="qd388_cfg";
+    function $(i){ return document.getElementById(i); }
+    function isEn(){ try{ var l=localStorage.getItem("qd_lang"); return l?String(l).indexOf("en")===0:false; }catch(e){ return false; } }
+    function T(a,e){ return isEn()?e:a; }
+    function hdr(){ var h={apikey:KEY,"Content-Type":"application/json"}; if(/^eyJ/.test(KEY)) h.Authorization="Bearer "+KEY; return h; }
+    function jget(k,d){ try{ var v=localStorage.getItem(k); return v?JSON.parse(v):d; }catch(e){ return d; } }
+    function jset(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); return true; }catch(e){ return false; } }
+    function cfg(){ var c=jget(LS,null)||{}; c.mode=c.mode||"broadcast"; c.group_id=c.group_id||""; c.fn=c.fn||""; c.staff=Array.isArray(c.staff)?c.staff:[]; c.key=c.key||""; return c; }
+    function toast(m,bad){ try{ if(typeof window.toast==="function") return window.toast(m); }catch(e){}
+      var d=$("qd388t"); if(!d){ d=document.createElement("div"); d.id="qd388t";
+        d.style.cssText="position:fixed;bottom:20px;left:50%;transform:translateX(-50%);max-width:90vw;text-align:center;background:#0B1118;color:#6EE7A8;border:1px solid rgba(110,231,168,.5);padding:10px 18px;border-radius:11px;font:900 12px system-ui;z-index:2147483647;direction:rtl";
+        document.body.appendChild(d); }
+      d.style.color=bad?"#FF9B9B":"#6EE7A8"; d.textContent=m; d.style.opacity="1";
+      clearTimeout(d.__h); d.__h=setTimeout(function(){ d.style.opacity="0"; },3600); }
+
+    /* ---------- مزامنة الإعداد ---------- */
+    function pull(){
+      fetch(URLBASE+"/rest/v1/"+TAB+"?id=eq."+ROW+"&select=data,rev",{headers:hdr(),cache:"no-store"})
+        .then(function(r){ if(!r.ok) throw new Error("HTTP "+r.status); return r.json(); })
+        .then(function(rows){ if(Array.isArray(rows)&&rows[0]&&rows[0].data){ jset(LS,rows[0].data); } })
+        .catch(function(){});
+    }
+    function push(c){
+      fetch(URLBASE+"/rest/v1/"+TAB+"?on_conflict=id",{method:"POST",
+        headers:Object.assign(hdr(),{Prefer:"resolution=merge-duplicates,return=minimal"}),
+        body:JSON.stringify([{id:ROW,data:c,rev:Date.now()}])}).catch(function(){});
+    }
+
+    /* ---------- الإرسال ---------- */
+    function sendNow(text, extra){
+      var c=cfg(), fn=c.fn||(URLBASE+"/functions/v1/wa-send");
+      var body={mode:c.mode,text:text,group_id:c.group_id,recipients:(c.staff||[]).map(function(x){ return x.phone; })};
+      if(extra&&extra.mode) body.mode=extra.mode;
+      if(extra&&extra.recipients) body.recipients=extra.recipients;
+      toast(T("جارٍ الإرسال…","Sending…"));
+      return fetch(fn,{method:"POST",headers:{"Content-Type":"application/json","x-qd-key":c.key||""},body:JSON.stringify(body)})
+        .then(function(r){ return r.json().then(function(j){ return {status:r.status,j:j}; }); })
+        .then(function(o){
+          var j=o.j||{};
+          if(j.ok){
+            var n=(j.sent!=null?j.sent:(j.id?1:0));
+            toast(T("✓ أُرسلت "+n+" رسالة","✓ Sent "+n));
+            return j;
+          }
+          var map={missing_secrets:"لم تُضبط أسرار Meta في Supabase",unauthorized:"مفتاح التحقق غير مطابق",missing_group_id:"لا يوجد معرّف مجموعة",no_recipients:"لا أرقام في قائمة الطاقم",empty_text:"النص فارغ"};
+          toast("⚠ "+(map[j.error]||j.error||("HTTP "+o.status)),true);
+          return j;
+        })
+        .catch(function(e){ toast("⚠ "+T("تعذّر الوصول للدالة — تأكد من نشرها","Function unreachable — check deployment"),true); return {ok:false}; });
+    }
+
+    /* ---------- نافذة الإعداد ---------- */
+    function css(){
+      if($("qd388css")) return;
+      var st=document.createElement("style"); st.id="qd388css";
+      st.textContent=
+      '#qd388m{position:fixed;inset:0;z-index:2147483645;background:rgba(8,10,14,.75);display:flex;align-items:flex-start;justify-content:center;padding:20px 14px;overflow:auto;direction:rtl}'+
+      '#qd388m .c{width:min(96vw,560px);margin:auto;background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 30px 90px rgba(0,0,0,.5);font-family:system-ui,Tahoma,sans-serif}'+
+      '#qd388m .h{background:linear-gradient(120deg,#075E54,#128C7E);color:#fff;padding:14px 18px;font:900 14px system-ui}'+
+      '#qd388m .h i{display:block;font:800 10.5px/1.7 system-ui;opacity:.9;font-style:normal;margin-top:3px}'+
+      '#qd388m .b{padding:14px 18px}'+
+      '#qd388m label{display:block;font:800 11px system-ui;color:#5B6472;margin:11px 0 4px}'+
+      '#qd388m input,#qd388m textarea,#qd388m select{width:100%;box-sizing:border-box;border:1.5px solid #DDE1E6;border-radius:10px;padding:10px 11px;font:700 12px system-ui;outline:0}'+
+      '#qd388m textarea{min-height:96px;direction:ltr;line-height:1.7}'+
+      '#qd388m .row{display:flex;gap:8px;margin-top:14px}'+
+      '#qd388m .row button{flex:1;border:0;border-radius:11px;padding:11px;font:900 12.5px system-ui;cursor:pointer}'+
+      '#qd388m .g{background:#128C7E;color:#fff}#qd388m .o{background:#F1F2F4;color:#454B54}';
+      document.head.appendChild(st);
+    }
+    function settings(){
+      css();
+      var c=cfg(), old=$("qd388m"); if(old) old.remove();
+      var d=document.createElement("div"); d.id="qd388m";
+      d.innerHTML='<div class="c"><div class="h">⚙ '+T("إعداد الإرسال الآلي — WhatsApp Cloud API","Automated sending — WhatsApp Cloud API")+
+        '<i>'+T("التوكن يبقى في Supabase ولا يُخزَّن هنا","Your token stays in Supabase, never here")+'</i></div><div class="b">'+
+        '<label>'+T("نمط الإرسال","Send mode")+'</label><select id="q388mode">'+
+          '<option value="broadcast"'+(c.mode==="broadcast"?" selected":"")+'>'+T("رسالة فردية لكل عضو في الطاقم (بلا حد)","One-to-one to each staff member (no cap)")+'</option>'+
+          '<option value="group"'+(c.mode==="group"?" selected":"")+'>'+T("مجموعة Groups API (حد ٨ أعضاء)","Groups API group (8 members max)")+'</option>'+
+        '</select>'+
+        '<label>'+T("معرّف المجموعة (يظهر في webhook group_lifecycle_update)","Group ID (from group_lifecycle_update webhook)")+'</label>'+
+        '<input id="q388gid" dir="ltr" value="'+(c.group_id||"").replace(/"/g,"&quot;")+'" placeholder="1203630xxxxxxxx@g.us">'+
+        '<label>'+T("رابط دالة الإرسال","Function URL")+'</label>'+
+        '<input id="q388fn" dir="ltr" value="'+(c.fn||(URLBASE+"/functions/v1/wa-send")).replace(/"/g,"&quot;")+'">'+
+        '<label>'+T("مفتاح التحقق x-qd-key (نفس WA_VERIFY)","Verify key x-qd-key (same as WA_VERIFY)")+'</label>'+
+        '<input id="q388key" dir="ltr" value="'+(c.key||"").replace(/"/g,"&quot;")+'">'+
+        '<label>'+T("أرقام الطاقم — سطر لكل واحد: الاسم، الرقم بصيغة دولية","Staff numbers — one per line: name, international number")+'</label>'+
+        '<textarea id="q388staff" placeholder="Dr. Amr, 9665xxxxxxxx\nCoach, 9665xxxxxxxx">'+
+          (c.staff||[]).map(function(x){ return (x.name||"")+", "+(x.phone||""); }).join("\n")+'</textarea>'+
+        '<div class="row"><button class="g" id="q388save">'+T("حفظ","Save")+'</button>'+
+        '<button class="o" id="q388close">'+T("إغلاق","Close")+'</button></div></div></div>';
+      document.documentElement.appendChild(d);
+      $("q388close").onclick=function(){ d.remove(); };
+      $("q388save").onclick=function(){
+        var staff=$("q388staff").value.split("\n").map(function(l){
+          l=l.trim(); if(!l) return null;
+          var parts=l.split(/[,،\t]/);
+          var nm=(parts[0]||"").trim(), ph=(parts[1]||"").trim();
+          if(!ph){ ph=nm; nm=""; }
+          return {name:nm,phone:ph.replace(/[^\d+]/g,"")};
+        }).filter(Boolean);
+        var n={mode:$("q388mode").value,group_id:$("q388gid").value.trim(),
+               fn:$("q388fn").value.trim(),key:$("q388key").value.trim(),staff:staff};
+        jset(LS,n); push(n); toast(T("حُفظ الإعداد","Settings saved")); d.remove();
+      };
+    }
+
+    /* ---------- زر داخل نافذة الإرسال القائمة ---------- */
+    function hook(){
+      try{
+        var m=$("qd387m"); if(!m||m.querySelector("#qd388api")) return;
+        var row=m.querySelector(".row"); if(!row) return;
+        var b=document.createElement("button"); b.id="qd388api"; b.type="button"; b.className="g";
+        b.style.cssText="background:#128C7E;color:#fff";
+        b.textContent=T("⚡ إرسال آلي (API)","⚡ Send automatically (API)");
+        b.onclick=function(e){ e.preventDefault(); e.stopPropagation(); sendNow($("qd387tx").value); };
+        row.insertBefore(b,row.firstChild);
+        var st=document.createElement("button"); st.type="button"; st.className="o";
+        st.style.cssText="background:#F1F2F4;color:#454B54";
+        st.textContent="⚙";
+        st.title=T("إعداد الإرسال الآلي","Automated sending settings");
+        st.onclick=function(e){ e.preventDefault(); e.stopPropagation(); settings(); };
+        row.appendChild(st);
+      }catch(e){}
+    }
+    try{ setInterval(hook,1200); }catch(e){}
+    try{ setTimeout(pull,1500); setInterval(pull,60000); }catch(e){}
+    if(document.readyState!=="loading") setTimeout(hook,1000);
+    window.QD388={send:sendNow,settings:settings,pull:pull};
+  }catch(e){}
+})();
+</script>
+
+<script>
+/* QD389 · GROUP-INJ10 — زر عادي واحد: إرسال إلى جروب الواتساب رسالة
+   باللاعبين الذين لم يشاركوا في تدريب اليوم والذين غيابهم بسبب الإصابة أكثر من ١٠ أيام. */
+(function(){
+  try{
+    if(window.__qd389) return; window.__qd389=1;
+    var GRPKEY="qd_wa_group", MIN=10;
+    function $(i){ return document.getElementById(i); }
+    function isEn(){ try{ var l=localStorage.getItem("qd_lang"); return l?String(l).indexOf("en")===0:false; }catch(e){ return false; } }
+    function T(a,e){ return isEn()?e:a; }
+    function toast(m,bad){
+      var d=$("qd389t");
+      if(!d){ d=document.createElement("div"); d.id="qd389t";
+        d.style.cssText="position:fixed;bottom:20px;left:50%;transform:translateX(-50%);max-width:90vw;text-align:center;background:#0B1118;color:#6EE7A8;border:1px solid rgba(110,231,168,.5);padding:10px 18px;border-radius:11px;font:900 12px system-ui;z-index:2147483647;direction:rtl";
+        document.body.appendChild(d); }
+      d.style.color=bad?"#FF9B9B":"#6EE7A8"; d.textContent=m; d.style.opacity="1";
+      clearTimeout(d.__h); d.__h=setTimeout(function(){ d.style.opacity="0"; },3600);
+    }
+
+    /* ---------- القائمة: إصابة فقط · أكثر من ١٠ أيام ---------- */
+    function list(){
+      var all=[];
+      try{ if(window.QD248&&QD248.absentList) all=QD248.absentList()||[]; }catch(e){}
+      /* QD391: إصابة أقصر من ١٠ أيام + أي لاعب مريض (مهما كانت مدة غيابه) */
+      return all.filter(function(p){
+        if(!p) return false;
+        var r=p.reasons||[], d=Number(p.days);
+        var ill=r.indexOf("ill")>=0;
+        var shortInj=r.indexOf("inj")>=0 && d<MIN;
+        return ill || shortInj;
+      }).sort(function(a,b){ return a.days-b.days; });
+    }
+
+    function whyAr(p){
+      var m={inj:"إصابة",ill:"مرض",team:"مع فريق آخر",nt:"استدعاء منتخب"};
+      return (p.reasons||[]).filter(function(r){ return r==="inj"||r==="ill"; }).map(function(r){ return m[r]||r; }).join(" + ");
+    }
+    function whyEn(p){
+      var m={inj:"injury",ill:"illness",team:"with another team",nt:"national call-up"};
+      return (p.reasons||[]).filter(function(r){ return r==="inj"||r==="ill"; }).map(function(r){ return m[r]||r; }).join(" + ");
+    }
+    function whenNow(){
+      try{ var d=new Date(); return d.toLocaleDateString(isEn()?"en-GB":"ar-EG",{day:"2-digit",month:"short",year:"numeric"}); }catch(e){ return ""; }
+    }
+
+    function text(rows){
+      var h="";
+      if(isEn()){
+        h+="*Al-Qadsiah U18 — Medical*\n";
+        h+="Not training today — injuries under "+MIN+" days, and ill players ("+whenNow()+")\n\n";
+        rows.forEach(function(p,i){ h+=(i+1)+") "+p.name+" — "+p.days+" days"+(whyEn(p)?(" · "+whyEn(p)):"")+(p.detail?" · "+p.detail:"")+"\n"; });
+        h+="\nTotal: "+rows.length+" player(s).\n";
+        h+="These players remain under the medical team's supervision.\n— Medical staff";
+      } else {
+        h+="*القادسية تحت ١٨ — الجهاز الطبي*\n";
+        h+="غير مشاركين في تدريب اليوم — إصابات أقل من "+MIN+" أيام، واللاعبون المرضى ("+whenNow()+")\n\n";
+        rows.forEach(function(p,i){ h+=(i+1)+") "+p.name+" — "+p.days+" يومًا"+(whyAr(p)?(" · "+whyAr(p)):"")+(p.detail?" · "+p.detail:"")+"\n"; });
+        h+="\nالإجمالي: "+rows.length+" لاعبًا.\n";
+        h+="هؤلاء اللاعبون تحت متابعة الجهاز الطبي.\n— الجهاز الطبي";
+      }
+      return h;
+    }
+
+    function copy(t){
+      try{ if(navigator.clipboard&&navigator.clipboard.writeText){ navigator.clipboard.writeText(t); return true; } }catch(e){}
+      try{
+        var ta=document.createElement("textarea"); ta.value=t; ta.style.cssText="position:fixed;opacity:0";
+        document.body.appendChild(ta); ta.select(); document.execCommand("copy"); ta.remove(); return true;
+      }catch(e){ return false; }
+    }
+
+    function go(){
+      var rows=list();
+      if(!rows.length){
+        toast(T("لا يوجد لاعب مطابق اليوم (إصابة أقل من ١٠ أيام أو مرض)","No matching player today (injury under "+MIN+" days or illness)"),true);
+        return;
+      }
+      var msg=text(rows);
+      var grp=""; try{ grp=localStorage.getItem(GRPKEY)||""; }catch(e){}
+      var enc=encodeURIComponent(msg);
+
+      if(/^https?:\/\/chat\.whatsapp\.com\//i.test(grp)){
+        /* جروب حقيقي: لا يسمح واتساب بتجهيز نص للجروب — نفتحه وننسخ النص */
+        copy(msg);
+        try{ window.open(grp,"_blank"); }catch(e){}
+        toast(T("فُتح الجروب ونُسخ نص "+rows.length+" لاعبًا — الصقه واضغط إرسال",
+                "Group opened, text for "+rows.length+" copied — paste and send"));
+      } else {
+        try{ window.open("https://wa.me/?text="+enc,"_blank"); }catch(e){}
+        toast(T("فُتح واتساب برسالة "+rows.length+" لاعبًا — اختر الجروب","WhatsApp opened with "+rows.length+" players — pick the group"));
+        copy(msg);
+      }
+    }
+
+    /* ---------- الزر ---------- */
+    function inject(){
+      try{
+        if(document.hidden) return;
+        var host=null, all=document.querySelectorAll("div,section");
+        for(var i=0;i<all.length;i++){
+          var t=all[i].textContent||"";
+          if(/لم يشاركوا في تدريب اليوم|Not training today|غير المشاركين/.test(t)&&t.length<3000){ host=all[i]; break; }
+        }
+        if(!host||host.querySelector("#qd389btn")) return;
+        var b=document.createElement("button"); b.id="qd389btn"; b.type="button";
+        b.style.cssText="border:0;border-radius:10px;padding:9px 14px;background:#1FA855;color:#fff;font:900 11.5px system-ui,Tahoma,sans-serif;cursor:pointer;margin:2px 0 2px 6px;box-shadow:0 4px 12px rgba(31,168,85,.28);display:inline-flex;align-items:center;gap:6px";
+        var n=list().length;
+        b.innerHTML="<span>📤</span><span>"+T("جروب — إصابة أقل من ١٠ أيام + المرضى","Group — injury under 10 days + ill")+"</span>"+
+          (n?'<span style="background:rgba(255,255,255,.25);border-radius:8px;padding:1px 6px;font-size:10.5px">'+n+'</span>':'');
+        b.onclick=function(e){ e.preventDefault(); e.stopPropagation(); go(); };
+        var first=host.firstElementChild;
+        if(first&&first.nextElementSibling) host.insertBefore(b,first.nextElementSibling); else host.insertBefore(b,first);
+      }catch(e){}
+    }
+    try{ setInterval(inject,1400); }catch(e){}
+    if(document.readyState!=="loading") setTimeout(inject,900);
+    try{ document.addEventListener("DOMContentLoaded",function(){ setTimeout(inject,800); }); }catch(e){}
+    window.QD389={go:go,list:list,text:text};
+  }catch(e){}
+})();
+</script>
+
+<script>
+/* QD392 · LOGIN-LOOK — إعادة شكل شاشة الدخول إلى هوية النادي:
+   خلفية داكنة بنقش، بطاقة بحدود ذهبية، شعار دائري، وحقول بتركيز واضح.
+   لا يمسّ المنطق: نفس الحقول والمعرّفات (g_u · g_p · g_go · g_m · g_rec). */
+(function(){
+  try{
+    if(window.__qd392) return; window.__qd392=1;
+    function css(){
+      if(document.getElementById("qd392css")) return;
+      var st=document.createElement("style"); st.id="qd392css";
+      st.textContent=
+      /* الخلفية والنقش */
+      '#qd356gate{background:radial-gradient(1200px 600px at 50% -10%,#243447 0%,#0B1220 55%,#070B12 100%)!important;padding:22px!important}'+
+      '#qd356gate:before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.5;'+
+        'background-image:linear-gradient(rgba(227,176,25,.055) 1px,transparent 1px),linear-gradient(90deg,rgba(227,176,25,.055) 1px,transparent 1px);'+
+        'background-size:46px 46px}'+
+      /* البطاقة */
+      '#qd356gate>div{position:relative;width:min(94vw,404px)!important;border-radius:22px!important;padding:0!important;'+
+        'background:linear-gradient(180deg,#FFFFFF,#FBF9F4)!important;border:1px solid rgba(227,176,25,.55)!important;'+
+        'box-shadow:0 34px 90px rgba(0,0,0,.55),0 0 0 6px rgba(227,176,25,.06)!important;overflow:hidden}'+
+      /* ترويسة */
+      '#qd356gate>div:before{content:"";display:block;height:5px;background:linear-gradient(90deg,#B5121B,#E3B019,#B5121B)}'+
+      '#qd356gate>div>div:first-child{font:900 18.5px system-ui,Tahoma,sans-serif!important;color:#0F172A!important;'+
+        'padding:22px 24px 0!important;letter-spacing:-.2px}'+
+      '#qd356gate>div>div:nth-child(2){font:700 11.5px/1.8 system-ui,Tahoma,sans-serif!important;color:#7C8493!important;'+
+        'padding:6px 24px 16px!important;margin:0!important;border-bottom:1px solid #EFEBE2;margin-bottom:16px!important}'+
+      /* الحقول */
+      '#qd356gate input{width:calc(100% - 48px)!important;margin:0 24px 10px!important;border:1.5px solid #E6E1D6!important;'+
+        'border-radius:12px!important;padding:13px 14px!important;font:800 13px system-ui!important;background:#FFFDF8!important;'+
+        'transition:border-color .15s,box-shadow .15s,background .15s;outline:0!important}'+
+      '#qd356gate input::placeholder{color:#A8AEBA;font-weight:700}'+
+      '#qd356gate input:focus{border-color:#B5121B!important;background:#fff!important;box-shadow:0 0 0 4px rgba(181,18,27,.10)!important}'+
+      /* زر الدخول */
+      '#qd356gate #g_go{width:calc(100% - 48px)!important;margin:4px 24px 0!important;border-radius:12px!important;'+
+        'padding:13px!important;background:linear-gradient(135deg,#C4141F,#8E1015)!important;color:#fff!important;'+
+        'font:900 13.5px system-ui!important;letter-spacing:.2px;box-shadow:0 10px 22px rgba(181,18,27,.28)!important;'+
+        'transition:transform .12s,box-shadow .15s;cursor:pointer}'+
+      '#qd356gate #g_go:hover{transform:translateY(-1px);box-shadow:0 14px 28px rgba(181,18,27,.34)!important}'+
+      '#qd356gate #g_go:active{transform:none}'+
+      /* رسالة الخطأ */
+      '#qd356gate #g_m{margin:10px 24px 0!important;font:800 11.5px/1.7 system-ui!important;color:#B5121B!important;min-height:16px!important;text-align:center}'+
+      /* زر الاستعادة */
+      '#qd356gate #g_rec,#qd356gate #qd383err{width:calc(100% - 48px)!important;margin:4px 24px 0!important;'+
+        'border:1px dashed #D8CFB8!important;background:#FCFAF4!important;color:#8A6B1F!important;'+
+        'border-radius:11px!important;padding:10px!important;font:900 11px system-ui!important;cursor:pointer}'+
+      '#qd356gate #g_rec:hover,#qd356gate #qd383err:hover{background:#F6F1E4!important;border-color:#C8A24A!important}'+
+      /* التذييل */
+      '#qd356gate>div>div:last-child{margin:14px 24px 20px!important;font:700 10px/1.9 system-ui!important;color:#A2A8B3!important;'+
+        'text-align:center;border-top:1px solid #F1EDE4;padding-top:12px}'+
+      /* شارة أسفل البطاقة */
+      '#qd356gate:after{content:"AL QADSIAH · U18 MEDICAL";position:absolute;bottom:14px;left:0;right:0;text-align:center;'+
+        'font:900 9px system-ui;letter-spacing:2.4px;color:rgba(227,176,25,.45);pointer-events:none}'+
+      '@media(max-width:420px){#qd356gate>div>div:first-child{font-size:17px!important}}'+
+      '@media print{#qd356gate{display:none!important}}';
+      document.head.appendChild(st);
+    }
+    function run(){ try{ if(document.getElementById("qd356gate")) css(); }catch(e){} }
+    try{ setInterval(run,700); }catch(e){}
+    if(document.readyState!=="loading") setTimeout(run,300);
+    try{ document.addEventListener("DOMContentLoaded",function(){ setTimeout(run,300); }); }catch(e){}
+  }catch(e){}
+})();
+</script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 </body>
 </html>
