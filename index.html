@@ -35142,7 +35142,7 @@ tr:hover .qde-ndate{color:#7E0E14}
 
   function badge(){
     try{ var b=document.getElementById("qdrBadge"); if(!b) return;
-      var w="v11-366 · LOGIN-CLEAN";
+      var w="v11-367 · LOGIN-LOCK";
       if(b.textContent!==w+" · BTN-OK") b.textContent=w+" · BTN-OK"; }catch(e){}
   }
 
@@ -50567,7 +50567,7 @@ return map;
   })();
 
   var CSS=
-  '#q365g{position:fixed;inset:0;z-index:2147483645;display:flex;align-items:flex-start;justify-content:center;padding:16px;overflow:auto;direction:rtl;font-family:system-ui,Tahoma,sans-serif;'+
+  '#q365g{position:fixed;inset:0;z-index:2147483647;display:flex;align-items:flex-start;justify-content:center;padding:16px;overflow:auto;direction:rtl;font-family:system-ui,Tahoma,sans-serif;'+
     'background:radial-gradient(120% 90% at 78% 8%,#12321F 0%,#0A1A12 42%,#060B09 100%)}'+
   '#q365g:before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(135deg,rgba(227,176,25,.045) 0 1px,transparent 1px 10px);pointer-events:none}'+
   '#q365g .q365c{position:relative;margin:auto;width:min(96vw,404px);background:linear-gradient(180deg,#0E1A14,#0A130F);border:1px solid rgba(227,176,25,.32);border-radius:22px;overflow:hidden;box-shadow:0 40px 110px rgba(0,0,0,.75),0 0 0 1px rgba(255,255,255,.03) inset}'+
@@ -50632,6 +50632,7 @@ return map;
         '<div class="q365f">الدخول محمي داخل هذا الجهاز · <b>الأدوار:</b> مدير كامل · طبيب · مشرف علاج طبيعي · اطلاع وتحميل</div>'+
       '</div></div>';
     document.documentElement.appendChild(d);
+    killLegacy();
     function go(){
       var un=$("q365u").value.trim().toLowerCase(), pw=$("q365p").value;
       var u=users().filter(function(x){ return String(x.user).toLowerCase()===un; })[0];
@@ -50653,6 +50654,12 @@ return map;
     setTimeout(function(){ try{ $("q365u").focus(); }catch(e){} },150);
   }
 
+  function killLegacy(){
+    try{
+      var L=document.getElementById("qdLock"); if(L&&L.parentNode){ L.parentNode.removeChild(L); }
+      document.body.style.overflow=""; document.documentElement.style.overflow="";
+    }catch(e){}
+  }
   function ownerForm(){
     var old=$("q365m2"); if(old) old.remove();
     var m=document.createElement("div"); m.id="q365m2";
@@ -50702,7 +50709,10 @@ return map;
     boot(); gate();
   }
   [500,1200,2600,5000].forEach(function(t){ setTimeout(hijack,t); });
-  setInterval(function(){ try{ if(!cur()){ var o=$("qd356gate"); if(o) o.remove(); if(!$("q365g")) gate(); } else { var g=$("q365g"); if(g) g.remove(); } }catch(e){} },1800);
+  setInterval(function(){ try{
+      if(!cur()){ var o=$("qd356gate"); if(o) o.remove(); if(!$("q365g")) gate(); killLegacy(); }
+      else { var g=$("q365g"); if(g) g.remove(); }
+  }catch(e){} },900);
   /* وضع الاطلاع: لقطة + استرجاع لأي محاولة كتابة على بيانات التطبيق أو جدول الحسابات */
   var NAT=(function(){ try{ var f=document.createElement("iframe"); f.style.display="none"; document.body.appendChild(f);
       var w=f.contentWindow.Storage.prototype; var o={set:w.setItem,del:w.removeItem}; f.remove(); return o; }catch(e){ return null; } })();
