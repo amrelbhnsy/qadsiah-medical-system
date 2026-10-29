@@ -35142,7 +35142,7 @@ tr:hover .qde-ndate{color:#7E0E14}
 
   function badge(){
     try{ var b=document.getElementById("qdrBadge"); if(!b) return;
-      var w="v11-361 · NAV-TOP";
+      var w="v11-362 · USERS-OPEN-FIX";
       if(b.textContent!==w+" · BTN-OK") b.textContent=w+" · BTN-OK"; }catch(e){}
   }
 
@@ -50015,21 +50015,33 @@ return map;
     if(!$("qd356fab")&&cur()){
       var f=document.createElement("button"); f.id="qd356fab"; f.textContent="🔐 "+(cur().name||cur().user);
       f.style.cssText="position:fixed;left:16px;bottom:314px;z-index:9999;border:0;border-radius:999px;padding:9px 14px;font:900 11.5px system-ui,Tahoma,sans-serif;background:#0F172A;color:#fff;box-shadow:0 8px 22px rgba(15,23,42,.4);cursor:pointer;max-width:190px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap";
-      f.onclick=function(){
-        if($("v-access")){ document.querySelectorAll(".view.active").forEach(function(x){ x.classList.remove("active"); }); $("v-access").classList.add("active"); render(); }
-        else { if(typeof window.showView==="function"){ try{ window.showView("access"); }catch(e){} } }
-      };
+      f.onclick=function(){ forceShow(); };
       document.body.appendChild(f);
     } else if($("qd356fab")&&!cur()){ $("qd356fab").remove(); }
   }
   [400,1200,3000].forEach(function(t){ setTimeout(boot,t); });
   setInterval(function(){ try{ guardWrites(); banner(); enforce(); if(!cur()) gate(); }catch(e){} },1500);
+  function forceShow(){
+    var v=document.getElementById("v-access");
+    if(!v){ var main=document.querySelector("main")||document.body; v=document.createElement("section"); v.className="view"; v.id="v-access"; main.appendChild(v); }
+    document.querySelectorAll(".view").forEach(function(x){ if(x!==v) x.classList.remove("active"); });
+    v.classList.add("active");
+    document.querySelectorAll("#qd290nav .qds-i,#nav .nav-item").forEach(function(b){ b.classList.toggle("active",b.getAttribute("data-view")==="access"); });
+    var c=document.getElementById("qd356c"); if(c) c.remove();
+    render();
+    try{ window.scrollTo(0,0); }catch(e){}
+    return true;
+  }
   document.addEventListener("click",function(e){
     var t=e.target; if(!t||!t.closest) return;
-    if(t.closest('[data-view="access"]')) setTimeout(boot,120);
+    var b=t.closest('[data-view="access"]');
+    if(!b) return;
+    try{ e.preventDefault(); e.stopPropagation(); }catch(x){}
+    forceShow();
+    setTimeout(forceShow,150);
   },true);
   setInterval(function(){ try{ var v=document.getElementById("v-access"); if(v&&v.classList.contains("active")&&!document.getElementById("qd356c")) render(); }catch(e){} },900);
-  window.QD356={gate:gate,seed:seed,render:render,users:users,current:cur,perm:P,logout:logout};
+  window.QD356={gate:gate,seed:seed,render:render,users:users,current:cur,perm:P,logout:logout,show:forceShow};
 })();
 </script>
 
@@ -50117,5 +50129,6 @@ return map;
   window.QD361={top:top};
 })();
 </script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 </body>
 </html>
