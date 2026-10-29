@@ -35142,7 +35142,7 @@ tr:hover .qde-ndate{color:#7E0E14}
 
   function badge(){
     try{ var b=document.getElementById("qdrBadge"); if(!b) return;
-      var w="v11-362 · USERS-OPEN-FIX";
+      var w="v11-364 · DATA-HUB";
       if(b.textContent!==w+" · BTN-OK") b.textContent=w+" · BTN-OK"; }catch(e){}
   }
 
@@ -48652,6 +48652,7 @@ return map;
     if($("q33gowell")) $("q33gowell").onclick=function(){ goView("wellness"); };
   }
 
+  try{ var __o330=open; open=function(){ var r=__o330.apply(null,arguments); try{ setTimeout(function(){ if(window.QD363) QD363.toolbar(); },80); }catch(e){} return r; }; }catch(e){}
   window.QD330={open:open,score:scoreOf,hooper:hooperOf,acwr:acwrOf,band:band,phq4:phq4,mergeNav:mergeNav,unhide:unhide,tab:function(){ return TAB; }};
   if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",mount,{once:true}); else mount();
   setTimeout(mount,1200);
@@ -50129,6 +50130,401 @@ return map;
   window.QD361={top:top};
 })();
 </script>
+
+<script>
+/* QD363 · DATA-HUB v11-363 — زر تسجيل بيانات + ربط التطوير المتقدم + استيراد/تصدير + تحليل مبني على الدراسات */
+(function(){
+  var $=function(i){ return document.getElementById(i); };
+  function esc(s){ return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+  function S(){ try{ return window.__QDAPP.S; }catch(e){ return null; } }
+  function save(){ try{ if(window.__QDAPP&&window.__QDAPP.save) return window.__QDAPP.save(); }catch(e){} }
+  function arr(k){ var s=S(); return (s&&Array.isArray(s[k]))?s[k]:[]; }
+  function players(){ return arr("players").filter(function(p){ return p&&!p.deleted; }); }
+  function nm(p){ return ((p.first||"")+" "+(p.last||"")).trim()||String(p.id); }
+  function pid(r){ return r&&(r.playerId||r.pid||r.player_id||r.player||""); }
+  function dt(r){ return String((r&&(r.date||r.d||r.day||r.dt||r.ts))||"").slice(0,10); }
+  function num(v){ var n=Number(v); return isFinite(n)?n:null; }
+  function today(){ var d=new Date(); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+  function daysAgo(d){ var t=new Date(String(d||"")+"T00:00:00"); return isNaN(t)?9e9:Math.round((Date.now()-t.getTime())/86400000); }
+  function toast(m){ try{ if(window.toast){ window.toast(m); return; } }catch(e){}
+    var d=$("q363t"); if(!d){ d=document.createElement("div"); d.id="q363t"; d.style.cssText="position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#111827;color:#fff;padding:10px 17px;border-radius:11px;font:900 12.5px system-ui,Tahoma,sans-serif;z-index:2147483647;direction:rtl;transition:.2s"; document.body.appendChild(d); }
+    d.textContent=m; d.style.opacity="1"; clearTimeout(d.__h); d.__h=setTimeout(function(){ d.style.opacity="0"; },2600); }
+
+  /* ============ 1) المصدر الموحّد: قراءة ما يراه «التطوير المتقدم» ============ */
+  function advSources(){
+    var out={wellness:arr("wellness"),loads:arr("loads"),daily:arr("daily"),gps:arr("gps"),sessions:arr("sessions"),therapies:arr("therapies"),injuries:arr("injuries")};
+    /* التطوير المتقدم QD268 يقرأ من جذور مختلفة في بعض النسخ — نوحّدها */
+    try{
+      if(window.QD268&&QD268.data){ var d268=QD268.data();
+        ["wellness","loads","daily","gps"].forEach(function(k){ if(Array.isArray(d268[k])&&d268[k].length>out[k].length) out[k]=d268[k]; });
+      }
+    }catch(e){}
+    try{ var ls=JSON.parse(localStorage.getItem("qadsiah_u18_v2")||"null");
+      if(ls){ ["wellness","loads","daily","gps"].forEach(function(k){ if(Array.isArray(ls[k])&&ls[k].length>out[k].length) out[k]=ls[k]; }); }
+    }catch(e){}
+    return out;
+  }
+  function bridge(){ /* يدمج أي سجلات موجودة في جذر بديل إلى الجذر الرسمي بلا تكرار */
+    var s=S(); if(!s) return {moved:0};
+    var moved=0;
+    try{
+      var ls=JSON.parse(localStorage.getItem("qadsiah_u18_v2")||"null")||{};
+      ["wellness","loads"].forEach(function(k){
+        if(!Array.isArray(s[k])) s[k]=[];
+        var seen={}; s[k].forEach(function(r){ seen[String(pid(r))+"|"+dt(r)]=1; });
+        (Array.isArray(ls[k])?ls[k]:[]).forEach(function(r){
+          var key=String(pid(r))+"|"+dt(r);
+          if(!seen[key]&&pid(r)&&dt(r)){ s[k].push(r); seen[key]=1; moved++; }
+        });
+      });
+      if(moved) save();
+    }catch(e){}
+    return {moved:moved};
+  }
+
+  /* ============ 2) زر تسجيل البيانات في مركز التقييم ============ */
+  function toolbar(){
+    var host=document.getElementById("qd330")||null;
+    if(!host||!host.classList.contains("on")){
+      var any=document.getElementById("qd330b")||document.getElementById("qd330c");
+      host=any?document.getElementById("qd330"):null;
+    }
+    if(!host) return;
+    if(host.className.indexOf("on")<0) return;
+    var bar=host.querySelector("#q363bar");
+    if(!bar){
+      bar=document.createElement("div"); bar.id="q363bar";
+      bar.style.cssText="display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:10px 14px;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:12px;margin:0 0 12px";
+      bar.innerHTML='<b style="font:900 12.5px system-ui;color:#0F172A">📋 بيانات الجاهزية</b>'+
+        '<span style="font:800 10.5px system-ui;color:#64748B" id="q363cnt"></span>'+
+        '<span style="flex:1"></span>'+
+        '<button id="q363add" style="border:0;border-radius:9px;padding:8px 14px;font:900 11.5px system-ui;background:#B5121B;color:#fff;cursor:pointer">➕ تسجيل بيانات</button>'+
+        '<button id="q363imp" style="border:1px solid #CBD5E1;background:#fff;color:#334155;border-radius:9px;padding:8px 12px;font:900 11px system-ui;cursor:pointer">⬆ استيراد</button>'+
+        '<button id="q363exp" style="border:1px solid #CBD5E1;background:#fff;color:#334155;border-radius:9px;padding:8px 12px;font:900 11px system-ui;cursor:pointer">⬇ تصدير</button>'+
+        '<button id="q363an" style="border:1px solid #BBF7D0;background:#F0FDF4;color:#15803D;border-radius:9px;padding:8px 12px;font:900 11px system-ui;cursor:pointer">📊 تحليل</button>'+
+        '<input type="file" id="q363file" accept=".csv,.json,.xlsx,.xls,.txt,.tsv" multiple style="display:none">';
+      var body=document.getElementById("qd330b")||host;
+      body.insertBefore(bar,body.firstChild);
+      $("q363add").onclick=function(){ form(); };
+      $("q363imp").onclick=function(){ $("q363file").click(); };
+      $("q363file").onchange=function(){ var f=$("q363file"); if(f.files&&f.files.length) importFiles(f.files); f.value=""; };
+      $("q363exp").onclick=exportDialog;
+      $("q363an").onclick=analysis;
+    }
+    var c=$("q363cnt");
+    if(c){ var w=arr("wellness"),l=arr("loads"); c.textContent=w.length+" ويلنس · "+l.length+" حمل · "+players().length+" لاعب"; }
+  }
+
+  /* ============ 3) نموذج تسجيل البيانات ============ */
+  function form(pre){
+    var old=$("q363m"); if(old) old.remove();
+    pre=pre||{};
+    var ps=players().slice().sort(function(a,b){ return nm(a).localeCompare(nm(b),"ar"); });
+    var d=document.createElement("div"); d.id="q363m";
+    d.style.cssText="position:fixed;inset:0;z-index:2147483647;background:rgba(10,10,12,.62);display:flex;align-items:flex-start;justify-content:center;padding:16px;overflow:auto;direction:rtl;font-family:system-ui,Tahoma,sans-serif";
+    d.innerHTML='<div style="background:#fff;border-radius:16px;width:min(96vw,760px);overflow:hidden">'+
+      '<div style="background:#0C1118;color:#fff;padding:13px 16px;display:flex;align-items:center;gap:10px">'+
+        '<b style="font:900 14px system-ui">تسجيل بيانات الجاهزية</b>'+
+        '<span style="font:700 10.5px system-ui;opacity:.62">ويلنس هوبر · حمل الجلسة · جودة النوم — تُحفظ في السجل الرسمي</span>'+
+        '<button id="q363x" style="margin-inline-start:auto;background:transparent;border:1px solid rgba(255,255,255,.35);color:#fff;border-radius:8px;padding:5px 10px;font:900 11px system-ui;cursor:pointer">✕</button></div>'+
+      '<div style="padding:14px">'+
+        '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:9px;margin-bottom:12px">'+
+          fld("اللاعب","player","select",'<option value="">— اختر —</option>'+ps.map(function(p){ return '<option value="'+esc(p.id)+'">'+esc(nm(p))+'</option>'; }).join(""))+
+          fld("التاريخ","date","date","",today())+
+          fld("ساعات النوم","sh","number","",8,"0.5")+
+          fld("RPE (1-10)","rpe","number","",5,"1")+
+          fld("مدة الجلسة (دقيقة)","dur","number","",90,"5")+
+          fld("المسافة (متر)","dist","number","",0,"100")+
+        '</div>'+
+        '<div style="background:#F8FAFC;border:1px solid #E2E8F0;border-radius:11px;padding:11px;margin-bottom:10px">'+
+          '<div style="font:900 11.5px system-ui;color:#334155;margin-bottom:8px">مقياس هوبر (1 = ممتاز · 5 = سيئ جدًا)</div>'+
+          sl("النوم","sleep")+sl("التعب","fatigue")+sl("الألم العضلي","soreness")+sl("التوتر","stress")+sl("المزاج","mood")+
+        '</div>'+
+        '<div id="q363prev" style="background:#0F172A;color:#fff;border-radius:11px;padding:10px 12px;font:800 11px system-ui;line-height:1.9;margin-bottom:10px"></div>'+
+        '<div id="q363msg" style="font:800 11px system-ui;color:#B5121B;min-height:15px;margin-bottom:8px"></div>'+
+      '</div>'+
+      '<div style="padding:11px 14px;border-top:1px solid #EDE7DA;background:#FBFAF7;display:flex;gap:9px;flex-wrap:wrap">'+
+        '<button id="q363save" style="border:0;border-radius:10px;padding:10px 18px;background:#B5121B;color:#fff;font:900 12px system-ui;cursor:pointer">حفظ السجل</button>'+
+        '<button id="q363save2" style="border:1px solid #B5121B;background:#fff;color:#B5121B;border-radius:10px;padding:10px 16px;font:900 12px system-ui;cursor:pointer">حفظ وإضافة آخر</button>'+
+        '<button id="q363can" style="border:1px solid #E0DBD4;background:#fff;color:#5B6472;border-radius:10px;padding:10px 16px;font:900 12px system-ui;cursor:pointer">إلغاء</button></div></div>';
+    document.body.appendChild(d);
+    $("q363x").onclick=$("q363can").onclick=function(){ d.remove(); };
+    if(pre.player){ d.querySelector("#f_player").value=pre.player; }
+    function vals(){
+      return {player:$("f_player").value,date:$("f_date").value||today(),
+        sh:num($("f_sh").value),rpe:num($("f_rpe").value),dur:num($("f_dur").value),dist:num($("f_dist").value),
+        sleep:num($("s_sleep").value),fatigue:num($("s_fatigue").value),soreness:num($("s_soreness").value),
+        stress:num($("s_stress").value),mood:num($("s_mood").value)};
+    }
+    function preview(){
+      var v=vals(); var it=[v.sleep,v.fatigue,v.soreness,v.stress,v.mood].filter(function(x){ return x!=null; });
+      var hooper=null;
+      if(it.length>=3){ var sum=it.reduce(function(a,b){ return a+b; },0), max=it.length*5;
+        hooper=Math.round(Math.max(0,Math.min(100,(max-sum)/(max-it.length)*100))); }
+      var pen=v.sh==null?0:Math.min(20,Math.abs(8-v.sh)*4);
+      var adj=hooper==null?null:Math.max(0,hooper-pen);
+      var tl=(v.rpe!=null&&v.dur!=null)?Math.round(v.rpe*v.dur):null;
+      var band=adj==null?"—":(adj>=80?"جاهز":adj>=60?"مراقبة":adj>=40?"حذر":"خطر");
+      var col=adj==null?"#94A3B8":(adj>=80?"#22C55E":adj>=60?"#F59E0B":adj>=40?"#F97316":"#EF4444");
+      $("q363prev").innerHTML='هوبر <b style="color:'+col+'">'+(hooper==null?"—":hooper+"%")+'</b> · بعد خصم النوم <b style="color:'+col+'">'+(adj==null?"—":adj+"%")+'</b> · الحالة <b style="color:'+col+'">'+band+'</b>'+
+        (tl?' · حمل الجلسة (RPE×دقيقة) <b>'+tl+'</b> AU':'')+
+        '<div style="opacity:.6;font-size:10px;margin-top:3px">هوبر 1995 · عقوبة النوم Mah 2011 · حمل الجلسة Foster 2001</div>';
+    }
+    d.querySelectorAll("input,select").forEach(function(x){ x.oninput=x.onchange=preview; });
+    preview();
+    function commit(keep){
+      var v=vals(); var msg=$("q363msg");
+      if(!v.player){ msg.textContent="اختر اللاعب."; return; }
+      var s=S(); if(!s) return;
+      if(!Array.isArray(s.wellness)) s.wellness=[];
+      if(!Array.isArray(s.loads)) s.loads=[];
+      var rec={id:"w"+Date.now().toString(36)+Math.random().toString(36).slice(2,5),playerId:v.player,date:v.date,
+        sleep:v.sleep,fatigue:v.fatigue,soreness:v.soreness,stress:v.stress,mood:v.mood,
+        sleep_hours:v.sh,dur:v.dur,src:"manual",ts:Date.now()};
+      var ex=s.wellness.filter(function(x){ return String(pid(x))===String(v.player)&&dt(x)===v.date; })[0];
+      if(ex){ Object.keys(rec).forEach(function(k){ if(k!=="id") ex[k]=rec[k]; }); } else { s.wellness.push(rec); }
+      if(v.rpe!=null&&v.dur!=null){
+        var lrec={id:"l"+Date.now().toString(36)+Math.random().toString(36).slice(2,5),playerId:v.player,date:v.date,
+          rpe:v.rpe,duration:v.dur,load:Math.round(v.rpe*v.dur),distance:v.dist||null,src:"manual",ts:Date.now()};
+        var lex=s.loads.filter(function(x){ return String(pid(x))===String(v.player)&&dt(x)===v.date; })[0];
+        if(lex){ Object.keys(lrec).forEach(function(k){ if(k!=="id") lex[k]=lrec[k]; }); } else { s.loads.push(lrec); }
+      }
+      save();
+      try{ if(window.QD320&&QD320.refresh) QD320.refresh(); }catch(e){}
+      try{ if(window.QD330&&QD330.open&&document.querySelector('[data-q330tab].on')) QD330.open(); }catch(e){}
+      toast("✓ حُفظ السجل — ويلنس " + (s.wellness.length) + " · حمل " + (s.loads.length));
+      if(keep){ d.remove(); setTimeout(function(){ form({player:v.player}); },120); }
+      else { d.remove(); toolbar(); }
+    }
+    $("q363save").onclick=function(){ commit(false); };
+    $("q363save2").onclick=function(){ commit(true); };
+  }
+  function fld(l,id,type,inner,val,step){
+    if(type==="select") return '<label style="display:block"><i style="display:block;font:800 10px system-ui;color:#64748B;font-style:normal;margin-bottom:4px">'+l+'</i><select id="f_'+id+'" style="width:100%;border:1px solid #E2E8F0;border-radius:9px;padding:8px;font:800 12px system-ui;background:#fff">'+inner+'</select></label>';
+    return '<label style="display:block"><i style="display:block;font:800 10px system-ui;color:#64748B;font-style:normal;margin-bottom:4px">'+l+'</i><input id="f_'+id+'" type="'+type+'" '+(val!==undefined?'value="'+val+'"':'')+(step?' step="'+step+'"':'')+' style="width:100%;box-sizing:border-box;border:1px solid #E2E8F0;border-radius:9px;padding:8px;font:800 12px system-ui"></label>';
+  }
+  function sl(l,k){
+    return '<div style="display:flex;align-items:center;gap:9px;margin-bottom:6px"><span style="font:800 10.5px system-ui;color:#475569;min-width:74px">'+l+'</span>'+
+      '<input id="s_'+k+'" type="range" min="1" max="5" value="3" style="flex:1;accent-color:#B5121B">'+
+      '<b id="v_'+k+'" style="font:900 12px system-ui;color:#0F172A;min-width:16px;text-align:center">3</b></div>';
+  }
+  document.addEventListener("input",function(e){
+    var t=e.target; if(!t||!t.id||t.id.indexOf("s_")!==0) return;
+    var v=$("v_"+t.id.slice(2)); if(v) v.textContent=t.value;
+  },true);
+
+  /* ============ 4) الاستيراد ============ */
+  function parseCSV(txt){
+    var lines=String(txt||"").replace(/\r/g,"").split("\n").filter(function(l){ return l.trim(); });
+    if(!lines.length) return [];
+    var sep=(lines[0].match(/\t/g)||[]).length>(lines[0].match(/,/g)||[]).length?"\t":(lines[0].indexOf(";")>-1&&lines[0].indexOf(",")<0?";":",");
+    function cells(l){ var o=[],c="",q=false; for(var i=0;i<l.length;i++){ var ch=l.charAt(i);
+      if(ch==='"'){ if(q&&l.charAt(i+1)==='"'){ c+='"'; i++; } else q=!q; }
+      else if(ch===sep&&!q){ o.push(c); c=""; } else c+=ch; } o.push(c); return o.map(function(x){ return x.trim(); }); }
+    return lines.map(cells);
+  }
+  function pick(head,pats){ for(var i=0;i<head.length;i++){ var h=String(head[i]||"").toLowerCase().replace(/\s+/g," ");
+      for(var j=0;j<pats.length;j++){ if(h.indexOf(pats[j])>-1) return i; } } return -1; }
+  function normRows(rows){
+    if(!rows||rows.length<2) return {recs:[],err:"الملف فارغ"};
+    var head=rows[0];
+    var ci={player:pick(head,["player","name","اللاعب","اسم"]),date:pick(head,["date","تاريخ","التاريخ"]),
+      sleep:pick(head,["sleep quality","نوم"]),fatigue:pick(head,["fatigue","تعب"]),soreness:pick(head,["soreness","ألم","شد"]),
+      stress:pick(head,["stress","توتر"]),mood:pick(head,["mood","مزاج"]),
+      sh:pick(head,["sleep hours","hours","ساعات","نوم ساعات"]),rpe:pick(head,["rpe","شدة"]),
+      dur:pick(head,["duration","minutes","مدة","دقيقة"]),dist:pick(head,["distance","مسافة"])};
+    if(ci.player<0) return {recs:[],err:"لا يوجد عمود لاعب"};
+    var ps=players(), recs=[], bad=0;
+    function findP(v){
+      var s=String(v||"").trim().toLowerCase(); if(!s) return null;
+      var hit=ps.filter(function(p){ return nm(p).toLowerCase()===s||String(p.id).toLowerCase()===s; })[0];
+      if(hit) return hit;
+      hit=ps.filter(function(p){ return nm(p).toLowerCase().indexOf(s)>-1||s.indexOf(nm(p).toLowerCase())>-1; })[0];
+      return hit||null;
+    }
+    for(var i=1;i<rows.length;i++){
+      var r=rows[i]; if(!r||!r[ci.player]) continue;
+      var p=findP(r[ci.player]); if(!p){ bad++; continue; }
+      var d=ci.date>-1?String(r[ci.date]||"").slice(0,10):today();
+      var m=d.match(/^(\d{1,2})[\/.](\d{1,2})[\/.](\d{4})$/);
+      if(m) d=m[3]+"-"+String(m[2]).padStart(2,"0")+"-"+String(m[1]).padStart(2,"0");
+      recs.push({playerId:p.id,date:d,
+        sleep:ci.sleep>-1?num(r[ci.sleep]):null,fatigue:ci.fatigue>-1?num(r[ci.fatigue]):null,
+        soreness:ci.soreness>-1?num(r[ci.soreness]):null,stress:ci.stress>-1?num(r[ci.stress]):null,mood:ci.mood>-1?num(r[ci.mood]):null,
+        sleep_hours:ci.sh>-1?num(r[ci.sh]):null,rpe:ci.rpe>-1?num(r[ci.rpe]):null,
+        dur:ci.dur>-1?num(r[ci.dur]):null,dist:ci.dist>-1?num(r[ci.dist]):null});
+    }
+    return {recs:recs,bad:bad,cols:Object.keys(ci).filter(function(k){ return ci[k]>-1; })};
+  }
+  function importFiles(files){
+    var s=S(); if(!s) return;
+    if(!Array.isArray(s.wellness)) s.wellness=[];
+    if(!Array.isArray(s.loads)) s.loads=[];
+    var total=0, skipped=0, todo=files.length;
+    Array.prototype.forEach.call(files,function(f){
+      var done=function(text){
+        var rows;
+        if(/\.json$/i.test(f.name)){ try{ var j=JSON.parse(text); rows=[["player","date","sleep","fatigue","soreness","stress","mood","sleep hours","rpe","duration","distance"]].concat(
+          (Array.isArray(j)?j:(j.wellness||j.records||[])).map(function(r){ return [pid(r),dt(r),r.sleep,r.fatigue,r.soreness,r.stress,r.mood,r.sleep_hours||r.dur,r.rpe,r.duration||r.dur,r.distance]; })); }catch(e){ rows=[]; } }
+        else rows=parseCSV(text);
+        var n=normRows(rows);
+        skipped+=n.bad||0;
+        (n.recs||[]).forEach(function(r){
+          var ex=s.wellness.filter(function(x){ return String(pid(x))===String(r.playerId)&&dt(x)===r.date; })[0];
+          var rec={id:"w"+Date.now().toString(36)+Math.random().toString(36).slice(2,5),playerId:r.playerId,date:r.date,
+            sleep:r.sleep,fatigue:r.fatigue,soreness:r.soreness,stress:r.stress,mood:r.mood,sleep_hours:r.sleep_hours,src:"import",ts:Date.now()};
+          if(ex){ Object.keys(rec).forEach(function(k){ if(k!=="id") ex[k]=rec[k]; }); } else s.wellness.push(rec);
+          if(r.rpe!=null&&r.dur!=null){
+            var lex=s.loads.filter(function(x){ return String(pid(x))===String(r.playerId)&&dt(x)===r.date; })[0];
+            var lr={id:"l"+Date.now().toString(36)+Math.random().toString(36).slice(2,5),playerId:r.playerId,date:r.date,rpe:r.rpe,duration:r.dur,load:Math.round(r.rpe*r.dur),distance:r.dist||null,src:"import",ts:Date.now()};
+            if(lex){ Object.keys(lr).forEach(function(k){ if(k!=="id") lex[k]=lr[k]; }); } else s.loads.push(lr);
+          }
+          total++;
+        });
+        if(--todo===0){ save(); toolbar(); toast("استُورد "+total+" سجل"+(skipped?(" · تجاهلت "+skipped+" صف"):"")); }
+      };
+      if(/\.xlsx$|\.xls$/i.test(f.name)&&window.QD320&&QD320.parseXlsx){
+        f.arrayBuffer().then(function(ab){ QD320.parseXlsx({arrayBuffer:function(){ return Promise.resolve(ab); }}).then(function(rows){
+          var head=rows[0]||[]; done(rows.map(function(r){ return r.join("\t"); }).join("\n"));
+        }).catch(function(){ done(""); }); });
+      } else {
+        var fr=new FileReader(); fr.onload=function(){ done(String(fr.result||"")); }; fr.onerror=function(){ done(""); };
+        fr.readAsText(f,"utf-8");
+      }
+    });
+  }
+
+  /* ============ 5) التصدير ============ */
+  function exportDialog(){
+    var old=$("q363x2"); if(old) old.remove();
+    var d=document.createElement("div"); d.id="q363x2";
+    d.style.cssText="position:fixed;inset:0;z-index:2147483647;background:rgba(10,10,12,.62);display:flex;align-items:center;justify-content:center;padding:16px;direction:rtl;font-family:system-ui,Tahoma,sans-serif";
+    d.innerHTML='<div style="background:#fff;border-radius:16px;width:min(94vw,440px);overflow:hidden">'+
+      '<div style="background:#0C1118;color:#fff;padding:13px 16px;display:flex;align-items:center"><b style="font:900 14px system-ui">تصدير البيانات</b>'+
+      '<button id="q363x3" style="margin-inline-start:auto;background:transparent;border:1px solid rgba(255,255,255,.35);color:#fff;border-radius:8px;padding:5px 10px;font:900 11px system-ui;cursor:pointer">✕</button></div>'+
+      '<div style="padding:14px;display:flex;flex-direction:column;gap:8px">'+
+      ['CSV — جدول لإكسل|CSV','JSON — نسخة كاملة|JSON','XLSX — ملف إكسل|XLSX','TXT — نص مفصول بفواصل|TXT'].map(function(o){
+        var p=o.split("|"); return '<button data-x="'+p[1]+'" style="border:1px solid #E2E8F0;background:#fff;color:#334155;border-radius:10px;padding:11px;font:900 12px system-ui;cursor:pointer;text-align:start">'+p[0]+'</button>'; }).join("")+
+      '</div></div>';
+    document.body.appendChild(d);
+    d.querySelector("#q363x3").onclick=function(){ d.remove(); };
+    d.querySelectorAll("[data-x]").forEach(function(b){ b.onclick=function(){ doExport(b.getAttribute("data-x")); d.remove(); }; });
+  }
+  function doExport(kind){
+    var w=arr("wellness"), l=arr("loads"), ps=players();
+    function pn(id){ var p=ps.filter(function(x){ return String(x.id)===String(id); })[0]; return p?nm(p):String(id); }
+    var rows=[["اللاعب","التاريخ","النوم","التعب","الألم","التوتر","المزاج","ساعات النوم","RPE","المدة","حمل الجلسة","المصدر"]];
+    var seen={};
+    w.forEach(function(r){
+      var key=String(pid(r))+"|"+dt(r); seen[key]=1;
+      var ld=l.filter(function(x){ return String(pid(x))===String(pid(r))&&dt(x)===dt(r); })[0]||{};
+      rows.push([pn(pid(r)),dt(r),r.sleep,r.fatigue,r.soreness,r.stress,r.mood,r.sleep_hours||r.dur||"",ld.rpe||"",ld.duration||"",ld.load||"",r.src||""]);
+    });
+    l.forEach(function(x){ var key=String(pid(x))+"|"+dt(x); if(seen[key]) return;
+      rows.push([pn(pid(x)),dt(x),"","","","","","",x.rpe||"",x.duration||"",x.load||"",x.src||""]); });
+    var stamp=today();
+    if(kind==="JSON"){
+      var j={exported:stamp,version:"v11-363",players:ps.map(function(p){ return {id:p.id,name:nm(p)}; }),wellness:w,loads:l};
+      dl(JSON.stringify(j,null,2),"readyness-"+stamp+".json","application/json");
+    } else if(kind==="XLSX"){
+      var html='<html xmlns:x="urn:schemas-microsoft-com:office:excel"><head><meta charset="utf-8"></head><body><table border="1">'+
+        rows.map(function(r){ return "<tr>"+r.map(function(c){ return "<td>"+String(c==null?"":c)+"</td>"; }).join("")+"</tr>"; }).join("")+'</table></body></html>';
+      dl(html,"readyness-"+stamp+".xls","application/vnd.ms-excel");
+    } else if(kind==="TXT"){
+      dl(rows.map(function(r){ return r.join("\t"); }).join("\r\n"),"readyness-"+stamp+".txt","text/plain");
+    } else {
+      dl("\ufeff"+rows.map(function(r){ return r.map(function(c){ var s=String(c==null?"":c); return /[",\n]/.test(s)?('"'+s.replace(/"/g,'""')+'"'):s; }).join(","); }).join("\r\n"),"readyness-"+stamp+".csv","text/csv");
+    }
+    toast("صُدّر الملف ("+rows.length+" صف)");
+  }
+  function dl(txt,name,mime){
+    var b=new Blob([txt],{type:mime+";charset=utf-8"});
+    var a=document.createElement("a"); a.href=URL.createObjectURL(b); a.download=name; a.click();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); },3000);
+  }
+
+  /* ============ 6) التحليل المبني على الدراسات ============ */
+  var STUDIES=[
+    {k:"هوبر للويلنس",ref:"Hooper & Mackinnon 1995",m:"5 بنود (نوم/تعب/ألم/توتر/مزاج) بمقياس 1-5 → نسبة جاهزية. حساس لتغيّر اللاعب عن نفسه، لا للمقارنة بين اللاعبين."},
+    {k:"عقوبة قلة النوم",ref:"Mah et al. 2011 · Milewski 2014",m:"كل ساعة انحراف عن 8 ساعات تُخصم حتى 4 نقاط (سقف 20). النوم <6س يرفع خطر الإصابة ~1.7×."},
+    {k:"حمل الجلسة sRPE",ref:"Foster et al. 2001",m:"الحمل = RPE × دقائق الجلسة (AU). طريقة معتمدة عالميًا لقياس الحمل الداخلي."},
+    {k:"نسبة الحمل الحاد/المزمن",ref:"Gabbett 2016 (ACWR)",m:"7 أيام ÷ متوسط 28 يومًا. النطاق الآمن 0.8–1.3. **تحذير: Impellizzeri 2020 ينتقد استخدامها كتنبؤ** — تُقرأ كمؤشر وصفي لا حكم."},
+    {k:"الألم العضلي",ref:"Saw et al. 2016",m:"DOMS أعلى من 3/5 يرتبط بانخفاض الأداء 24-48س؛ يُستخدم لإعادة توزيع الحمل لا للتشخيص."},
+    {k:"التوتر النفسي",ref:"Ivarsson et al. 2017",m:"التوتر العالي يرتبط بزيادة خطر الإصابة؛ يُراقب أسبوعيًا مع مؤشرات الحمل."},
+    {k:"الوقاية من إصابات العضلات",ref:"Harøy 2019 Copenhagen · Petersen 2011 Nordic",m:"برامج الإحماء العصبي-عضلي تخفض إصابات العضلات الخلفية ~51% والفتقية ~41%."}
+  ];
+  function analysis(){
+    var old=$("q363a"); if(old) old.remove();
+    var w=arr("wellness"), l=arr("loads"), ps=players();
+    function pn(id){ var p=ps.filter(function(x){ return String(x.id)===String(id); })[0]; return p?nm(p):String(id); }
+    var rows=ps.map(function(p){
+      var ww=w.filter(function(x){ return String(pid(x))===String(p.id); }).sort(function(a,b){ return dt(b)>dt(a)?1:-1; });
+      var ll=l.filter(function(x){ return String(pid(x))===String(p.id); }).sort(function(a,b){ return dt(b)>dt(a)?1:-1; });
+      var last=ww[0]||null, hooper=null, adj=null;
+      if(last){ var it=[last.sleep,last.fatigue,last.soreness,last.stress,last.mood].map(function(x){ return num(x); }).filter(function(x){ return x!=null; });
+        if(it.length>=3){ var sm=it.reduce(function(a,b){ return a+b; },0), mx=it.length*5;
+          hooper=Math.round(Math.max(0,Math.min(100,(mx-sm)/(mx-it.length)*100)));
+          var sh=num(last.sleep_hours||last.dur); adj=Math.max(0,hooper-(sh==null?0:Math.min(20,Math.abs(8-sh)*4))); } }
+      var s7=0,s28=0,c7=0;
+      ll.forEach(function(x){ var v=num(x.load); if(v==null) return; var g=daysAgo(dt(x)); if(g<=7){ s7+=v; c7++; } if(g<=28){ s28+=v; } });
+      var acwr=s28>0?(s7/(s28/4)):null;
+      var tl7=s7;
+      var flag=acwr==null?"—":(acwr>1.5?"خطر مرتفع":acwr>1.3?"مرتفع":acwr<0.8?"منخفض":"آمن");
+      var band=adj==null?"—":(adj>=80?"جاهز":adj>=60?"مراقبة":adj>=40?"حذر":"خطر");
+      return {p:p,last:last?dt(last):"—",hooper:hooper,adj:adj,band:band,acwr:acwr!=null?acwr.toFixed(2):"—",flag:flag,tl7:Math.round(tl7),n:ww.length,nl:ll.length};
+    }).sort(function(a,b){ return (a.adj==null?999:a.adj)-(b.adj==null?999:b.adj); });
+    var withW=rows.filter(function(r){ return r.adj!=null; });
+    var avg=withW.length?Math.round(withW.reduce(function(a,r){ return a+r.adj; },0)/withW.length):null;
+    var ready=withW.filter(function(r){ return r.adj>=80; }).length, watch=withW.filter(function(r){ return r.adj>=60&&r.adj<80; }).length, risk=withW.filter(function(r){ return r.adj<60; }).length;
+    var safe=rows.filter(function(r){ return r.acwr!=="—"&&r.flag==="آمن"; }).length;
+    var d=document.createElement("div"); d.id="q363a";
+    d.style.cssText="position:fixed;inset:0;z-index:2147483647;background:rgba(10,10,12,.66);display:flex;align-items:flex-start;justify-content:center;padding:16px;overflow:auto;direction:rtl;font-family:system-ui,Tahoma,sans-serif";
+    d.innerHTML='<div style="background:#fff;border-radius:16px;width:min(98vw,1080px);overflow:hidden">'+
+      '<div style="background:linear-gradient(135deg,#0F172A,#26303F);color:#fff;padding:14px 18px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">'+
+      '<b style="font:900 15px system-ui">📊 تحليل الجاهزية — مبني على الدراسات</b>'+
+      '<span style="font:800 10.5px system-ui;color:#AEB8C7">'+rows.length+' لاعب · '+w.length+' سجل ويلنس · '+l.length+' سجل حمل</span>'+
+      '<button id="q363ax" style="margin-inline-start:auto;background:transparent;border:1px solid rgba(255,255,255,.35);color:#fff;border-radius:8px;padding:6px 11px;font:900 11px system-ui;cursor:pointer">✕</button></div>'+
+      '<div style="padding:14px">'+
+      '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-bottom:12px">'+
+        ['متوسط الجاهزية',avg==null?"—":avg+"%"].map(function(x,i){ return ''; }).join("")+
+        kpi("متوسط الجاهزية",(avg==null?"—":avg+"%"),"#0F172A")+
+        kpi("جاهز",ready,"#15803D")+
+        kpi("مراقبة",watch,"#B45309")+
+        kpi("حذر/خطر",risk,"#B5121B")+
+        kpi("ACWR آمن",safe,"#0E7490")+
+      '</div>'+
+      '<div style="overflow:auto;max-height:44vh;border:1px solid #E2E8F0;border-radius:11px"><table style="width:100%;border-collapse:collapse;font:700 11.5px system-ui">'+
+      '<thead><tr>'+["اللاعب","آخر سجل","هوبر","بعد النوم","الحالة","ACWR 7/28","حمل 7 أيام","سجلات"].map(function(h){
+        return '<th style="position:sticky;top:0;background:#F8FAFC;color:#64748B;font:900 10px system-ui;padding:8px;text-align:start;border-bottom:1px solid #E2E8F0;white-space:nowrap">'+h+'</th>'; }).join("")+'</tr></thead><tbody>'+
+      rows.map(function(r){
+        var col=r.adj==null?"#94A3B8":(r.adj>=80?"#15803D":r.adj>=60?"#B45309":r.adj>=40?"#C2410C":"#B5121B");
+        return '<tr><td style="padding:7px 8px;border-bottom:1px solid #F1F5F9"><b>'+esc(nm(r.p))+'</b></td>'+
+          '<td style="padding:7px 8px;border-bottom:1px solid #F1F5F9;color:#64748B">'+esc(r.last)+'</td>'+
+          '<td style="padding:7px 8px;border-bottom:1px solid #F1F5F9">'+(r.hooper==null?"—":r.hooper+"%")+'</td>'+
+          '<td style="padding:7px 8px;border-bottom:1px solid #F1F5F9"><b style="color:'+col+'">'+(r.adj==null?"—":r.adj+"%")+'</b></td>'+
+          '<td style="padding:7px 8px;border-bottom:1px solid #F1F5F9"><span style="background:'+col+'18;color:'+col+';border-radius:999px;padding:2px 8px;font:900 10px system-ui">'+r.band+'</span></td>'+
+          '<td style="padding:7px 8px;border-bottom:1px solid #F1F5F9">'+r.acwr+' <s style="text-decoration:none;font-size:9.5px;color:#94A3B8">'+r.flag+'</s></td>'+
+          '<td style="padding:7px 8px;border-bottom:1px solid #F1F5F9">'+r.tl7+'</td>'+
+          '<td style="padding:7px 8px;border-bottom:1px solid #F1F5F9;color:#64748B">'+r.n+' / '+r.nl+'</td></tr>';
+      }).join("")+'</tbody></table></div>'+
+      '<div style="margin-top:12px;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:11px;padding:11px">'+
+      '<div style="font:900 11.5px system-ui;color:#334155;margin-bottom:7px">الأساس العلمي لكل رقم</div>'+
+      STUDIES.map(function(st){ return '<div style="font:700 10.5px system-ui;color:#475569;line-height:1.85;margin-bottom:4px">• <b>'+st.k+'</b> — <s style="text-decoration:none;color:#0E7490">'+st.ref+'</s>: '+st.m+'</div>'; }).join("")+
+      '<div style="margin-top:8px;font:800 10px system-ui;color:#B45309;line-height:1.8">تنبيه: هذه مؤشرات مساندة للقرار السريري وليست تشخيصًا. ACWR مقياس وصفي منتقد علميًا كأداة تنبؤ (Impellizzeri 2020) — لا تُبنى عليه قرارات إقصاء بمفرده.</div>'+
+      '</div></div></div>';
+    document.body.appendChild(d);
+    d.querySelector("#q363ax").onclick=function(){ d.remove(); };
+  }
+  function kpi(l,v,c){ return '<div style="background:#fff;border:1px solid #E2E8F0;border-radius:11px;padding:9px 11px"><i style="display:block;font:800 9.5px system-ui;color:#64748B;font-style:normal;margin-bottom:3px">'+l+'</i><b style="font:900 18px system-ui;color:'+c+'">'+v+'</b></div>'; }
+
+  /* ============ تشغيل ============ */
+  bridge();
+  [600,1500,3000,6000].forEach(function(t){ setTimeout(toolbar,t); });
+  setInterval(function(){ try{ toolbar(); }catch(e){} },3500);
+  window.QD363={form:form,importFiles:importFiles,analysis:analysis,exportData:doExport,bridge:bridge,toolbar:toolbar};
+})();
+</script>
+
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 </body>
 </html>
