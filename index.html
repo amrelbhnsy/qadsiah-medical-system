@@ -21228,6 +21228,18 @@ try{ window.__qdbKeys=Object.keys(window.QDB).length; }catch(e){}
   function isAr(){ try{ var l=localStorage.getItem("qd_lang")||"ar"; return l.indexOf("en")!==0; }catch(e){ return true; } }
   function L(a,e){ return isAr()?a:e; }
   function esc(v){ return String(v==null?"":v).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
+  /* QD373 · FREEZE-FIX — حارسا إعادة الدخول والمسّ: يمنعان إعادة بناء النموذج
+     أثناء الكتابة (كان build() يمحي كل حقول التواريخ ثم يعيدها كل ٨٠٠ ملّي ثانية
+     فتتجمد الصفحة وتفقد الحقول ما كُتب فيها). */
+  function touched(){ try{ window.__qdCTouch=Date.now(); }catch(e){} }
+  function busy(){ try{
+    if(window.__qdChainBuilding) return true;
+    if(window.__qdMBusy&&window.__qdMBusy()) return true;
+    var ae=document.activeElement;
+    if(ae&&ae.closest&&ae.closest("#qdChainWrap")) return true;
+    return (Date.now()-(window.__qdCTouch||0))<1500;
+  }catch(e){ return true; } }
+
   var SURG=[["st_rp_ph_assess","التقييم والفحص","Assessment & screening"],
             ["st_rp_ph_preop_physio","العلاج الطبيعي قبل العملية","Pre-operative physiotherapy"],
             ["st_rp_ph_surgery","العملية الجراحية","Surgery"],
@@ -21278,23 +21290,44 @@ try{ window.__qdbKeys=Object.keys(window.QDB).length; }catch(e){}
         }
       }catch(e){}
     }
+    /* مسار واحد ونفس عدد الحقول ⇒ حدّث القيم فقط ولا تلمس البنية */
+    var path=(surg?"S":"N")+list.length;
+    var win0=wrap.querySelectorAll("input[data-f]");
+    if(wrap.getAttribute("data-path")===path && win0.length===list.length){
+      var ae0=document.activeElement;
+      for(var i3=0;i3<list.length;i3++){
+        var k3=list[i3][0], ip=win0[i3];
+        if(String(ip.getAttribute("data-f"))!==String(k3)) break;
+        if(ip===ae0) continue;
+        var os=root.querySelectorAll('[data-f="'+k3+'"]'), v3="";
+        for(var q3=0;q3<os.length;q3++){
+          if(os[q3]===ip||wrap.contains(os[q3])) continue;
+          if(String(os[q3].value||"")){ v3=String(os[q3].value||""); break; }
+        }
+        if(v3 && String(ip.value||"")!==v3) ip.value=v3;
+      }
+      return;
+    }
     var h='<div class="field"><label class="label">'+esc(L("سلسلة مراحل العودة للملعب — ","Return-to-play stage chain — "))+
       '<b style="color:'+(surg?"#7E0E14":"#0E7490")+'">'+esc(surg?L("مسار جراحي","Surgical pathway"):L("مسار غير جراحي","Non-surgical pathway"))+'</b>'+
       '<span class="badge" style="background:'+(surg?"#7E0E14":"#0E7490")+';color:#fff;margin-inline-start:6px">'+list.length+' '+esc(L("مراحل","stages"))+'</span>'+
       '<span class="tiny muted" style="margin-inline-start:8px">'+esc(L("يُحدَّد تلقائيًّا حسب «هل تستوجب عملية جراحية؟»","Set automatically by the surgery-required field"))+'</span></label>'+
       '<div style="display:grid;gap:8px">';
-    for(var s=0;s<list.length;s++){
-      var key=list[s][0], lab=list[s][1], en=list[s][2];
-      var cur=root.querySelector('[data-f="'+key+'"]:not(#qdChainWrap [data-f])');
-      var val=(cur&&cur.value)||(function(){ try{ var e=root.querySelector('#'+key); return e?e.value:""; }catch(e){ return ""; } })()||"";
-      h+='<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;border:1px solid var(--line,#e5e5e5);border-radius:10px;background:'+(s===0?"rgba(14,116,144,.05)":"#fff")+'">'+
-         '<b style="width:26px;height:26px;flex:none;display:grid;place-items:center;border-radius:50%;background:'+(surg?"#7E0E14":"#0E7490")+';color:#fff;font-size:12px">'+(s+1)+'</b>'+
+    for(var s2=0;s2<list.length;s2++){
+      var key=list[s2][0], lab=list[s2][1], en=list[s2][2];
+      var val="";
+      var outs2=root.querySelectorAll('[data-f="'+key+'"]');
+      for(var q2=0;q2<outs2.length;q2++){ if(wrap.contains(outs2[q2])) continue; if(String(outs2[q2].value||"")){ val=String(outs2[q2].value||""); break; } }
+      h+='<div style="display:flex;align-items:center;gap:10px;padding:8px 10px;border:1px solid var(--line,#e5e5e5);border-radius:10px;background:'+(s2===0?"rgba(14,116,144,.05)":"#fff")+'">'+
+         '<b style="width:26px;height:26px;flex:none;display:grid;place-items:center;border-radius:50%;background:'+(surg?"#7E0E14":"#0E7490")+';color:#fff;font-size:12px">'+(s2+1)+'</b>'+
          '<span style="flex:1;font-size:13px">'+esc(L(lab,en))+'</span>'+
-         '<input type="date" data-f="'+key+'" id="'+key+'" value="'+esc(String(val||"").slice(0,10))+'" style="padding:7px 9px;border:1px solid #ccc;border-radius:8px">'+
+         '<input type="date" data-f="'+key+'" data-qdc="1" value="'+esc(String(val||"").slice(0,10))+'" style="padding:7px 9px;border:1px solid #ccc;border-radius:8px">'+
          '</div>';
     }
     h+='</div></div>';
-    wrap.innerHTML=h;
+    window.__qdChainBuilding=1;
+    try{ wrap.innerHTML=h; wrap.setAttribute("data-path",path); }
+    finally{ window.__qdChainBuilding=0; }
   }
   function hookSurg(root){
     try{
@@ -21308,8 +21341,19 @@ try{ window.__qdbKeys=Object.keys(window.QDB).length; }catch(e){}
   if(!root||!root.querySelector('[data-act="saveInjury"]')) return;
   if(!root.querySelector('[data-f="rp_exp"]')&&!root.querySelector('[data-f="st_rp_ph_assess"]')) return;
   hookSurg(root);
+  if(busy()) return;
   var wrap=root.querySelector("#qdChainWrap");
   if(!wrap){ build(root); return; }
+  /* القيم تُنسخ من الحقول الأصلية دائمًا، حتى لو كانت face الواجهة في وضع التركيز */
+  try{
+    var wq=wrap.querySelectorAll("input[data-f]");
+    for(var w1=0;w1<wq.length;w1++){
+      var kq=wq[w1].getAttribute("data-f"), vq=String(wq[w1].value||"");
+      if(!vq) continue;
+      var oq=root.querySelectorAll('[data-f="'+kq+'"]');
+      for(var q4=0;q4<oq.length;q4++){ if(oq[q4]===wq[w1]||wrap.contains(oq[q4])) continue; if(String(oq[q4].value||"")!==vq) oq[q4].value=vq; }
+    }
+  }catch(e){}
   var win=wrap.querySelectorAll('input[data-f]');
   for(var i=0;i<win.length;i++){
     var k=win[i].getAttribute("data-f"), v=String(win[i].value||"");
@@ -21326,8 +21370,9 @@ try{ window.__qdbKeys=Object.keys(window.QDB).length; }catch(e){}
 }catch(e){} }
 window.qdChainBuild=scan;
  try{
-   document.addEventListener("pointerdown",function(e){ try{ var w=document.getElementById("qdChainWrap"); if(w&&w.contains(e.target)) w.setAttribute("data-busy","1"); }catch(x){} },true);
-   document.addEventListener("focusin",function(e){ try{ var w=document.getElementById("qdChainWrap"); if(w&&w.contains(e.target)) w.setAttribute("data-busy","1"); }catch(x){} },true);
+   document.addEventListener("pointerdown",function(e){ try{ var w=document.getElementById("qdChainWrap"); if(w&&w.contains(e.target)){ w.setAttribute("data-busy","1"); touched(); } }catch(x){} },true);
+   document.addEventListener("keydown",function(e){ try{ var w=document.getElementById("qdChainWrap"); if(w&&w.contains(e.target)) touched(); }catch(x){} },true);
+   document.addEventListener("focusin",function(e){ try{ var w=document.getElementById("qdChainWrap"); if(w&&w.contains(e.target)){ w.setAttribute("data-busy","1"); touched(); } }catch(x){} },true);
    document.addEventListener("focusout",function(e){ try{ var w=document.getElementById("qdChainWrap"); if(w&&w.contains(e.target)) setTimeout(function(){ try{ var ae=document.activeElement; if(!(ae&&w.contains(ae))) w.removeAttribute("data-busy"); }catch(x){} },500); }catch(x){} },true);
    document.addEventListener("change",function(e){ try{
      var w=document.getElementById("qdChainWrap"); if(!w||!w.contains(e.target)) return;
@@ -21337,7 +21382,7 @@ window.qdChainBuild=scan;
      for(var q=0;q<outs.length;q++){ if(outs[q]===t||w.contains(outs[q])) continue; outs[q].value=t.value; }
    }catch(x){} },true);
  }catch(e){}
-  try{ setInterval(scan,800); }catch(e){}
+  try{ setInterval(scan,1500); }catch(e){}
   try{ if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",scan); else scan(); }catch(e){}
  }catch(e){}
 })();
