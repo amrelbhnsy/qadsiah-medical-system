@@ -50595,6 +50595,9 @@ return map;
           }
           var R=rows[0]||{}, rev=Number(R.rev)||0, data=R.data;
           if(!Array.isArray(data)) return;
+          /* QD382: قائمة سحابية فارغة لا تمحو حسابًا موجودًا على الجهاز */
+          if(!data.length && (localArr()||[]).length){ push(true); return; }
+          try{ if((localArr()||[]).length) localStorage.setItem("qd377_bak", JSON.stringify(localArr())); }catch(e){}
           if(rev>localRev()){
             var before=norm(localArr());
             apply(data,rev);
@@ -50614,7 +50617,8 @@ return map;
     }
 
     function push(force){
-      var a=localArr(); if(!a) return;
+      var a=localArr(); if(!a||!a.length) return;   /* QD382: لا ترفع قائمة فارغة أبدًا — كانت تمحو كل الحسابات */
+      try{ localStorage.setItem("qd377_bak", JSON.stringify(a)); }catch(e){}
       var json=norm(a);
       if(json===lastPushed && !force) return;
       var rev=Math.max(Date.now(), lastRev+1);
@@ -51016,7 +51020,7 @@ return map;
           if(!t) return;
           var keep=KEEP.some(function(r){ return r.test(t); });
           if(keep){ if(!primary) primary=b; return; }
-          if(b.id==="qd381fg") return;
+          if(b.id==="qd381fg"||b.id==="qd382boot"||b.id==="qd382banner") return;
           /* كل ما ليس زر الدخول الأساسي يُحذف من الشاشة */
           if(b.parentNode) b.parentNode.removeChild(b);
         });
@@ -51050,6 +51054,111 @@ return map;
     if(document.readyState!=="loading") setTimeout(clean,500);
     try{ document.addEventListener("DOMContentLoaded",function(){ setTimeout(clean,400); }); }catch(e){}
     window.QD381={clean:clean,help:help};
+  }catch(e){}
+})();
+</script>
+
+<script>
+/* QD382 · OWNER-BOOTSTRAP — إن لم يوجد أي حساب (بعد محو أو جهاز جديد)
+   تظهر دعوة لإنشاء حساب المالك فورًا، ويُحفظ محليًا ويُرفع للسحابة. */
+(function(){
+  try{
+    if(window.__qd382) return; window.__qd382=1;
+    var LS="qd356_users", SS="qd356_session";
+    function $(i){ return document.getElementById(i); }
+    function isAr(){ try{ var l=localStorage.getItem("qd_lang"); return l?String(l).indexOf("en")!==0:true; }catch(e){ return true; } }
+    function T(a,e){ return isAr()?a:e; }
+    function users(){ try{ var v=localStorage.getItem(LS); var a=v?JSON.parse(v):null; return Array.isArray(a)?a.filter(function(u){return u&&u.user;}):[]; }catch(e){ return []; } }
+    function onLogin(){ try{ return !document.querySelector(".topbar") && !!document.querySelector('input[type="password"]'); }catch(e){ return false; } }
+    function hash(pw,salt){ var t=String(salt||"")+"|"+String(pw||"");
+      if(window.crypto&&crypto.subtle&&crypto.subtle.digest){
+        return crypto.subtle.digest("SHA-256",new TextEncoder().encode(t)).then(function(b){
+          return Array.prototype.map.call(new Uint8Array(b),function(x){ return ("0"+x.toString(16)).slice(-2); }).join(""); }); }
+      var h=5381; for(var i=0;i<t.length;i++){ h=((h<<5)+h+t.charCodeAt(i))|0; }
+      return Promise.resolve("fb"+(h>>>0).toString(16)); }
+
+    function css(){
+      if($("qd382css")) return;
+      var st=document.createElement("style"); st.id="qd382css";
+      st.textContent=
+      '#qd382banner{position:fixed;bottom:0;left:0;right:0;z-index:2147483400;background:#B5121B;color:#fff;'+
+      'padding:12px 14px;display:flex;align-items:center;gap:10px;justify-content:center;flex-wrap:wrap;direction:rtl;font-family:system-ui}'+
+      '#qd382banner span{font:800 12.5px system-ui}'+
+      '#qd382boot{border:0;border-radius:10px;background:#fff;color:#B5121B;font:900 12.5px system-ui;padding:9px 16px;cursor:pointer}'+
+      '#qd382banner .x{background:transparent;border:1px solid rgba(255,255,255,.5);color:#fff;border-radius:9px;padding:8px 12px;font:800 11px system-ui;cursor:pointer}'+
+      '#qd382m{position:fixed;inset:0;z-index:2147483600;background:rgba(8,10,14,.72);display:flex;align-items:center;justify-content:center;padding:16px;direction:rtl}'+
+      '#qd382m .c{width:min(94vw,430px);background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.45);font-family:system-ui,Tahoma,sans-serif}'+
+      '#qd382m .h{background:#B5121B;color:#fff;padding:14px 18px;font:900 14px system-ui}'+
+      '#qd382m .h i{font-style:normal;font:800 10.5px system-ui;opacity:.85;display:block;margin-top:3px}'+
+      '#qd382m .b{padding:16px 18px}'+
+      '#qd382m label{display:block;font:800 11px system-ui;color:#454B54;margin:9px 0 4px}'+
+      '#qd382m input{width:100%;box-sizing:border-box;padding:11px 12px;border:1.5px solid #D9DCE1;border-radius:11px;font:700 13px system-ui;outline:0}'+
+      '#qd382m input:focus{border-color:#B5121B}'+
+      '#qd382m .m{font:800 11px system-ui;color:#B5121B;min-height:16px;margin-top:8px}'+
+      '#qd382m .f{display:flex;gap:8px;padding:0 18px 18px}'+
+      '#qd382m .f button{flex:1;border:0;border-radius:11px;padding:12px;font:900 13px system-ui;cursor:pointer}'+
+      '#qd382m .ok{background:#B5121B;color:#fff}#qd382m .no{background:#F1F2F4;color:#454B54}';
+      document.head.appendChild(st);
+    }
+
+    function banner(){
+      css();
+      if(users().length || !onLogin()){ var b=$("qd382banner"); if(b&&users().length) b.remove(); return; }
+      if($("qd382banner")) return;
+      var d=document.createElement("div"); d.id="qd382banner";
+      d.innerHTML='<span>'+T("لا توجد أي حسابات على هذا الجهاز — أنشئ حساب المالك للدخول.","No accounts on this device — create the owner account to sign in.")+'</span>'+
+        '<button id="qd382boot" type="button">'+T("إنشاء حساب المالك","Create owner account")+'</button>'+
+        '<button class="x" type="button" id="qd382x">'+T("لاحقًا","Later")+'</button>';
+      document.body.appendChild(d);
+      $("qd382boot").onclick=form;
+      $("qd382x").onclick=function(){ d.remove(); };
+    }
+
+    function form(){
+      css();
+      var old=$("qd382m"); if(old) old.remove();
+      var d=document.createElement("div"); d.id="qd382m";
+      d.innerHTML='<div class="c"><div class="h">👑 '+T("إنشاء حساب المالك","Create owner account")+
+        '<i>'+T("صلاحيات كاملة — يُحفظ في هذا الجهاز ويُرفع للسحابة","Full permissions — saved here and pushed to the cloud")+'</i></div>'+
+        '<div class="b">'+
+        '<label>'+T("الاسم الكامل","Full name")+'</label><input id="q382n" placeholder="'+T("مثال: د. عمرو","e.g. Dr. Amr")+'">'+
+        '<label>'+T("اسم المستخدم (لاتيني)","Username (Latin)")+'</label><input id="q382u" dir="ltr" placeholder="owner">'+
+        '<label>'+T("كلمة المرور (٦ أحرف على الأقل)","Password (min 6 chars)")+'</label><input id="q382p" type="password" dir="ltr">'+
+        '<label>'+T("تأكيد كلمة المرور","Confirm password")+'</label><input id="q382p2" type="password" dir="ltr">'+
+        '<div class="m" id="q382e"></div></div>'+
+        '<div class="f"><button class="ok" id="q382go">'+T("إنشاء ودخول","Create & sign in")+'</button>'+
+        '<button class="no" id="q382c">'+T("إلغاء","Cancel")+'</button></div></div>';
+      document.documentElement.appendChild(d);
+      $("q382c").onclick=function(){ d.remove(); };
+      $("q382go").onclick=function(){
+        var n=$("q382n").value.trim(), un=$("q382u").value.trim(), pw=$("q382p").value, pw2=$("q382p2").value;
+        if(!n){ $("q382e").textContent=T("أدخل الاسم.","Enter the name."); return; }
+        if(!/^[a-zA-Z0-9_.\-]{3,}$/.test(un)){ $("q382e").textContent=T("اسم المستخدم لاتيني ٣ أحرف على الأقل.","Username: 3+ Latin characters."); return; }
+        if(String(pw).length<6){ $("q382e").textContent=T("كلمة المرور ٦ أحرف على الأقل.","Password: at least 6 characters."); return; }
+        if(pw!==pw2){ $("q382e").textContent=T("كلمتا المرور غير متطابقتين.","Passwords do not match."); return; }
+        var sa="abcdef0123456789", salt="";
+        for(var i=0;i<16;i++) salt+=sa.charAt(Math.floor(Math.random()*sa.length));
+        hash(pw,salt).then(function(h){
+          var arr=users();
+          var rec={id:"u"+Date.now().toString(36),name:n,user:un,salt:salt,hash:h,role:"owner",owner:true,active:true,created:Date.now()};
+          arr.push(rec);
+          try{
+            localStorage.setItem(LS, JSON.stringify(arr));
+            localStorage.setItem("qd377_bak", JSON.stringify(arr));
+            sessionStorage.setItem(SS, rec.id);
+          }catch(e){ $("q382e").textContent=T("تعذّر الحفظ في هذا المتصفح.","Could not save in this browser."); return; }
+          try{ if(window.QD377&&QD377.push) QD377.push(true); }catch(e){}
+          $("q382e").textContent=T("تم ✓ — يُعاد التحميل…","Done ✓ — reloading…");
+          setTimeout(function(){ try{ location.reload(); }catch(e){} },700);
+        });
+      };
+      setTimeout(function(){ try{ $("q382n").focus(); }catch(e){} },120);
+    }
+
+    try{ setInterval(banner,1200); }catch(e){}
+    if(document.readyState!=="loading") setTimeout(banner,700);
+    try{ document.addEventListener("DOMContentLoaded",function(){ setTimeout(banner,600); }); }catch(e){}
+    window.QD382={form:form,banner:banner};
   }catch(e){}
 })();
 </script>
