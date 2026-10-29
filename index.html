@@ -51162,6 +51162,136 @@ return map;
   }catch(e){}
 })();
 </script>
+
+<script>
+/* QD383 · RECOVER-NOW — مخرج فوري من قفل الدخول.
+   ثلاث طرق للوصول إلى إنشاء/استعادة حساب المالك:
+   ١) ?owner=1  أو  #owner  في عنوان الصفحة
+   ٢) زر يظهر تلقائيًا عند أي فشل في الدخول
+   ٣) إن لم يوجد أي حساب
+   النموذج يُحدّث الحساب إن كان الاسم موجودًا (كلمة مرور جديدة) بدل إنشاء مكرّر. */
+(function(){
+  try{
+    if(window.__qd383) return; window.__qd383=1;
+    var LS="qd356_users", SS="qd356_session";
+    function $(i){ return document.getElementById(i); }
+    function isAr(){ try{ var l=localStorage.getItem("qd_lang"); return l?String(l).indexOf("en")!==0:true; }catch(e){ return true; } }
+    function T(a,e){ return isAr()?a:e; }
+    function users(){ try{ var v=localStorage.getItem(LS); var a=v?JSON.parse(v):null; return Array.isArray(a)?a.filter(function(u){return u&&u.user;}):[]; }catch(e){ return []; } }
+    function hash(pw,salt){ var t=String(salt||"")+"|"+String(pw||"");
+      if(window.crypto&&crypto.subtle&&crypto.subtle.digest){
+        return crypto.subtle.digest("SHA-256",new TextEncoder().encode(t)).then(function(b){
+          return Array.prototype.map.call(new Uint8Array(b),function(x){ return ("0"+x.toString(16)).slice(-2); }).join(""); }); }
+      var h=5381; for(var i=0;i<t.length;i++){ h=((h<<5)+h+t.charCodeAt(i))|0; }
+      return Promise.resolve("fb"+(h>>>0).toString(16)); }
+    function newSalt(){ var a="abcdef0123456789",s2=""; for(var i=0;i<16;i++) s2+=a.charAt(Math.floor(Math.random()*16)); return s2; }
+
+    function css(){
+      if($("qd383css")) return;
+      var st=document.createElement("style"); st.id="qd383css";
+      st.textContent=
+      '#qd383m{position:fixed;inset:0;z-index:2147483647;background:rgba(8,10,14,.78);display:flex;align-items:center;justify-content:center;padding:16px;direction:rtl;overflow:auto}'+
+      '#qd383m .c{width:min(94vw,440px);background:#fff;border-radius:18px;overflow:hidden;box-shadow:0 30px 90px rgba(0,0,0,.5);font-family:system-ui,Tahoma,sans-serif}'+
+      '#qd383m .h{background:#B5121B;color:#fff;padding:15px 18px;font:900 14.5px system-ui}'+
+      '#qd383m .h i{font-style:normal;font:800 10.5px/1.7 system-ui;opacity:.88;display:block;margin-top:3px}'+
+      '#qd383m .b{padding:15px 18px}'+
+      '#qd383m label{display:block;font:800 11px system-ui;color:#454B54;margin:10px 0 4px}'+
+      '#qd383m input{width:100%;box-sizing:border-box;padding:11px 12px;border:1.5px solid #D9DCE1;border-radius:11px;font:700 13px system-ui;outline:0}'+
+      '#qd383m input:focus{border-color:#B5121B}'+
+      '#qd383m .m{font:800 11px/1.7 system-ui;color:#B5121B;min-height:17px;margin-top:9px}'+
+      '#qd383m .f{display:flex;gap:8px;padding:0 18px 17px}'+
+      '#qd383m .f button{flex:1;border:0;border-radius:11px;padding:12px;font:900 13px system-ui;cursor:pointer}'+
+      '#qd383m .ok{background:#B5121B;color:#fff}#qd383m .no{background:#F1F2F4;color:#454B54}'+
+      '#qd383hint{margin-top:10px;text-align:center;font:800 11.5px system-ui;color:#B5121B;cursor:pointer;text-decoration:underline}'+
+      '#qd383err{display:block;width:100%;margin-top:8px;border:1px dashed #B5121B;background:#FFF5F5;color:#B5121B;border-radius:10px;padding:9px;font:900 11.5px system-ui;cursor:pointer}';
+      document.head.appendChild(st);
+    }
+
+    function form(preUser){
+      css();
+      var old=$("qd383m"); if(old) old.remove();
+      var list=users(), existing=preUser||"";
+      var d=document.createElement("div"); d.id="qd383m";
+      d.innerHTML='<div class="c"><div class="h">👑 '+T("إنشاء / استعادة حساب المالك","Create / recover owner account")+
+        '<i>'+T("صلاحيات كاملة · يُحفظ في هذا الجهاز ويُرفع للسحابة",
+                "Full permissions · saved here and pushed to the cloud")+'</i></div>'+
+        '<div class="b">'+
+        '<label>'+T("الاسم الكامل","Full name")+'</label><input id="q383n" placeholder="'+T("د. عمرو","Dr. Amr")+'">'+
+        '<label>'+T("اسم المستخدم (لاتيني)","Username (Latin)")+'</label><input id="q383u" dir="ltr" value="'+existing.replace(/"/g,"&quot;")+'" placeholder="owner">'+
+        '<label>'+T("كلمة المرور (٦ أحرف على الأقل)","Password (min 6)")+'</label><input id="q383p" type="password" dir="ltr">'+
+        '<label>'+T("تأكيد كلمة المرور","Confirm password")+'</label><input id="q383p2" type="password" dir="ltr">'+
+        '<div class="m" id="q383e"></div></div>'+
+        '<div class="f"><button class="ok" id="q383go">'+T("حفظ ودخول","Save & sign in")+'</button>'+
+        '<button class="no" id="q383c">'+T("إغلاق","Close")+'</button></div></div>';
+      document.documentElement.appendChild(d);
+      $("q383c").onclick=function(){ d.remove(); };
+      $("q383go").onclick=function(){
+        var n=$("q383n").value.trim(), un=$("q383u").value.trim(), pw=$("q383p").value, pw2=$("q383p2").value;
+        if(!n) n=un;
+        if(!/^[a-zA-Z0-9_.\-]{3,}$/.test(un)){ $("q383e").textContent=T("اسم المستخدم لاتيني ٣ أحرف على الأقل.","Username: 3+ Latin chars."); return; }
+        if(String(pw).length<6){ $("q383e").textContent=T("كلمة المرور ٦ أحرف على الأقل.","Password: 6+ chars."); return; }
+        if(pw!==pw2){ $("q383e").textContent=T("كلمتا المرور غير متطابقتين.","Passwords do not match."); return; }
+        var salt=newSalt();
+        hash(pw,salt).then(function(h){
+          var arr=users().slice(), hit=null;
+          arr.forEach(function(u){ if(String(u.user).toLowerCase()===un.toLowerCase()) hit=u; });
+          if(hit){ hit.salt=salt; hit.hash=h; hit.role="owner"; hit.owner=true; hit.active=true; if(n) hit.name=n; }
+          else { hit={id:"u"+Date.now().toString(36),name:n,user:un,salt:salt,hash:h,role:"owner",owner:true,active:true,created:Date.now()}; arr.push(hit); }
+          try{
+            localStorage.setItem(LS, JSON.stringify(arr));
+            localStorage.setItem("qd377_bak", JSON.stringify(arr));
+            sessionStorage.setItem(SS, hit.id);
+          }catch(e){ $("q383e").textContent=T("تعذّر الحفظ — مساحة المتصفح ممتلئة.","Could not save — browser storage full."); return; }
+          try{ if(window.QD377&&QD377.push) QD377.push(true); }catch(e){}
+          $("q383e").style.color="#15803D";
+          $("q383e").textContent=T("تم ✓ — يُعاد التحميل…","Done ✓ — reloading…");
+          setTimeout(function(){ try{ location.reload(); }catch(e){} },800);
+        });
+      };
+      setTimeout(function(){ try{ $("q383n").focus(); }catch(e){} },120);
+    }
+
+    /* ١) رابط مباشر */
+    function forced(){
+      try{
+        var q=(location.search||"")+" "+(location.hash||"");
+        return /[?&#](owner|reset|recover)\b|=1/.test(q)&&/(owner|reset|recover)/.test(q);
+      }catch(e){ return false; }
+    }
+
+    /* ٢) زر يظهر عند أي فشل دخول */
+    function hookErrors(){
+      try{
+        if(!document.querySelector('input[type="password"]')) return;
+        var cands=document.querySelectorAll("div,span,p");
+        for(var i=0;i<cands.length;i++){
+          var e=cands[i];
+          if(e.children.length>2) continue;
+          var t=String(e.textContent||"").trim();
+          if(!t||t.length>60) continue;
+          if(!/غير موجود|كلمة المرور غير صحيحة|Wrong username|not found|invalid/i.test(t)) continue;
+          if(e.nextElementSibling&&e.nextElementSibling.id==="qd383err") continue;
+          var b=document.createElement("button"); b.id="qd383err"; b.type="button";
+          b.textContent=T("🔑 إنشاء / استعادة حساب المالك","🔑 Create / recover owner account");
+          b.onclick=function(ev){ ev.preventDefault(); ev.stopPropagation(); form(""); };
+          e.parentNode.insertBefore(b,e.nextSibling);
+          return;
+        }
+      }catch(e){}
+    }
+
+    function tick(){
+      css();
+      if(forced() && !$("qd383m")) { form(""); return; }
+      hookErrors();
+    }
+    try{ setInterval(tick,900); }catch(e){}
+    if(document.readyState!=="loading") setTimeout(tick,500);
+    try{ document.addEventListener("DOMContentLoaded",function(){ setTimeout(tick,400); }); }catch(e){}
+    window.QD383={form:form};
+  }catch(e){}
+})();
+</script>
 <script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"4edd5f8ec12a48cfa682ab8261b80a79","spa":2}' crossorigin="anonymous"></script>
 </body>
 </html>
