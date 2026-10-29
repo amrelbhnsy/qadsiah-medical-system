@@ -51547,32 +51547,9 @@ return map;
 
     /* ---------- ٣) الأزرار العائمة ---------- */
     function killFloats(){
-      try{
-        if(document.hidden) return;
-        /* أزرار التأهيل/التغذية المكرّرة */
-        document.querySelectorAll('button[data-q361]').forEach(function(b){
-          var r=b.getBoundingClientRect();
-          /* إن كانت في القائمة الجانبية أبقها، وإلا احذفها */
-          if(r.left<180||r.width>0&&r.left<200){ if(b.parentNode) b.parentNode.removeChild(b); }
-        });
-        /* أي عنصر عائم على الحافة اليسرى خارج القائمة */
-        document.querySelectorAll("body *").forEach(function(el){
-          try{
-            if(el.closest("#sidebar")) return;
-            if(el.closest("#qd379tools")) return;
-            if(el.id&&/qd379|q374|q375p|q383|q382|q386/i.test(el.id)) return;
-            var cs=getComputedStyle(el);
-            if(cs.position!=="fixed") return;
-            if(/^(DIV|SECTION|ASIDE)$/.test(el.tagName)) return;
-            var r=el.getBoundingClientRect();
-            if(r.width<20||r.height<12) return;
-            if(r.left>260) return;
-            if(cs.display==="none") return;
-            el.style.display="none";
-          }catch(e){}
-        });
-      }catch(e){}
-    }
+      /* QD394: أوقفت — الحوض الجديد يتولى جمع الأزرار */
+      return;
+}
 
     function all(){
       guardRenders(); ensureNavHost(); sweepAll(); killFloats();
@@ -52011,57 +51988,62 @@ return map;
 </script>
 
 <script>
-/* QD392 · LOGIN-LOOK — إعادة شكل شاشة الدخول إلى هوية النادي:
-   خلفية داكنة بنقش، بطاقة بحدود ذهبية، شعار دائري، وحقول بتركيز واضح.
-   لا يمسّ المنطق: نفس الحقول والمعرّفات (g_u · g_p · g_go · g_m · g_rec). */
+/* QD393 · LOGIN-LIGHT — شاشة دخول بنمط فاتح: خلفية عاجية، بطاقة بيضاء بحدود ذهبية.
+   لا يمسّ المنطق: نفس المعرّفات (g_u · g_p · g_go · g_m · g_rec). */
 (function(){
   try{
-    if(window.__qd392) return; window.__qd392=1;
+    if(window.__qd393) return; window.__qd393=1;
     function css(){
-      if(document.getElementById("qd392css")) return;
-      var st=document.createElement("style"); st.id="qd392css";
+      if(document.getElementById("qd393css")) return;
+      var st=document.createElement("style"); st.id="qd393css";
       st.textContent=
-      /* الخلفية والنقش */
-      '#qd356gate{background:radial-gradient(1200px 600px at 50% -10%,#243447 0%,#0B1220 55%,#070B12 100%)!important;padding:22px!important}'+
-      '#qd356gate:before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.5;'+
-        'background-image:linear-gradient(rgba(227,176,25,.055) 1px,transparent 1px),linear-gradient(90deg,rgba(227,176,25,.055) 1px,transparent 1px);'+
-        'background-size:46px 46px}'+
-      /* البطاقة */
-      '#qd356gate>div{position:relative;width:min(94vw,404px)!important;border-radius:22px!important;padding:0!important;'+
-        'background:linear-gradient(180deg,#FFFFFF,#FBF9F4)!important;border:1px solid rgba(227,176,25,.55)!important;'+
-        'box-shadow:0 34px 90px rgba(0,0,0,.55),0 0 0 6px rgba(227,176,25,.06)!important;overflow:hidden}'+
-      /* ترويسة */
-      '#qd356gate>div:before{content:"";display:block;height:5px;background:linear-gradient(90deg,#B5121B,#E3B019,#B5121B)}'+
-      '#qd356gate>div>div:first-child{font:900 18.5px system-ui,Tahoma,sans-serif!important;color:#0F172A!important;'+
-        'padding:22px 24px 0!important;letter-spacing:-.2px}'+
+      /* الخلفية العاجية + نقش ذهبي رقيق */
+      '#qd356gate{background:#FAF7F0!important;padding:22px!important;'+
+        'background-image:radial-gradient(circle at 50% 0%,#FFFDF7 0%,#F6F1E6 60%,#EFE8D9 100%)!important}'+
+      '#qd356gate:before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.55;'+
+        'background-image:linear-gradient(rgba(200,162,74,.10) 1px,transparent 1px),linear-gradient(90deg,rgba(200,162,74,.10) 1px,transparent 1px);'+
+        'background-size:44px 44px}'+
+      /* البطاقة البيضاء */
+      '#qd356gate>div{position:relative;width:min(94vw,404px)!important;border-radius:20px!important;padding:0!important;'+
+        'background:#FFFFFF!important;border:1.5px solid #E3D3A8!important;'+
+        'box-shadow:0 26px 60px rgba(92,72,24,.14),0 0 0 7px rgba(200,162,74,.07)!important;overflow:hidden}'+
+      /* شريط علوي */
+      '#qd356gate>div:before{content:"";display:block;height:5px;background:linear-gradient(90deg,#B5121B,#D9B45A,#B5121B)}'+
+      /* شعار دائري ذهبي */
+      '#qd356gate>div>div:first-child{font:900 18.5px system-ui,Tahoma,sans-serif!important;color:#14181F!important;'+
+        'padding:20px 24px 0!important;letter-spacing:-.2px;display:flex;align-items:center;gap:11px}'+
+      '#qd356gate>div>div:first-child:before{content:"الق";flex:none;width:38px;height:38px;border-radius:50%;'+
+        'display:grid;place-items:center;font:900 14px system-ui;color:#7A5B10;'+
+        'background:linear-gradient(145deg,#F7E7BC,#E3C87E);border:1.5px solid #D9B45A;'+
+        'box-shadow:inset 0 0 0 2px rgba(255,255,255,.6)}'+
       '#qd356gate>div>div:nth-child(2){font:700 11.5px/1.8 system-ui,Tahoma,sans-serif!important;color:#7C8493!important;'+
-        'padding:6px 24px 16px!important;margin:0!important;border-bottom:1px solid #EFEBE2;margin-bottom:16px!important}'+
+        'padding:6px 24px 15px!important;margin:0 0 0!important;border-bottom:1px solid #F1EADA!important;margin-bottom:16px!important}'+
       /* الحقول */
-      '#qd356gate input{width:calc(100% - 48px)!important;margin:0 24px 10px!important;border:1.5px solid #E6E1D6!important;'+
-        'border-radius:12px!important;padding:13px 14px!important;font:800 13px system-ui!important;background:#FFFDF8!important;'+
-        'transition:border-color .15s,box-shadow .15s,background .15s;outline:0!important}'+
-      '#qd356gate input::placeholder{color:#A8AEBA;font-weight:700}'+
-      '#qd356gate input:focus{border-color:#B5121B!important;background:#fff!important;box-shadow:0 0 0 4px rgba(181,18,27,.10)!important}'+
+      '#qd356gate input{width:calc(100% - 48px)!important;margin:0 24px 10px!important;border:1.5px solid #EAE3D3!important;'+
+        'border-radius:12px!important;padding:13px 14px!important;font:800 13px system-ui!important;background:#FDFBF6!important;'+
+        'color:#14181F!important;transition:border-color .15s,box-shadow .15s,background .15s;outline:0!important}'+
+      '#qd356gate input::placeholder{color:#AEB4BE;font-weight:700}'+
+      '#qd356gate input:focus{border-color:#C8A24A!important;background:#fff!important;box-shadow:0 0 0 4px rgba(200,162,74,.18)!important}'+
       /* زر الدخول */
-      '#qd356gate #g_go{width:calc(100% - 48px)!important;margin:4px 24px 0!important;border-radius:12px!important;'+
+      '#qd356gate #g_go{width:calc(100% - 48px)!important;margin:5px 24px 0!important;border-radius:12px!important;'+
         'padding:13px!important;background:linear-gradient(135deg,#C4141F,#8E1015)!important;color:#fff!important;'+
-        'font:900 13.5px system-ui!important;letter-spacing:.2px;box-shadow:0 10px 22px rgba(181,18,27,.28)!important;'+
-        'transition:transform .12s,box-shadow .15s;cursor:pointer}'+
-      '#qd356gate #g_go:hover{transform:translateY(-1px);box-shadow:0 14px 28px rgba(181,18,27,.34)!important}'+
+        'font:900 13.5px system-ui!important;letter-spacing:.2px;'+
+        'box-shadow:0 10px 22px rgba(181,18,27,.22)!important;transition:transform .12s,box-shadow .15s;cursor:pointer}'+
+      '#qd356gate #g_go:hover{transform:translateY(-1px);box-shadow:0 14px 26px rgba(181,18,27,.28)!important}'+
       '#qd356gate #g_go:active{transform:none}'+
       /* رسالة الخطأ */
       '#qd356gate #g_m{margin:10px 24px 0!important;font:800 11.5px/1.7 system-ui!important;color:#B5121B!important;min-height:16px!important;text-align:center}'+
       /* زر الاستعادة */
-      '#qd356gate #g_rec,#qd356gate #qd383err{width:calc(100% - 48px)!important;margin:4px 24px 0!important;'+
-        'border:1px dashed #D8CFB8!important;background:#FCFAF4!important;color:#8A6B1F!important;'+
-        'border-radius:11px!important;padding:10px!important;font:900 11px system-ui!important;cursor:pointer}'+
-      '#qd356gate #g_rec:hover,#qd356gate #qd383err:hover{background:#F6F1E4!important;border-color:#C8A24A!important}'+
+      '#qd356gate #g_rec,#qd356gate #qd383err{width:calc(100% - 48px)!important;margin:5px 24px 0!important;'+
+        'border:1px dashed #DDCFA8!important;background:#FDFAF2!important;color:#8A6B1F!important;'+
+        'border-radius:11px!important;padding:10px!important;font:900 11px system-ui!important;cursor:pointer;transition:.15s}'+
+      '#qd356gate #g_rec:hover,#qd356gate #qd383err:hover{background:#F8F2E2!important;border-color:#C8A24A!important}'+
       /* التذييل */
-      '#qd356gate>div>div:last-child{margin:14px 24px 20px!important;font:700 10px/1.9 system-ui!important;color:#A2A8B3!important;'+
-        'text-align:center;border-top:1px solid #F1EDE4;padding-top:12px}'+
-      /* شارة أسفل البطاقة */
+      '#qd356gate>div>div:last-child{margin:14px 24px 20px!important;font:700 10px/1.9 system-ui!important;color:#A6ABB4!important;'+
+        'text-align:center;border-top:1px solid #F3EDE0;padding-top:12px}'+
+      /* سطر هوية */
       '#qd356gate:after{content:"AL QADSIAH · U18 MEDICAL";position:absolute;bottom:14px;left:0;right:0;text-align:center;'+
-        'font:900 9px system-ui;letter-spacing:2.4px;color:rgba(227,176,25,.45);pointer-events:none}'+
+        'font:900 9px system-ui;letter-spacing:2.4px;color:#C0AE7E;pointer-events:none}'+
       '@media(max-width:420px){#qd356gate>div>div:first-child{font-size:17px!important}}'+
       '@media print{#qd356gate{display:none!important}}';
       document.head.appendChild(st);
@@ -52070,6 +52052,226 @@ return map;
     try{ setInterval(run,700); }catch(e){}
     if(document.readyState!=="loading") setTimeout(run,300);
     try{ document.addEventListener("DOMContentLoaded",function(){ setTimeout(run,300); }); }catch(e){}
+  }catch(e){}
+})();
+</script>
+
+<script>
+/* QD394 · LOGIN + SIDE DOCK + VERSION
+   ١) شاشة دخول فاتحة ومركزية (بأنماط سطرية تتغلب على أي CSS قديم).
+   ٢) حوض جانبي واحد على الحافة اليسرى يجمع كل زر عائم صغير.
+   ٣) رقم النسخة ظاهر أسفل الشاشة. */
+(function(){
+  try{
+    if(window.__qd394) return; window.__qd394=1;
+    var DOCK="qd394dock", HDL="qd394h", VEREL="qd394ver";
+    function $(i){ return document.getElementById(i); }
+    function isLogin(){ return !!document.getElementById("qd356gate"); }
+    function isEn(){ try{ var l=localStorage.getItem("qd_lang"); return l?String(l).indexOf("en")===0:false; }catch(e){ return false; } }
+    function T(a,e){ return isEn()?e:a; }
+
+    /* ---------------- ١) شاشة الدخول ---------------- */
+    function styleGate(){
+      var g=$("qd356gate"); if(!g) return;
+      /* الحاوية: عاجية ومركزية */
+      g.style.setProperty("background","#FAF7F0","important");
+      g.style.setProperty("background-image","radial-gradient(circle at 50% 0%,#FFFDF7 0%,#F6F1E6 55%,#EDE5D5 100%)","important");
+      g.style.setProperty("display","flex","important");
+      g.style.setProperty("align-items","center","important");
+      g.style.setProperty("justify-content","center","important");
+      g.style.setProperty("padding","22px","important");
+      var card=g.firstElementChild; if(!card) return;
+      card.style.setProperty("background","#fff","important");
+      card.style.setProperty("border","1.5px solid #E3D3A8","important");
+      card.style.setProperty("border-radius","20px","important");
+      card.style.setProperty("box-shadow","0 26px 60px rgba(92,72,24,.14), 0 0 0 7px rgba(200,162,74,.07)","important");
+      card.style.setProperty("width","min(94vw,404px)","important");
+      card.style.setProperty("padding","0","important");
+      card.style.setProperty("overflow","hidden","important");
+      card.style.setProperty("position","relative","important");
+      /* الترويسة */
+      var kids=card.children;
+      if(kids[0]){
+        kids[0].style.setProperty("font","900 18.5px system-ui,Tahoma,sans-serif","important");
+        kids[0].style.setProperty("color","#14181F","important");
+        kids[0].style.setProperty("padding","20px 24px 0","important");
+      }
+      if(kids[1]){
+        kids[1].style.setProperty("font","700 11.5px/1.8 system-ui,Tahoma,sans-serif","important");
+        kids[1].style.setProperty("color","#7C8493","important");
+        kids[1].style.setProperty("padding","6px 24px 15px","important");
+        kids[1].style.setProperty("margin","0 0 14px","important");
+        kids[1].style.setProperty("border-bottom","1px solid #F1EADA","important");
+      }
+      /* الحقول والأزرار */
+      ["g_u","g_p"].forEach(function(id){
+        var el=$(id); if(!el) return;
+        el.style.setProperty("width","calc(100% - 48px)","important");
+        el.style.setProperty("margin","0 24px 10px","important");
+        el.style.setProperty("border","1.5px solid #EAE3D3","important");
+        el.style.setProperty("border-radius","12px","important");
+        el.style.setProperty("padding","13px 14px","important");
+        el.style.setProperty("background","#FDFBF6","important");
+        el.style.setProperty("font","800 13px system-ui","important");
+        el.style.setProperty("box-sizing","border-box","important");
+      });
+      var go=$("g_go");
+      if(go){
+        go.style.setProperty("width","calc(100% - 48px)","important");
+        go.style.setProperty("margin","4px 24px 0","important");
+        go.style.setProperty("border-radius","12px","important");
+        go.style.setProperty("padding","13px","important");
+        go.style.setProperty("background","linear-gradient(135deg,#C4141F,#8E1015)","important");
+        go.style.setProperty("color","#fff","important");
+        go.style.setProperty("font","900 13.5px system-ui","important");
+        go.style.setProperty("border","0","important");
+      }
+      ["g_rec","qd383err"].forEach(function(id){
+        var el=$(id); if(!el) return;
+        el.style.setProperty("width","calc(100% - 48px)","important");
+        el.style.setProperty("margin","5px 24px 0","important");
+        el.style.setProperty("border","1px dashed #DDCFA8","important");
+        el.style.setProperty("background","#FDFAF2","important");
+        el.style.setProperty("color","#8A6B1F","important");
+        el.style.setProperty("border-radius","11px","important");
+        el.style.setProperty("padding","10px","important");
+        el.style.setProperty("font","900 11px system-ui","important");
+      });
+      var gm=$("g_m"); if(gm){ gm.style.setProperty("margin","10px 24px 0","important"); gm.style.setProperty("text-align","center","important"); }
+
+      /* أخفِ أي عنصر عائم غريب فوق شاشة الدخول (سوى الحوض ورقم النسخة ونوافذ الاستعادة) */
+      var all=document.body.children;
+      for(var i2=0;i2<all.length;i2++){
+        var e=all[i2];
+        if(!e||e.nodeType!==1) continue;
+        if(e.id===DOCK||e.id===HDL||e.id===VEREL) continue;
+        if(/^(qd383m|qd382m|qd356gate)$/.test(e.id||"")) continue;
+        var cs=getComputedStyle(e);
+        if(cs.position!=="fixed") continue;
+        var r=e.getBoundingClientRect();
+        if(r.width>window.innerWidth*0.5||r.height>window.innerHeight*0.5) continue;
+        e.setAttribute("data-qd394hid","1"); e.style.display="none";
+      }
+    }
+
+    /* ---------------- ٢) الحوض الجانبي ---------------- */
+    function dockCss(){
+      if($("qd394css")) return;
+      var st=document.createElement("style"); st.id="qd394css";
+      st.textContent=
+      '#'+HDL+'{position:fixed;left:0;top:50%;transform:translateY(-50%);z-index:2147482800;'+
+        'display:flex;flex-direction:column;align-items:center;gap:4px;padding:9px 7px;border-radius:0 14px 14px 0;'+
+        'background:linear-gradient(180deg,#14181F,#0B1118);border:1px solid rgba(227,176,25,.35);border-left:0;'+
+        'color:#E3B019;font:900 9px system-ui;cursor:pointer;box-shadow:6px 0 18px rgba(0,0,0,.28)}'+
+      '#'+HDL+' .n{background:#E3B019;color:#0B1118;border-radius:8px;padding:1px 5px;font:900 9.5px system-ui}'+
+      '#'+DOCK+'{position:fixed;left:0;top:50%;transform:translateY(-50%) translateX(-104%);z-index:2147482810;'+
+        'width:228px;max-height:78vh;overflow:auto;padding:9px;border-radius:0 16px 16px 0;'+
+        'background:rgba(10,16,14,.985);border:1px solid rgba(227,176,25,.35);border-left:0;'+
+        'box-shadow:12px 0 40px rgba(0,0,0,.5);transition:transform .22s ease;direction:rtl;display:flex;flex-direction:column;gap:6px}'+
+      '#'+DOCK+'.on{transform:translateY(-50%) translateX(0)}'+
+      '#'+DOCK+' .hh{display:flex;align-items:center;justify-content:space-between;padding:2px 4px 6px;'+
+        'border-bottom:1px solid rgba(255,255,255,.09);color:#8FA396;font:900 9.5px system-ui;letter-spacing:.3px}'+
+      '#'+DOCK+'.on~#'+HDL+'{opacity:.35}'+
+      /* الأزرار المنقولة تصير صفوفًا */
+      '#'+DOCK+' button,#'+DOCK+' a{position:static!important;left:auto!important;right:auto!important;top:auto!important;bottom:auto!important;'+
+        'transform:none!important;width:100%!important;height:auto!important;min-height:34px!important;margin:0!important;'+
+        'padding:8px 10px!important;border-radius:10px!important;display:flex!important;align-items:center!important;gap:8px!important;'+
+        'justify-content:flex-start!important;text-align:start!important;font:800 11.5px system-ui!important;'+
+        'background:rgba(255,255,255,.055)!important;color:#DCE6DF!important;border:1px solid rgba(255,255,255,.09)!important;'+
+        'box-shadow:none!important;white-space:normal!important;line-height:1.35!important;cursor:pointer}'+
+      '#'+DOCK+' button:hover,#'+DOCK+' a:hover{background:rgba(227,176,25,.16)!important;border-color:rgba(227,176,25,.45)!important;color:#fff!important}'+
+      '#'+DOCK+' .row{margin:0}'+
+      '#'+VEREL+'{position:fixed;left:12px;bottom:8px;z-index:2147482700;padding:3px 9px;border-radius:8px;'+
+        'background:rgba(15,20,26,.72);color:#B9C3BC;font:900 9.5px system-ui;letter-spacing:.4px;'+
+        'border:1px solid rgba(255,255,255,.10);pointer-events:none;direction:ltr}'+
+      '@media print{#'+DOCK+',#'+HDL+',#'+VEREL+'{display:none!important}}';
+      document.head.appendChild(st);
+    }
+
+    function isJunk(el){
+      try{
+        if(!el||el.nodeType!==1) return true;
+        if(el.id&&new RegExp("("+DOCK+"|"+HDL+"|"+VEREL+")").test(el.id)) return true;
+        if(el.closest&&el.closest("#"+DOCK)) return true;
+        if(el.closest&&el.closest('[id^="qd38"]')) return true;          /* نوافذ الاستعادة */
+        if(el.closest&&el.closest('#qd375p,#qd375pw,#qd354m,.modal,#modal')) return true;
+        if(/^(HTML|BODY)$/.test(el.tagName)) return true;
+        if(/^(DIV|SECTION)$/.test(el.tagName)&&el.querySelector("input,textarea")) return true;
+      }catch(e){ return true; }
+      return false;
+    }
+
+    function collect(){
+      try{
+        if(document.hidden) return;
+        var d=$(DOCK); if(!d) return;
+        var all=document.body.querySelectorAll("button,a");
+        for(var i=0;i<all.length;i++){
+          var el=all[i];
+          if(!el||isJunk(el)) continue;
+          if(el.getAttribute("data-qd394")==="1") continue;
+          var cs=getComputedStyle(el);
+          if(cs.position!=="fixed") continue;
+          if(cs.display==="none"||cs.visibility==="hidden") continue;
+          var r=el.getBoundingClientRect();
+          if(r.width<16||r.height<12) continue;
+          if(r.width>window.innerWidth*0.5) continue;
+          if(cs.position==="fixed"&&parseInt(cs.zIndex||0,10)>=2147483400) continue;  /* مشرفات/نوافذ */
+          if(/close|q369p|q375p|q394/i.test(el.id||"")) continue;
+          var row=document.createElement("div"); row.className="row";
+          d.appendChild(row); row.appendChild(el);
+          el.setAttribute("data-qd394","1");
+          var t=(el.getAttribute("aria-label")||el.title||el.textContent||"").replace(/\s+/g," ").trim();
+          if(t) el.title=t;
+        }
+        var n=d.querySelectorAll(".row").length, badge=$("#"+HDL+" .n");
+        if(badge) badge.textContent=n;
+      }catch(e){}
+    }
+
+    function mount(){
+      dockCss();
+      if(!$(HDL)){
+        var h=document.createElement("div"); h.id=HDL; h.setAttribute("role","button");
+        h.innerHTML='<span>⚙</span><span class="n">0</span>';
+        h.title=T("الأدوات","Tools");
+        h.onclick=function(e){ e.preventDefault(); e.stopPropagation();
+          var d=$(DOCK); if(!d) return; d.classList.toggle("on"); };
+        document.body.appendChild(h);
+      }
+      if(!$(DOCK)){
+        var d=document.createElement("div"); d.id=DOCK;
+        d.innerHTML='<div class="hh"><b style="color:#E3B019">⚙ '+T("الأدوات","TOOLS")+'</b><span>'+T("انقر ⚙ للإغلاق","tap ⚙ to close")+'</span></div>';
+        document.body.appendChild(d);
+      }
+      collect();
+    }
+
+    /* ---------------- ٣) رقم النسخة ---------------- */
+    function version(){
+      var v="";
+      try{
+        var m=document.documentElement.innerHTML.match(/v11-\d{3}[A-Za-z0-9._-]*/);
+        if(m&&m[0]) v=m[0];
+      }catch(e){}
+      return v||"v11-361";
+    }
+    function stamp(){
+      if($(VEREL)) return;
+      var e=document.createElement("div"); e.id=VEREL;
+      e.textContent=version()+" · 30 Oct 2026";
+      e.title=T("رقم النسخة","Build version");
+      document.body.appendChild(e);
+    }
+
+    function tick(){
+      try{ stamp(); if(isLogin()) styleGate(); mount(); }catch(e){}
+    }
+    try{ setInterval(tick,1000); }catch(e){}
+    if(document.readyState!=="loading") setTimeout(tick,350);
+    try{ document.addEventListener("DOMContentLoaded",function(){ setTimeout(tick,300); }); }catch(e){}
+    try{ document.addEventListener("click",function(){ setTimeout(function(){ try{ mount(); }catch(e){} },200); },true); }catch(e){}
+    window.QD394={tick:tick,version:version,collect:collect};
   }catch(e){}
 })();
 </script>
